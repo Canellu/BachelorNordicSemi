@@ -15,7 +15,7 @@
 #define switch_2 9
 
 
-
+/* Initialize struct variables for button configurations */
 const struct device *dev;
 
 static struct gpio_callback cb1;
@@ -30,15 +30,15 @@ static bool switch_2_state = true;
 
 void state_change() 
 {
-	// button_1_state = gpio_pin_get(dev, button_1);
-	// button_2_state = gpio_pin_get(dev, button_2);
-	// switch_1_state = gpio_pin_get(dev, switch_1);
-	// switch_2_state = gpio_pin_get(dev, switch_2);
-
-	if(gpio_pin_get(dev, button_1)){gpio_pin_toggle(dev, LED_3);}
-	if(gpio_pin_get(dev, button_2)){gpio_pin_toggle(dev, LED_4);}
-
-	// printk("Button 1: %d  Button 2: %d  Switch 1: %d  Switch 2: %d\n\n", button_1_state, button_2_state, switch_1_state, switch_2_state);
+	if(gpio_pin_get(dev, button_1))
+	{
+		gpio_pin_toggle(dev, LED_3);
+	}
+	if(gpio_pin_get(dev, button_2))
+	{
+		gpio_pin_toggle(dev, LED_4);
+	}
+	printk("Button 1: %d  Button 2: %d  Switch 1: %d  Switch 2: %d\n\n", button_1_state, button_2_state, switch_1_state, switch_2_state);
 }
 void get_state() {
 	button_1_state = gpio_pin_get(dev, button_1);
@@ -53,7 +53,7 @@ void get_state() {
 
 void main(void)
 {
-	printk("\n\n\n\n\n\n\n*** Running Simple Sample ***\n");
+	printk("\n\n*** Running Simple_Button Sample ***\n");
 
 	dev = device_get_binding("GPIO_0");
 

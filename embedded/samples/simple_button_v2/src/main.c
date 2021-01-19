@@ -19,12 +19,6 @@
 
 const struct device *dev;
 
-// void get_state() 
-// {
-// 	button_1_state = gpio_pin_get(dev, button_1);
-// 	gpio_pin_set(dev, LED_3, !button_1_state);
-
-// }
 
 static void button_handler(uint32_t button_states, uint32_t has_changed)
 {
