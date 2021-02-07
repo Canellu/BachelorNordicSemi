@@ -199,8 +199,7 @@ button:active {
   text-align: center;
   background-color: var(--darkest);
   border-radius: 10px;
-  box-shadow: 6px 6px 8px 0 var(--shadowDark) inset,
-    -6px -6px 8px 0 var(--shadowLight) inset;
+  box-shadow: inset 5px 5px 10px #cad0d5, inset -5px -5px 10px #ffffff;
 }
 
 .card h3 {
