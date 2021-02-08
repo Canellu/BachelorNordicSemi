@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" href="css/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css"
+      integrity="sha512-+4zCK9k+qNFUR5X+cKL9EIR+ZOhtIloNl9GIKS57V1MyNsYpYcUrUeQc9vNfzsWfV28IaLL3i96P9sdNyeRssA=="
+      crossorigin="anonymous"
+    />
+
+    <script src="https://www.gstatic.com/firebasejs/8.2.5/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.2.5/firebase-firestore.js"></script>
+
+    <title>MUG Simulation Demo</title>
+  </head>
+  <body>
+    <header>
+      <h1>Communication Simulation</h1>
+    </header>
+
+    <div class="mainContent">
+      <div class="topRowContainer">
+        <div class="sliderContainer">
+          <div class="indicRow">
+            <div>
+              <div class="indicHealth"></div>
+              <h3>Health</h3>
+            </div>
+            <div>
+              <div class="indicStatus"></div>
+              <h3>Status</h3>
+            </div>
+          </div>
+
+          <div class="neumorphic-slider" onselectstart="return false">
+            <div class="neumorphic-slider__back"></div>
+            <div class="neumorphic-slider__line"></div>
+            <div class="neumorphic-slider__thumb"></div>
+            <div class="neumorphic-slider__popover"></div>
+            <h3>Battery</h3>
+          </div>
+        </div>
+
+        <div class="cardContainer">
+          <div class="card battery">
+            <div class="infoBox"></div>
+            <h3>Battery</h3>
+          </div>
+          <div class="card duration">
+            <div class="infoBox"></div>
+            <h3>Duration</h3>
+          </div>
+          <div class="card status">
+            <div class="infoBox"></div>
+            <h3>Status</h3>
+          </div>
+          <div class="card health">
+            <div class="infoBox"></div>
+            <h3>Health</h3>
+          </div>
+          <div class="card temperature">
+            <div class="infoBox"></div>
+            <h3>Temperature</h3>
+          </div>
+        </div>
+      </div>
+
+      <div class="container">
+        <h1>Terminal</h1>
+        <textarea
+          readonly
+          class="receiveBox"
+          placeholder="awaiting data..."
+          cols="30"
+          rows="5"
+        ></textarea>
+        <div class="botRow">
+          <div class="row">
+            <input class="sendBox" type="text" />
+          </div>
+
+          <button class="sendBtn" onclick="sendData()">send</button>
+          <button class="clearBtn" onclick="clearScreen()">clear</button>
+        </div>
+      </div>
+    </div>
+
+  
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"
+      type="text/javascript"
+    ></script>
+    <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyBgmnAlnqUYSKux9s1596U6UpmSLP9ncsU",
+        authDomain: "nordicoasys.firebaseapp.com",
+        projectId: "nordicoasys",
+        storageBucket: "nordicoasys.appspot.com",
+        messagingSenderId: "40698568655",
+        appId: "1:40698568655:web:0019d0a8fe097028c4fcba",
+        measurementId: "G-WG6M7TCHK6",
+      };
+      firebase.initializeApp(firebaseConfig);
+
+      const db = firebase.firestore();
+      // db.settings({ timestampsInSnapshots: true})
+    </script>
+    <script src="js/mqtt.js"></script>
+    <script src="js/slider.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>
