@@ -35,9 +35,6 @@ client = new Paho.MQTT.Client(
       textToReceive.value += "\n> " + message.payloadString;
     }
     console.log("onMessageArrived:" + message.payloadString);
+  
     textToReceive.scrollTop = textToReceive.scrollHeight;
-
-    updateDoc(message.payloadString)
-
-
   }

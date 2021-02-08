@@ -13,7 +13,7 @@ function sendData() {
   if (textToSend.value == "") return;
   
   message = new Paho.MQTT.Message(textToSend.value);
-  message.destinationName = "projects/nordicoasys/topics/commands";
+  message.destinationName = "projects/nordicoasys/topics/data";
   client.send(message);
   updateDoc(textToSend.value);
   if (textToSend.value == "cls") textToReceive.value = "";
@@ -29,11 +29,10 @@ function clearScreen() {
 function renderData(doc) {
   data = doc.data()
   //Update cards
-  document.querySelector(".battery").childNodes[1].textContent = data.Battery;
-  document.querySelector(".duration").childNodes[1].textContent = data["Dive duration"];
-  document.querySelector(".status").childNodes[1].textContent = data["Dive status"];
-  document.querySelector(".health").childNodes[1].textContent = data.Health;
-  document.querySelector(".temperature").childNodes[1].textContent = data.Temperature;
+  document.querySelector(".battery").childNodes[3].textContent = data.Battery;
+  document.querySelector(".duration").childNodes[3].textContent = data["Dive duration"];
+  document.querySelector(".status").childNodes[3].textContent = data["Dive status"];
+  document.querySelector(".temperature").childNodes[3].textContent = data.Temperature;
 
   //Update indicator
   indicHealth = document.querySelector(".indicHealth");
