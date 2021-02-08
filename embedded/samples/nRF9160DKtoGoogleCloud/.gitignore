@@ -1,5 +1,0 @@
-**/build
-
-**/.vscode
-
-./gcloud/firebase/node_modules/*
