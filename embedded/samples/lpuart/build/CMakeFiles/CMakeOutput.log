@@ -1,0 +1,43 @@
+The target system is: Generic - 2.4.99 - arm
+The host system is: Windows - 10.0.18363 - AMD64
+Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+Compiler: C:/Users/Einar/ncs/v1.4.1/toolchain/opt/bin/arm-none-eabi-gcc.exe 
+Build flags: 
+Id flags: -c 
+
+The output was:
+0
+
+
+Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CMakeCCompilerId.o"
+
+The C compiler identification is GNU, found in "C:/Users/Einar/Desktop/Bachelor_Project/github/BachelorNordicSemi/embedded/samples/lpuart/build/CMakeFiles/3.18.4/CompilerIdC/CMakeCCompilerId.o"
+
+Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
+Compiler: C:/Users/Einar/ncs/v1.4.1/toolchain/opt/bin/arm-none-eabi-gcc.exe 
+Build flags: 
+Id flags: -c 
+
+The output was:
+0
+
+
+Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CMakeCXXCompilerId.o"
+
+The CXX compiler identification is GNU, found in "C:/Users/Einar/Desktop/Bachelor_Project/github/BachelorNordicSemi/embedded/samples/lpuart/build/CMakeFiles/3.18.4/CompilerIdCXX/CMakeCXXCompilerId.o"
+
+Checking whether the ASM compiler is GNU using "--version" matched "(GNU assembler)|(GCC)|(Free Software Foundation)":
+arm-none-eabi-gcc.exe (GNU Tools for Arm Embedded Processors 9-2019-q4-major) 9.2.1 20191025 (release) [ARM/arm-9-branch revision 277599]
+Copyright (C) 2019 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+Performing C SOURCE FILE Test check_fmacro_prefix_map_C__Users_Einar_Desktop_Bachelor_Project_github_BachelorNordicSemi_embedded_samples_lpuart_CMAKE_SOURCE_DIR_C__nostartfiles__nostdlib__isystem__c__users_einar_ncs_v1_4_1_toolchain_opt_bin____lib_gcc_arm_none_eabi_9_2_1_include___isystem__c__users_einar_ncs_v1_4_1_toolchain_opt_bin____lib_gcc_arm_none_eabi_9_2_1_include_fixed___Wl___unresolved_symbols_ignore_in_object_files__Wl___entry_0 succeeded with the following output:
+Change Dir: C:/Users/Einar/Desktop/Bachelor_Project/github/BachelorNordicSemi/embedded/samples/lpuart/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Users/Einar/ncs/v1.4.1/toolchain/opt/bin/ninja.exe cmTC_99204 && [1/2] Building C object CMakeFiles/cmTC_99204.dir/src.c.obj
+[2/2] Linking C executable cmTC_99204
+
+
+Source file was:
+int main(void) { return 0; }

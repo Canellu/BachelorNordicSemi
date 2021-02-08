@@ -1,0 +1,16 @@
+config GCLOUD_PROJECT_NAME
+    string "Name of the Google Cloud project"
+
+config GCLOUD_REGION
+    string "Google cloud region"
+
+config GCLOUD_REGISTRY_NAME
+    string "Name of the Google Cloud reigstry of the device"
+
+config GCLOUD_DEVICE_NAME
+    string "Name of the device in Google Cloud"
+    
+# Include Zephyr's Kconfig
+menu "Zephyr Kernel"
+source "Kconfig.zephyr"
+endmenu
