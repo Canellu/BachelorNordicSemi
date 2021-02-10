@@ -1,76 +1,40 @@
 import 'package:flutter/material.dart';
-import 'package:hexcolor/hexcolor.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'dashboard.dart';
+import 'home.dart';
+import 'loading.dart';
 
-void main() => runApp(MaterialApp(
-      title: 'TestApp',
-      debugShowCheckedModeBanner: false,
-      home: Home(),
-      routes: {'/dashboard': (_) => DashBoard()},
-    ));
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(MyApp());
+}
 
-class Home extends StatelessWidget {
+class MyApp extends StatelessWidget {
+  final Future<FirebaseApp> _fbInit = Firebase.initializeApp();
+
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        body: Stack(
-          alignment: Alignment.center,
-          children: <Widget>[
-            Container(
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage("assets/jellyfish.jfif"),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            Positioned(
-              top: 180,
-              child: RichText(
-                textAlign: TextAlign.center,
-                text: TextSpan(
-                    text: "SIMULATION",
-                    style: TextStyle(
-                      fontSize: 40,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 2.2,
-                      color: Colors.white,
-                    ),
-                    children: [
-                      TextSpan(
-                        text: '\nA demo of communcation \nbetween MUG & APP'
-                            .toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[200],
-                        ),
-                      )
-                    ]),
-              ),
-            ),
-            Positioned(
-                bottom: 160,
-                child: ElevatedButton.icon(
-                  label: Text('Go to demo'),
-                  icon: Icon(Icons.arrow_right),
-                  style: ElevatedButton.styleFrom(
-                    primary: HexColor('#00C2FF'),
-                    onPrimary: Colors.grey[200],
-                    shadowColor: Colors.white,
-                    elevation: 5,
-                    textStyle: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  onPressed: () {
-                    Navigator.of(context).pushNamed('/dashboard');
-                  },
-                )),
-          ],
-        ),
+    return MaterialApp(
+      title: 'TestApp',
+      debugShowCheckedModeBanner: false,
+      home: FutureBuilder(
+        future: _fbInit,
+        builder: (context, snapshot) {
+          // Check for errors
+          if (snapshot.hasError) {
+            print('Error initializing Firebase! ${snapshot.error.toString()}');
+            return Text('Something went wrong!');
+          }
+          // Once complete, show Home screen
+          if (snapshot.connectionState == ConnectionState.done) {
+            return Home();
+          }
+          // If still not initialized, run loading screen
+          return Loading();
+        },
       ),
+      routes: {'/dashboard': (_) => DashBoard()},
     );
   }
 }

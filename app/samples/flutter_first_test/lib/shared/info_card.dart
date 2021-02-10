@@ -1,18 +1,52 @@
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_first_test/models/sensor.dart';
 
-class InfoCard extends StatelessWidget {
-  final String field;
-  final String value;
-  final Icon icon;
+class InfoCard extends StatefulWidget {
+  String field;
+  String value;
+  Icon icon;
 
-  const InfoCard({this.field, this.value, this.icon});
+  InfoCard({this.field, this.value, this.icon});
+  @override
+  _InfoCardState createState() => _InfoCardState();
+}
 
+class _InfoCardState extends State<InfoCard> {
   @override
   Widget build(BuildContext context) {
+    final sensor = Provider.of<List<Sensor>>(context);
+    if (sensor != null) {
+      sensor.forEach((sensor) {
+        switch (widget.field) {
+          case "Battery":
+            {
+              widget.value = sensor.battery;
+            }
+            break;
+          case "Status":
+            {
+              widget.value = sensor.status;
+            }
+            break;
+          case "Duration":
+            {
+              widget.value = sensor.duration;
+            }
+            break;
+          case "Temperature":
+            {
+              widget.value = sensor.temp;
+            }
+            break;
+        }
+      });
+    }
+
     return Expanded(
       child: Container(
-        height: 140,
+        height: 120,
         margin: EdgeInsets.only(left: 2, top: 5, right: 2, bottom: 5),
         // color: HexColor('#0081AA'),
         child: Card(
@@ -32,13 +66,13 @@ class InfoCard extends StatelessWidget {
                   child: ListTile(
                     // tileColor: HexColor('#0081AA'),
                     dense: true,
-                    trailing: icon,
+                    trailing: widget.icon,
                     title: Text(
-                      field,
+                      widget.field,
                       maxLines: 1,
                       overflow: TextOverflow.clip,
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 16,
                         fontFamily: 'Poppins',
                         fontWeight: FontWeight.w700,
                         color: Colors.white,
@@ -49,9 +83,9 @@ class InfoCard extends StatelessWidget {
                 Expanded(
                   child: Container(
                     alignment: Alignment.center,
-                    child: Text(value,
+                    child: Text(widget.value,
                         style: TextStyle(
-                            fontSize: 30,
+                            fontSize: 22,
                             fontFamily: 'Poppins',
                             fontWeight: FontWeight.w800,
                             color: Colors.grey[800])),
