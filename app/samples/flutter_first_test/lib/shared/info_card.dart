@@ -47,7 +47,7 @@ class _InfoCardState extends State<InfoCard> {
     return Expanded(
       child: Container(
         height: 120,
-        margin: EdgeInsets.only(left: 2, top: 5, right: 2, bottom: 5),
+        margin: EdgeInsets.symmetric(vertical: 5, horizontal: 2),
         // color: HexColor('#0081AA'),
         child: Card(
             shape: RoundedRectangleBorder(

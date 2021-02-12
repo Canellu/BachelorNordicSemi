@@ -137,16 +137,16 @@ class _DashBoardState extends State<DashBoard> {
                                     min: 0,
                                     max: 100,
                                     divisions: 100,
-                                    value: double.parse(strVal),
+                                    value: sliderVal,
                                     onChanged: (newVal) {
                                       setState(() {
                                         sliderVal = newVal;
                                         strVal = sliderVal.round().toString();
-
-                                        snapshot.data.reference.update({
-                                          'Battery': "${sliderVal.round()}%"
-                                        });
                                       });
+                                    },
+                                    onChangeEnd: (newVal) {
+                                      snapshot.data.reference.update(
+                                          {'Battery': "${sliderVal.round()}%"});
                                     },
                                   );
                                 } else {
