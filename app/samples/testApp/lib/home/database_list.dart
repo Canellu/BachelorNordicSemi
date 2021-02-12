@@ -9,37 +9,42 @@ class DataList extends StatefulWidget {
 }
 
 class _DataListState extends State<DataList> {
-
-  //form values
-  String currentBattery;
-  int currentDuration;
-  bool currentHealth;
-
   @override
   Widget build(BuildContext context) {
-
     final datas = Provider.of<List<Data>>(context) ?? [];
+    final db = DatabaseService();
+
+    var health;
+    var duration;
+    var battery;
 
     print(datas.length);
 
-
     datas.forEach((data) {
+      health = data.health;
+      duration = data.duration;
+      battery = data.battery;
+
       print(data.health);
       print(data.duration);
       print(data.battery);
     });
 
-    //return Container();*/
-    return StreamBuilder<Data>(
-      stream: datas,
+    db.updateData(battery, duration, health);
 
-    );
-
-    return ListView.builder(
-      itemCount: datas.length,
-      itemBuilder: (context, index) {
-        return
-      },
+    return Container(
+      alignment: Alignment.center,
+      child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text('$health',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            Text('$duration',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            Text('$battery',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold))
+          ]),
     );
   }
 }
