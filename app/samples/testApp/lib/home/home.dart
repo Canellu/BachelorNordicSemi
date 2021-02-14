@@ -4,6 +4,8 @@ import 'package:oasys_app/models/data.dart';
 import 'package:provider/provider.dart';
 import 'package:oasys_app/services/database.dart';
 
+final datalist = DataList();
+
 class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -14,13 +16,14 @@ class Home extends StatelessWidget {
           title: Text('Test Connection'),
         ),
         body: DataList(),
+        /*
         floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            DatabaseService().updateData("50", 30, false);
+          onPressed: (){
+            DatabaseService().updateData("0", 100, true);
           },
           child: Icon(Icons.navigation),
           backgroundColor: Colors.green,
-        ),
+        ),*/
       ),
     );
   }
