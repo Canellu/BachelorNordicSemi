@@ -58,9 +58,9 @@ C:/Users/Einar/Desktop/Bachelor_Project/github/BachelorNordicSemi/embedded/sampl
 C:/Users/Einar/Desktop/Bachelor_Project/github/BachelorNordicSemi/embedded/samples/nrfgcloud_new/build/zephyr/lib/CMakeFiles/rebuild_cache.dir
 C:/Users/Einar/Desktop/Bachelor_Project/github/BachelorNordicSemi/embedded/samples/nrfgcloud_new/build/zephyr/lib/libc/CMakeFiles/edit_cache.dir
 C:/Users/Einar/Desktop/Bachelor_Project/github/BachelorNordicSemi/embedded/samples/nrfgcloud_new/build/zephyr/lib/libc/CMakeFiles/rebuild_cache.dir
-C:/Users/Einar/Desktop/Bachelor_Project/github/BachelorNordicSemi/embedded/samples/nrfgcloud_new/build/zephyr/lib/libc/minimal/CMakeFiles/lib__libc__minimal.dir
-C:/Users/Einar/Desktop/Bachelor_Project/github/BachelorNordicSemi/embedded/samples/nrfgcloud_new/build/zephyr/lib/libc/minimal/CMakeFiles/edit_cache.dir
-C:/Users/Einar/Desktop/Bachelor_Project/github/BachelorNordicSemi/embedded/samples/nrfgcloud_new/build/zephyr/lib/libc/minimal/CMakeFiles/rebuild_cache.dir
+C:/Users/Einar/Desktop/Bachelor_Project/github/BachelorNordicSemi/embedded/samples/nrfgcloud_new/build/zephyr/lib/libc/newlib/CMakeFiles/lib__libc__newlib.dir
+C:/Users/Einar/Desktop/Bachelor_Project/github/BachelorNordicSemi/embedded/samples/nrfgcloud_new/build/zephyr/lib/libc/newlib/CMakeFiles/edit_cache.dir
+C:/Users/Einar/Desktop/Bachelor_Project/github/BachelorNordicSemi/embedded/samples/nrfgcloud_new/build/zephyr/lib/libc/newlib/CMakeFiles/rebuild_cache.dir
 C:/Users/Einar/Desktop/Bachelor_Project/github/BachelorNordicSemi/embedded/samples/nrfgcloud_new/build/zephyr/lib/posix/CMakeFiles/lib__posix.dir
 C:/Users/Einar/Desktop/Bachelor_Project/github/BachelorNordicSemi/embedded/samples/nrfgcloud_new/build/zephyr/lib/posix/CMakeFiles/edit_cache.dir
 C:/Users/Einar/Desktop/Bachelor_Project/github/BachelorNordicSemi/embedded/samples/nrfgcloud_new/build/zephyr/lib/posix/CMakeFiles/rebuild_cache.dir
@@ -190,6 +190,9 @@ C:/Users/Einar/Desktop/Bachelor_Project/github/BachelorNordicSemi/embedded/sampl
 C:/Users/Einar/Desktop/Bachelor_Project/github/BachelorNordicSemi/embedded/samples/nrfgcloud_new/build/modules/nrf/lib/fatal_error/CMakeFiles/..__nrf__lib__fatal_error.dir
 C:/Users/Einar/Desktop/Bachelor_Project/github/BachelorNordicSemi/embedded/samples/nrfgcloud_new/build/modules/nrf/lib/fatal_error/CMakeFiles/edit_cache.dir
 C:/Users/Einar/Desktop/Bachelor_Project/github/BachelorNordicSemi/embedded/samples/nrfgcloud_new/build/modules/nrf/lib/fatal_error/CMakeFiles/rebuild_cache.dir
+C:/Users/Einar/Desktop/Bachelor_Project/github/BachelorNordicSemi/embedded/samples/nrfgcloud_new/build/modules/nrf/lib/modem_key_mgmt/CMakeFiles/edit_cache.dir
+C:/Users/Einar/Desktop/Bachelor_Project/github/BachelorNordicSemi/embedded/samples/nrfgcloud_new/build/modules/nrf/lib/modem_key_mgmt/CMakeFiles/..__nrf__lib__modem_key_mgmt.dir
+C:/Users/Einar/Desktop/Bachelor_Project/github/BachelorNordicSemi/embedded/samples/nrfgcloud_new/build/modules/nrf/lib/modem_key_mgmt/CMakeFiles/rebuild_cache.dir
 C:/Users/Einar/Desktop/Bachelor_Project/github/BachelorNordicSemi/embedded/samples/nrfgcloud_new/build/modules/nrf/samples/CMakeFiles/rebuild_cache.dir
 C:/Users/Einar/Desktop/Bachelor_Project/github/BachelorNordicSemi/embedded/samples/nrfgcloud_new/build/modules/nrf/samples/CMakeFiles/spm_subimage.dir
 C:/Users/Einar/Desktop/Bachelor_Project/github/BachelorNordicSemi/embedded/samples/nrfgcloud_new/build/modules/nrf/samples/CMakeFiles/spm_guiconfig.dir

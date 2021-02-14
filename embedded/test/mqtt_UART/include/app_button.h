@@ -5,6 +5,6 @@
 
 void button_dev_init(void);
 void button_handler(uint32_t button_states, uint32_t has_changed);
-int toggleLED(uint8_t *data, size_t len);
+int check_data(uint8_t *data, size_t len);
 
 #endif

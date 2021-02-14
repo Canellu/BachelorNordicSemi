@@ -4,6 +4,7 @@
 #include <kernel.h>
 #include <string.h>
 #include <errno.h>
+#include <random/rand32.h>
 
 #include <date_time.h>
 
@@ -14,6 +15,7 @@
 #include <data/jwt.h>
 
 #include <modem/modem_key_mgmt.h>
+#include <modem/lte_lc.h>
 #include <modem/bsdlib.h>
 #include <bsd.h>
 
@@ -301,10 +303,8 @@ int gcloud_provision(void) {
 
     /* Security configuration */
     static sec_tag_t sec_tag_list[] = {GCLOUD_SEC_TAG};
-    tls_config = (client.transport).tls.config;
 
 	tls_config.peer_verify = 0;
-    tls_config.hostname = NULL;
 
 	tls_config.cipher_list = NULL;
 
@@ -316,12 +316,12 @@ int gcloud_provision(void) {
     /* Delete certificates */
     nrf_sec_tag_t sec_tag = GCLOUD_SEC_TAG;
 
-    for (enum modem_key_mgnt_cred_type type = 0; type < 5; type++) {
-        err = modem_key_mgmt_delete(sec_tag, type);
-        if (err) {
-            printk("key delete err: [%d] %s", err, "hei");
-        }
-    }
+    // for (enum modem_key_mgnt_cred_type type = 0; type < 5; type++) {
+    //     err = modem_key_mgmt_delete(sec_tag, type);
+    //     if (err) {
+    //         printk("key delete err: [%d] %s", err, "hei");
+    //     }
+    // }
     // printk("CERT:\n%s\n", GCLOUD_CA_CERTIFICATE);
     /* Provision CA Certificate */
     err = modem_key_mgmt_write(
@@ -476,7 +476,6 @@ static void mqtt_event_handler(struct mqtt_client *client,
             printk("Got CONNACK");
             if (evt->result != 0) {
                 printk("MQTT connect failed: [%d] %s", err, "hei");
-                sys_reboot(0); //TODO: Handle error
                 break;
             }
 

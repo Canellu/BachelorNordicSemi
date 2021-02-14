@@ -49,6 +49,7 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   include("C:/Users/Einar/Desktop/Bachelor_Project/github/BachelorNordicSemi/embedded/samples/nrfgcloud_new/build/modules/nrf/lib/lte_link_control/cmake_install.cmake")
   include("C:/Users/Einar/Desktop/Bachelor_Project/github/BachelorNordicSemi/embedded/samples/nrfgcloud_new/build/modules/nrf/lib/flash_patch/cmake_install.cmake")
   include("C:/Users/Einar/Desktop/Bachelor_Project/github/BachelorNordicSemi/embedded/samples/nrfgcloud_new/build/modules/nrf/lib/fatal_error/cmake_install.cmake")
+  include("C:/Users/Einar/Desktop/Bachelor_Project/github/BachelorNordicSemi/embedded/samples/nrfgcloud_new/build/modules/nrf/lib/modem_key_mgmt/cmake_install.cmake")
 
 endif()
 

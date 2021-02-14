@@ -1,7 +1,8 @@
 #include <zephyr.h>
 #include <device.h>
-#include <modem/lte_lc.h>
-#include <net/mqtt.h>
+#include <misc/printk.h>
+#include <lte_lc.h>
+#include <net/mqtt_socket.h>
 #include <string.h>
 #include <errno.h>
 #include <bsd.h>
@@ -135,7 +136,7 @@ void main(void)
 	u32_t cnt = 0;
     for(int i = 0; ; i++) {
         cnt++ % 2 == 0 ? dk_set_led_on(3) : dk_set_led_off(3);
-        k_sleep(K_MSEC(SLEEP_TIME));
+        k_sleep(SLEEP_TIME);
 
         double yrNum = 22019 - cnt;
         cJSON * yrObj = cJSON_CreateObject();

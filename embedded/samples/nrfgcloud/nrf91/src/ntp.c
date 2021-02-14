@@ -7,7 +7,7 @@
 #include <zephyr.h>
 #include <net/socket.h>
 #include <stdio.h>
-#include <drivers/uart.h>
+#include <uart.h>
 #include <string.h>
 #include <time.h>
 #include "ntp.h"

@@ -1,7 +1,7 @@
 #ifndef __MQTT_H__
 #define __MQTT_H__
 
-// #include <net/mqtt_socket.h>
+#include <net/mqtt_socket.h>
 
 #define strlens(s) (s==NULL?0:strlen(s))
 

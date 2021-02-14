@@ -12,7 +12,7 @@ zephyr/linker.cmd: \
  C:/Users/Einar/ncs/v1.4.99-dev1/zephyr/include/sys/util.h \
  C:/Users/Einar/ncs/v1.4.99-dev1/zephyr/include/sys/util_macro.h \
  C:/Users/Einar/ncs/v1.4.99-dev1/zephyr/include/sys/util_internal.h \
- C:/Users/Einar/ncs/v1.4.99-dev1/zephyr/lib/libc/minimal/include/stdbool.h \
+ c:\users\einar\ncs\v1.4.1\toolchain\opt\lib\gcc\arm-none-eabi\9.2.1\include\stdbool.h \
  C:/Users/Einar/ncs/v1.4.99-dev1/zephyr/include/devicetree/io-channels.h \
  C:/Users/Einar/ncs/v1.4.99-dev1/zephyr/include/devicetree/clocks.h \
  C:/Users/Einar/ncs/v1.4.99-dev1/zephyr/include/devicetree/gpio.h \

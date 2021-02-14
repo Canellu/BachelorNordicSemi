@@ -2,13 +2,14 @@
 LOG_MODULE_REGISTER(gcloud);
 
 #include <zephyr.h>
+#include <misc/printk.h>
 #include <net/socket.h>
-#include <net/mqtt.h>
+#include <net/mqtt_socket.h>
 #include <string.h>
 #include <errno.h>
-#include <data/jwt.h>
+#include <zephyr/jwt.h>
 
-// #include "nrf_inbuilt_key.h"
+#include "nrf_inbuilt_key.h"
 
 #include "gcloud.h"
 #include "ntp.h"

@@ -168,7 +168,7 @@ void main(void)
         cnt++ % 2 == 0 ? dk_set_led_on(3) : dk_set_led_off(3);
         k_sleep(K_MSEC(SLEEP_TIME));
 
-        double yrNum = 22019 - cnt;
+        double yrNum = 22021 - cnt;
         cJSON * yrObj = cJSON_CreateObject();
         cJSON * year = NULL;
         char * JSONString = NULL;

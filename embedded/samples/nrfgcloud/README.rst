@@ -46,7 +46,7 @@ gcloud pubsub topics create TOPIC_NAME
 ```
 Optional: Make a subscription. This can be used to check for messages yourself
 ```console
-gcloud pubsub subscriptions create --topic data SUBSCRIPTION_NAME
+gcloud pubsub subscriptions create --topic TOPIC_NAME SUBSCRIPTION_NAME
 ```
 Create a registry
 ```console

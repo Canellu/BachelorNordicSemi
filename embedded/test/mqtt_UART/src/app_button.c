@@ -47,25 +47,23 @@ void button_handler(uint32_t button_states, uint32_t has_changed)
 		app_data_publish(MSG_4, sizeof(MSG_4));
 	}
 
-
 }
 
-int toggleLED(uint8_t *data, size_t len) 
+// TODO: combine this function with data_choice_handler from "app_mqtt.h" ?
+int check_data(uint8_t *data, size_t len) 
 {
 	int ret_value = 0;
 
-	printk("\n\nbefore led data: %s %d", data, len);
+	char buf[len + 1];
+	memcpy(buf, data, len);
+	buf[len] = 0;
 
-    if(strcmp(data, "LED") == 0) 
+    if(strcmp(buf, "LED") == 0) 
 	{
-		printk("\n\nafter led data: %s %d", data, len);
-		
-
 		ledOn = !ledOn;
 		dk_set_led(DK_LED1, ledOn);
-		ret_value = 0;
     }
-	else if(strcmp(data, "exit") == 0)
+	else if(strcmp(buf, "exit") == 0)
 	{
 		ret_value = 1;
 	}

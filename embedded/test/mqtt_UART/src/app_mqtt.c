@@ -28,7 +28,6 @@ extern int data_available_to_send;
 
 int data_choice = 0;
 
-
 LOG_MODULE_REGISTER(mqtt_simple, CONFIG_MQTT_SIMPLE_LOG_LEVEL);
 
 /* Buffers for MQTT client. */
@@ -168,7 +167,7 @@ void mqtt_evt_handler(struct mqtt_client *const c,
 			data_print("Received: ", payload_buf,
 				p->message.payload.len);
 
-			data_choice = toggleLED(payload_buf, p->message.payload.len);
+			data_choice = check_data(payload_buf, p->message.payload.len);
 	
 		} else {
 			LOG_ERR("publish_get_payload failed: %d", err);
@@ -344,6 +343,21 @@ int app_data_publish(uint8_t *data, size_t len) {
 	return err;
 }
 
+
+// TODO: combine this function with check_data from "app_button.h" ?
+static int data_choice_handler()
+{
+	int ret_val = 0;
+
+	switch(data_choice)
+	{
+		case 1: ret_val = 1000; break;
+	}
+
+	return ret_val;
+}
+
+
 // CUSTOM FUNCTIONS END
 
 
@@ -355,11 +369,11 @@ static int fds_init(struct mqtt_client *c)
 	if (c->transport.type == MQTT_TRANSPORT_NON_SECURE) {
 		fds.fd = c->transport.tcp.sock;
 	} else {
-#if defined(CONFIG_MQTT_LIB_TLS)
+	#if defined(CONFIG_MQTT_LIB_TLS)
 		fds.fd = c->transport.tls.sock;
-#else
+	#else
 		return -ENOTSUP;
-#endif
+	#endif
 	}
 
 	fds.events = POLLIN;
@@ -372,36 +386,82 @@ static int fds_init(struct mqtt_client *c)
  */
 int modem_configure(void)
 {
-#if defined(CONFIG_LTE_LINK_CONTROL)
-		int err;
+	int err;
 
-		LOG_INF("LTE Link Connecting...");
-		err = lte_lc_init_and_connect();
-		if (err) {
-			LOG_INF("Failed to establish LTE connection: %d", err);
-			return err;
-		}
-		LOG_INF("LTE Link Connected!");
-#endif /* defined(CONFIG_LTE_LINK_CONTROL) */
+	LOG_INF("LTE Link Connecting and Initializing...");
+	err = lte_lc_init_and_connect();
+	if (err) {
+		LOG_INF("Failed to establish LTE connection: %d", err);
+		return err;
+	}
+	LOG_INF("LTE Link Connected!");
 
 	/* Turn off power saving modes for a more responsive demo */
 	LOG_INF("Disabling PSM and eDRX");
 	lte_lc_psm_req(false);
 	lte_lc_edrx_req(false);
 
-	return 0;
+	return err;
 }
 
+int modem_reconnect(void)
+{
+	int err;
+
+	LOG_INF("LTE Link Connecting...");
+	err = lte_lc_connect();
+	if (err) {
+		LOG_INF("Failed to establish LTE connection: %d", err);
+		return err;
+	}
+
+	LOG_INF("LTE Link Connected!");
+
+	return err;
+}
+
+int app_mqtt_init(void)
+{
+	int err;
+
+	err = client_init(&client);
+	if (err != 0) {
+		LOG_ERR("client_init: %d", err);
+	}
+
+	return err;
+}
+
+int app_mqtt_connect(void)
+{
+    int err;
+
+	err = mqtt_connect(&client);
+	if (err != 0) {
+		LOG_ERR("mqtt_connect %d", err);
+	}
+	return err;
+}
+
+int app_fds_init(void)
+{
+	int err;
+
+	err = fds_init(&client);
+	if (err != 0) {
+	LOG_ERR("fds_init: %d", err);
+	}
+	return err;
+}
 
 int app_mqtt_run(void)
 {	
 	int err;
 
-
 	err = poll(&fds, 1, mqtt_keepalive_time_left(&client));
 	if (err < 0) {
 		LOG_ERR("poll: %d", errno);
-	return err;
+		return err;
 	}
 
 	err = mqtt_live(&client);
@@ -428,46 +488,14 @@ int app_mqtt_run(void)
 		return err;
 	}
 
-	// if (data_available_to_send)
-	// {
-	// 	app_data_publish_uart();
-	// }
-
-	err = 0;
-
-	return err;
-}
-
-
-int app_mqtt_init(void)
-{
-    int err;
-
-  	err = client_init(&client);
-	if (err != 0) {
-		LOG_ERR("client_init: %d", err);
-	}
-
-	err = mqtt_connect(&client);
-	if (err != 0) {
-		LOG_ERR("mqtt_connect %d", err);
-	}
-
-	err = fds_init(&client);
-	if (err != 0) {
-		LOG_ERR("fds_init: %d", err);
-	}
-
-	// TEMPORARY SOLUTION CHANGE LATER
-	if(data_choice)
+	if(data_choice != 0)
 	{
+		err = data_choice_handler();
 		data_choice = 0;
-		err = 1;
 	}
 
 	return err;
 }
-
 
 int app_mqtt_disconnect(void)
 {
@@ -478,8 +506,15 @@ int app_mqtt_disconnect(void)
 	err = mqtt_disconnect(&client);
 	if (err) {
 		LOG_ERR("Could not disconnect MQTT client: %d", err);
+		return err;
+	}
+
+	printk("\nReturning to main\n");
+
+	err = lte_lc_offline();
+	if (err) {
+		LOG_ERR("Could not set modem to offline: %d", err);
 	}
 	
 	return err;
 }
-

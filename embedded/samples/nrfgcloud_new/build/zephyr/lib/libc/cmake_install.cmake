@@ -39,7 +39,7 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("C:/Users/Einar/Desktop/Bachelor_Project/github/BachelorNordicSemi/embedded/samples/nrfgcloud_new/build/zephyr/lib/libc/minimal/cmake_install.cmake")
+  include("C:/Users/Einar/Desktop/Bachelor_Project/github/BachelorNordicSemi/embedded/samples/nrfgcloud_new/build/zephyr/lib/libc/newlib/cmake_install.cmake")
 
 endif()
 
