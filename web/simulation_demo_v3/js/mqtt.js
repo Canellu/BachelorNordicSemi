@@ -17,7 +17,7 @@ function onConnect() {
   // Once a connection has been made, make a subscription
   console.log("onConnect");
   client.subscribe("projects/nordicoasys/topics/data");
-  client.subscribe("projects/nordicoasys/topics/commands");
+  // client.subscribe("projects/nordicoasys/topics/commands");
 }
 
 // called when the client loses its connection
