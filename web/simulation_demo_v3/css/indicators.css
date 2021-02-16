@@ -1,0 +1,45 @@
+.lightRow {
+  /* border: 2px solid yellow; */
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.lightRow > div {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding-top: 20px;
+  /* border: 2px solid green; */
+}
+
+.lightNode {
+  width: 40px;
+  height: 20px;
+  margin: 20px 0px;
+  border-radius: 20px;
+  box-shadow: 2px 2px 4px 1px rgba(0, 0, 0, 0.3);
+  background-color: rgb(109, 255, 141);
+}
+
+.alert {
+  background: #d15050;
+  animation-name: pulseAlert;
+  animation-duration: 0.5s;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+@keyframes pulseAlert {
+  0% {
+    background: #d15050;
+  }
+  50% {
+    background: #d15050;
+  }
+  100% {
+    background: #7e6363;
+  }
+}
