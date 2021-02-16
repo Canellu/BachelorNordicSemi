@@ -1,0 +1,89 @@
+.system,
+.scientific,
+.navigation {
+  /* border: 2px solid orange; */
+  background-color: white;
+  box-shadow: 5px 5px 10px 1px rgba(0, 0, 0, 0.3);
+  margin-right: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  min-width: 240px; /* System column width */
+}
+
+.scientific {
+  width: 50%;
+  min-width: 600px;
+  margin: 0 10px;
+}
+
+.navigation {
+  width: 50%;
+  margin-left: 10px;
+  min-width: 600px;
+}
+
+/* SYSTEM CONTENT */
+.systemData {
+  /* border: 2px solid red; */
+  width: 100%;
+  height: 100%;
+  margin: 10px 0px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.systemData > div {
+  font-size: 30px;
+}
+
+p {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #0081aa;
+  width: 150px;
+  min-height: 30px;
+  color: white;
+  border-radius: 20px;
+  /* border: 2px solid rgb(72, 223, 58); */
+}
+
+/* SCIENTIFIC CONTENT */
+.scientificData {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  height: 100%;
+  width: 100%;
+
+  /* border: 5px solid rgb(245, 242, 59); */
+}
+
+.temperatureBox,
+.pressureBox,
+.conductivityBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* border: 2px solid crimson; */
+  margin: 20px;
+  width: 100%;
+  height: 30%;
+}
+
+.temperature,
+.pressure,
+.conductivity {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 36px;
+  font-weight: 600;
+  /* border: 5px solid rgb(245, 242, 59); */
+  width: 100%;
+  height: 100%;
+}

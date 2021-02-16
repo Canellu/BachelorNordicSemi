@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" href="css/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css"
+      integrity="sha512-+4zCK9k+qNFUR5X+cKL9EIR+ZOhtIloNl9GIKS57V1MyNsYpYcUrUeQc9vNfzsWfV28IaLL3i96P9sdNyeRssA=="
+      crossorigin="anonymous"
+    />
+
+    <script src="https://www.gstatic.com/firebasejs/8.2.5/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.2.5/firebase-firestore.js"></script>
+
+    <title>MUG Simulation Demo</title>
+  </head>
+  <body>
+    <!-- <div class="sidebar">
+      <div class="logo">OASYS</div>
+    </div> -->
+    <div class="mainContent">
+      <div class="indicators">
+        <div class="title">Indicators</div>
+        <div class="lightRow">
+          <div>
+            <p>Motor 1</p>
+            <div class="lightNode indicHealth"></div>
+          </div>
+          <div>
+            <p>Motor 2</p>
+            <div class="lightNode"></div>
+          </div>
+          <div>
+            <p>Balloon</p>
+            <div class="lightNode"></div>
+          </div>
+          <div>
+            <p>Oil pump</p>
+            <div class="lightNode"></div>
+          </div>
+        </div>
+      </div>
+      <div class="data">
+        <div class="system">
+          <div class="title">System</div>
+          <div class="systemData">
+            <p>UID</p>
+            <div class="uid">G1</div>
+
+            <p>Battery</p>
+            <div class="battery"></div>
+
+            <p>Avg current</p>
+            <div class="avgCurrent"></div>
+
+            <p>Max current</p>
+            <div class="maxCurrent"></div>
+          </div>
+        </div>
+        <div class="scientific">
+          <div class="title">Scientific data</div>
+          <div class="scientificData">
+            <div class="temperatureBox">
+              <p>Temperature</p>
+              <div class="temperature"></div>
+              celsius
+            </div>
+
+            <div class="pressureBox">
+              <p>Pressure</p>
+              <div class="pressure"></div>
+              bar
+            </div>
+
+            <div class="conductivityBox">
+              <p>Conductivity</p>
+              <div class="conductivity"></div>
+              mS/cm
+            </div>
+          </div>
+        </div>
+        <div class="navigation">
+          <div class="title">Location</div>
+        </div>
+      </div>
+      <div class="commands">
+        <div class="terminal">
+          <div class="title">Terminal</div>
+          <textarea
+            readonly
+            class="display"
+            placeholder="commands..."
+          ></textarea>
+          <div class="sendRow">
+            <input class="sendBox" type="text" />
+            <button class="sendBtn" onclick="sendData()">send</button>
+            <button class="clearBtn" onclick="clearScreen()">clear</button>
+          </div>
+        </div>
+        <div class="sliders">
+          <div class="title">Command center</div>
+          <div class="commandCenter">
+            <div class="sliderContainer">
+              
+              
+              <div class="sliderBox">
+                <div class="bubble s1"></div>
+                <p>0</p>
+                <input type="range" min="0" max="100" value="50" class="slider" id="slider1">
+                <p>100</p> 
+              </div>
+
+              <div class="sliderBox">
+                <div class="bubble s2"></div>
+                <p>0</p>
+                <input type="range" min="0" max="100" value="50" class="slider" id="slider2">
+                <p>100</p> 
+              </div>
+
+              <div class="sliderBox">
+                <div class="bubble s3"></div>
+                <p>0</p>
+                <input type="range" min="0" max="100" value="50" class="slider" id="slider3">
+                <p>100</p> 
+              </div>
+         
+            
+             
+            </div>
+            <div class="switchContainer"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"
+      type="text/javascript"
+    ></script>
+  
+    <script src="js/database.js"></script>
+    <script src="js/slider.js"></script>
+    <script src="js/mqtt.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>

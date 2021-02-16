@@ -51,6 +51,9 @@ function renderData(doc) {
 }
 
 
+
+
+
 // Updates firestore Sensor collection document
 function updateDoc(command) {
   var doc = db.collection("Sensor").doc("H4JYgp8VythfG7JX4GZ4");
