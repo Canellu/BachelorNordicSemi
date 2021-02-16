@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:oasys_app/models/data.dart';
 import 'package:flutter/material.dart';
 import 'package:oasys_app/services/database.dart';
@@ -14,6 +15,10 @@ class DataList extends StatefulWidget {
 
 class _DataListState extends State<DataList> {
 
+  String newBattery;
+  int newDuration;
+  bool newHealth;
+
   @override
   Widget build(BuildContext context) {
 
@@ -26,45 +31,10 @@ class _DataListState extends State<DataList> {
     String battery;
 
     datas.forEach((data) {
-      print(data.health);
-      print(data.duration);
-      print(data.battery);
-
       health = data.health;
       duration = data.duration;
       battery = data.battery;
     });
-
-    var healthStatus = health ?? false;
-
-
-    /*
-    void setHealthColor() {
-      if(health){
-        healthStatus = Colors.green;
-      }else{
-        healthStatus = Colors.red;
-      }
-    }
-    setHealthColor();*/
-
-    //db.updateData(battery, duration, health);
-    /*
-    return Container(
-      alignment: Alignment.center,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text('$health',
-          style: TextStyle),
-          Text('$duration',
-              style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold)),
-          Text('$battery',
-              style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold))
-        ],
-      )
-    );*/
 
     return Form(
       key: formKey,
@@ -76,18 +46,20 @@ class _DataListState extends State<DataList> {
           ),
           SizedBox(height: 20.0),
           TextFormField(
+            initialValue: newBattery ?? battery,
             decoration: textInputDecoration,
-            initialValue: battery,
-            onChanged: (val) => setState(() => battery = val),
+            onChanged: (v) {
+              newBattery = v;
+            },
           ),
           SizedBox(height: 20.0),
           Slider(
-            value: (duration ?? 0.0).toDouble(),
+            value: (newDuration ?? duration ?? 0.0).toDouble(),
             min: 0.0,
             max: 100.0,
-            divisions: 100,
+            divisions: 10,
             activeColor: Colors.blueAccent[500],
-            onChanged: (val) => setState(() => duration = val.round()),
+            onChanged: (val) => setState(() => newDuration = val.round()),
           ),
           SizedBox(height: 20.0),
           Text(
@@ -95,22 +67,24 @@ class _DataListState extends State<DataList> {
             style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
           ),
           RaisedButton(
-            color: healthStatus ? Colors.green : Colors.red,
+            color: newHealth ?? health ?? false ? Colors.green : Colors.red,
             onPressed: (){
               setState(() {
-                health = !health;
-                print(health);
-            });
-            /*
-                health = !health;
-                setHealthColor();
-                print(health);
-                print(healthStatus);*/
+                if(newHealth == null){
+                  newHealth = !health;
+                }else{
+                  newHealth = !newHealth;
+                }
+              });
             },
           ),
+          SizedBox(height: 30.0),
           FloatingActionButton(
             onPressed: (){
-              //DatabaseService().updateData("0", 100, true);
+              db.updateData(newBattery, newDuration, newHealth);
+              newDuration = null;
+              newHealth = null;
+              newBattery = null;
             },
             child: Icon(Icons.navigation),
             backgroundColor: Colors.green,
