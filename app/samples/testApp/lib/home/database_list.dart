@@ -80,7 +80,7 @@ class _DataListState extends State<DataList> {
             ),
             RaisedButton(
               color: health ?? false ? Colors.green : Colors.red,
-              child: Text(health ? 'True' : 'False', style: TextStyle(fontSize: 15)),
+              child: Text(health ?? false ? 'True' : 'False', style: TextStyle(fontSize: 15)),
               onPressed: (){
                 health = !health;
                 print("health test : "+health.toString());
