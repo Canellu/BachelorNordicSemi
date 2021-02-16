@@ -36,63 +36,72 @@ class _DataListState extends State<DataList> {
       battery = data.battery;
     });
 
-    return Form(
-      key: formKey,
-      child: Column(
-        children: <Widget>[
-          Text(
-            'Battery : ',
-            style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 20.0),
-          TextFormField(
-            initialValue: newBattery ?? battery,
-            decoration: textInputDecoration,
-            onChanged: (v) {
-              newBattery = v;
-            },
-          ),
-          SizedBox(height: 20.0),
-          Slider(
-            value: (newDuration ?? duration ?? 0.0).toDouble(),
-            min: 0.0,
-            max: 100.0,
-            divisions: 10,
-            activeColor: Colors.blueAccent[500],
-            onChanged: (val) => setState(() => newDuration = val.round()),
-          ),
-          SizedBox(height: 20.0),
-          Text(
-            'Health Status :',
-            style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
-          ),
-          RaisedButton(
-            color: newHealth ?? health ?? false ? Colors.green : Colors.red,
-            onPressed: (){
-              setState(() {
-                if(newHealth == null){
-                  newHealth = !health;
-                }else{
-                  newHealth = !newHealth;
-                }
-              });
-            },
-          ),
+    return Container(
+      margin: const EdgeInsets.all(20.0),
+      child: Form(
+        key: formKey,
+        child: Column(
+          children: <Widget>[
+            Text(
+              'Battery : ',
+              style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 20.0),
+            TextFormField(
+              initialValue: battery,
+              decoration: textInputDecoration,
+              onChanged: (v) {
+                battery = v;
+              },
+              onEditingComplete: (){
+                db.updateData(battery, duration, health);
+              },
+            ),
+            SizedBox(height: 20.0),
+            Text(
+              'Duration : ' + duration.toString(),
+              style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
+            ),
+            Slider(
+              value: (duration ?? 0.0).toDouble(),
+              min: 0.0,
+              max: 100.0,
+              divisions: 10,
+              activeColor: Colors.blueAccent[500],
+              onChanged: (val) => duration = val.round(),
+              onChangeEnd: (val){
+                db.updateData(battery, duration, health);
+              },
+            ),
+            SizedBox(height: 20.0),
+            Text(
+              'Health Status :',
+              style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
+            ),
+            RaisedButton(
+              color: health ?? false ? Colors.green : Colors.red,
+              child: Text(health ? 'True' : 'False', style: TextStyle(fontSize: 15)),
+              onPressed: (){
+                health = !health;
+                print("health test : "+health.toString());
+                db.updateData(battery, duration, health);
+              },
+            ),
+            /*
           SizedBox(height: 30.0),
           FloatingActionButton(
             onPressed: (){
-              db.updateData(newBattery, newDuration, newHealth);
-              newDuration = null;
+              db.updateData(battery, newDuration, newHealth);
+              //newDuration = null;
               newHealth = null;
-              newBattery = null;
+              //newBattery = null;
             },
             child: Icon(Icons.navigation),
             backgroundColor: Colors.green,
-          ),
-        ],
+          ),*/
+          ],
+        ),
       ),
-
     );
-
   }
 }
