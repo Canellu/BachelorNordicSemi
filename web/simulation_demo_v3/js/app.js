@@ -62,3 +62,11 @@ function renderData(doc) {
 
   //Update indicator
 }
+
+//TODO finish conversion function
+function convertToFirestoreFormat(nrfFormat) {
+  var tmp = JSON.parse(nrfFormat);
+  console.log(Object.keys(tmp));
+}
+
+// convertToFirestoreFormat('{"t":"17:10:52","P":"78.654","C":"20.452"}');
