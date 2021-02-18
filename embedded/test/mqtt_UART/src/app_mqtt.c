@@ -21,8 +21,8 @@
 #endif
 
 // VARIABLES FROM MAIN
-extern uint8_t uart_data_array[128][16];
-extern int data_available_to_send;
+extern struct k_msgq mqtt_msg_q;
+
 
 // LOCAL
 
@@ -167,7 +167,12 @@ void mqtt_evt_handler(struct mqtt_client *const c,
 			data_print("Received: ", payload_buf,
 				p->message.payload.len);
 
-			data_choice = check_data(payload_buf, p->message.payload.len);
+			// fixing length of string to be added to message queue
+			char tmp_str[p->message.payload.len + 1];
+			memcpy(tmp_str, payload_buf, p->message.payload.len);
+			tmp_str[p->message.payload.len] = 0;
+
+			k_msgq_put(&mqtt_msg_q, tmp_str, K_NO_WAIT);
 	
 		} else {
 			LOG_ERR("publish_get_payload failed: %d", err);
@@ -327,41 +332,6 @@ static int client_init(struct mqtt_client *client)
 	return err;
 }
 
-
-
-// CUSTOM FUNCTIONS START
-
-int app_data_publish(uint8_t *data, size_t len) {
-	int err;
-
-	err = data_publish(&client, MQTT_QOS_1_AT_LEAST_ONCE, data, len-1);
-
-	if (err) {
-		LOG_ERR("Publish failed: %d", err);
-	}
-
-	return err;
-}
-
-
-// TODO: combine this function with check_data from "app_button.h" ?
-static int data_choice_handler()
-{
-	int ret_val = 0;
-
-	switch(data_choice)
-	{
-		case 1: ret_val = 1000; break;
-	}
-
-	return ret_val;
-}
-
-
-// CUSTOM FUNCTIONS END
-
-
-
 /**@brief Initialize the file descriptor structure used by poll.
  */
 static int fds_init(struct mqtt_client *c)
@@ -384,7 +354,7 @@ static int fds_init(struct mqtt_client *c)
 /**@brief Configures modem to provide LTE link. Blocks until link is
  * successfully established.
  */
-int modem_configure(void)
+static int modem_configure(void)
 {
 	int err;
 
@@ -404,7 +374,9 @@ int modem_configure(void)
 	return err;
 }
 
-int modem_reconnect(void)
+// CUSTOM FUNCTIONS START
+
+static int modem_reconnect(void)
 {
 	int err;
 
@@ -420,40 +392,75 @@ int modem_reconnect(void)
 	return err;
 }
 
-int app_mqtt_init(void)
+// TODO: set max number of retries
+int app_mqtt_init_and_connect(void)
 {
-	int err;
+	int err = 0;
 
+	// modem configure
+	do {
+		err = modem_configure();
+		if (err) {
+			LOG_INF("Retrying in %d seconds", CONFIG_LTE_CONNECT_RETRY_DELAY_S);
+			k_sleep(K_SECONDS(CONFIG_LTE_CONNECT_RETRY_DELAY_S));
+		}
+		} while (err);
+
+	// mqtt init
 	err = client_init(&client);
 	if (err != 0) {
 		LOG_ERR("client_init: %d", err);
+		return err;
 	}
 
-	return err;
-}
+	// mqtt connect
+	do {
+		err = mqtt_connect(&client);
+		if (err != 0) {
+			LOG_ERR("mqtt_connect %d", err);
+			LOG_INF("Reconnecting in %d seconds...", CONFIG_MQTT_RECONNECT_DELAY_S);
+			k_sleep(K_SECONDS(CONFIG_MQTT_RECONNECT_DELAY_S));
+		}
+	} while (err);
 
-int app_mqtt_connect(void)
-{
-    int err;
-
-	err = mqtt_connect(&client);
-	if (err != 0) {
-		LOG_ERR("mqtt_connect %d", err);
-	}
-	return err;
-}
-
-int app_fds_init(void)
-{
-	int err;
-
+	// fds init
 	err = fds_init(&client);
 	if (err != 0) {
-	LOG_ERR("fds_init: %d", err);
+		LOG_ERR("fds_init: %d", err);
+		return err;
 	}
+
 	return err;
 }
 
+// TODO: set max number of retries
+int app_mqtt_connect(void)
+{
+    int err = 0;
+
+	// modem configure
+	do {
+		err = modem_reconnect();
+		if (err) {
+			LOG_INF("Retrying in %d seconds", CONFIG_LTE_CONNECT_RETRY_DELAY_S);
+			k_sleep(K_SECONDS(CONFIG_LTE_CONNECT_RETRY_DELAY_S));
+		}
+	} while (err);
+
+	// mqtt connect
+	do {
+		err = mqtt_connect(&client);
+		if (err != 0) {
+			LOG_ERR("mqtt_connect %d", err);
+			LOG_INF("Reconnecting in %d seconds...", CONFIG_MQTT_RECONNECT_DELAY_S);
+			k_sleep(K_SECONDS(CONFIG_MQTT_RECONNECT_DELAY_S));
+		}
+	} while (err);
+
+	return err;
+}
+
+// CANDO: change poll to message queueing to allow instantaneous response from button
 int app_mqtt_run(void)
 {	
 	int err;
@@ -488,12 +495,6 @@ int app_mqtt_run(void)
 		return err;
 	}
 
-	if(data_choice != 0)
-	{
-		err = data_choice_handler();
-		data_choice = 0;
-	}
-
 	return err;
 }
 
@@ -509,12 +510,22 @@ int app_mqtt_disconnect(void)
 		return err;
 	}
 
-	printk("\nReturning to main\n");
-
 	err = lte_lc_offline();
 	if (err) {
 		LOG_ERR("Could not set modem to offline: %d", err);
 	}
 	
+	return err;
+}
+
+int app_data_publish(uint8_t *data, size_t len) {
+
+	int err;
+	err = data_publish(&client, MQTT_QOS_1_AT_LEAST_ONCE, data, len-1);
+
+	if (err) {
+		LOG_ERR("Publish failed: %d", err);
+	}
+
 	return err;
 }

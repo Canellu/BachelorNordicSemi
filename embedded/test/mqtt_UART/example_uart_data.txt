@@ -1,0 +1,5 @@
+{"timestamp":"17:10:52","pressure":"78.654","C":"20.452"}
+{"UID":"G1","timestamp":"20:10:56","pressure":"42.672","C":"10.123"}
+{"timestamp":"01:20:34","pressure":"34.500","C":"16.42"}
+{"UID":"G1","temperature":"13.552","health":"false"}
+{exit}

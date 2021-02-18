@@ -212,3 +212,12 @@
 27	186	634578491	spm/zephyr/zephyr.elf	4d47f23d9292e077
 27	186	634578491	spm/libspmsecureentries.a	4d47f23d9292e077
 187	217	0	zephyr/cmake/flash/CMakeFiles/west_flash_depends	893b661a994de4e4
+30	213	634578491	modules/nrf/samples/spm_subimage-prefix/src/spm_subimage-stamp/spm_subimage-build	4d47f23d9292e077
+30	213	634578491	spm/zephyr/zephyr.hex	4d47f23d9292e077
+30	213	634578491	spm/zephyr/zephyr.elf	4d47f23d9292e077
+30	213	634578491	spm/libspmsecureentries.a	4d47f23d9292e077
+28	210	634578491	modules/nrf/samples/spm_subimage-prefix/src/spm_subimage-stamp/spm_subimage-build	4d47f23d9292e077
+28	210	634578491	spm/zephyr/zephyr.hex	4d47f23d9292e077
+28	210	634578491	spm/zephyr/zephyr.elf	4d47f23d9292e077
+28	210	634578491	spm/libspmsecureentries.a	4d47f23d9292e077
+211	255	0	zephyr/cmake/flash/CMakeFiles/west_flash_depends	893b661a994de4e4

@@ -67,9 +67,9 @@ static u8_t tx_buffer[CONFIG_MQTT_MESSAGE_BUFFER_SIZE];
 
 extern void gcloud_thread(void *, void *, void *);
 
-// K_THREAD_DEFINE(gcloud_thread_tid, GCLOUD_THREAD_STACK_SIZE, 
-//                 gcloud_thread, NULL, NULL, NULL, 
-//                 GCLOUD_THREAD_PRIORITY, 0, 0);
+K_THREAD_DEFINE(gcloud_thread_tid, GCLOUD_THREAD_STACK_SIZE, 
+                gcloud_thread, NULL, NULL, NULL, 
+                GCLOUD_THREAD_PRIORITY, 0, 0);
 
 enum gcloud_event_type {
     CONNECT,

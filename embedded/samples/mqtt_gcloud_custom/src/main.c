@@ -565,6 +565,8 @@ void main(void)
 		}
 	} while (err);
 
+	
+
 	err = client_init(&client);
 	if (err != 0) {
 		LOG_ERR("client_init: %d", err);

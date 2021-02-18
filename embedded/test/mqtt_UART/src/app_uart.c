@@ -5,68 +5,55 @@
 #include "app_uart.h"
 
 // VARIABLES FROM MAIN
-
-extern int new_data;
-extern int button_choice;
-extern uint8_t uart_data[128];
-
-uint8_t uart_data2[128];
+extern struct k_msgq uart_msg_q;
 
 // LOCAL
-const struct device *uart;
-static uint8_t buf[] = {"hi,"};
-int i = 0;
+uint8_t str_buf[128];
 
-static void uart_cb(const struct device *dev, void *context)
+const struct device *dev_uart;
+static uint8_t buf[] = {"hi,"};
+
+static void uart_cb(const struct device *dev_uart, void *context)
 {
 
-	uart_irq_update(dev);
+	uart_irq_update(dev_uart);
 
-	if (uart_irq_tx_ready(dev)) {
-		(void)uart_fifo_fill(dev, buf, sizeof(buf));
-		uart_irq_tx_disable(dev);
+	if (uart_irq_tx_ready(dev_uart)) {
+		(void)uart_fifo_fill(dev_uart, buf, sizeof(buf));
+		uart_irq_tx_disable(dev_uart);
 		printk("sent\n");
 	}
 
-	if (uart_irq_rx_ready(dev)) {
+	if (uart_irq_rx_ready(dev_uart)) {
 		uint8_t buf[10];
-		int len = uart_fifo_read(dev, buf, sizeof(buf));
+		int len = uart_fifo_read(dev_uart, buf, sizeof(buf));
 		buf[len] = 0;
-		// check for newline due to arduino sending newline, only used for testing purposes
-		// MOVE TO MAIN AND CLEAN UP
-		if((strcmp(buf, ",") == 0 || strcmp(buf, "\n") == 0) && !uart_irq_is_pending(dev))
+
+		if (strcmp(buf, "{") == 0)
 		{
-			strcat(uart_data, buf);
-			//printk("\n%s", uart_data2);
-			// int test = uart_irq_is_pending(dev);
-			// printk(" %d\n", test);
-			if(strcmp(uart_data2, "nice") == 0)
-			{
-				printk("   yay");
-				button_choice = 1;
-			}
-
-			strcpy(uart_data2, "");
-
+			strcpy(str_buf, "");
+			strcat(str_buf, buf);
+		}
+		else if (strcmp(buf, "}") == 0)
+		{
+			strcat(str_buf, buf);
+			k_msgq_put(&uart_msg_q, &str_buf, K_NO_WAIT);
 		}
 		else
 		{
-			strcat(uart_data, buf);
-			strcat(uart_data2, buf);
+			strcat(str_buf, buf);
 		}
-		printk("%s", buf);
 
 	}
-
 }
 
 // get device binding, only call once
 void uart_dev_init(void)
 {
-	uart = device_get_binding("UART_1");
-	__ASSERT(uart, "Failed to get the device\n\n");
+	dev_uart = device_get_binding("UART_1");
+	__ASSERT(dev_uart, "Failed to get the device\n\n");
 
-	uart_irq_callback_set(uart, uart_cb);
+	uart_irq_callback_set(dev_uart, uart_cb);
 
 }
 
@@ -74,13 +61,14 @@ void uart_dev_init(void)
 // add more here if other functions need to be enabled before uart use
 void uart_start(void)
 {
-	uart_irq_rx_enable(uart);
+	uart_irq_rx_disable(dev_uart);
+	uart_irq_rx_enable(dev_uart);
 }
 
 // turn off functions, might have to come back here and more things to disable
 void uart_exit(void)
 {
-	uart_irq_rx_disable(uart);
+	uart_irq_rx_disable(dev_uart);
 }
 
 // send data to uart device
@@ -88,7 +76,7 @@ void uart_exit(void)
 // should be useable in main
 void uart_send(void)
 {
-	uart_irq_tx_enable(uart);
+	uart_irq_tx_enable(dev_uart);
 }
 
 /* Function ideas and TODOs
