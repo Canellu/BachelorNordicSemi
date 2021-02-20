@@ -1,0 +1,39 @@
+.indicators {
+  display: flex;
+  /* border: 2px solid purple; */
+  height: 10%;
+  margin: 10px;
+  background-color: white;
+}
+
+.indicators .title {
+  width: 20%;
+  height: 50px;
+}
+
+.data {
+  /* border: 2px solid rgb(35, 136, 194); */
+  height: 50%;
+  display: flex;
+  justify-self: center;
+  padding: 10px;
+}
+
+.commands {
+  /* border: 2px solid rgba(17, 146, 86, 0.644); */
+  display: flex;
+  height: 40%;
+}
+
+.title {
+  width: 100%;
+  min-height: 60px;
+  color: white;
+  font-size: 25px;
+  font-weight: 600;
+  background-color: #0081aa;
+  border-radius: 0 0 30px 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

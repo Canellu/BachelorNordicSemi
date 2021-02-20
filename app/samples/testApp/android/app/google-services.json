@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "922040786230",
+    "project_id": "nimbus-f3278",
+    "storage_bucket": "nimbus-f3278.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:922040786230:android:c1a197770f1ddf5783e797",
+        "android_client_info": {
+          "package_name": "com.example.bachelor_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "922040786230-33fde26m3926mbdfqarpbbpn59cgsm20.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyADfjArzEoTBbPVLxQHKXOiL783KPMhk30"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "922040786230-33fde26m3926mbdfqarpbbpn59cgsm20.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:922040786230:android:c42615309eaf21b083e797",
+        "android_client_info": {
+          "package_name": "com.example.oasys_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "922040786230-33fde26m3926mbdfqarpbbpn59cgsm20.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyADfjArzEoTBbPVLxQHKXOiL783KPMhk30"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "922040786230-33fde26m3926mbdfqarpbbpn59cgsm20.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

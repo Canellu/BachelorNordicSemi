@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "40698568655",
+    "project_id": "nordicoasys",
+    "storage_bucket": "nordicoasys.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:40698568655:android:b5b5b8b4b713a930c4fcba",
+        "android_client_info": {
+          "package_name": "com.example.flutter_first_test"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "40698568655-vrujl9r1ivsp34fh7qpdvb3u66telrh5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAiizm1pcxv3puLaMFfjABL2IZ3NMrw2NE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "40698568655-vrujl9r1ivsp34fh7qpdvb3u66telrh5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

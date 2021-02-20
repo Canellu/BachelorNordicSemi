@@ -1,0 +1,232 @@
+.terminal {
+  /* border: 2px solid rgba(146, 69, 17, 0.644); */
+  width: 40%;
+  background-color: white;
+  margin: 10px;
+  box-shadow: 5px 5px 10px 1px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 10px;
+}
+
+.terminal textArea {
+  resize: none;
+  width: 90%;
+  height: 80%;
+  margin: 10px auto;
+  background-color: var(--bgColor);
+  border: none;
+  padding: 20px;
+  border-radius: 10px;
+  color: black;
+  font-size: 1.2rem;
+  font-family: "Poppins", sans-serif;
+}
+
+.sendRow {
+  display: flex;
+  /* border: 2px solid salmon; */
+  width: 90%;
+  height: 10%;
+  margin: auto;
+}
+
+.sendRow .sendBox {
+  width: 100%;
+  border-radius: 10px;
+  background-color: var(--bgColor);
+  padding: 0px 10px;
+  margin-right: 4px;
+  font-family: "Poppins", sans-serif;
+  font-size: 1.2rem;
+}
+
+button {
+  padding: 0px 12px;
+  margin: 0px 4px;
+  border-radius: 10px;
+  font-family: "Poppins", sans-serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+input:focus {
+  box-shadow: 2px 2px 4px 1px rgba(0, 0, 0, 0.3);
+}
+
+button:hover {
+  background-color: #9a9a9a;
+  color: white;
+}
+
+button:active {
+  background-color: #4d4d4d;
+}
+
+.sliders {
+  /* border: 2px solid rgba(146, 69, 17, 0.644); */
+  width: 60%;
+  background-color: white;
+  margin: 10px;
+  box-shadow: 5px 5px 10px 1px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+}
+
+.commandCenter {
+  display: flex;
+  /* border: 2px solid orange; */
+  height: 100%;
+}
+
+.sliderContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 100%;
+  /* border: 2px solid rgb(21, 82, 31); */
+  height: 100%;
+  padding: 20px;
+  margin-left: 20px;
+}
+
+.switchContainer {
+  width: 24%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  /* border: 2px solid rgb(189, 27, 54); */
+}
+
+.slider {
+  -webkit-appearance: none;
+  /* border-radius: 20px; */
+  width: 100%;
+  height: 20px;
+  background: linear-gradient(
+    90deg,
+    rgb(0, 194, 255) 50%,
+    rgb(200, 200, 200) 50%
+  );
+  outline: none;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+  cursor: pointer;
+
+  /* border: 2px solid orange; */
+}
+
+.slider:hover {
+  opacity: 1;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 50px;
+  height: 24px;
+  border-radius: 4px;
+  background: #0081aa;
+  cursor: pointer;
+}
+
+.sliderBox {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  /* height: 20px; */
+  /* border: 2px solid orange; */
+}
+.sliderContainer p {
+  width: 55px;
+  min-height: 10px;
+  border-radius: 5px;
+}
+
+.bubble {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: 30px;
+  height: 30px;
+  width: 70px;
+  /* border: 2px solid red; */
+
+  background: #0081aa;
+  color: white;
+  border-radius: 3px;
+}
+
+/* SWITCHEEEEs */
+
+/* The switch - the box around the slider */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* The slider */
+.checkSlider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+}
+
+.checkSlider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+}
+
+input:checked + .checkSlider {
+  background-color: #2196f3;
+}
+
+input:focus + .checkSlider {
+  box-shadow: 0 0 1px #2196f3;
+}
+
+input:checked + .checkSlider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.checkSlider.round {
+  border-radius: 34px;
+}
+
+.checkSlider.round:before {
+  border-radius: 50%;
+}
+
+.switchContainer button {
+  /* border: 2px solid red; */
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
