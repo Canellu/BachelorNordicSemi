@@ -1,0 +1,67 @@
+@import url("https://fonts.googleapis.com/css2?family=Lato&family=Montserrat&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap");
+/* font-family: 'Lato', sans-serif;
+font-family: 'Montserrat', sans-serif; */
+
+@import "sidebar.css";
+@import "mainContent.css";
+@import "indicators.css";
+@import "data.css";
+@import "commands.css";
+
+:root {
+  --bgColor: #f4f4f4;
+}
+
+*:focus {
+  outline: none;
+}
+
+* {
+  box-sizing: border-box;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  overflow: hidden;
+  font-family: "Poppins", sans-serif;
+  letter-spacing: 1px;
+  height: 100vh;
+  display: flex;
+  background-color: var(--bgColor);
+}
+
+.sidebar {
+  /* border: 2px solid red; */
+  background-color: #0081aa;
+  min-width: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.sidebar .logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 42px;
+  font-size: 40px;
+  font-weight: 500;
+  color: #0081aa;
+  width: 80%;
+  height: 70px;
+  border-radius: 40px;
+  background-color: white;
+  /* border: solid red 2px; */
+}
+
+.mainContent {
+  overflow-y: hidden;
+  overflow-x: auto;
+  min-height: 1000px;
+  /* border: 2px solid coral; */
+  width: 100%;
+  padding: 20px;
+}
