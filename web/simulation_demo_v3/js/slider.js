@@ -16,7 +16,8 @@ slider3.oninput = () => {
 };
 
 slider1.addEventListener("mousemove", () => {
-  var x = slider1.value;
+  var x = 10 * slider1.value;
+
   var color =
     "linear-gradient(90deg, rgb(0, 194, 255)" +
     x +
