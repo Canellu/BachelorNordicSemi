@@ -8,10 +8,9 @@
 extern struct k_msgq uart_msg_q;
 
 // LOCAL
-uint8_t str_buf[128];
-
 const struct device *dev_uart;
-static uint8_t buf[] = {"hi,"};
+static uint8_t str_buf[128];
+static uint8_t tx_buf[] = {"hi,"};
 
 static void uart_cb(const struct device *dev_uart, void *context)
 {
@@ -19,7 +18,7 @@ static void uart_cb(const struct device *dev_uart, void *context)
 	uart_irq_update(dev_uart);
 
 	if (uart_irq_tx_ready(dev_uart)) {
-		(void)uart_fifo_fill(dev_uart, buf, sizeof(buf));
+		(void)uart_fifo_fill(dev_uart, tx_buf, sizeof(tx_buf));
 		uart_irq_tx_disable(dev_uart);
 		printk("sent\n");
 	}

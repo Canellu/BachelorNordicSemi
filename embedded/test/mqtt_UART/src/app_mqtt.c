@@ -23,11 +23,6 @@
 // VARIABLES FROM MAIN
 extern struct k_msgq mqtt_msg_q;
 
-
-// LOCAL
-
-int data_choice = 0;
-
 LOG_MODULE_REGISTER(mqtt_simple, CONFIG_MQTT_SIMPLE_LOG_LEVEL);
 
 /* Buffers for MQTT client. */

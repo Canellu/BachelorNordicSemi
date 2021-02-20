@@ -3,9 +3,10 @@
 #include <string.h>
 #include <kernel.h>
 
-#include "app_mqtt.h"
 #include "app_button.h"
 #include "app_uart.h"
+#include "app_mqtt.h"
+#include "app_gps.h"
 
 
 /* STRUCTS AND ENUMS */
@@ -48,33 +49,29 @@ struct oasys_param_t { // currently not in use
 // button variables
 struct k_msgq button_msg_q;
 struct k_msgq button_msg_qr;
-uint8_t button_msgq_buffer[3 * sizeof(int)];
-int button_config;  // value sent to button, TODO: create enum?
-					// 0: main
-					// 1: uart
-					// 2: mqtt
-int button_val; // value received from button, only used when button_config = 0
+static uint8_t button_msgq_buffer[3 * sizeof(int)];
+static int button_val; // value received from button, only used when button_config = 0
 
 
 // UART variables
 struct k_msgq uart_msg_q;
-uint8_t uart_msgq_buffer[128 * 3];
-uint8_t uart_msg[128];
-uint8_t uart_data_array[16][128] = { "" };
+static uint8_t uart_msgq_buffer[128 * 3];
+static uint8_t uart_msg[128];
+static uint8_t uart_data_array[16][128] = { "" };
 
 // MQTT variables
 struct k_msgq mqtt_msg_q;
-uint8_t mqtt_msgq_buffer[128 * 3];
-uint8_t mqtt_msg[128];
+static uint8_t mqtt_msgq_buffer[128 * 3];
+static uint8_t mqtt_msg[128];
 
-bool mqtt_init_complete = false;
-bool data_available_to_send = false;
+static bool mqtt_init_complete = false;
+static bool data_available_to_send = false;
 
 
 /* FUNCTION DECLARATIONS */
 
 // publish all data that is currently saved from uart
-int publish_uart_data() 
+static int publish_uart_data() 
 {
 	int i = 0;
 
@@ -86,7 +83,7 @@ int publish_uart_data()
 	return 0;
 }
 
-int check_mqtt_msg(void *data, size_t len)
+static int check_mqtt_msg(void *data, size_t len)
 {
 	int ret_value = 0;
 
@@ -106,7 +103,7 @@ int check_mqtt_msg(void *data, size_t len)
 }
 
 // changes button configuration
-int set_button_config(int local_button_config)
+static int set_button_config(int local_button_config)
 {
 	k_msgq_purge(&button_msg_q);
 	k_msgq_put(&button_msg_q, &local_button_config, K_NO_WAIT);
@@ -115,7 +112,7 @@ int set_button_config(int local_button_config)
 }
 
 // waiting function, waits for button 1 to be pressed
-int button_wait()
+static int button_wait()
 {
 	set_button_config(0);
 	while(1) {
@@ -212,6 +209,19 @@ void main(void)
 		}
 
 		printk("\nuart test end\n\n");		
+		printk("\n\npress button 1 to start gps test\n\n");
+
+		button_wait();
+
+		/******* GPS START *******/
+		
+		// TODO: Test on separate thread
+
+		printk("gps test start\n");
+
+		app_gps(20, 500);
+
+		printk("\ngps test end\n\n");
 		printk("\n\npress button 1 to start mqtt test\n\n");
 
 		button_wait();

@@ -8,7 +8,7 @@
 #include "app_mqtt.h"
 #include "app_button.h"
 
-bool led1_on = false;
+static bool led1_on = false;
 
 #define MSG_1 "Pressed Button 1"
 #define MSG_2 "Pressed Button 2"
@@ -18,7 +18,7 @@ bool led1_on = false;
 // message queues
 extern struct k_msgq button_msg_q;
 extern struct k_msgq button_msg_qr;
-int app_button_config;
+static int app_button_config;
 
 extern struct k_msgq uart_msg_q;
 extern struct k_msgq mqtt_msg_q;
