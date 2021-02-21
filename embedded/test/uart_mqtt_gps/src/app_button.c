@@ -5,8 +5,9 @@
 #include <string.h>
 #include <dk_buttons_and_leds.h>
 
-#include "app_mqtt.h"
 #include "app_button.h"
+#include "app_uart.h"
+#include "app_mqtt.h"
 
 static bool led1_on = false;
 
@@ -51,6 +52,9 @@ static void button_handler(uint32_t button_states, uint32_t has_changed)
 		case 1: // UART
 			if(has_changed == 1 && !gpio_pin_get(dev_button, 6)) {
 				k_msgq_put(&uart_msg_q, "{exit}", K_NO_WAIT);
+			}
+			if(has_changed == 2 && !gpio_pin_get(dev_button, 7)) {
+				uart_send();
 			}
 			break;
 
