@@ -10,7 +10,7 @@ extern struct k_msgq uart_msg_q;
 // LOCAL
 const struct device *dev_uart;
 static uint8_t str_buf[128];
-static uint8_t tx_buf[] = {"hi,"};
+static uint8_t tx_buf[] = {"{hi}"};
 
 static void uart_cb(const struct device *dev_uart, void *context)
 {
