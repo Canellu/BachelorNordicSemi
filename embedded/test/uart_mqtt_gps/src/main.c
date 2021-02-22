@@ -1,7 +1,7 @@
 #include <zephyr.h>
 #include <dk_buttons_and_leds.h>
-#include <string.h>
 #include <kernel.h>
+#include <string.h>
 
 #include "app_button.h"
 #include "app_uart.h"

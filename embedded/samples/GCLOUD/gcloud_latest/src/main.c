@@ -114,14 +114,14 @@ static int gcloud_provision(void)
 
 	LOG_INF("Provisioning google cloud certificates");
 
-	nrf_sec_tag_t sec_tag = GCLOUD_SEC_TAG;
+	// nrf_sec_tag_t sec_tag = GCLOUD_SEC_TAG;
 
-    for(enum modem_key_mgmt_cred_type type = 0; type < 5; type++) {
-        err = modem_key_mgmt_delete(sec_tag, type);
-        if (err) {
-            LOG_ERR("key delete err: [%d] %s", err, strerror(err));
-        }
-    }
+    // for(enum modem_key_mgmt_cred_type type = 0; type < 5; type++) {
+    //     err = modem_key_mgmt_delete(sec_tag, type);
+    //     if (err) {
+    //         LOG_ERR("key delete err: [%d] %s", err, strerror(err));
+    //     }
+    // }
 
 	err = modem_key_mgmt_write(GCLOUD_SEC_TAG,
 				   MODEM_KEY_MGMT_CRED_TYPE_CA_CHAIN,
