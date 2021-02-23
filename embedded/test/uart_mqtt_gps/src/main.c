@@ -61,6 +61,8 @@ static uint8_t uart_msg[128];
 
 // TODO: change to general data_array instead of just uart data
 static uint8_t uart_data_array[16][128] = { "" };
+int data_size = 0; // keeps track of no. of messages stored in data array. 
+				   // UPDATE THIS VALUE WHEN SAVING INTO DATA ARRAY
 
 // GPS variables
 struct k_msgq gps_msg_q;
@@ -133,23 +135,13 @@ static int button_wait()
 	return 0;
 }
 
-/* MAIN */
-
-void main(void)
+static int message_queue_init()
 {
-
-	/* device inits and configurations */
-
-	// buttons and leds
-	button_dev_init();
-	dk_leds_init();
-
+	// button
 	k_msgq_init(&button_msg_q, button_msgq_buffer, sizeof(int), 3);
 	k_msgq_init(&button_msg_qr, button_msgq_buffer, sizeof(int), 3);
 
 	// UART
-	uart_dev_init();
-
 	k_msgq_init(&uart_msg_q, uart_msgq_buffer, sizeof(uart_msg), 3);
 
 	// GPS
@@ -157,161 +149,205 @@ void main(void)
 
 	// MQTT
 	k_msgq_init(&mqtt_msg_q, mqtt_msgq_buffer, sizeof(mqtt_msg), 3);
+	return 0;
+}
 
+static int device_inits()
+{	
+	button_dev_init();
+	dk_leds_init();
+	uart_dev_init();
+	return 0;
+}
 
-	/******* PROGRAM START *******/
+static int message_queue_reset()
+{
+	// NOTE: THIS IS ONLY HERE UNTIL SD CARD STORAGE IS OKAY
+	data_size = 0;
+	int i = 0;
+	while(strcmp(uart_data_array[i], "") != 0) {
+		strcpy(uart_data_array[i], "");
+		i++;
+	}
+	
+	k_msgq_purge(&button_msg_q);
+	k_msgq_purge(&uart_msg_q);
+	k_msgq_purge(&gps_msg_q);
+	k_msgq_purge(&mqtt_msg_q);
+	return 0;
+}
+
+static int uart_module()
+{
+	set_button_config(1);
+
+	uart_start();
+
+	printk("\nuart test start\n");
+	printk("button 1: exit \nbutton 2: send uart signal\n\n");
+
+	/* UART loop */
+	for (int i = 0;; i++) {
+		k_msgq_get(&uart_msg_q, &uart_msg, K_FOREVER);
+
+		// TODO: create function to check uart msg similar to mqtt
+
+		if (strcmp(uart_msg, "{exit}") == 0) {
+			uart_exit();
+			data_available_to_send = true;
+			break;
+		}
+		else {
+			// add to data array
+
+			// printk("\nUART message: %s", uart_msg);
+			strcpy(uart_data_array[i], uart_msg);
+		}
+	}
+	/* UART loop end */
+
+	// print all uart data
+	if(strcmp(uart_data_array[0], "") != 0) {
+		int i = 0;
+		while(strcmp(uart_data_array[i], "") != 0){
+			printk("\nArray %d: %s", i, uart_data_array[i]);
+			i++;
+			data_size++;
+		}
+	}
+	else {
+		printk("no data saved\n");
+	}
+
+	printk("\nuart test end\n\n");
+
+	return 0;
+}
+
+// TODO: Test on separate thread?
+// Currently on hold until LTE and GPS can function at the same time
+
+// TODO: add parameters to pass to app_gps
+static int gps_module()
+{
+
+	printk("\n\npress button 1 to start gps test\n\n");
+
+	button_wait();
+
+	printk("gps test start\n");
+
+	// CANDO: change parameter to timeout instead of no. of retries
+	app_gps(10, 500);
+	k_msgq_get(&gps_msg_q, &gps_msg, K_NO_WAIT);
+
+	// print to terminal
+	printk("\n%s", gps_msg);
+
+	// add to data array
+	strcpy(uart_data_array[data_size++], gps_msg);
+	data_available_to_send = true;
+
+	printk("\ngps test end\n\n");
+
+	return 0;
+}
+
+static int mqtt_module()
+{
+
+	printk("\n\npress button 1 to start mqtt test\n\n");
+	button_wait();
+
+	set_button_config(2);
+
+	printk("mqtt test start\n");
+
+	int err;
+
+	// mqtt init
+	if(!mqtt_init_complete) {
+
+		err = app_mqtt_init_and_connect();
+		if (err != 0) {
+			return err;
+		}
+
+		mqtt_init_complete = true;
+	}
+	else {
+
+		err = app_mqtt_connect();
+		if (err != 0) {
+			return err;
+		}
+	}
+
+	// TODO: store mqtt commands into an array
+	/* MQTT loop */
+	while (1) {
+		err = app_mqtt_run();
+
+		k_msgq_get(&mqtt_msg_q, &mqtt_msg, K_NO_WAIT);
+
+		int mqtt_val = check_mqtt_msg(&mqtt_msg, sizeof(mqtt_msg));
+
+		if (mqtt_val == 1 || err != 0) {
+			strcpy(mqtt_msg, "");
+			break;
+		}
+		else if (mqtt_val == 2) {
+
+			printk("button choice: 2\n\n");
+			strcpy(mqtt_msg, "");
+		}
+
+		if (data_available_to_send) {
+			publish_uart_data();
+			data_available_to_send = false;
+		}
+	} 
+	/* MQTT loop end */
+
+	err = app_mqtt_disconnect();
+	if (err != 0) {
+		printk("\nDisconnect unsuccessful: %d", err);
+		printk("\n\nClosing program, check for errors in code lol");
+		return err;
+	}
+
+	return 0;
+}
+
+/* MAIN */
+
+void main(void)
+{
+
+	/* device inits and configurations */
+	device_inits();
+
+	// message queues
+	message_queue_init();
 
 	printk("\n\n**** NordicOasys v0.5 - Started ****\n\n");
 	printk("press button 1 to start\n\n");
 
 	button_wait();
 
-	/******* MAIN LOOP START *******/
-
 	while(1) {
 
-		/******* UART START *******/
+		message_queue_reset();
 
-		int data_size = 0; // keeps track of no. of messages stored in data array. 
-						   // UPDATE THIS VALUE WHEN SAVING INTO DATA ARRAY
+		uart_module();	
 
-		int i = 0;
-		while(strcmp(uart_data_array[i], "") != 0) {
-			strcpy(uart_data_array[i], "");
-			i++;
-		}
+		gps_module();
 
-		// CANDO: create function to purge and clear message queue / messages
-		k_msgq_purge(&button_msg_q);
-		k_msgq_purge(&uart_msg_q);
-		k_msgq_purge(&gps_msg_q);
-		k_msgq_purge(&mqtt_msg_q);
-
-		set_button_config(1);
-
-		uart_start();
-
-		printk("\nuart test start\n");
-		printk("button 1: exit \nbutton 2: send uart signal\n\n");
-
-		/* UART loop */
-		for (i = 0;; i++) {
-			k_msgq_get(&uart_msg_q, &uart_msg, K_FOREVER);
-
-			// TODO: create function to check uart msg similar to mqtt
-
-			if (strcmp(uart_msg, "{exit}") == 0) {
-				uart_exit();
-				data_available_to_send = true;
-				break;
-			}
-			else {
-				// printk("\nUART message: %s", uart_msg);
-				strcpy(uart_data_array[i], uart_msg);
-			}
-		}
-		/* UART loop end */
-		
-		if(strcmp(uart_data_array[0], "") != 0) {
-			i = 0;
-			while(strcmp(uart_data_array[i], "") != 0){
-				printk("\nArray %d: %s", i, uart_data_array[i]);
-				i++;
-				data_size++;
-			}
-		}
-		else {
-			printk("no data saved\n");
-		}
-
-		printk("\nuart test end\n\n");
-		printk("\n\npress button 1 to start gps test\n\n");
-
-		button_wait();
-
-		/******* GPS START *******/
-
-		// TODO: Test on separate thread
-		// Currently on hold until LTE and GPS can function at the same time
-
-		printk("gps test start\n");
-
-		// CANDO: change parameter to timeout instead of no. of retries
-		app_gps(1200, 500);
-		k_msgq_get(&gps_msg_q, &gps_msg, K_NO_WAIT);
-
-		printk("\n%s", gps_msg);
-
-		strcpy(uart_data_array[data_size++], gps_msg);
-		data_available_to_send = true;
-
-		printk("\ngps test end\n\n");
-		printk("\n\npress button 1 to start mqtt test\n\n");
-
-		button_wait();
-
-		/******* MQTT START *******/
-
-		set_button_config(2);
-
-		printk("mqtt test start\n");
-
-		int err;
-
-		if(!mqtt_init_complete) {
-
-			err = app_mqtt_init_and_connect();
-			if (err != 0) {
-				return;
-			}
-
-			mqtt_init_complete = true;
-		}
-		else {
-
-			err = app_mqtt_connect();
-			if (err != 0) {
-				return;
-			}
-		}
-
-		// TODO: store mqtt commands into an array
-		/* MQTT loop */
-		while (1) {
-			err = app_mqtt_run();
-
-			k_msgq_get(&mqtt_msg_q, &mqtt_msg, K_NO_WAIT);
-
-			int mqtt_val = check_mqtt_msg(&mqtt_msg, sizeof(mqtt_msg));
-
-			if (mqtt_val == 1 || err != 0) {
-				strcpy(mqtt_msg, "");
-				break;
-			}
-			else if (mqtt_val == 2) {
-
-				printk("button choice: 2\n\n");
-				strcpy(mqtt_msg, "");
-			}
-
-			if (data_available_to_send) {
-				publish_uart_data();
-				data_available_to_send = false;
-			}
-		} 
-		/* MQTT loop end */
-
-		err = app_mqtt_disconnect();
-		if (err != 0) {
-			printk("\nDisconnect unsuccessful: %d", err);
-			printk("\n\nClosing program, check for errors in code lol");
-			return;
-		}
-
-		printk("**** NordicOasys test end ****\n");
+		mqtt_module();
 
 	}
-	/******* MAIN LOOP END *******/
+
+	printk("**** NordicOasys test end ****\n");
 }
 
 /* Function ideas and TODOs

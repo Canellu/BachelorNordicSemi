@@ -476,11 +476,11 @@ int app_gps(int fix_retries, int retry_interval)
 			printk("---------------------------------\n");
 
 			if (!got_fix) {
-				// printk("Seconds since last fix: %lld\n",
-				//        (k_uptime_get() - fix_timestamp) / 1000);
+				
 				cnt++;
-				printk("Searching [%c]\n",
-				       update_indicator[cnt%4]);
+				printk("Searching [%c] ---- Elapsed time: %lld s\n",
+				       update_indicator[cnt%4], (k_uptime_get() - fix_timestamp) / 1000);
+
 			} else {
                 printk("\n\nGot fix\n");
 				print_fix_data(&last_pvt);
@@ -496,7 +496,7 @@ int app_gps(int fix_retries, int retry_interval)
         retry_cnt++;
 	}
 
-	// create_dummy_gps_data(&last_pvt);
+	create_dummy_gps_data(&last_pvt);
 
 	if (!got_fix) {
 		strcpy(gps_string, "Unable to get GPS fix");
