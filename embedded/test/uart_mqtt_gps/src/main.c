@@ -1,4 +1,5 @@
 #include <zephyr.h>
+#include <nrf_socket.h>
 #include <dk_buttons_and_leds.h>
 #include <string.h>
 #include <kernel.h>
@@ -55,13 +56,20 @@ static int button_val; // value received from button, only used when button_conf
 
 // UART variables
 struct k_msgq uart_msg_q;
-static uint8_t uart_msgq_buffer[128 * 3];
+static uint8_t uart_msgq_buffer[3 * 128];
 static uint8_t uart_msg[128];
+
+// TODO: change to general data_array instead of just uart data
 static uint8_t uart_data_array[16][128] = { "" };
+
+// GPS variables
+struct k_msgq gps_msg_q;
+static uint8_t gps_msgq_buffer[2 * 128];
+static uint8_t gps_msg[128];
 
 // MQTT variables
 struct k_msgq mqtt_msg_q;
-static uint8_t mqtt_msgq_buffer[128 * 3];
+static uint8_t mqtt_msgq_buffer[3 * 128];
 static uint8_t mqtt_msg[128];
 
 static bool mqtt_init_complete = false;
@@ -144,10 +152,13 @@ void main(void)
 
 	k_msgq_init(&uart_msg_q, uart_msgq_buffer, sizeof(uart_msg), 3);
 
+	// GPS
+	k_msgq_init(&gps_msg_q, gps_msgq_buffer, sizeof(gps_msg), 2);
+
 	// MQTT
 	k_msgq_init(&mqtt_msg_q, mqtt_msgq_buffer, sizeof(mqtt_msg), 3);
 
-	
+
 	/******* PROGRAM START *******/
 
 	printk("\n\n**** NordicOasys v0.5 - Started ****\n\n");
@@ -161,6 +172,9 @@ void main(void)
 
 		/******* UART START *******/
 
+		int data_size = 0; // keeps track of no. of messages stored in data array. 
+						   // UPDATE THIS VALUE WHEN SAVING INTO DATA ARRAY
+
 		int i = 0;
 		while(strcmp(uart_data_array[i], "") != 0) {
 			strcpy(uart_data_array[i], "");
@@ -170,6 +184,7 @@ void main(void)
 		// CANDO: create function to purge and clear message queue / messages
 		k_msgq_purge(&button_msg_q);
 		k_msgq_purge(&uart_msg_q);
+		k_msgq_purge(&gps_msg_q);
 		k_msgq_purge(&mqtt_msg_q);
 
 		set_button_config(1);
@@ -202,24 +217,33 @@ void main(void)
 			while(strcmp(uart_data_array[i], "") != 0){
 				printk("\nArray %d: %s", i, uart_data_array[i]);
 				i++;
+				data_size++;
 			}
 		}
 		else {
 			printk("no data saved\n");
 		}
 
-		printk("\nuart test end\n\n");		
+		printk("\nuart test end\n\n");
 		printk("\n\npress button 1 to start gps test\n\n");
 
 		button_wait();
 
 		/******* GPS START *******/
-		
+
 		// TODO: Test on separate thread
+		// Currently on hold until LTE and GPS can function at the same time
 
 		printk("gps test start\n");
 
-		app_gps(20, 500);
+		// CANDO: change parameter to timeout instead of no. of retries
+		app_gps(1200, 500);
+		k_msgq_get(&gps_msg_q, &gps_msg, K_NO_WAIT);
+
+		printk("\n%s", gps_msg);
+
+		strcpy(uart_data_array[data_size++], gps_msg);
+		data_available_to_send = true;
 
 		printk("\ngps test end\n\n");
 		printk("\n\npress button 1 to start mqtt test\n\n");
@@ -297,5 +321,7 @@ void main(void)
 
 - Fill up dev_param struct. Should contain parameters set by user.
   Should be changeable through MQTT.
+
+- Save messages received from MQTT into array similar to data.
 
 */

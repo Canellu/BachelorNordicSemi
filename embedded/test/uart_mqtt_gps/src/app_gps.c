@@ -8,6 +8,7 @@
 #include <nrf_socket.h>
 #include <net/socket.h>
 #include <stdio.h>
+#include <string.h>
 #include <modem/at_cmd.h>
 #include <modem/at_notif.h>
 
@@ -62,6 +63,7 @@ K_SEM_DEFINE(lte_ready, 0, 1);
 
 // CUSTOM DECLARATIONS
 
+extern struct k_msgq gps_msg_q;
 static bool init_complete = false;
 
 static int setup_modem(void)
@@ -370,15 +372,76 @@ int inject_agps_type(void *agps,
 }
 #endif
 
+
+// CANDO: maybe create JSON directly
+static int gps_struct_to_string(void *gps_string, nrf_gnss_data_frame_t *pvt_data)
+{
+	uint8_t temp_str[16];
+
+	strcpy(gps_string, "Long: ");
+	snprintf(temp_str, sizeof(temp_str), "%f", pvt_data->pvt.longitude);
+	strcat(gps_string, temp_str);
+
+	strcat(gps_string, ",Lat: ");
+	snprintf(temp_str, sizeof(temp_str), "%f", pvt_data->pvt.latitude);
+	strcat(gps_string, temp_str);
+
+	strcat(gps_string, ",Date: ");
+	snprintf(temp_str, sizeof(temp_str), "%02u", pvt_data->pvt.datetime.year);
+	strcat(gps_string, temp_str);
+	strcat(gps_string, "-");
+	snprintf(temp_str, sizeof(temp_str), "%02u", pvt_data->pvt.datetime.month);
+	strcat(gps_string, temp_str);
+	strcat(gps_string, "-");
+	snprintf(temp_str, sizeof(temp_str), "%02u", pvt_data->pvt.datetime.day);
+	strcat(gps_string, temp_str);
+
+	strcat(gps_string, ",Time: ");
+	snprintf(temp_str, sizeof(temp_str), "%02u", pvt_data->pvt.datetime.hour);
+	strcat(gps_string, temp_str);
+	strcat(gps_string, ":");
+	snprintf(temp_str, sizeof(temp_str), "%02u", pvt_data->pvt.datetime.minute);
+	strcat(gps_string, temp_str);
+	strcat(gps_string, ":");
+	snprintf(temp_str, sizeof(temp_str), "%02u", pvt_data->pvt.datetime.seconds);
+	strcat(gps_string, temp_str);
+
+	return 0;
+}
+
+static int create_dummy_gps_data(nrf_gnss_data_frame_t *pvt_data)
+{
+	got_fix = 1;
+
+	pvt_data->pvt.longitude	= 23.771611;
+	pvt_data->pvt.latitude 	= 61.491275;
+	pvt_data->pvt.altitude	= 116.274658;
+	pvt_data->pvt.speed		= 0.039595;
+	pvt_data->pvt.heading	= 0.000000;
+
+	pvt_data->pvt.datetime.year		= 2020;
+	pvt_data->pvt.datetime.month	= 03;
+	pvt_data->pvt.datetime.day		= 06;
+	pvt_data->pvt.datetime.hour		= 05;
+	pvt_data->pvt.datetime.minute	= 48;
+	pvt_data->pvt.datetime.seconds	= 24;
+
+	printk("\n\nCreated dummy gps data");
+
+	return 0;
+}
+
 int app_gps(int fix_retries, int retry_interval)
 {
 	nrf_gnss_data_frame_t gps_data;
+	uint8_t gps_string[128] = { "" };
 	uint8_t cnt = 0;
 
 	printk("Starting GPS application\n");
 
 	if (init_complete == false) {
 
+		// CANDO: create separate function and run in main?
 		if (init_app() != 0) {
 			return -1;
 			}
@@ -419,8 +482,9 @@ int app_gps(int fix_retries, int retry_interval)
 				printk("Searching [%c]\n",
 				       update_indicator[cnt%4]);
 			} else {
-                printk("\n\ngot fix\n");
+                printk("\n\nGot fix\n");
 				print_fix_data(&last_pvt);
+				break;
 			}
 
 			// printk("\nNMEA strings:\n\n");
@@ -432,7 +496,19 @@ int app_gps(int fix_retries, int retry_interval)
         retry_cnt++;
 	}
 
-    printk("\n\nStopping GPS module\n\n\n");
+	// create_dummy_gps_data(&last_pvt);
+
+	if (!got_fix) {
+		strcpy(gps_string, "Unable to get GPS fix");
+		
+	} else {
+		gps_struct_to_string(&gps_string, &last_pvt);
+		got_fix = 0;
+	}
+
+	k_msgq_put(&gps_msg_q, &gps_string, K_NO_WAIT);
+
+    printk("\nStopping GPS module");
 
     gnss_ctrl(GNSS_STOP);
     if (at_cmd_write(AT_DEACTIVATE_GPS, NULL, 0, NULL) != 0) {

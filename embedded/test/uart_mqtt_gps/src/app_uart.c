@@ -10,7 +10,7 @@ extern struct k_msgq uart_msg_q;
 // LOCAL
 const struct device *dev_uart;
 static uint8_t str_buf[128];
-static uint8_t tx_buf[] = {"{hi}"};
+static uint8_t tx_buf[] = {"{\"hi\"}"};
 
 static void uart_cb(const struct device *dev_uart, void *context)
 {
@@ -49,7 +49,7 @@ static void uart_cb(const struct device *dev_uart, void *context)
 // get device binding, only call once
 void uart_dev_init(void)
 {
-	dev_uart = device_get_binding("UART_1");
+	dev_uart = device_get_binding("UART_2");
 	__ASSERT(dev_uart, "Failed to get the device\n\n");
 
 	uart_irq_callback_set(dev_uart, uart_cb);

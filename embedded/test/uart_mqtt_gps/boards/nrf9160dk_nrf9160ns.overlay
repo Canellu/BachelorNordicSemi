@@ -6,3 +6,16 @@
 	rts-pin = <14>;
 	cts-pin = <15>;
 };
+
+&i2c2 {
+	status = "disabled";
+};
+
+&uart2 {
+	status = "okay";
+	current-speed = <115200>;
+	tx-pin = <13>;
+	rx-pin = <12>;
+	rts-pin = <16>;
+	cts-pin = <17>;
+};
