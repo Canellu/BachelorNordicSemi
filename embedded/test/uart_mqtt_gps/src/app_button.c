@@ -76,23 +76,23 @@ static void button_handler(uint32_t button_states, uint32_t has_changed)
 			}
 			break;
 		
-		case 999: // DO NOT USE, ONLY FOR TEMPLATE
-			if(has_changed == 1 && !gpio_pin_get(dev_button, 6)) {
-				// empty
-			}
+		// case 999: // DO NOT USE, ONLY FOR TEMPLATE
+		// 	if(has_changed == 1 && !gpio_pin_get(dev_button, 6)) {
+		// 		// empty
+		// 	}
 
-			else if(has_changed == 2 && !gpio_pin_get(dev_button, 7)) {
-				// empty
-			}
+		// 	else if(has_changed == 2 && !gpio_pin_get(dev_button, 7)) {
+		// 		// empty
+		// 	}
 
-			else if(has_changed == 4) {
-				// empty
-			}
+		// 	else if(has_changed == 4) {
+		// 		// empty
+		// 	}
 
-			else if(has_changed == 8) {
-				// empty
-			}
-			break;
+		// 	else if(has_changed == 8) {
+		// 		// empty
+		// 	}
+		// 	break;
 
 		default:
 			printk("\nunregistered button configuration\n");

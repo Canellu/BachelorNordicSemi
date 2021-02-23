@@ -399,7 +399,7 @@ int app_mqtt_init_and_connect(void)
 			LOG_INF("Retrying in %d seconds", CONFIG_LTE_CONNECT_RETRY_DELAY_S);
 			k_sleep(K_SECONDS(CONFIG_LTE_CONNECT_RETRY_DELAY_S));
 		}
-		} while (err);
+	} while (err);
 
 	// mqtt init
 	err = client_init(&client);
