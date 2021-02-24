@@ -15,10 +15,6 @@ class DataList extends StatefulWidget {
 
 class _DataListState extends State<DataList> {
 
-  String newBattery;
-  int newDuration;
-  bool newHealth;
-
   @override
   Widget build(BuildContext context) {
 
@@ -26,8 +22,8 @@ class _DataListState extends State<DataList> {
     final db = DatabaseService();
     final formKey = GlobalKey<FormState>();
 
-    bool health;
-    int duration;
+    String health;
+    String duration;
     String battery;
 
     datas.forEach((data) {
@@ -35,6 +31,13 @@ class _DataListState extends State<DataList> {
       duration = data.duration;
       battery = data.battery;
     });
+
+    bool healthToBool = false;
+    if(health == "true" || health == "True"){
+      healthToBool = true;
+    }else{
+      healthToBool = false;
+    }
 
     return Container(
       margin: const EdgeInsets.all(20.0),
@@ -54,7 +57,7 @@ class _DataListState extends State<DataList> {
                 battery = v;
               },
               onEditingComplete: (){
-                db.updateData(battery, duration, health);
+                db.updateData(battery, duration, healthToBool.toString());
               },
             ),
             SizedBox(height: 20.0),
@@ -63,14 +66,14 @@ class _DataListState extends State<DataList> {
               style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
             ),
             Slider(
-              value: (duration ?? 0.0).toDouble(),
+              value: (double.parse(duration) ?? 0.0),
               min: 0.0,
               max: 100.0,
               divisions: 10,
               activeColor: Colors.blueAccent[500],
-              onChanged: (val) => duration = val.round(),
+              onChanged: (val) => duration = val.toString(),
               onChangeEnd: (val){
-                db.updateData(battery, duration, health);
+                db.updateData(battery, duration, healthToBool.toString());
               },
             ),
             SizedBox(height: 20.0),
@@ -79,26 +82,13 @@ class _DataListState extends State<DataList> {
               style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
             ),
             RaisedButton(
-              color: health ?? false ? Colors.green : Colors.red,
-              child: Text(health ?? false ? 'True' : 'False', style: TextStyle(fontSize: 15)),
+              color: healthToBool ?? false ? Colors.green : Colors.red,
+              child: Text(healthToBool ? 'True' : 'False', style: TextStyle(fontSize: 15)),
               onPressed: (){
-                health = !health;
-                print("health test : "+health.toString());
-                db.updateData(battery, duration, health);
+                healthToBool = !healthToBool;
+                db.updateData(battery, duration, healthToBool.toString());
               },
             ),
-            /*
-          SizedBox(height: 30.0),
-          FloatingActionButton(
-            onPressed: (){
-              db.updateData(battery, newDuration, newHealth);
-              //newDuration = null;
-              newHealth = null;
-              //newBattery = null;
-            },
-            child: Icon(Icons.navigation),
-            backgroundColor: Colors.green,
-          ),*/
           ],
         ),
       ),

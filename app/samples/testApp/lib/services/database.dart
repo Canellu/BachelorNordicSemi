@@ -3,18 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:oasys_app/models/data.dart';
 
 class DatabaseService {
-  //give the documentID
-  //final String docID;
-  //0DatabaseService({this.docID});*/
-
   //collection reference
-  final CollectionReference connectionTestCollection = FirebaseFirestore.instance.collection('connectTest');
+  final CollectionReference connectionTestCollection = FirebaseFirestore.instance.collection('Sensor');
 
-  Future<void> updateData(String battery, int duration, bool health) async {
-    return await connectionTestCollection.doc('uhXEigO7WcpwJltYZgPJ').update({
-      'battery': battery,
-      'duration': duration,
-      'health': health
+  Future<void> updateData(String battery, String duration, String health) async {
+    return await connectionTestCollection.doc('H4JYgp8VythfG7JX4GZ4').update({
+      'Battery': battery,
+      'Dive duration': duration,
+      'Health': health
     }).then((value) => print("Database Updated"))
         .catchError((error) => print("Failedd to update database : $error"));
   }
@@ -24,31 +20,16 @@ class DatabaseService {
     return snapshot.docs.map((doc){
       //print(doc.data)
       return Data(
-          health: doc.data()['health'] ?? false,
-          duration: doc.data()['duration'] ?? 0,
-          battery: doc.data()['battery'] ?? ''
+          health: doc.data()['Health'] ?? "false",
+          duration: doc.data()['Dive duration'] ?? "0",
+          battery: doc.data()['Battery'] ?? ''
       );
     }).toList();
   }
-/*
-  DataWithDocInfo dataDocInfoFromSnapshot(QuerySnapshot snapshot){
-    return DataWithDocInfo(
-        docID: 'uhXEigO7WcpwJItYZgPJ',
-        health: snapshot.data()['health'],
-        duration: snapshot.data()['duration'],
-        battery: snapshot.data()['battery']
-    );
-  }
-*/
 
 //get databse stream
   Stream<List<Data>> get datas {
     return connectionTestCollection.snapshots()
         .map(dataListFromSanpshot);
   }
-/*
-  Stream<Data> get docData {
-    return connectionTestCollection.doc('uhXEigO7WcpwJItYZgPJ').snapshots()
-        .map(dataListFromSanpshot);
-  }*/
 }

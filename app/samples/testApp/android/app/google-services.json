@@ -1,33 +1,33 @@
 {
   "project_info": {
-    "project_number": "922040786230",
-    "project_id": "nimbus-f3278",
-    "storage_bucket": "nimbus-f3278.appspot.com"
+    "project_number": "40698568655",
+    "project_id": "nordicoasys",
+    "storage_bucket": "nordicoasys.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:922040786230:android:c1a197770f1ddf5783e797",
+        "mobilesdk_app_id": "1:40698568655:android:b5b5b8b4b713a930c4fcba",
         "android_client_info": {
-          "package_name": "com.example.bachelor_app"
+          "package_name": "com.example.flutter_first_test"
         }
       },
       "oauth_client": [
         {
-          "client_id": "922040786230-33fde26m3926mbdfqarpbbpn59cgsm20.apps.googleusercontent.com",
+          "client_id": "40698568655-vrujl9r1ivsp34fh7qpdvb3u66telrh5.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyADfjArzEoTBbPVLxQHKXOiL783KPMhk30"
+          "current_key": "AIzaSyAiizm1pcxv3puLaMFfjABL2IZ3NMrw2NE"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "922040786230-33fde26m3926mbdfqarpbbpn59cgsm20.apps.googleusercontent.com",
+              "client_id": "40698568655-vrujl9r1ivsp34fh7qpdvb3u66telrh5.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
@@ -36,27 +36,27 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:922040786230:android:c42615309eaf21b083e797",
+        "mobilesdk_app_id": "1:40698568655:android:a149f77ed7528b26c4fcba",
         "android_client_info": {
           "package_name": "com.example.oasys_app"
         }
       },
       "oauth_client": [
         {
-          "client_id": "922040786230-33fde26m3926mbdfqarpbbpn59cgsm20.apps.googleusercontent.com",
+          "client_id": "40698568655-vrujl9r1ivsp34fh7qpdvb3u66telrh5.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyADfjArzEoTBbPVLxQHKXOiL783KPMhk30"
+          "current_key": "AIzaSyAiizm1pcxv3puLaMFfjABL2IZ3NMrw2NE"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "922040786230-33fde26m3926mbdfqarpbbpn59cgsm20.apps.googleusercontent.com",
+              "client_id": "40698568655-vrujl9r1ivsp34fh7qpdvb3u66telrh5.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
