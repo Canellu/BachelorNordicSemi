@@ -41,7 +41,7 @@
   font-size: 1.2rem;
 }
 
-.sendRow button {
+button {
   padding: 0px 12px;
   margin: 0px 4px;
   border-radius: 10px;
@@ -50,16 +50,16 @@
   font-weight: 600;
 }
 
-.sendRow input:focus {
+input:focus {
   box-shadow: 2px 2px 4px 1px rgba(0, 0, 0, 0.3);
 }
 
-.sendRow button:hover {
+button:hover {
   background-color: #9a9a9a;
   color: white;
 }
 
-.sendRow button:active {
+button:active {
   background-color: #4d4d4d;
 }
 
@@ -87,11 +87,16 @@
   /* border: 2px solid rgb(21, 82, 31); */
   height: 100%;
   padding: 20px;
+  margin-left: 20px;
 }
 
 .switchContainer {
-  width: 20%;
+  width: 24%;
   height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
   /* border: 2px solid rgb(189, 27, 54); */
 }
 
@@ -134,8 +139,6 @@
   width: 100%;
   /* height: 20px; */
   /* border: 2px solid orange; */
-
-  /* border: 2px solid teal; */
 }
 .sliderContainer p {
   width: 55px;
@@ -155,4 +158,75 @@
   background: #0081aa;
   color: white;
   border-radius: 3px;
+}
+
+/* SWITCHEEEEs */
+
+/* The switch - the box around the slider */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* The slider */
+.checkSlider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+}
+
+.checkSlider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+}
+
+input:checked + .checkSlider {
+  background-color: #2196f3;
+}
+
+input:focus + .checkSlider {
+  box-shadow: 0 0 1px #2196f3;
+}
+
+input:checked + .checkSlider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.checkSlider.round {
+  border-radius: 34px;
+}
+
+.checkSlider.round:before {
+  border-radius: 50%;
+}
+
+.switchContainer button {
+  /* border: 2px solid red; */
+  padding-top: 4px;
+  padding-bottom: 4px;
 }
