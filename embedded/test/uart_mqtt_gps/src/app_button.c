@@ -16,6 +16,9 @@ static bool led1_on = false;
 #define MSG_3 "{\"health\":\"true\"}"
 #define MSG_4 "{\"health\":\"false\"}"
 
+// external variables
+extern enum uart_device_type uart_dev1;
+
 // message queues
 extern struct k_msgq button_msg_q;
 extern struct k_msgq button_msg_qr;
@@ -54,7 +57,7 @@ static void button_handler(uint32_t button_states, uint32_t has_changed)
 				k_msgq_put(&uart_msg_q, "{exit}", K_NO_WAIT);
 			}
 			if(has_changed == 2 && !gpio_pin_get(dev_button, 7)) {
-				uart_send();
+				uart_send(uart_dev1, "{\"hi\"}\n");
 			}
 			break;
 
@@ -74,6 +77,19 @@ static void button_handler(uint32_t button_states, uint32_t has_changed)
 			else if(has_changed == 8) {
 				app_data_publish(MSG_4, sizeof(MSG_4));
 			}
+			break;
+
+		case 3: // Choice: wifi or mqtt
+			if(has_changed == 1 && !gpio_pin_get(dev_button, 6)) {
+				app_button_ret_val = 1;
+			}
+
+			else if(has_changed == 2 && !gpio_pin_get(dev_button, 7)) {
+				app_button_ret_val = 2;
+			}
+
+			k_msgq_put(&button_msg_qr, &app_button_ret_val, K_NO_WAIT);
+
 			break;
 		
 		// case 999: // DO NOT USE, ONLY FOR TEMPLATE

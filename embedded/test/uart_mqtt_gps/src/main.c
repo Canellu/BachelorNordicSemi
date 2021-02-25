@@ -13,6 +13,7 @@
 /* STRUCTS AND ENUMS */
 
 // Enumerations
+
 enum oasys_event_type { // currently not in use
 	EVT_INIT,
 	EVT_UART,
@@ -55,6 +56,8 @@ static int button_val; // value received from button, only used when button_conf
 
 
 // UART variables
+enum uart_device_type uart_dev1 = UART_2;
+
 struct k_msgq uart_msg_q;
 static uint8_t uart_msgq_buffer[3 * 128];
 static uint8_t uart_msg[128];
@@ -90,6 +93,8 @@ static int publish_uart_data()
 		k_sleep(K_MSEC(500));
 		i++;
 	}
+	data_available_to_send = false;
+
 	return 0;
 }
 
@@ -152,11 +157,12 @@ static int message_queue_init()
 	return 0;
 }
 
+//TODO: pass devices to init
 static int device_inits()
 {	
 	button_dev_init();
 	dk_leds_init();
-	uart_dev_init();
+	uart_dev_init(uart_dev1);
 	return 0;
 }
 
@@ -180,8 +186,7 @@ static int message_queue_reset()
 static int uart_module()
 {
 	set_button_config(1);
-
-	uart_start();
+	uart_start(uart_dev1);
 
 	printk("\nuart test start\n");
 	printk("button 1: exit \nbutton 2: send uart signal\n\n");
@@ -193,7 +198,7 @@ static int uart_module()
 		// TODO: create function to check uart msg similar to mqtt
 
 		if (strcmp(uart_msg, "{exit}") == 0) {
-			uart_exit();
+			uart_exit(uart_dev1);
 			data_available_to_send = true;
 			break;
 		}
@@ -253,6 +258,48 @@ static int gps_module()
 	return 0;
 }
 
+static int wifi_module()
+{
+	set_button_config(1);
+	uart_start(uart_dev1);
+
+	printk("\nwifi test start\n");
+
+	uart_send(uart_dev1, "{wifi}\n");
+
+	/* wifi loop */
+	for (int i = 0;; i++) {
+		k_msgq_get(&uart_msg_q, &uart_msg, K_FOREVER);
+		printk("\n%s", uart_msg);
+
+		if (strcmp(uart_msg, "{exit}") == 0) {
+			uart_exit(uart_dev1);
+			break;
+		}
+		else if (strcmp(uart_msg, "{wifi ok}") == 0)
+		{
+			printk("\nReceived wifi ok");
+			uart_send(uart_dev1, "{mqtt}\n");
+		}
+		else if (strcmp(uart_msg, "{mqtt ok}") == 0)
+		{
+			printk("\nReceived mqtt ok");
+			publish_uart_data();
+		}
+		// else if (strcmp(uart_msg, "{keyword}") == 0)
+		// {
+		// 	//something
+		// }
+		else
+		{
+			printk("\n%s", uart_msg);
+		}
+
+	}
+	/* wifi loop end */
+	return 0;
+}
+
 static int mqtt_module()
 {
 
@@ -304,7 +351,6 @@ static int mqtt_module()
 
 		if (data_available_to_send) {
 			publish_uart_data();
-			data_available_to_send = false;
 		}
 	} 
 	/* MQTT loop end */
@@ -343,7 +389,18 @@ void main(void)
 
 		gps_module();
 
-		mqtt_module();
+		printk("press button 1 to start mqtt\n");
+		printk("press button 2 to start wifi\n\n");
+		set_button_config(3);
+		k_msgq_get(&button_msg_qr, &button_val, K_FOREVER);
+
+		if (button_val == 1) {
+			mqtt_module();
+		}
+		else if (button_val == 2) {
+			wifi_module();
+		}
+
 
 	}
 

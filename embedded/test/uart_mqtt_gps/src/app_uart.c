@@ -8,9 +8,11 @@
 extern struct k_msgq uart_msg_q;
 
 // LOCAL
-const struct device *dev_uart;
-static uint8_t str_buf[128];
-static uint8_t tx_buf[] = {"{\"hi\"}"};
+const struct device *dev_uart1;
+const struct device *dev_uart2;
+
+static uint8_t rx_buf[128];
+static uint8_t tx_buf[128];
 
 static void uart_cb(const struct device *dev_uart, void *context)
 {
@@ -30,63 +32,103 @@ static void uart_cb(const struct device *dev_uart, void *context)
 
 		if (strcmp(buf, "{") == 0)
 		{
-			strcpy(str_buf, "");
-			strcat(str_buf, buf);
+			strcpy(rx_buf, "");
+			strcat(rx_buf, buf);
 		}
 		else if (strcmp(buf, "}") == 0)
 		{
-			strcat(str_buf, buf);
-			k_msgq_put(&uart_msg_q, &str_buf, K_NO_WAIT);
+			strcat(rx_buf, buf);
+			printk("\nuart msg received");
+			k_msgq_put(&uart_msg_q, &rx_buf, K_NO_WAIT);		
 		}
 		else
 		{
-			strcat(str_buf, buf);
+			strcat(rx_buf, buf);
 		}
 
 	}
 }
 
 // get device binding, only call once
-void uart_dev_init(void)
+void uart_dev_init(enum uart_device_type uart_dev_no)
 {
-	dev_uart = device_get_binding("UART_2");
-	__ASSERT(dev_uart, "Failed to get the device\n\n");
+	switch(uart_dev_no)
+	{
+		case UART_1:
+			dev_uart1 = device_get_binding("UART_1");
+			__ASSERT(dev_uart1, "Failed to get the device\n\n");
+			uart_irq_callback_set(dev_uart1, uart_cb);
+			break;
 
-	uart_irq_callback_set(dev_uart, uart_cb);
+		case UART_2:
+			dev_uart2 = device_get_binding("UART_2");
+			__ASSERT(dev_uart2, "Failed to get the device\n\n");
+			uart_irq_callback_set(dev_uart2, uart_cb);
+			break;
+
+		default:
+			printk("\n\nUnknown UART device");
+			break;
+	}
 
 }
 
 // start uart, run before using uart functions,
 // add more here if other functions need to be enabled before uart use
-void uart_start(void)
+void uart_start(enum uart_device_type uart_dev_no)
 {
-	uart_irq_rx_disable(dev_uart);
-	uart_irq_rx_enable(dev_uart);
+	switch(uart_dev_no)
+	{
+		case UART_1:
+			uart_irq_rx_disable(dev_uart1);
+			uart_irq_rx_enable(dev_uart1);
+			break;
+
+		case UART_2:
+			uart_irq_rx_disable(dev_uart2);
+			uart_irq_rx_enable(dev_uart2);
+			break;
+	}
 }
 
 // turn off functions, might have to come back here and more things to disable
-void uart_exit(void)
+void uart_exit(enum uart_device_type uart_dev_no)
 {
-	uart_irq_rx_disable(dev_uart);
+	switch(uart_dev_no)
+	{
+		case UART_1:
+			uart_irq_rx_disable(dev_uart1);
+			break;
+
+		case UART_2:
+			uart_irq_rx_disable(dev_uart2);
+			break;
+	}
 }
 
 // send data to uart device
 // TODO: add parameters to choose data to be sent, currently only sends "hi"
 // should be useable in main
-void uart_send(void)
+void uart_send(enum uart_device_type uart_dev_no, uint8_t *msg)
 {
-	uart_irq_tx_enable(dev_uart);
+	strcpy(tx_buf, msg);
+
+	switch(uart_dev_no)
+	{
+		case UART_1:
+			uart_irq_tx_enable(dev_uart1);
+			break;
+
+		case UART_2:
+			uart_irq_tx_enable(dev_uart2);
+			break;
+	}
 }
 
 /* Function ideas and TODOs
 
-buffer read until a delimiter, save to array and start saving to array+1
-- May not be the best idea to implement here, probably better to create this function in main
-  to avoid creating too many variables that overlap.
-
-- Overhaul saving of data. Ideal: just send buffer to main (e.g. mailbox), let main append data
-  and split into array.
-
-- Add timestamp to when the data was received.
-
+- specify UART to use
+  currently uses switch case to find out which uart device to use.
+  Horrible, need a switch case in each function.
+  Possible fix: create device in main and pass device to functions, requires big overhaul.
 */
