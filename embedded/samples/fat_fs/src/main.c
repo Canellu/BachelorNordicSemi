@@ -13,6 +13,10 @@
 #include <fs/fs.h>
 #include <ff.h>
 #include <string.h>
+#include <dk_buttons_and_leds.h>
+
+
+
 
 LOG_MODULE_REGISTER(main);
 
@@ -65,74 +69,61 @@ static int lsdir(const char *path)
 	/* Verify fs_closedir() */
 	fs_closedir(&dirp);
 
-
-	// Read and write file
-
-	struct fs_file_t test_file;
-	int ret;
-
-	const char *file_name = "/SD:/test1.txt";
-
-	fs_open(&test_file, file_name, (FS_O_RDWR | FS_O_CREATE));
-	printk("\nfile location: %d\n\n", fs_tell(&test_file));
-
-	fs_seek(&test_file, 0, FS_SEEK_END);
-	ret = fs_write(&test_file, "\nhello", sizeof("\nhello"));
-	printk("\nwrite val: %d\n", ret);
-	printk("\nfile location: %d\n\n", fs_tell(&test_file));
-
-	fs_seek(&test_file, 0, FS_SEEK_CUR);
-	printk("\nfile location: %d\n\n", fs_tell(&test_file));
-	printk("\n\nDone with writing\n\n\n");
-
-	fs_close(&test_file);
-
-
-	fs_open(&test_file, file_name, FS_O_RDWR);
-	printk("\nOpen file location: %d\n\n", fs_tell(&test_file));
-
-	uint8_t line[128] = "";
-	uint8_t bokstav[2] = "";
-
-
-	do {
-		ret = fs_read(&test_file, &bokstav, 1);
-		printk("%s", bokstav);
-
-	} while (ret > 0);
-	// printk("\nline read: %s, ret value: %d\n", line, ret);
-
-	// printk("\nfile location after 1 read: %d\n\n", fs_tell(&test_file));
-
-	// ret = fs_read(&test_file, &line, 1);
-	// printk("\nline read: %s, ret value: %d\n", line, ret);
-
-	// // fs_read(&test_file, &line, sizeof(line));
-	// // printk("\nline read: %s\n", line);
-
-	// printk("\nfile location after 2 reads: %d\n\n", fs_tell(&test_file));
-
-	fs_close(&test_file);
-
-	
-
-
 	return res;
 }
 
+static void create_file_path(char *file_path, char *filename) {
+	// Create absolute path for filename
+	strcat(file_path, disk_mount_pt);
+	strcat(file_path, "/");
+	strcat(file_path, filename);
+}
 
-void main(void)
-{
-	/* raw disk i/o */
+
+static int read_file(char *file_path, char *data, int size) {
+
+	// For catching return values from fs_functions
+	int ret = 1;
+
+	// Open file for reading, if file doesnt exist, create one.
+	struct fs_file_t file;
+	fs_open(&file, file_path, FS_O_READ);
+
+	// Read characters until end of file
+	uint8_t buffer[8] = "";
+	while (1) {
+		ret = fs_read(&file, &buffer, 1);
+		if (ret == 0) break;
+		strcat(data, buffer);
+	} 
+	fs_close(&file);
+
+
+	return 0;
+}
+
+
+static int write_file(char *file_path, char *data, int size) {
+	struct fs_file_t file;
+	fs_open(&file, file_path, (FS_O_WRITE | FS_O_APPEND));
+	fs_write(&file, "\n", strlen("\n"));
+	fs_write(&file, data, size);
+	fs_close(&file);
+
+	return 0;
+}
+
+static int mountSD() {
+	
+	static const char *disk_pdrv = "SD";
+	uint64_t memory_size_mb;
+	uint32_t block_count;
+	uint32_t block_size;
+
 	do {
-		static const char *disk_pdrv = "SD";
-		uint64_t memory_size_mb;
-		uint32_t block_count;
-		uint32_t block_size;
-
 		if (disk_access_init(disk_pdrv) != 0) {
-			LOG_ERR("Storage init ERROR!");
-			break;
+		LOG_ERR("Storage init ERROR!");
+		break;
 		}
 
 		if (disk_access_ioctl(disk_pdrv,
@@ -151,20 +142,43 @@ void main(void)
 
 		memory_size_mb = (uint64_t)block_count * block_size;
 		printk("Memory Size(MB) %u\n", (uint32_t)(memory_size_mb >> 20));
+		
+
+		mp.mnt_point = disk_mount_pt;
+
+		int res = fs_mount(&mp);
+
+		if (res == FR_OK) {
+			printk("Disk mounted.\n");
+			lsdir(disk_mount_pt);
+		} else {
+			printk("Error mounting disk.\n");
+			return res;
+		}
 	} while (0);
 
-	mp.mnt_point = disk_mount_pt;
-
-	int res = fs_mount(&mp);
-
-	if (res == FR_OK) {
-		printk("Disk mounted.\n");
-		lsdir(disk_mount_pt);
-	} else {
-		printk("Error mounting disk.\n");
-	}
-
-	while (1) {
-		k_sleep(K_MSEC(1000));
-	}
+	return 0;
 }
+
+
+void main(void)
+{
+	mountSD();
+	char dataBuffer[1024] = "";	
+	char filepath[32] = "";
+	create_file_path(filepath, "test.txt");
+	read_file(filepath, dataBuffer, sizeof(dataBuffer));
+	//write_file(filepath, dataBuffer, strlen(dataBuffer));
+
+	printk("%s", dataBuffer);
+
+
+	long hey = 86400000;
+
+	printk("LOONG: %ld", hey);
+
+
+
+
+}
+
