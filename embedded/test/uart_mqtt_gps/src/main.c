@@ -3,17 +3,20 @@
 #include <dk_buttons_and_leds.h>
 #include <kernel.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "app_button.h"
 #include "app_uart.h"
 #include "app_mqtt.h"
 #include "app_gps.h"
+#include "app_sd.h"
 
 
 /* STRUCTS AND ENUMS */
 
 // Enumerations
 
+// TODO: TYPEDEF EVERYTHING
 enum oasys_event_type { // currently not in use
 	EVT_INIT,
 	EVT_UART,
@@ -56,7 +59,7 @@ static int button_val; // value received from button, only used when button_conf
 
 
 // UART variables
-enum uart_device_type uart_dev1 = UART_2;
+enum uart_device_type uart_dev1 = UART_1;
 
 struct k_msgq uart_msg_q;
 static uint8_t uart_msgq_buffer[3 * 128];
@@ -69,8 +72,8 @@ int data_size = 0; // keeps track of no. of messages stored in data array.
 
 // GPS variables
 struct k_msgq gps_msg_q;
-static uint8_t gps_msgq_buffer[2 * 128];
-static uint8_t gps_msg[128];
+static uint8_t gps_msgq_buffer[2 * sizeof(oasys_gps_data_t)];
+static oasys_gps_data_t gps_data;
 
 // MQTT variables
 struct k_msgq mqtt_msg_q;
@@ -79,6 +82,11 @@ static uint8_t mqtt_msg[128];
 
 static bool mqtt_init_complete = false;
 static bool data_available_to_send = false;
+
+// SD Card variables
+struct k_msgq sd_msg_q;
+static uint8_t sd_msgq_buffer[2 * sizeof(oasys_data_t)];
+static oasys_data_t oasys_data;
 
 
 /* FUNCTION DECLARATIONS */
@@ -150,10 +158,14 @@ static int message_queue_init()
 	k_msgq_init(&uart_msg_q, uart_msgq_buffer, sizeof(uart_msg), 3);
 
 	// GPS
-	k_msgq_init(&gps_msg_q, gps_msgq_buffer, sizeof(gps_msg), 2);
+	k_msgq_init(&gps_msg_q, gps_msgq_buffer, sizeof(gps_data), 2);
 
 	// MQTT
 	k_msgq_init(&mqtt_msg_q, mqtt_msgq_buffer, sizeof(mqtt_msg), 3);
+
+	// SD
+	k_msgq_init(&sd_msg_q, sd_msgq_buffer, sizeof(oasys_data), 2);
+
 	return 0;
 }
 
@@ -190,6 +202,9 @@ static int uart_module()
 
 	printk("\nuart test start\n");
 	printk("button 1: exit \nbutton 2: send uart signal\n\n");
+
+	uart_send(uart_dev1, uart_data_array[0]);
+	// 
 
 	/* UART loop */
 	for (int i = 0;; i++) {
@@ -235,6 +250,7 @@ static int uart_module()
 // TODO: add parameters to pass to app_gps
 static int gps_module()
 {
+	oasys_data_t gps_send_data;
 
 	printk("\n\npress button 1 to start gps test\n\n");
 
@@ -244,13 +260,30 @@ static int gps_module()
 
 	// CANDO: change parameter to timeout instead of no. of retries
 	app_gps(10, 500);
-	k_msgq_get(&gps_msg_q, &gps_msg, K_NO_WAIT);
+	k_msgq_get(&gps_msg_q, &gps_data, K_NO_WAIT);
 
 	// print to terminal
-	printk("\n%s", gps_msg);
+	printk("\n%s", gps_data.gps_string);
+
+	// {"lng":"23.771611","lat":"61.491275","d":"2020-03-06","t":"05:48:24"}
+	strcpy(gps_send_data.json_string, gps_data.gps_string);
+
+	gps_send_data.year = gps_data.year;
+	gps_send_data.month = gps_data.month;
+	gps_send_data.day = gps_data.day;
+
+	// add to sd card message queue
+	k_msgq_put(&sd_msg_q, &gps_send_data, K_NO_WAIT);
+
+	// send time to sensors
+	uint8_t time_millis_str[16];
+	uint32_t time_millis = ((gps_data.hour*60*60)+(gps_data.minute*60)+gps_data.seconds)*1000;
+	snprintf(time_millis_str, sizeof(time_millis_str), "\"%02u", time_millis);
+
+	uart_send(uart_dev1, time_millis_str);
 
 	// add to data array
-	strcpy(uart_data_array[data_size++], gps_msg);
+	strcpy(uart_data_array[data_size++], gps_data.gps_string);
 	data_available_to_send = true;
 
 	printk("\ngps test end\n\n");
@@ -385,9 +418,21 @@ void main(void)
 
 		message_queue_reset();
 
-		uart_module();	
+		// app_sd();
 
 		gps_module();
+
+		// TEMPORARY TEST PRINTING WHAT WILL BE SENT TO SD CARD FROM GPS
+
+		oasys_data_t test_data;
+
+		k_msgq_get(&sd_msg_q, &test_data, K_NO_WAIT);
+
+		printk("\n%02d-%02d-%02d", test_data.year, test_data.month, test_data.day);
+		printk("\n%s", test_data.json_string);
+
+
+		uart_module();	
 
 		printk("press button 1 to start mqtt\n");
 		printk("press button 2 to start wifi\n\n");

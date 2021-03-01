@@ -378,33 +378,35 @@ static int gps_struct_to_string(void *gps_string, nrf_gnss_data_frame_t *pvt_dat
 {
 	uint8_t temp_str[16];
 
-	strcpy(gps_string, "Long: ");
-	snprintf(temp_str, sizeof(temp_str), "%f", pvt_data->pvt.longitude);
+	strcpy(gps_string, "{");
+	strcat(gps_string, "\"lng\":");
+	snprintf(temp_str, sizeof(temp_str), "\"%f\"", pvt_data->pvt.longitude);
 	strcat(gps_string, temp_str);
 
-	strcat(gps_string, ",Lat: ");
-	snprintf(temp_str, sizeof(temp_str), "%f", pvt_data->pvt.latitude);
+	strcat(gps_string, ",\"lat\":");
+	snprintf(temp_str, sizeof(temp_str), "\"%f\"", pvt_data->pvt.latitude);
 	strcat(gps_string, temp_str);
 
-	strcat(gps_string, ",Date: ");
-	snprintf(temp_str, sizeof(temp_str), "%02u", pvt_data->pvt.datetime.year);
+	strcat(gps_string, ",\"d\":");
+	snprintf(temp_str, sizeof(temp_str), "\"%02u", pvt_data->pvt.datetime.year);
 	strcat(gps_string, temp_str);
 	strcat(gps_string, "-");
 	snprintf(temp_str, sizeof(temp_str), "%02u", pvt_data->pvt.datetime.month);
 	strcat(gps_string, temp_str);
 	strcat(gps_string, "-");
-	snprintf(temp_str, sizeof(temp_str), "%02u", pvt_data->pvt.datetime.day);
+	snprintf(temp_str, sizeof(temp_str), "%02u\"", pvt_data->pvt.datetime.day);
 	strcat(gps_string, temp_str);
 
-	strcat(gps_string, ",Time: ");
-	snprintf(temp_str, sizeof(temp_str), "%02u", pvt_data->pvt.datetime.hour);
+	strcat(gps_string, ",\"t\":");
+	snprintf(temp_str, sizeof(temp_str), "\"%02u", pvt_data->pvt.datetime.hour);
 	strcat(gps_string, temp_str);
 	strcat(gps_string, ":");
 	snprintf(temp_str, sizeof(temp_str), "%02u", pvt_data->pvt.datetime.minute);
 	strcat(gps_string, temp_str);
 	strcat(gps_string, ":");
-	snprintf(temp_str, sizeof(temp_str), "%02u", pvt_data->pvt.datetime.seconds);
+	snprintf(temp_str, sizeof(temp_str), "%02u\"", pvt_data->pvt.datetime.seconds);
 	strcat(gps_string, temp_str);
+	strcat(gps_string, "}");
 
 	return 0;
 }
@@ -431,9 +433,27 @@ static int create_dummy_gps_data(nrf_gnss_data_frame_t *pvt_data)
 	return 0;
 }
 
+static int oasys_gps_fill(oasys_gps_data_t *app_gps_data, nrf_gnss_data_frame_t *pvt_data, void *gps_string)
+{
+	strcpy(app_gps_data->gps_string, gps_string);
+	app_gps_data->longitude	= pvt_data->pvt.longitude;
+	app_gps_data->latitude	= pvt_data->pvt.latitude;
+
+	app_gps_data->year		= pvt_data->pvt.datetime.year;
+	app_gps_data->month		= pvt_data->pvt.datetime.month;
+	app_gps_data->day		= pvt_data->pvt.datetime.day;
+	app_gps_data->hour		= pvt_data->pvt.datetime.hour;
+	app_gps_data->minute	= pvt_data->pvt.datetime.minute;
+	app_gps_data->seconds	= pvt_data->pvt.datetime.seconds;
+
+	return 0;
+}
+
 int app_gps(int fix_retries, int retry_interval)
 {
 	nrf_gnss_data_frame_t gps_data;
+	oasys_gps_data_t app_gps_data;
+
 	uint8_t gps_string[128] = { "" };
 	uint8_t cnt = 0;
 
@@ -506,7 +526,9 @@ int app_gps(int fix_retries, int retry_interval)
 		got_fix = 0;
 	}
 
-	k_msgq_put(&gps_msg_q, &gps_string, K_NO_WAIT);
+	oasys_gps_fill(&app_gps_data, &last_pvt, &gps_string);
+
+	k_msgq_put(&gps_msg_q, &app_gps_data, K_NO_WAIT);
 
     printk("\nStopping GPS module");
 

@@ -18,12 +18,14 @@ target_sources(app PRIVATE
     src/app_uart.c
     src/app_mqtt.c
     src/app_gps.c
+    src/app_sd.c
 
     
     include/app_button.h
     include/app_uart.h
     include/app_mqtt.h
     include/app_gps.h
+    include/app_sd.h
     )
 
 zephyr_include_directories(include)

@@ -9,18 +9,14 @@
 #include <zephyr.h>
 #include <device.h>
 #include <disk/disk_access.h>
-#include <logging/log.h>
 #include <fs/fs.h>
 #include <ff.h>
 #include <string.h>
-#include <dk_buttons_and_leds.h>
+#include <stdio.h>
 
+#include "app_sd.h"
 
-
-
-LOG_MODULE_REGISTER(main);
-
-static int lsdir(const char *path);
+extern struct k_msgq sd_msg_q;
 
 static FATFS fat_fs;
 /* mounting info */
@@ -74,6 +70,8 @@ static int lsdir(const char *path)
 
 static void create_file_path(char *file_path, char *filename) {
 	// Create absolute path for filename
+    strcpy(file_path, "");
+
 	strcat(file_path, disk_mount_pt);
 	strcat(file_path, "/");
 	strcat(file_path, filename);
@@ -105,9 +103,9 @@ static int read_file(char *file_path, char *data, int size) {
 
 static int write_file(char *file_path, char *data, int size) {
 	struct fs_file_t file;
-	fs_open(&file, file_path, (FS_O_WRITE | FS_O_APPEND));
-	fs_write(&file, "\n", strlen("\n"));
+	fs_open(&file, file_path, (FS_O_WRITE | FS_O_APPEND | FS_O_CREATE));
 	fs_write(&file, data, size);
+	fs_write(&file, "\n", strlen("\n"));
 	fs_close(&file);
 
 	return 0;
@@ -122,20 +120,20 @@ static int mountSD() {
 
 	do {
 		if (disk_access_init(disk_pdrv) != 0) {
-		LOG_ERR("Storage init ERROR!");
+		printk("Storage init ERROR!");
 		break;
 		}
 
 		if (disk_access_ioctl(disk_pdrv,
 				DISK_IOCTL_GET_SECTOR_COUNT, &block_count)) {
-			LOG_ERR("Unable to get sector count");
+			printk("Unable to get sector count");
 			break;
 		}
-		LOG_INF("Block count %u", block_count);
+		printk("Block count %u", block_count);
 
 		if (disk_access_ioctl(disk_pdrv,
 				DISK_IOCTL_GET_SECTOR_SIZE, &block_size)) {
-			LOG_ERR("Unable to get sector size");
+			printk("Unable to get sector size");
 			break;
 		}
 		printk("Sector size %u\n", block_size);
@@ -161,24 +159,48 @@ static int mountSD() {
 }
 
 
-void main(void)
+void app_sd(void)
 {
+    oasys_data_t sd_msg;
+    uint16_t	current_year = -1;
+	uint8_t		current_month = -1;
+	uint8_t		current_day = -1;
+
+    uint8_t current_filename[16] = "";
+	char file_path[32] = "";
+
 	mountSD();
-	char dataBuffer[1024] = "";
-	char filepath[32] = "";
-	create_file_path(filepath, "test.txt");
-	read_file(filepath, dataBuffer, sizeof(dataBuffer));
-	//write_file(filepath, dataBuffer, strlen(dataBuffer));
-
-	printk("%s", dataBuffer);
 
 
-	long hey = 86400000;
+    while(1)
+    {
+        // get msg from main
+		k_msgq_get(&sd_msg_q, &sd_msg, K_FOREVER);
 
-	printk("LOONG: %ld", hey);
+        // test date vs currently saved
+        if(current_year != sd_msg.year || current_month != sd_msg.month || current_day != sd_msg.day)
+        {
+            current_year = sd_msg.year;
+            current_month = sd_msg.month;
+            current_day = sd_msg.day;
 
+            // create filename format: [yyyy-mm-dd]
+            uint8_t temp_str[16];
 
+            strcpy(current_filename, "");
+ 
+            snprintf(temp_str, sizeof(temp_str), "%02u-", sd_msg.year);
+            strcat(current_filename, temp_str);
+            snprintf(temp_str, sizeof(temp_str), "%02u-", sd_msg.month);
+            strcat(current_filename, temp_str);
+            snprintf(temp_str, sizeof(temp_str), "%02u", sd_msg.day);
+            strcat(current_filename, temp_str);
 
+            // create file path
+            create_file_path(file_path, current_filename);
+        }
 
+        // write
+        write_file(file_path, sd_msg.json_string, strlen(sd_msg.json_string));
+    }
 }
-
