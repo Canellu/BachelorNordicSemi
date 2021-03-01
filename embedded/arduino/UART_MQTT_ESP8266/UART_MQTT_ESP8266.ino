@@ -1,5 +1,7 @@
 #include <SoftwareSerial.h>
 #include <ESP8266WiFi.h>
+#include <WiFiClient.h>
+#include <ESP8266WebServer.h>
 #include <ArduinoMqttClient.h>
 
 // UART
@@ -10,13 +12,21 @@ String tmp_fromNrf = "";
 String fromSerial = "";
 
 // WIFI
-#ifndef STASSID
-#define STASSID "NETGEAR94"
-#define STAPSK  "luckyroad468"
+//#ifndef STASSID
+//#define STASSID "NETGEAR94"
+//#define STAPSK  "luckyroad468"
+//#endif
+
+
+#ifndef APSSID
+#define APSSID "ESPap"
+#define APPSK  "thereisnospoon"
 #endif
 
-const char* ssid     = STASSID;
-const char* password = STAPSK;
+const char* ssid     = APSSID;
+const char* password = APPSK;
+
+ESP8266WebServer server(80);
 
 WiFiClient client;
 
@@ -44,27 +54,25 @@ int led_on = 0;
 
 // FUNCTIONS
 
+void handleRoot() {
+  server.send(200, "text/html", "<h1>You are connected</h1>");
+}
+
 void wifi_connect()
 {
   // Connecting to a WiFi network
 
   Serial.println();
-  Serial.println();
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
+  Serial.print("Configuring access point...");
+  /* You can remove the password parameter if you want the AP to be open. */
+  WiFi.softAP(ssid, password);
 
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
-
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-
-  Serial.println("");
-  Serial.println("WiFi connected");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
+  IPAddress myIP = WiFi.softAPIP();
+  Serial.print("AP IP address: ");
+  Serial.println(myIP);
+  server.on("/", handleRoot);
+  server.begin();
+  Serial.println("HTTP server started");
   wifi_on = 1;
   
   // Serial.println("{wifi ok}");  
@@ -186,21 +194,21 @@ void process_nrf_msg()
   {
     wifi_connect();
   }
-  else if (fromNrf == "{mqtt}")
-  {
-    mqtt_connect();
-  }
+  //else if (fromNrf == "{mqtt}")
+  //{
+  //  mqtt_connect();
+  //}
   else if (fromNrf == "exit")
   {
-    mqtt_disconnect();
+    // mqtt_disconnect();
     wifi_disconnect();
   }
-  else if (wifi_on == 1 && mqtt_on == 1)
-  {
-    mqtt_publish();
-    
-    startMillis = millis();
-  }
+  //else if (wifi_on == 1 && mqtt_on == 1)
+  //{
+  //  mqtt_publish();
+  //  
+  //  startMillis = millis();
+  //}
   
   fromNrf = "";
 }
@@ -266,11 +274,9 @@ void loop() {
     }
 
     // mqtt on, not receiving commands from nRF
-    else if (wifi_on == 1 && mqtt_on == 1)
+    else if (wifi_on == 1)
     {
-      mqtt_keepalive();
-
-      mqtt_receive();
+      server.handleClient();
     }
 
     // idle
