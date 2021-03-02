@@ -1,18 +1,17 @@
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fl_chart/fl_chart.dart';
 
-class LineChartSample extends StatefulWidget {
+class MultiLineChartSample extends StatefulWidget {
   @override
-  _LineChartSampleState createState() => _LineChartSampleState();
+  _MultiLineChartState createState() => _MultiLineChartState();
 }
 
-class _LineChartSampleState extends State<LineChartSample> {
+class _MultiLineChartState extends State<MultiLineChartSample> {
   List<Color> gradientColors = [
     const Color(0xff23b6e6),
     const Color(0xff02d39a),
   ];
-
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +44,7 @@ class _LineChartSampleState extends State<LineChartSample> {
           top: 25,
           left: 25,
           child: Text(
-            'Line Chart',
+            'Multi Line Chart',
             style: TextStyle(fontSize: 15, color: Colors.white, decoration: TextDecoration.none),
           ),
         )
@@ -95,14 +94,12 @@ class _LineChartSampleState extends State<LineChartSample> {
           ),
           getTitles: (value) {
             switch (value.toInt()){
-              case 0:
-                return '-20C';
-              case 2:
-                return '0C';
-              case 4:
-                return '20C';
-              case 6:
-                return '40C';
+              case 1:
+                return '10k';
+              case 3:
+                return '30k';
+              case 5:
+                return '50k';
             }
             return '';
           },
@@ -124,15 +121,15 @@ class _LineChartSampleState extends State<LineChartSample> {
   }
 
   List<LineChartBarData> linesBarData() {
-    final LineChartBarData lineChartBarData = LineChartBarData(
+    final LineChartBarData lineChartBarData1 = LineChartBarData(
       spots: [
-        FlSpot(0, 1),
-        FlSpot(2, 0.5),
-        FlSpot(4, 4),
-        FlSpot(6, 3),
-        FlSpot(8, 5),
-        FlSpot(10, 1),
-        FlSpot(11, 2),
+        FlSpot(0, 3),
+        FlSpot(2.6, 2),
+        FlSpot(4.9, 5),
+        FlSpot(6.8, 3.1),
+        FlSpot(8, 4),
+        FlSpot(9.6, 3),
+        FlSpot(11, 4),
       ],
       isCurved: true,
       colors: gradientColors,
@@ -146,7 +143,28 @@ class _LineChartSampleState extends State<LineChartSample> {
         colors: gradientColors.map((color) => color.withOpacity(0.3)).toList(),
       ),
     );
-    return [lineChartBarData];
+    final LineChartBarData lineChartBarData2 = LineChartBarData(
+      spots: [
+        FlSpot(0, 1),
+        FlSpot(2.6, 2.8),
+        FlSpot(4.9, 1.2),
+        FlSpot(6.8, 2.8),
+        FlSpot(8, 2.6),
+        FlSpot(9.6, 3.9),
+        FlSpot(11, 3),
+      ],
+      isCurved: true,
+      colors: [const Color(0xffaa4cfc)],
+      barWidth: 5,
+      isStrokeCapRound: true,
+      dotData:  FlDotData(
+        show: false,
+      ),
+      belowBarData: BarAreaData(
+        show: true,
+        colors: gradientColors.map((color) => color.withOpacity(0.3)).toList(),
+      ),
+    );
+    return [lineChartBarData1,lineChartBarData2];
   }
 }
-
