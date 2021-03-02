@@ -259,7 +259,7 @@ static int gps_module()
 	printk("gps test start\n");
 
 	// CANDO: change parameter to timeout instead of no. of retries
-	app_gps(10, 500);
+	app_gps(1000, 500);
 	k_msgq_get(&gps_msg_q, &gps_data, K_NO_WAIT);
 
 	// print to terminal
@@ -424,12 +424,14 @@ void main(void)
 
 		// TEMPORARY TEST PRINTING WHAT WILL BE SENT TO SD CARD FROM GPS
 
-		oasys_data_t test_data;
+		app_sd();
 
-		k_msgq_get(&sd_msg_q, &test_data, K_NO_WAIT);
+		// oasys_data_t test_data;
 
-		printk("\n%02d-%02d-%02d", test_data.year, test_data.month, test_data.day);
-		printk("\n%s", test_data.json_string);
+		// k_msgq_get(&sd_msg_q, &test_data, K_NO_WAIT);
+
+		// printk("\n%02d-%02d-%02d", test_data.year, test_data.month, test_data.day);
+		// printk("\n%s", test_data.json_string);
 
 
 		uart_module();	

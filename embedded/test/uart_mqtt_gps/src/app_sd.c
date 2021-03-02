@@ -100,6 +100,52 @@ static int read_file(char *file_path, char *data, int size) {
 	return 0;
 }
 
+static int read_JSON(char *file_path, char *data, int size, uint32_t *cursor) {
+
+	// For catching return values from fs_functions
+	int ret = 1;
+
+	// Open file for reading, if file doesnt exist, create one.
+	struct fs_file_t file;
+	fs_open(&file, file_path, FS_O_READ);
+
+	// TODO: seek end to read cursor value
+
+	fs_seek(&file, *cursor, FS_SEEK_SET);
+
+	// Read characters until end of file
+	uint8_t buffer[8] = "";
+
+	while (1) {
+		ret = fs_read(&file, &buffer, 1);
+		if (ret == 0)
+		{
+			break;
+		}
+		else if (strcmp(buffer, "{") == 0)
+		{
+			strcpy(data, "");
+			strcat(data, buffer);
+		}
+		else if (strcmp(buffer, "}") == 0)
+		{
+			strcat(data, buffer);
+			*cursor = fs_tell(&file);
+			printk("\n%s %d", data, *cursor);
+			return 0;
+		}
+		else
+		{
+			strcat(data, buffer);
+		}
+	}
+
+	fs_close(&file);
+
+
+	return 0;
+}
+
 
 static int write_file(char *file_path, char *data, int size) {
 	struct fs_file_t file;
@@ -189,18 +235,28 @@ void app_sd(void)
 
             strcpy(current_filename, "");
  
-            snprintf(temp_str, sizeof(temp_str), "%02u-", sd_msg.year);
+            snprintf(temp_str, sizeof(temp_str), "%02u", sd_msg.year);
             strcat(current_filename, temp_str);
-            snprintf(temp_str, sizeof(temp_str), "%02u-", sd_msg.month);
+            snprintf(temp_str, sizeof(temp_str), "%02u", sd_msg.month);
             strcat(current_filename, temp_str);
-            snprintf(temp_str, sizeof(temp_str), "%02u", sd_msg.day);
+            snprintf(temp_str, sizeof(temp_str), "%02u.txt", sd_msg.day);
             strcat(current_filename, temp_str);
+
+			printk("\nCreating file path with name: %s", current_filename);
 
             // create file path
             create_file_path(file_path, current_filename);
         }
 
+		printk("\nCreating file path");
+
         // write
         write_file(file_path, sd_msg.json_string, strlen(sd_msg.json_string));
+
+		uint8_t json_text[128] = "";
+		uint32_t cursor = 0;
+
+        read_JSON(file_path, json_text, sizeof(json_text), &cursor);
+        read_JSON(file_path, json_text, sizeof(json_text), &cursor);
     }
 }

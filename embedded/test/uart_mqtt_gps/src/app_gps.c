@@ -516,7 +516,7 @@ int app_gps(int fix_retries, int retry_interval)
         retry_cnt++;
 	}
 
-	create_dummy_gps_data(&last_pvt);
+	// create_dummy_gps_data(&last_pvt);
 
 	if (!got_fix) {
 		strcpy(gps_string, "Unable to get GPS fix");

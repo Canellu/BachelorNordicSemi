@@ -168,14 +168,10 @@ void main(void)
 	char filepath[32] = "";
 	create_file_path(filepath, "test.txt");
 	read_file(filepath, dataBuffer, sizeof(dataBuffer));
-	//write_file(filepath, dataBuffer, strlen(dataBuffer));
+	create_file_path(filepath, "test2.txt");
+	write_file(filepath, dataBuffer, strlen(dataBuffer));
 
 	printk("%s", dataBuffer);
-
-
-	long hey = 86400000;
-
-	printk("LOONG: %ld", hey);
 
 
 

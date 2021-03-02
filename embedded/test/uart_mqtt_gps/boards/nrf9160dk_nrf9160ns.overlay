@@ -1,10 +1,10 @@
 &uart1 {
 	status = "okay";
 	current-speed = <115200>;
-	tx-pin = <11>;
-	rx-pin = <10>;
-	rts-pin = <14>;
-	cts-pin = <15>;
+	tx-pin = <28>;
+	rx-pin = <27>;
+	rts-pin = <25>;
+	cts-pin = <26>;
 };
 
 &i2c2 {
@@ -14,8 +14,8 @@
 &uart2 {
 	status = "okay";
 	current-speed = <115200>;
-	tx-pin = <13>;
-	rx-pin = <12>;
+	tx-pin = <15>;
+	rx-pin = <14>;
 	rts-pin = <16>;
 	cts-pin = <17>;
 };
