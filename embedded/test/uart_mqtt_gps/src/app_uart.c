@@ -19,12 +19,15 @@ static void uart_cb(const struct device *dev_uart, void *context)
 
 	uart_irq_update(dev_uart);
 
+	// send uart msg, runs when uart_irq_tx_enable is run
 	if (uart_irq_tx_ready(dev_uart)) {
 		(void)uart_fifo_fill(dev_uart, tx_buf, sizeof(tx_buf));
 		uart_irq_tx_disable(dev_uart);
 		printk("sent\n");
 	}
 
+	// read uart msg, only reads in JSON format
+	// adds to message queue when entire JSON is received
 	if (uart_irq_rx_ready(dev_uart)) {
 		uint8_t buf[10];
 		int len = uart_fifo_read(dev_uart, buf, sizeof(buf));
@@ -107,8 +110,6 @@ void uart_exit(enum uart_device_type uart_dev_no)
 }
 
 // send data to uart device
-// TODO: add parameters to choose data to be sent, currently only sends "hi"
-// should be useable in main
 void uart_send(enum uart_device_type uart_dev_no, uint8_t *msg)
 {
 	strcpy(tx_buf, msg);

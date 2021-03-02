@@ -16,7 +16,7 @@
 
 // Enumerations
 
-// TODO: TYPEDEF EVERYTHING
+// CANDO: typedef
 enum oasys_event_type { // currently not in use
 	EVT_INIT,
 	EVT_UART,
@@ -92,6 +92,7 @@ static oasys_data_t oasys_data;
 /* FUNCTION DECLARATIONS */
 
 // publish all data that is currently saved from uart
+// REMINDER: Double check after implementing SD card
 static int publish_uart_data() 
 {
 	int i = 0;
@@ -106,6 +107,7 @@ static int publish_uart_data()
 	return 0;
 }
 
+// test messages received from mqtt
 static int check_mqtt_msg(void *data, size_t len)
 {
 	int ret_value = 0;
@@ -178,6 +180,7 @@ static int device_inits()
 	return 0;
 }
 
+// purge leftover messages from message queue
 static int message_queue_reset()
 {
 	// NOTE: THIS IS ONLY HERE UNTIL SD CARD STORAGE IS OKAY
@@ -246,8 +249,6 @@ static int uart_module()
 
 // TODO: Test on separate thread?
 // Currently on hold until LTE and GPS can function at the same time
-
-// TODO: add parameters to pass to app_gps
 static int gps_module()
 {
 	oasys_data_t gps_send_data;
@@ -298,10 +299,13 @@ static int wifi_module()
 
 	printk("\nwifi test start\n");
 
+	// send wifi command to wifi controller
 	uart_send(uart_dev1, "{wifi}\n");
 
 	/* wifi loop */
 	for (int i = 0;; i++) {
+
+		// test messages from wifi controller
 		k_msgq_get(&uart_msg_q, &uart_msg, K_FOREVER);
 		printk("\n%s", uart_msg);
 
@@ -309,11 +313,13 @@ static int wifi_module()
 			uart_exit(uart_dev1);
 			break;
 		}
+		// wifi setup success, send further commands
 		else if (strcmp(uart_msg, "{wifi ok}") == 0)
 		{
 			printk("\nReceived wifi ok");
 			uart_send(uart_dev1, "{mqtt}\n");
 		}
+		// send data from uart_data_array
 		else if (strcmp(uart_msg, "{mqtt ok}") == 0)
 		{
 			printk("\nReceived mqtt ok");
@@ -323,6 +329,7 @@ static int wifi_module()
 		// {
 		// 	//something
 		// }
+		// default print to terminal
 		else
 		{
 			printk("\n%s", uart_msg);
@@ -355,6 +362,7 @@ static int mqtt_module()
 
 		mqtt_init_complete = true;
 	}
+	// reconnect
 	else {
 
 		err = app_mqtt_connect();
@@ -366,10 +374,12 @@ static int mqtt_module()
 	// TODO: store mqtt commands into an array
 	/* MQTT loop */
 	while (1) {
+
+		// mqtt function
 		err = app_mqtt_run();
 
+		// test messages received from mqtt
 		k_msgq_get(&mqtt_msg_q, &mqtt_msg, K_NO_WAIT);
-
 		int mqtt_val = check_mqtt_msg(&mqtt_msg, sizeof(mqtt_msg));
 
 		if (mqtt_val == 1 || err != 0) {

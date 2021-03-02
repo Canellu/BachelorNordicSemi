@@ -387,6 +387,7 @@ static int modem_reconnect(void)
 	return err;
 }
 
+// first time init for mqtt, ONLY RUN ONCE
 // TODO: set max number of retries
 int app_mqtt_init_and_connect(void)
 {
@@ -428,6 +429,7 @@ int app_mqtt_init_and_connect(void)
 	return err;
 }
 
+// reconnect, run instead of app_mqtt_init_and_connect in consecutive uses of mqtt
 // TODO: set max number of retries
 int app_mqtt_connect(void)
 {
@@ -455,23 +457,27 @@ int app_mqtt_connect(void)
 	return err;
 }
 
+// main mqtt loop
 // CANDO: change poll to message queueing to allow instantaneous response from button
 int app_mqtt_run(void)
 {	
 	int err;
 
+	// wait for any mqtt input (default 60s), continues on input or timeout
 	err = poll(&fds, 1, mqtt_keepalive_time_left(&client));
 	if (err < 0) {
 		LOG_ERR("poll: %d", errno);
 		return err;
 	}
 
+	// ping mqtt broker
 	err = mqtt_live(&client);
 	if ((err != 0) && (err != -EAGAIN)) {
 		LOG_ERR("ERROR: mqtt_live: %d", err);
 		return err;
 	}
 
+	// updates mqtt receives and sends
 	if ((fds.revents & POLLIN) == POLLIN) {
 		err = mqtt_input(&client);
 		if (err != 0) {
@@ -480,6 +486,7 @@ int app_mqtt_run(void)
 		}
 	}
 
+	// error checks?
 	if ((fds.revents & POLLERR) == POLLERR) {
 		LOG_ERR("POLLERR");
 		return err;
@@ -493,18 +500,21 @@ int app_mqtt_run(void)
 	return err;
 }
 
+// disconnect mqtt and turn off lte
 int app_mqtt_disconnect(void)
 {
     int err;
     
 	LOG_INF("Disconnecting MQTT client...");
 
+	// mqtt disconnect
 	err = mqtt_disconnect(&client);
 	if (err) {
 		LOG_ERR("Could not disconnect MQTT client: %d", err);
 		return err;
 	}
 
+	// lte off
 	err = lte_lc_offline();
 	if (err) {
 		LOG_ERR("Could not set modem to offline: %d", err);
@@ -513,6 +523,7 @@ int app_mqtt_disconnect(void)
 	return err;
 }
 
+// simplified function to publish data to mqtt.
 int app_data_publish(uint8_t *data, size_t len) {
 
 	int err;

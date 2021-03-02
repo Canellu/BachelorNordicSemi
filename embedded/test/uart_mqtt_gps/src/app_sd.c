@@ -68,8 +68,11 @@ static int lsdir(const char *path)
 	return res;
 }
 
-static void create_file_path(char *file_path, char *filename) {
 	// Create absolute path for filename
+
+static void create_file_path(char *file_path, char *filename) {
+
+	// empty file_path
     strcpy(file_path, "");
 
 	strcat(file_path, disk_mount_pt);
@@ -77,13 +80,12 @@ static void create_file_path(char *file_path, char *filename) {
 	strcat(file_path, filename);
 }
 
-
+// reads entire file
 static int read_file(char *file_path, char *data, int size) {
 
 	// For catching return values from fs_functions
 	int ret = 1;
 
-	// Open file for reading, if file doesnt exist, create one.
 	struct fs_file_t file;
 	fs_open(&file, file_path, FS_O_READ);
 
@@ -100,6 +102,7 @@ static int read_file(char *file_path, char *data, int size) {
 	return 0;
 }
 
+// reads per JSON
 static int read_JSON(char *file_path, char *data, int size, uint32_t *cursor) {
 
 	// For catching return values from fs_functions
@@ -113,7 +116,6 @@ static int read_JSON(char *file_path, char *data, int size, uint32_t *cursor) {
 
 	fs_seek(&file, *cursor, FS_SEEK_SET);
 
-	// Read characters until end of file
 	uint8_t buffer[8] = "";
 
 	while (1) {
@@ -146,7 +148,7 @@ static int read_JSON(char *file_path, char *data, int size, uint32_t *cursor) {
 	return 0;
 }
 
-
+// write into file, creates new file if it doesn't exist
 static int write_file(char *file_path, char *data, int size) {
 	struct fs_file_t file;
 	fs_open(&file, file_path, (FS_O_WRITE | FS_O_APPEND | FS_O_CREATE));

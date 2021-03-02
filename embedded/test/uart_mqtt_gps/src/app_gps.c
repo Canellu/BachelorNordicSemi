@@ -373,6 +373,7 @@ int inject_agps_type(void *agps,
 #endif
 
 
+// Creates string version of desired gps data
 // CANDO: maybe create JSON directly
 static int gps_struct_to_string(void *gps_string, nrf_gnss_data_frame_t *pvt_data)
 {
@@ -411,6 +412,8 @@ static int gps_struct_to_string(void *gps_string, nrf_gnss_data_frame_t *pvt_dat
 	return 0;
 }
 
+
+// Creates dummy data. Values are constant
 static int create_dummy_gps_data(nrf_gnss_data_frame_t *pvt_data)
 {
 	got_fix = 1;
@@ -459,9 +462,10 @@ int app_gps(int fix_retries, int retry_interval)
 
 	printk("Starting GPS application\n");
 
+	// Runs first time init
+	// CANDO: create separate function and run in main?
 	if (init_complete == false) {
 
-		// CANDO: create separate function and run in main?
 		if (init_app() != 0) {
 			return -1;
 			}
@@ -469,6 +473,7 @@ int app_gps(int fix_retries, int retry_interval)
         init_complete = true; 
 		}
 
+	// Reconnect
 	else {
         setup_modem();
 		gnss_ctrl(GNSS_RESTART);
@@ -516,22 +521,25 @@ int app_gps(int fix_retries, int retry_interval)
         retry_cnt++;
 	}
 
-	// create_dummy_gps_data(&last_pvt);
-
 	if (!got_fix) {
 		strcpy(gps_string, "Unable to get GPS fix");
+
+		// create dummy data, REMINDER: COMMENT WHEN RUNNING PROPER TESTS
+		create_dummy_gps_data(&last_pvt);
 		
 	} else {
 		gps_struct_to_string(&gps_string, &last_pvt);
 		got_fix = 0;
 	}
 
+	// fill out struct to add to message queue
 	oasys_gps_fill(&app_gps_data, &last_pvt, &gps_string);
 
 	k_msgq_put(&gps_msg_q, &app_gps_data, K_NO_WAIT);
 
     printk("\nStopping GPS module");
 
+	// AT command to turn off GPS
     gnss_ctrl(GNSS_STOP);
     if (at_cmd_write(AT_DEACTIVATE_GPS, NULL, 0, NULL) != 0) {
 			printk("\nunable to deactivate GPS\n");
