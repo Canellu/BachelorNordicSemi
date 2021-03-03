@@ -1,0 +1,81 @@
+.download-btn {
+  margin-top: 30px;
+}
+
+#terminal {
+  /* border: 2px solid red; */
+  margin-top: 30px;
+}
+
+.mtop {
+  margin-top: 20px;
+}
+
+.padding {
+  padding: 8px;
+}
+
+table tbody {
+  display: block;
+  max-height: 40vh;
+  overflow: auto;
+}
+
+thead,
+tbody tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+h4 {
+  margin: 0;
+}
+
+.tabs .indicator {
+  background-color: #ff9100;
+}
+
+.tabs .tab a.active {
+  color: #ff6d00;
+}
+
+textarea {
+  cursor: none;
+}
+
+.collection {
+  max-height: 40vh;
+  overflow: auto;
+}
+
+.tabs .tab a {
+  font-weight: bold;
+  color: #9e9e9e;
+}
+.tabs .tab a.active {
+  color: #424242;
+}
+
+/* label focus color */
+.input-field input[type="text"]:focus + label {
+  color: #ff9100 !important;
+}
+/* label underline focus color */
+.input-field input[type="text"]:focus {
+  border-bottom: 1px solid #ff9100 !important;
+  box-shadow: 0 1px 0 0 #ff9100 !important;
+}
+
+/* icon prefix focus color */
+.input-field .prefix.active {
+  color: #ff9100;
+}
+
+.fa-info-circle {
+  position: relative;
+  top: 30px;
+}
+.fa-info-circle:active {
+  color: #ffd600;
+}

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css"
+      integrity="sha512-HK5fgLBL+xu6dm/Ii3z4xhlSUyZgTT9tuc/hSrtw6uzJOvgRr2a9jyxxT1ely+B+xFAmJKVSTbpM/CuL7qxO8w=="
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="css/materialize.min.css" />
+    <link rel="stylesheet" href="css/styles.css" />
+    <title>File Downloader</title>
+  </head>
+  <body class="grey lighten-5">
+    <!-- HEADER -->
+    <nav class="nav-extended">
+      <!-- LOGO -->
+      <div class="nav-wrapper yellow accent-4">
+        <div class="container">
+          <a href="/" class="center brand-logo grey-text text-darken-3">
+            Oasys
+          </a>
+        </div>
+      </div>
+    </nav>
+    <!--  TAB SELECTOR: [TERMINAL] [FILES] -->
+    <div class="yellow accent-4">
+      <div class="nav-content container">
+        <ul class="tabs tabs-fixed-width yellow accent-4">
+          <li class="tab"><a href="#files">Files</a></li>
+          <li class="tab"><a class="active" href="#terminal">Terminal</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- FILES TAB -->
+    <div class="container mtop col s12" id="files">
+      <!-- CARDS: file data -->
+      <div class="row">
+        <div class="col s6">
+          <div class="card yellow darken-1 center">
+            <div class="card-content grey-text text-darken-3">
+              <span class="card-title">Files</span>
+              <h4>20</h4>
+            </div>
+          </div>
+        </div>
+        <div class="col s6">
+          <div class="card yellow darken-1 center">
+            <div class="card-content grey-text text-darken-3">
+              <span class="card-title">Size [mB]</span>
+              <h4>2349</h4>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLE -->
+      <table class="striped centered">
+        <thead class="table-header yellow darken-2">
+          <tr>
+            <th>Filename [Date]</th>
+            <th>Size [kB]</th>
+          </tr>
+        </thead>
+
+        <tbody class="tbodyFiles">
+          <tr>
+            <td>2020-03-09</td>
+            <td>123</td>
+          </tr>
+          <tr>
+            <td>2020-03-09</td>
+            <td>123</td>
+          </tr>
+          <tr>
+            <td>2020-03-09</td>
+            <td>123</td>
+          </tr>
+          <tr>
+            <td>2020-03-09</td>
+            <td>123</td>
+          </tr>
+          <tr>
+            <td>2020-03-09</td>
+            <td>123</td>
+          </tr>
+          <tr>
+            <td>2020-03-09</td>
+            <td>123</td>
+          </tr>
+          <tr>
+            <td>2020-03-09</td>
+            <td>123</td>
+          </tr>
+          <tr>
+            <td>2020-03-09</td>
+            <td>123</td>
+          </tr>
+          <tr>
+            <td>2020-03-09</td>
+            <td>123</td>
+          </tr>
+          <tr>
+            <td>2020-03-09</td>
+            <td>123</td>
+          </tr>
+          <tr>
+            <td>2020-03-09</td>
+            <td>123</td>
+          </tr>
+          <tr>
+            <td>2020-03-09</td>
+            <td>123</td>
+          </tr>
+          <tr>
+            <td>2020-03-09</td>
+            <td>123</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- DOWNLOAD BUTTON -->
+      <div class="center">
+        <a class="download-btn waves-effect waves-light btn">
+          generate & download
+          <i class="material-icons left">download</i>
+        </a>
+      </div>
+
+      <!-- PROGRESS BAR -->
+      <div class="row valign-wrapper hide prog-bar mtop">
+        <div class="col s10">
+          <div class="progress mtop">
+            <div class="determinate" style="width: 20%"></div>
+          </div>
+        </div>
+        <div class="col s2">
+          <span class="new badge" data-badge-caption="">20%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TERMINAL TAB -->
+    <div class="container mtop" id="terminal">
+      <div class="row">
+        <div class="col s10">
+          <form>
+            <div class="input-field">
+              <!-- <i class="material-icons prefix">mode</i> -->
+              <!-- TODO: create validation, add class invalid or valid on input-->
+              <input id="commands" type="text" class="" />
+              <label for="commands">Insert command</label>
+              <span
+                class="helper-text"
+                data-error="Invalid command"
+                data-success="Command sent"
+              >
+                command format is a key value pair separated by space
+              </span>
+            </div>
+          </form>
+        </div>
+
+        <div class="col s2">
+          <!-- Info button, opens modal -->
+          <a class="modal-trigger" data-target="modal1" style="color: #26a69a">
+            <i class="fas fa-info-circle fa-2x"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- COMMAND MODAL -->
+      <div id="modal1" class="modal">
+        <div class="modal-content">
+          <h4>Valid commands</h4>
+          <p>Some commands...</p>
+        </div>
+        <div class="modal-footer">
+          <a class="modal-close waves-effect waves-green btn-flat">Close</a>
+        </div>
+      </div>
+
+      <!-- LIST OF COMMANDS SENT -->
+      <table class="striped centered">
+        <thead class="table-header yellow darken-2">
+          <tr>
+            <th style="font-size: 1.2rem">Commands sent</th>
+          </tr>
+        </thead>
+
+        <tbody class="tbodyCommands">
+          <tr>
+            <td>bla bla timestamp?</td>
+          </tr>
+          <tr>
+            <td>bla bla timestamp?</td>
+          </tr>
+          <tr>
+            <td>bla bla timestamp?</td>
+          </tr>
+          <tr>
+            <td>bla bla timestamp?</td>
+          </tr>
+          <tr>
+            <td>bla bla timestamp?</td>
+          </tr>
+          <tr>
+            <td>bla bla timestamp?</td>
+          </tr>
+          <tr>
+            <td>bla bla timestamp?</td>
+          </tr>
+          <tr>
+            <td>bla bla timestamp?</td>
+          </tr>
+          <tr>
+            <td>bla bla timestamp?</td>
+          </tr>
+          <tr>
+            <td>bla bla timestamp?</td>
+          </tr>
+          <tr>
+            <td>bla bla timestamp?</td>
+          </tr>
+          <tr>
+            <td>bla bla timestamp?</td>
+          </tr>
+          <tr>
+            <td>bla bla timestamp?</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <script src="js/materialize.min.js"></script>
+    <script src="js/FileSaver.js"></script>
+    <script src="js/jszip.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>
