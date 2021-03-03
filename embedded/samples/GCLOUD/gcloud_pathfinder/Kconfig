@@ -1,0 +1,126 @@
+#
+# Copyright (c) 2019 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-BSD-5-Clause-Nordic
+#
+
+menu "Google Cloud"
+
+config GCLOUD_PROJECT_NAME
+    string "Name of the Google Cloud project"
+
+config GCLOUD_REGION
+    string "Google cloud region"
+
+config GCLOUD_REGISTRY_NAME
+    string "Name of the Google Cloud reigstry of the device"
+
+config GCLOUD_DEVICE_NAME
+    string "Name of the device in Google Cloud"
+
+endmenu # Google Cloud
+
+menu "GPS Path"
+
+config GPS_PATH_MAX_LENGTH
+	int "Length of the gps path for nRF91"
+	default 40
+
+config GPS_PATH_MARKER_REMOVAL_THRESHOLD
+	int "Threshold in meters for removal of markers"
+	default 20
+	help
+		How close to the next marker the nrf91 needs to be in order
+		to consider the marker reached and therefore remove it 
+		from the path.
+
+endmenu # GPS Path 
+
+menu "Asset tracker"
+
+rsource "src/ui/Kconfig"
+
+menu "GPS"
+
+choice
+	prompt "GPS device"
+	help
+		Select from which device GPS data will be fetched.
+
+config GPS_USE_EXTERNAL
+	bool "User provided GPS device"
+	help
+		Provide a GPS device that location data will be fetched from and
+		sent to nRF Cloud
+
+endchoice
+
+rsource "src/gps_controller/Kconfig"
+
+config GPS_DEV_NAME
+	string "GPS device name"
+	help
+		GPS device from which location data will be fetched and sent
+		to nRF Cloud.
+
+config GPS_TRIGGER
+	bool
+
+config GPS_SPOOF
+	bool "Use fake GPS data"
+	default n
+
+config GPS_AUTO_START
+	bool "Automatically start the GPS when it is ready"
+	depends on !GPS_SPOOF
+	default n
+
+endmenu	# GPS
+
+menu "Cloud"
+
+config MQTT_KEEPALIVE
+	int
+	default GPS_CONTROL_FIX_TRY_TIME if GPS_USE_EXTERNAL
+	default 120
+
+config CLOUD_WAIT_DURATION
+	int "Cloud connection acknowledge wait duration"
+	default 30
+	help
+	    How long the device should wait for a CONNACK
+	    event from the cloud.
+
+endmenu # Cloud
+
+config USE_AT_HOST
+	bool "Enable AT commands"
+	default y
+	select AT_HOST_LIBRARY
+	help
+		Enable the AT host library so that AT commands can be sent to and
+		received from a serial terminal.
+
+endmenu #Enable AT commands
+
+menu "Zephyr Kernel"
+source "$ZEPHYR_BASE/Kconfig.zephyr"
+endmenu #Zephyr Kernel
+
+menu "BLE"
+
+config MICROBIT_ID
+	string "Identifier for the microbit"
+	
+config BLE_CONNECT_TO_MICRO_BIT
+	bool "Enable VLE connecting to micro:bit"
+	default y
+
+endmenu #BLE
+
+menu "Path Module"
+
+config UNIQUE_ID_LEN
+	int "Length of unique marker id length"
+
+endmenu #Path Module
