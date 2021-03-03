@@ -1,0 +1,2 @@
+To run this sample, needs to wirte "fl_chart: ^0.12.3" under dependencies in pubspec.yaml file.
+main.dart can crash with the original one when import, can just cply paste and replace the original code.
