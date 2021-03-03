@@ -526,6 +526,7 @@ int app_gps(int fix_retries, int retry_interval)
 
 		// create dummy data, REMINDER: COMMENT WHEN RUNNING PROPER TESTS
 		create_dummy_gps_data(&last_pvt);
+		gps_struct_to_string(&gps_string, &last_pvt);
 		
 	} else {
 		gps_struct_to_string(&gps_string, &last_pvt);

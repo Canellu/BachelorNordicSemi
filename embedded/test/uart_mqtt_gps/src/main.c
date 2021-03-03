@@ -88,6 +88,11 @@ struct k_msgq sd_msg_q;
 static uint8_t sd_msgq_buffer[2 * sizeof(oasys_data_t)];
 static oasys_data_t oasys_data;
 
+// Time variables
+static uint16_t current_year	= -1;
+static uint8_t current_month 	= -1;
+static uint8_t current_day   	= -1;
+
 
 /* FUNCTION DECLARATIONS */
 
@@ -206,9 +211,6 @@ static int uart_module()
 	printk("\nuart test start\n");
 	printk("button 1: exit \nbutton 2: send uart signal\n\n");
 
-	uart_send(uart_dev1, uart_data_array[0]);
-	// 
-
 	/* UART loop */
 	for (int i = 0;; i++) {
 		k_msgq_get(&uart_msg_q, &uart_msg, K_FOREVER);
@@ -223,8 +225,20 @@ static int uart_module()
 		else {
 			// add to data array
 
+			// TODO: test timestamp to check if new day
+
+			oasys_data_t uart_data;
+
+			uart_data.year = current_year;
+			uart_data.month = current_month;
+			uart_data.day = current_day;
+			strcpy(uart_data.json_string, uart_msg);
+
+			// write to SD card
+			// k_msgq_put(&sd_msg_q, &uart_data, K_NO_WAIT);
+
 			// printk("\nUART message: %s", uart_msg);
-			strcpy(uart_data_array[i], uart_msg);
+			// strcpy(uart_data_array[i], uart_msg);
 		}
 	}
 	/* UART loop end */
@@ -260,11 +274,16 @@ static int gps_module()
 	printk("gps test start\n");
 
 	// CANDO: change parameter to timeout instead of no. of retries
-	app_gps(1000, 500);
+	app_gps(5, 500);
 	k_msgq_get(&gps_msg_q, &gps_data, K_NO_WAIT);
 
 	// print to terminal
 	printk("\n%s", gps_data.gps_string);
+
+	// update date CANDO: create function?
+	current_year = gps_data.year;
+	current_month = gps_data.month;
+	current_day = gps_data.day;
 
 	// {"lng":"23.771611","lat":"61.491275","d":"2020-03-06","t":"05:48:24"}
 	strcpy(gps_send_data.json_string, gps_data.gps_string);
@@ -279,7 +298,7 @@ static int gps_module()
 	// send time to sensors
 	uint8_t time_millis_str[16];
 	uint32_t time_millis = ((gps_data.hour*60*60)+(gps_data.minute*60)+gps_data.seconds)*1000;
-	snprintf(time_millis_str, sizeof(time_millis_str), "\"%02u", time_millis);
+	snprintf(time_millis_str, sizeof(time_millis_str), "{%02u}", time_millis);
 
 	uart_send(uart_dev1, time_millis_str);
 
@@ -428,13 +447,9 @@ void main(void)
 
 		message_queue_reset();
 
-		// app_sd();
-
 		gps_module();
 
 		// TEMPORARY TEST PRINTING WHAT WILL BE SENT TO SD CARD FROM GPS
-
-		app_sd();
 
 		// oasys_data_t test_data;
 
@@ -444,7 +459,9 @@ void main(void)
 		// printk("\n%s", test_data.json_string);
 
 
-		uart_module();	
+		uart_module();
+
+		app_sd();
 
 		printk("press button 1 to start mqtt\n");
 		printk("press button 2 to start wifi\n\n");
