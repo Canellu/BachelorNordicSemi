@@ -8,12 +8,7 @@
       href="https://fonts.googleapis.com/icon?family=Material+Icons"
       rel="stylesheet"
     />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css"
-      integrity="sha512-HK5fgLBL+xu6dm/Ii3z4xhlSUyZgTT9tuc/hSrtw6uzJOvgRr2a9jyxxT1ely+B+xFAmJKVSTbpM/CuL7qxO8w=="
-      crossorigin="anonymous"
-    />
+
     <link rel="stylesheet" href="css/materialize.min.css" />
     <link rel="stylesheet" href="css/styles.css" />
     <title>File Downloader</title>
@@ -34,8 +29,8 @@
     <div class="tabSelectorBottom yellow accent-4">
       <div class="container">
         <ul class="tabs tabs-fixed-width yellow accent-4">
-          <li class="tab"><a class="active" href="#info">Info</a></li>
-          <li class="tab"><a href="#terminal">Terminal</a></li>
+          <li class="tab"><a href="#info">Info</a></li>
+          <li class="tab"><a class="active" href="#terminal">Terminal</a></li>
           <li class="tab"><a href="#files">Files</a></li>
         </ul>
       </div>
@@ -131,14 +126,18 @@
 
         <div class="col s2">
           <!-- Info button, opens modal -->
-          <a class="modal-trigger" data-target="modal1" style="color: #26a69a">
-            <i class="fas fa-info-circle fa-2x"></i>
+          <a
+            class="modal-trigger"
+            data-target="commandModal"
+            style="color: #26a69a"
+          >
+            <i class="small material-icons infoCircle">info</i>
           </a>
         </div>
       </div>
 
       <!-- COMMAND MODAL -->
-      <div id="modal1" class="modal">
+      <div id="commandModal" class="modal">
         <div class="modal-content">
           <h4>Valid commands</h4>
           <p>Some commands...</p>
@@ -227,7 +226,7 @@
 
     <script src="js/materialize.min.js"></script>
     <script src="js/FileSaver.js"></script>
-    <script src="js/jszip.js"></script>
+    <script src="js/jszip.min.js"></script>
     <script src="js/app.js"></script>
   </body>
 </html>

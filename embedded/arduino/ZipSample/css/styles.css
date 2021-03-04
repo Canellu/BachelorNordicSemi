@@ -76,12 +76,23 @@ textarea {
   color: #ff9100;
 }
 
-.fa-info-circle {
+.modal-trigger {
   position: relative;
-  top: 30px;
+  top: 26px;
 }
-.fa-info-circle:active {
-  color: #ffd600;
+
+.infoCircle {
+  position: relative;
+  top: 8px;
+}
+
+.infoCircle:hover {
+  color: #2bbbad;
+  cursor: pointer;
+}
+
+.infoCircle:active {
+  color: #8bdad2;
 }
 
 .carousel .indicators .indicator-item {
