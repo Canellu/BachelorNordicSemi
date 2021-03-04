@@ -20,8 +20,7 @@
   </head>
   <body class="grey lighten-5">
     <!-- HEADER -->
-    <nav class="nav-extended">
-      <!-- LOGO -->
+    <nav>
       <div class="nav-wrapper yellow accent-4">
         <div class="container">
           <a href="/" class="center brand-logo grey-text text-darken-3">
@@ -32,8 +31,8 @@
     </nav>
 
     <!--  TAB SELECTOR: [STATS] [FILES] [TERMINAL]  -->
-    <div class="yellow accent-4">
-      <div class="nav-content container">
+    <div class="tabSelectorBottom yellow accent-4">
+      <div class="container">
         <ul class="tabs tabs-fixed-width yellow accent-4">
           <li class="tab"><a class="active" href="#info">Info</a></li>
           <li class="tab"><a href="#terminal">Terminal</a></li>
@@ -43,9 +42,9 @@
     </div>
 
     <!-- INFO TAB -->
-    <div class="container mtop col s12" id="info">
+    <div class="container mtop" id="info">
       <div class="row">
-        <div class="col s12">
+        <div class="col s12 m6 l4">
           <div class="card yellow darken-2">
             <div class="card-image glider">
               <img
@@ -63,9 +62,8 @@
             </div>
           </div>
         </div>
-      </div>
-      <div class="row">
-        <div class="col s4">
+
+        <div class="col s4 m6 l8">
           <div class="card yellow darken-3">
             <div class="card-content white-text">
               <span class="card-title">Some info</span>
@@ -73,21 +71,20 @@
             </div>
           </div>
         </div>
-        <div class="col s8">
+        <div class="col s8 m6 l4">
           <div class="card yellow darken-4">
             <div class="card-content white-text">
               <span class="card-title">Moar info</span>
               <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Quaerat
-                sapiente quasi iure ea sequi a doloribus ratione accusamus, esse
-                necessitatibus.
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Nihil
+                amet adipisci unde fugit! Deleniti libero numquam eligendi.
+                Repellendus officia quas nam vitae incidunt fuga inventore dicta
+                placeat blanditiis, veniam labore!
               </p>
             </div>
           </div>
         </div>
-      </div>
-      <div class="row">
-        <div class="col s6">
+        <div class="col s6 m7 l4">
           <div class="card yellow darken-5">
             <div class="card-content black-text">
               <span class="card-title">Some info</span>
@@ -95,7 +92,7 @@
             </div>
           </div>
         </div>
-        <div class="col s6">
+        <div class="col s6 m5 l4">
           <div class="card yellow accent-4">
             <div class="card-content black-text">
               <span class="card-title">Moar info</span>
@@ -107,7 +104,9 @@
           </div>
         </div>
       </div>
+      <!-- row -->
     </div>
+    <!-- INFO TAB -->
 
     <!-- TERMINAL TAB -->
     <div class="container mtop" id="terminal">
@@ -159,50 +158,18 @@
 
         <tbody class="tbodyCommands">
           <tr>
-            <td>bla bla timestamp?</td>
+            <td>T 20</td>
           </tr>
           <tr>
-            <td>bla bla timestamp?</td>
-          </tr>
-          <tr>
-            <td>bla bla timestamp?</td>
-          </tr>
-          <tr>
-            <td>bla bla timestamp?</td>
-          </tr>
-          <tr>
-            <td>bla bla timestamp?</td>
-          </tr>
-          <tr>
-            <td>bla bla timestamp?</td>
-          </tr>
-          <tr>
-            <td>bla bla timestamp?</td>
-          </tr>
-          <tr>
-            <td>bla bla timestamp?</td>
-          </tr>
-          <tr>
-            <td>bla bla timestamp?</td>
-          </tr>
-          <tr>
-            <td>bla bla timestamp?</td>
-          </tr>
-          <tr>
-            <td>bla bla timestamp?</td>
-          </tr>
-          <tr>
-            <td>bla bla timestamp?</td>
-          </tr>
-          <tr>
-            <td>bla bla timestamp?</td>
+            <td>P 4</td>
           </tr>
         </tbody>
       </table>
     </div>
+    <!-- TERMINAL TAB -->
 
     <!-- FILES TAB -->
-    <div class="container mtop col s12" id="files">
+    <div class="container mtop" id="files">
       <!-- CARDS: file data -->
       <div class="row">
         <div class="col s6">
@@ -232,60 +199,7 @@
           </tr>
         </thead>
 
-        <tbody class="tbodyFiles">
-          <tr>
-            <td>2020-03-09</td>
-            <td>123</td>
-          </tr>
-          <tr>
-            <td>2020-03-09</td>
-            <td>123</td>
-          </tr>
-          <tr>
-            <td>2020-03-09</td>
-            <td>123</td>
-          </tr>
-          <tr>
-            <td>2020-03-09</td>
-            <td>123</td>
-          </tr>
-          <tr>
-            <td>2020-03-09</td>
-            <td>123</td>
-          </tr>
-          <tr>
-            <td>2020-03-09</td>
-            <td>123</td>
-          </tr>
-          <tr>
-            <td>2020-03-09</td>
-            <td>123</td>
-          </tr>
-          <tr>
-            <td>2020-03-09</td>
-            <td>123</td>
-          </tr>
-          <tr>
-            <td>2020-03-09</td>
-            <td>123</td>
-          </tr>
-          <tr>
-            <td>2020-03-09</td>
-            <td>123</td>
-          </tr>
-          <tr>
-            <td>2020-03-09</td>
-            <td>123</td>
-          </tr>
-          <tr>
-            <td>2020-03-09</td>
-            <td>123</td>
-          </tr>
-          <tr>
-            <td>2020-03-09</td>
-            <td>123</td>
-          </tr>
-        </tbody>
+        <tbody class="tbodyFiles"></tbody>
       </table>
 
       <!-- DOWNLOAD BUTTON -->
@@ -308,6 +222,8 @@
         </div>
       </div>
     </div>
+
+    <!-- FILES TAB-->
 
     <script src="js/materialize.min.js"></script>
     <script src="js/FileSaver.js"></script>
