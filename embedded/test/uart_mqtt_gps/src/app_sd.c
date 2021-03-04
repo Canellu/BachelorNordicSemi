@@ -18,6 +18,10 @@
 
 extern struct k_msgq sd_msg_q;
 
+uint16_t	current_year = -1;
+uint8_t		current_month = -1;
+uint8_t		current_day = -1;
+
 static FATFS fat_fs;
 /* mounting info */
 static struct fs_mount_t mp = {
@@ -68,9 +72,42 @@ static int lsdir(const char *path)
 	return res;
 }
 
-	// Create absolute path for filename
 
-static void create_file_path(char *file_path, char *filename) {
+static int create_file_name(char *file_name, oasys_data_t *sd_msg)
+{
+
+	// test date vs currently saved
+	if(current_year != sd_msg->year || current_month != sd_msg->month || current_day != sd_msg->day)
+	{
+		// update date
+		current_year = sd_msg->year;
+		current_month = sd_msg->month;
+		current_day = sd_msg->day;
+
+		// create filename, format: [yyyy-mm-dd]
+		uint8_t temp_str[16];
+
+		// empty file_name
+		strcpy(file_name, "");
+
+		snprintf(temp_str, sizeof(temp_str), "%02u", sd_msg->year);
+		strcat(file_name, temp_str);
+		snprintf(temp_str, sizeof(temp_str), "%02u", sd_msg->month);
+		strcat(file_name, temp_str);
+		snprintf(temp_str, sizeof(temp_str), "%02u.txt", sd_msg->day);
+		strcat(file_name, temp_str);
+
+		printk("\nCreated file path with name: %s", file_name);
+	}
+
+	return 0;
+}
+
+// Create absolute path for filename
+static void create_file_path(char *file_path, char *filename) 
+{
+
+	printk("\nCreating file path");
 
 	// empty file_path
     strcpy(file_path, "");
@@ -81,7 +118,8 @@ static void create_file_path(char *file_path, char *filename) {
 }
 
 // reads entire file
-static int read_file(char *file_path, char *data, int size) {
+static int read_file(char *file_path, char *data, int size) 
+{
 
 	// For catching return values from fs_functions
 	int ret = 1;
@@ -103,7 +141,8 @@ static int read_file(char *file_path, char *data, int size) {
 }
 
 // reads per JSON
-static int read_JSON(char *file_path, char *data, int size, uint32_t *cursor) {
+static int read_JSON(char *file_path, char *data, int size, uint32_t *cursor) 
+{
 
 	// For catching return values from fs_functions
 	int ret = 1;
@@ -149,7 +188,8 @@ static int read_JSON(char *file_path, char *data, int size, uint32_t *cursor) {
 }
 
 // write into file, creates new file if it doesn't exist
-static int write_file(char *file_path, char *data, int size) {
+static int write_file(char *file_path, char *data, int size) 
+{
 	struct fs_file_t file;
 	fs_open(&file, file_path, (FS_O_WRITE | FS_O_APPEND | FS_O_CREATE));
 	fs_write(&file, data, size);
@@ -159,7 +199,8 @@ static int write_file(char *file_path, char *data, int size) {
 	return 0;
 }
 
-static int mountSD() {
+static int mountSD() 
+{
 	
 	static const char *disk_pdrv = "SD";
 	uint64_t memory_size_mb;
@@ -210,11 +251,8 @@ static int mountSD() {
 void app_sd(void)
 {
     oasys_data_t sd_msg;
-    uint16_t	current_year = -1;
-	uint8_t		current_month = -1;
-	uint8_t		current_day = -1;
 
-    uint8_t current_filename[16] = "";
+    uint8_t file_name[16] = "";
 	char file_path[32] = "";
 
 	mountSD();
@@ -225,32 +263,11 @@ void app_sd(void)
         // get msg from main
 		k_msgq_get(&sd_msg_q, &sd_msg, K_FOREVER);
 
-        // test date vs currently saved
-        if(current_year != sd_msg.year || current_month != sd_msg.month || current_day != sd_msg.day)
-        {
-            current_year = sd_msg.year;
-            current_month = sd_msg.month;
-            current_day = sd_msg.day;
+		// create file name if it does not exist
+		create_file_name(file_name, &sd_msg);
 
-            // create filename format: [yyyy-mm-dd]
-            uint8_t temp_str[16];
-
-            strcpy(current_filename, "");
- 
-            snprintf(temp_str, sizeof(temp_str), "%02u", sd_msg.year);
-            strcat(current_filename, temp_str);
-            snprintf(temp_str, sizeof(temp_str), "%02u", sd_msg.month);
-            strcat(current_filename, temp_str);
-            snprintf(temp_str, sizeof(temp_str), "%02u.txt", sd_msg.day);
-            strcat(current_filename, temp_str);
-
-			printk("\nCreating file path with name: %s", current_filename);
-
-            // create file path
-            create_file_path(file_path, current_filename);
-        }
-
-		printk("\nCreating file path");
+		// create file path
+		create_file_path(file_path, file_name);
 
         // write
         write_file(file_path, sd_msg.json_string, strlen(sd_msg.json_string));
@@ -258,7 +275,7 @@ void app_sd(void)
 		uint8_t json_text[128] = "";
 		uint32_t cursor = 0;
 
-        read_JSON(file_path, json_text, sizeof(json_text), &cursor);
-        read_JSON(file_path, json_text, sizeof(json_text), &cursor);
+        // read_JSON(file_path, json_text, sizeof(json_text), &cursor);
+        // read_JSON(file_path, json_text, sizeof(json_text), &cursor);
     }
 }

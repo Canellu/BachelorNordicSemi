@@ -1,10 +1,10 @@
 &uart1 {
 	status = "okay";
 	current-speed = <115200>;
-	tx-pin = <28>;
-	rx-pin = <27>;
-	rts-pin = <25>;
-	cts-pin = <26>;
+	tx-pin = <11>;
+	rx-pin = <10>;
+	rts-pin = <12>;
+	cts-pin = <13>;
 };
 
 &i2c2 {
@@ -14,20 +14,20 @@
 &uart2 {
 	status = "okay";
 	current-speed = <115200>;
-	tx-pin = <15>;
-	rx-pin = <14>;
-	rts-pin = <16>;
-	cts-pin = <17>;
+	tx-pin = <24>;
+	rx-pin = <23>;
+	rts-pin = <26>;
+	cts-pin = <27>;
 };
 
 &spi3 {
    
     status = "okay";
-    sck-pin = <10>;
-    mosi-pin = <12>;
-    miso-pin = <11>;
+    sck-pin = <19>;
+    mosi-pin = <17>;
+    miso-pin = <18>;
 
-    cs-gpios = <&gpio0 13 GPIO_ACTIVE_LOW>;
+    cs-gpios = <&gpio0 16 GPIO_ACTIVE_LOW>;
 
     sdhc0: sdhc@0 {
             compatible = "zephyr,mmc-spi-slot";
