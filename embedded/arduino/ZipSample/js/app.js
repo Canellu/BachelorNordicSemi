@@ -16,6 +16,10 @@ var fileList = document.querySelector(".tbodyFiles");
 document.addEventListener("DOMContentLoaded", function () {
   M.Tabs.init(document.querySelectorAll(".tabs"));
   M.Modal.init(document.querySelectorAll(".modal"));
+  M.Carousel.init(document.querySelectorAll(".carousel"), {
+    indicators: true,
+    noWrap: true,
+  });
 });
 
 // M.AutoInit();
