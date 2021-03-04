@@ -79,3 +79,18 @@ textarea {
 .fa-info-circle:active {
   color: #ffd600;
 }
+
+.carousel .indicators .indicator-item {
+  background-color: rgba(253, 216, 53, 0.4);
+}
+.carousel .indicators .indicator-item.active {
+  background-color: rgb(255, 145, 0);
+}
+
+.card-image {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center;
+  padding: 40px;
+  max-width: 100%;
+}
