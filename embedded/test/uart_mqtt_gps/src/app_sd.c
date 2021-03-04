@@ -107,7 +107,7 @@ static int create_file_name(char *file_name, oasys_data_t *sd_msg)
 static void create_file_path(char *file_path, char *filename) 
 {
 
-	printk("\nCreating file path");
+	// printk("\nCreating file path");
 
 	// empty file_path
     strcpy(file_path, "");
@@ -172,7 +172,7 @@ static int read_JSON(char *file_path, char *data, int size, uint32_t *cursor)
 		{
 			strcat(data, buffer);
 			*cursor = fs_tell(&file);
-			printk("\n%s %d", data, *cursor);
+			// printk("\n%s %d", data, *cursor);
 			return 0;
 		}
 		else
@@ -255,8 +255,10 @@ void app_sd(void)
     uint8_t file_name[16] = "";
 	char file_path[32] = "";
 
-	mountSD();
+	uint8_t json_text[128] = "";
+	uint32_t cursor = 0;
 
+	mountSD();
 
     while(1)
     {
@@ -265,17 +267,69 @@ void app_sd(void)
 
 		// create file name if it does not exist
 		create_file_name(file_name, &sd_msg);
-
 		// create file path
 		create_file_path(file_path, file_name);
 
-        // write
-        write_file(file_path, sd_msg.json_string, strlen(sd_msg.json_string));
+		switch(sd_msg.event) {
+			case WRITE_FILE:
+				// write
+				write_file(file_path, sd_msg.json_string, strlen(sd_msg.json_string));
 
-		uint8_t json_text[128] = "";
-		uint32_t cursor = 0;
+			break;
+			case READ_JSON:
+				read_JSON(file_path, json_text, sizeof(json_text), &cursor);
+				printk("\nJSON: %s, cursor: %d", json_text, cursor);
 
-        // read_JSON(file_path, json_text, sizeof(json_text), &cursor);
-        // read_JSON(file_path, json_text, sizeof(json_text), &cursor);
+			break;
+			default:
+				printk("\nUnknown event type");
+
+		}
+    }
+}
+
+
+void app_sd_thread(void *unused1, void *unused2, void *unused3)
+{
+    oasys_data_t sd_msg;
+
+    uint8_t file_name[16] = "";
+	char file_path[32] = "";
+
+	uint8_t file_text[1024] = "";
+	uint8_t json_text[128] = "";
+	uint32_t cursor = 0;
+
+	mountSD();
+
+    while(1)
+    {
+        // get msg from main
+		k_msgq_get(&sd_msg_q, &sd_msg, K_FOREVER);
+
+		// create file name if it does not exist
+		create_file_name(file_name, &sd_msg);
+		// create file path
+		create_file_path(file_path, file_name);
+
+		switch(sd_msg.event) {
+			case WRITE_FILE:
+				write_file(file_path, sd_msg.json_string, strlen(sd_msg.json_string));
+
+			break;
+			case READ_JSON:
+				read_JSON(file_path, json_text, sizeof(json_text), &cursor);
+				printk("\nJSON: %s, cursor: %d", json_text, cursor);
+
+			break;
+			case READ_FILE:
+				read_file(file_path, file_text, sizeof(file_text));
+				printk("\nFile content:\n\n%s", file_text);
+
+			break;
+			default:
+				printk("\nUnknown SD event type");
+
+		} // switch case end
     }
 }

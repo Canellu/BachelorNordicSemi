@@ -57,12 +57,14 @@ void setup(void) {
 }
 
 void loop(void) {
-  webSocket.loop();
-  server.handleClient();
+
+  webSocket.loop();         // keeps tcp connection alive?
+  server.handleClient();    // checks if client is connected
 
   // read input from serial and send to webpage
   if(Serial.available() > 0) {
     char c[] = {(char)Serial.read()};
+    Serial.print(c);
     webSocket.broadcastTXT(c, sizeof(c));
   }
 }

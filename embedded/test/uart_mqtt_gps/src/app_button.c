@@ -15,9 +15,9 @@ static bool led1_on = false;
 #define MSG_2 "Pressed Button 2"
 #define MSG_3 "{\"health\":\"true\"}"
 #define MSG_4 "{\"health\":\"false\"}"
-#define MSG_DEFAULT "{\"hi\"}\n"
-#define MSG_DEFAULT2 "{ABCDEFGHIJ}\n"
-#define MSG_DEFAULT3 "{short}"
+#define MSG_DEFAULT "\"hi\"\n"
+#define MSG_DEFAULT2 "ABCDEFGHIJ"
+#define MSG_DEFAULT3 "short"
 
 // external variables
 extern enum uart_device_type uart_dev1;
