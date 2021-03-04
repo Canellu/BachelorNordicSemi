@@ -12,11 +12,20 @@
 #include "app_sd.h"
 
 
+/* Stack definition for application */
+static K_THREAD_STACK_DEFINE(sd_stack_area, 4096);
+
+/* Threads */
+static struct k_thread sd_thread;
+
+k_tid_t sd_tid;
+
+
 /* STRUCTS AND ENUMS */
 
 // Enumerations
+// CANDO: typedef everything
 
-// CANDO: typedef
 enum oasys_event_type { // currently not in use
 	EVT_INIT,
 	EVT_UART,
@@ -85,8 +94,7 @@ static bool data_available_to_send = false;
 
 // SD Card variables
 struct k_msgq sd_msg_q;
-static uint8_t sd_msgq_buffer[2 * sizeof(oasys_data_t)];
-static oasys_data_t oasys_data;
+static uint8_t sd_msgq_buffer[5 * sizeof(oasys_data_t)];
 
 // Time variables
 static uint16_t current_year	= -1;
@@ -155,6 +163,28 @@ static int button_wait()
 	return 0;
 }
 
+// fills out current date, sends string and event type
+static int sd_msg_fill_send(void *data_string, enum sd_event_type event)
+{
+	oasys_data_t sd_msg;
+
+	sd_msg.event = event;
+
+	strcpy(sd_msg.json_string, data_string);
+
+	sd_msg.year = current_year;
+	sd_msg.month = current_month;
+	sd_msg.day = current_day;
+
+	// add to sd card message queue
+	k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
+
+	return 0;
+}
+
+
+// initialize message queues
+//TODO: replace sizeof parameter with type instead of variable
 static int message_queue_init()
 {
 	// button
@@ -171,12 +201,12 @@ static int message_queue_init()
 	k_msgq_init(&mqtt_msg_q, mqtt_msgq_buffer, sizeof(mqtt_msg), 3);
 
 	// SD
-	k_msgq_init(&sd_msg_q, sd_msgq_buffer, sizeof(oasys_data), 2);
+	k_msgq_init(&sd_msg_q, sd_msgq_buffer, sizeof(oasys_data_t), 5);
 
 	return 0;
 }
 
-//TODO: pass devices to init
+//TODO: pass devices to initialise
 static int device_inits()
 {	
 	button_dev_init();
@@ -223,21 +253,13 @@ static int uart_module()
 			break;
 		}
 		else {
-			// add to data array
 
 			// TODO: test timestamp to check if new day
 
-			oasys_data_t uart_data;
-
-			uart_data.year = current_year;
-			uart_data.month = current_month;
-			uart_data.day = current_day;
-			strcpy(uart_data.json_string, uart_msg);
-
-			// write to SD card
-			// k_msgq_put(&sd_msg_q, &uart_data, K_NO_WAIT);
+			sd_msg_fill_send(uart_msg, WRITE_FILE);
 
 			// printk("\nUART message: %s", uart_msg);
+			// add to data array
 			// strcpy(uart_data_array[i], uart_msg);
 		}
 	}
@@ -265,8 +287,6 @@ static int uart_module()
 // Currently on hold until LTE and GPS can function at the same time
 static int gps_module()
 {
-	oasys_data_t gps_send_data;
-
 	printk("\n\npress button 1 to start gps test\n\n");
 
 	button_wait();
@@ -278,6 +298,7 @@ static int gps_module()
 	k_msgq_get(&gps_msg_q, &gps_data, K_NO_WAIT);
 
 	// print to terminal
+	// {"lng":"23.771611","lat":"61.491275"}
 	printk("\n%s", gps_data.gps_string);
 
 	// update date CANDO: create function?
@@ -285,20 +306,13 @@ static int gps_module()
 	current_month = gps_data.month;
 	current_day = gps_data.day;
 
-	// {"lng":"23.771611","lat":"61.491275","d":"2020-03-06","t":"05:48:24"}
-	strcpy(gps_send_data.json_string, gps_data.gps_string);
-
-	gps_send_data.year = gps_data.year;
-	gps_send_data.month = gps_data.month;
-	gps_send_data.day = gps_data.day;
-
-	// add to sd card message queue
-	k_msgq_put(&sd_msg_q, &gps_send_data, K_NO_WAIT);
+	// save gps data on sd card
+	sd_msg_fill_send(gps_data.gps_string, WRITE_FILE);
 
 	// send time to sensors
 	uint8_t time_millis_str[16];
 	uint32_t time_millis = ((gps_data.hour*60*60)+(gps_data.minute*60)+gps_data.seconds)*1000;
-	snprintf(time_millis_str, sizeof(time_millis_str), "{%02u}", time_millis);
+	snprintf(time_millis_str, sizeof(time_millis_str), "%02u", time_millis);
 
 	uart_send(uart_dev1, time_millis_str);
 
@@ -438,6 +452,11 @@ void main(void)
 	// message queues
 	message_queue_init();
 
+	// sd card thread
+	sd_tid = k_thread_create(&sd_thread, sd_stack_area, K_THREAD_STACK_SIZEOF(sd_stack_area),
+							 (k_thread_entry_t)app_sd_thread, NULL, NULL, NULL,
+							 7, 0, K_NO_WAIT);
+
 	printk("\n\n**** NordicOasys v0.5 - Started ****\n\n");
 	printk("press button 1 to start\n\n");
 
@@ -461,7 +480,15 @@ void main(void)
 
 		uart_module();
 
-		app_sd();
+		// for testing purposes, read JSON
+		sd_msg_fill_send("", READ_JSON);
+		sd_msg_fill_send("", READ_JSON);
+
+		// read entire file
+		k_sleep(K_MSEC(2000));
+		sd_msg_fill_send("", READ_FILE);
+
+		// app_sd();
 
 		printk("press button 1 to start mqtt\n");
 		printk("press button 2 to start wifi\n\n");

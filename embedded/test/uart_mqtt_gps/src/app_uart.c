@@ -23,7 +23,7 @@ static void uart_cb(const struct device *dev_uart, void *context)
 	if (uart_irq_tx_ready(dev_uart)) {
 		(void)uart_fifo_fill(dev_uart, tx_buf, sizeof(tx_buf));
 		uart_irq_tx_disable(dev_uart);
-		printk("sent\n");
+		printk("\nsent");
 	}
 
 	// read uart msg, only reads in JSON format
