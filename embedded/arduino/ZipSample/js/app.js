@@ -43,6 +43,9 @@ addFileRow("TOO BIG", ">9000");
 addFileRow("TOO23r BIG", ">9000");
 addFileRow("23rG", ">23r23r00");
 
+
+
+
 function createZip() {
   // Instantiate ZIP object
   var zip = new JSZip();
@@ -60,3 +63,4 @@ function createZip() {
       saveAs(content, "GliderData.zip");
     });
 }
+

@@ -14,13 +14,14 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "app_uart.h"
 #include "app_sd.h"
 
 extern struct k_msgq sd_msg_q;
 
-uint16_t	current_year = -1;
-uint8_t		current_month = -1;
-uint8_t		current_day = -1;
+uint16_t current_year = -1;
+uint8_t current_month = -1;
+uint8_t current_day = -1;
 
 static FATFS fat_fs;
 /* mounting info */
@@ -43,26 +44,32 @@ static int lsdir(const char *path)
 
 	/* Verify fs_opendir() */
 	res = fs_opendir(&dirp, path);
-	if (res) {
+	if (res)
+	{
 		printk("Error opening dir %s [%d]\n", path, res);
 		return res;
 	}
 
 	printk("\nListing dir %s ...\n", path);
-	for (;;) {
+	for (;;)
+	{
 		/* Verify fs_readdir() */
 		res = fs_readdir(&dirp, &entry);
 
 		/* entry.name[0] == 0 means end-of-dir */
-		if (res || entry.name[0] == 0) {
+		if (res || entry.name[0] == 0)
+		{
 			break;
 		}
 
-		if (entry.type == FS_DIR_ENTRY_DIR) {
+		if (entry.type == FS_DIR_ENTRY_DIR)
+		{
 			printk("[DIR ] %s\n", entry.name);
-		} else {
+		}
+		else
+		{
 			printk("[FILE] %s (size = %zu)\n",
-				entry.name, entry.size);
+				   entry.name, entry.size);
 		}
 	}
 
@@ -72,12 +79,11 @@ static int lsdir(const char *path)
 	return res;
 }
 
-
 static int create_file_name(char *file_name, oasys_data_t *sd_msg)
 {
 
 	// test date vs currently saved
-	if(current_year != sd_msg->year || current_month != sd_msg->month || current_day != sd_msg->day)
+	if (current_year != sd_msg->year || current_month != sd_msg->month || current_day != sd_msg->day)
 	{
 		// update date
 		current_year = sd_msg->year;
@@ -104,13 +110,13 @@ static int create_file_name(char *file_name, oasys_data_t *sd_msg)
 }
 
 // Create absolute path for filename
-static void create_file_path(char *file_path, char *filename) 
+static void create_file_path(char *file_path, char *filename)
 {
 
 	// printk("\nCreating file path");
 
 	// empty file_path
-    strcpy(file_path, "");
+	strcpy(file_path, "");
 
 	strcat(file_path, disk_mount_pt);
 	strcat(file_path, "/");
@@ -118,7 +124,7 @@ static void create_file_path(char *file_path, char *filename)
 }
 
 // reads entire file
-static int read_file(char *file_path, char *data, int size) 
+static int read_file(char *file_path, char *data, int size)
 {
 
 	// For catching return values from fs_functions
@@ -128,20 +134,25 @@ static int read_file(char *file_path, char *data, int size)
 	fs_open(&file, file_path, FS_O_READ);
 
 	// Read characters until end of file
-	uint8_t buffer[8] = "";
-	while (1) {
-		ret = fs_read(&file, &buffer, 1);
-		if (ret == 0) break;
-		strcat(data, buffer);
-	} 
-	fs_close(&file);
+	uint8_t buffer[16] = "";
+	while (1)
+	{
+		ret = fs_read(&file, &buffer, 8);
+		if (ret == 0)
+			break;
+		// uart_send(UART_1, buffer);
+		printk("%s", buffer);
+		k_sleep(K_MSEC(1));
+	}
 
+	printk("\n\nFinished reading file");
+	fs_close(&file);
 
 	return 0;
 }
 
 // reads per JSON
-static int read_JSON(char *file_path, char *data, int size, uint32_t *cursor) 
+static int read_JSON(char *file_path, char *data, int size, uint32_t *cursor)
 {
 
 	// For catching return values from fs_functions
@@ -157,7 +168,8 @@ static int read_JSON(char *file_path, char *data, int size, uint32_t *cursor)
 
 	uint8_t buffer[8] = "";
 
-	while (1) {
+	while (1)
+	{
 		ret = fs_read(&file, &buffer, 1);
 		if (ret == 0)
 		{
@@ -183,12 +195,11 @@ static int read_JSON(char *file_path, char *data, int size, uint32_t *cursor)
 
 	fs_close(&file);
 
-
 	return 0;
 }
 
 // write into file, creates new file if it doesn't exist
-static int write_file(char *file_path, char *data, int size) 
+static int write_file(char *file_path, char *data, int size)
 {
 	struct fs_file_t file;
 	fs_open(&file, file_path, (FS_O_WRITE | FS_O_APPEND | FS_O_CREATE));
@@ -199,29 +210,33 @@ static int write_file(char *file_path, char *data, int size)
 	return 0;
 }
 
-static int mountSD() 
+static int mountSD()
 {
-	
+
 	static const char *disk_pdrv = "SD";
 	uint64_t memory_size_mb;
 	uint32_t block_count;
 	uint32_t block_size;
 
-	do {
-		if (disk_access_init(disk_pdrv) != 0) {
-		printk("Storage init ERROR!");
-		break;
+	do
+	{
+		if (disk_access_init(disk_pdrv) != 0)
+		{
+			printk("Storage init ERROR!");
+			break;
 		}
 
 		if (disk_access_ioctl(disk_pdrv,
-				DISK_IOCTL_GET_SECTOR_COUNT, &block_count)) {
+							  DISK_IOCTL_GET_SECTOR_COUNT, &block_count))
+		{
 			printk("Unable to get sector count");
 			break;
 		}
 		printk("Block count %u", block_count);
 
 		if (disk_access_ioctl(disk_pdrv,
-				DISK_IOCTL_GET_SECTOR_SIZE, &block_size)) {
+							  DISK_IOCTL_GET_SECTOR_SIZE, &block_size))
+		{
 			printk("Unable to get sector size");
 			break;
 		}
@@ -229,16 +244,18 @@ static int mountSD()
 
 		memory_size_mb = (uint64_t)block_count * block_size;
 		printk("Memory Size(MB) %u\n", (uint32_t)(memory_size_mb >> 20));
-		
 
 		mp.mnt_point = disk_mount_pt;
 
 		int res = fs_mount(&mp);
 
-		if (res == FR_OK) {
+		if (res == FR_OK)
+		{
 			printk("Disk mounted.\n");
 			lsdir(disk_mount_pt);
-		} else {
+		}
+		else
+		{
 			printk("Error mounting disk.\n");
 			return res;
 		}
@@ -247,53 +264,11 @@ static int mountSD()
 	return 0;
 }
 
-
-void app_sd(void)
-{
-    oasys_data_t sd_msg;
-
-    uint8_t file_name[16] = "";
-	char file_path[32] = "";
-
-	uint8_t json_text[128] = "";
-	uint32_t cursor = 0;
-
-	mountSD();
-
-    while(1)
-    {
-        // get msg from main
-		k_msgq_get(&sd_msg_q, &sd_msg, K_FOREVER);
-
-		// create file name if it does not exist
-		create_file_name(file_name, &sd_msg);
-		// create file path
-		create_file_path(file_path, file_name);
-
-		switch(sd_msg.event) {
-			case WRITE_FILE:
-				// write
-				write_file(file_path, sd_msg.json_string, strlen(sd_msg.json_string));
-
-			break;
-			case READ_JSON:
-				read_JSON(file_path, json_text, sizeof(json_text), &cursor);
-				printk("\nJSON: %s, cursor: %d", json_text, cursor);
-
-			break;
-			default:
-				printk("\nUnknown event type");
-
-		}
-    }
-}
-
-
 void app_sd_thread(void *unused1, void *unused2, void *unused3)
 {
-    oasys_data_t sd_msg;
+	oasys_data_t sd_msg;
 
-    uint8_t file_name[16] = "";
+	uint8_t file_name[16] = "";
 	char file_path[32] = "";
 
 	uint8_t file_text[1024] = "";
@@ -302,9 +277,9 @@ void app_sd_thread(void *unused1, void *unused2, void *unused3)
 
 	mountSD();
 
-    while(1)
-    {
-        // get msg from main
+	while (1)
+	{
+		// get msg from main
 		k_msgq_get(&sd_msg_q, &sd_msg, K_FOREVER);
 
 		// create file name if it does not exist
@@ -312,24 +287,26 @@ void app_sd_thread(void *unused1, void *unused2, void *unused3)
 		// create file path
 		create_file_path(file_path, file_name);
 
-		switch(sd_msg.event) {
-			case WRITE_FILE:
-				write_file(file_path, sd_msg.json_string, strlen(sd_msg.json_string));
+		switch (sd_msg.event)
+		{
+		case WRITE_FILE:
+			write_file(file_path, sd_msg.json_string, strlen(sd_msg.json_string));
 
 			break;
-			case READ_JSON:
-				read_JSON(file_path, json_text, sizeof(json_text), &cursor);
-				printk("\nJSON: %s, cursor: %d", json_text, cursor);
+		case READ_JSON:
+			read_JSON(file_path, json_text, sizeof(json_text), &cursor);
+			printk("\nJSON: %s, cursor: %d", json_text, cursor);
 
 			break;
-			case READ_FILE:
-				read_file(file_path, file_text, sizeof(file_text));
-				printk("\nFile content:\n\n%s", file_text);
+		case READ_FILE:
+			printk("\nIn read file\n");
+			read_file(file_path, file_text, sizeof(file_text));
+			printk("\nFile content:\n\n%s", file_text);
 
 			break;
-			default:
-				printk("\nUnknown SD event type");
+		default:
+			printk("\nUnknown SD event type");
 
 		} // switch case end
-    }
+	}
 }

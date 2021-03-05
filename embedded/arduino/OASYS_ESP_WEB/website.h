@@ -208,7 +208,7 @@ const char web[] PROGMEM = R"====(
         <div class="files">
             <div class="filesTitle">Files in SD</div>
             <div class="fileWindow">
-                <textarea class="textAreaSD">wefwefewfwf</textarea>
+                <textarea class="textAreaSD"></textarea>
             </div>
             <button class="showFilesBtn">Show files</button>
             <button class="downloadBtn">Download from SD</button>

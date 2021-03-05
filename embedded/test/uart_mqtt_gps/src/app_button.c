@@ -30,10 +30,8 @@ static int app_button_config;
 extern struct k_msgq uart_msg_q;
 extern struct k_msgq mqtt_msg_q;
 
-
 // LOCAL
 const struct device *dev_button;
-
 
 static void button_handler(uint32_t button_states, uint32_t has_changed)
 {
@@ -48,53 +46,62 @@ static void button_handler(uint32_t button_states, uint32_t has_changed)
 	// TODO: create functions for the cases
 	switch (app_button_config)
 	{
-		case 0: // for waiting
-			if(has_changed == 1 && !gpio_pin_get(dev_button, 6)) {
-				app_button_ret_val = 1;
-				k_msgq_put(&button_msg_qr, &app_button_ret_val, K_NO_WAIT);
-			}
-			break;
-
-		case 1: // UART
-			if(has_changed == 1 && !gpio_pin_get(dev_button, 6)) {
-				k_msgq_put(&uart_msg_q, "{exit}", K_NO_WAIT);
-			}
-			if(has_changed == 2 && !gpio_pin_get(dev_button, 7)) {
-				uart_send(uart_dev1, MSG_DEFAULT2);
-			}
-			break;
-
-		case 2: // MQTT
-			if(has_changed == 1 && !gpio_pin_get(dev_button, 6)) {
-				k_msgq_put(&mqtt_msg_q, "exit", K_NO_WAIT);
-			}
-
-			else if(has_changed == 2 && !gpio_pin_get(dev_button, 7)) {
-				app_data_publish(MSG_2, sizeof(MSG_2));
-			}
-
-			else if(has_changed == 4) {
-				app_data_publish(MSG_3, sizeof(MSG_3));
-			}
-
-			else if(has_changed == 8) {
-				app_data_publish(MSG_4, sizeof(MSG_4));
-			}
-			break;
-
-		case 3: // Choice: wifi or mqtt
-			if(has_changed == 1 && !gpio_pin_get(dev_button, 6)) {
-				app_button_ret_val = 1;
-			}
-
-			else if(has_changed == 2 && !gpio_pin_get(dev_button, 7)) {
-				app_button_ret_val = 2;
-			}
-
+	case 0: // for waiting
+		if (has_changed == 1 && !gpio_pin_get(dev_button, 6))
+		{
+			app_button_ret_val = 1;
 			k_msgq_put(&button_msg_qr, &app_button_ret_val, K_NO_WAIT);
+		}
+		break;
 
-			break;
-		
+	case 1: // UART
+		if (has_changed == 1 && !gpio_pin_get(dev_button, 6))
+		{
+			k_msgq_put(&uart_msg_q, "{exit}", K_NO_WAIT);
+		}
+		if (has_changed == 2 && !gpio_pin_get(dev_button, 7))
+		{
+			uart_send(uart_dev1, MSG_3);
+		}
+		break;
+
+	case 2: // MQTT
+		if (has_changed == 1 && !gpio_pin_get(dev_button, 6))
+		{
+			k_msgq_put(&mqtt_msg_q, "exit", K_NO_WAIT);
+		}
+
+		else if (has_changed == 2 && !gpio_pin_get(dev_button, 7))
+		{
+			app_data_publish(MSG_2, sizeof(MSG_2));
+		}
+
+		else if (has_changed == 4)
+		{
+			app_data_publish(MSG_3, sizeof(MSG_3));
+		}
+
+		else if (has_changed == 8)
+		{
+			app_data_publish(MSG_4, sizeof(MSG_4));
+		}
+		break;
+
+	case 3: // Choice: wifi or mqtt
+		if (has_changed == 1 && !gpio_pin_get(dev_button, 6))
+		{
+			app_button_ret_val = 1;
+		}
+
+		else if (has_changed == 2 && !gpio_pin_get(dev_button, 7))
+		{
+			app_button_ret_val = 2;
+		}
+
+		k_msgq_put(&button_msg_qr, &app_button_ret_val, K_NO_WAIT);
+
+		break;
+
 		// case 999: // DO NOT USE, ONLY FOR TEMPLATE
 		// 	if(has_changed == 1 && !gpio_pin_get(dev_button, 6)) {
 		// 		// empty
@@ -113,15 +120,14 @@ static void button_handler(uint32_t button_states, uint32_t has_changed)
 		// 	}
 		// 	break;
 
-		default:
-			printk("\nunregistered button configuration\n");
-			break;
+	default:
+		printk("\nunregistered button configuration\n");
+		break;
 	}
-
 }
 
 // initialize buttons
-void button_dev_init(void) 
+void button_dev_init(void)
 {
 	dev_button = device_get_binding("GPIO_0");
 	dk_buttons_init(button_handler);
@@ -132,14 +138,14 @@ int toggle_LED(int led_val)
 {
 	switch (led_val)
 	{
-		case 1:
-			led1_on = !led1_on;
-			dk_set_led(DK_LED1, led1_on);
-			break;
+	case 1:
+		led1_on = !led1_on;
+		dk_set_led(DK_LED1, led1_on);
+		break;
 
-		default:
-			printk("\nunknown led value\n");
-			break;
+	default:
+		printk("\nunknown led value\n");
+		break;
 	}
 
 	return 0;

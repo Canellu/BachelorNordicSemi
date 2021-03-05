@@ -11,7 +11,6 @@
 #include "app_gps.h"
 #include "app_sd.h"
 
-
 /* Stack definition for application */
 static K_THREAD_STACK_DEFINE(sd_stack_area, 4096);
 
@@ -20,33 +19,36 @@ static struct k_thread sd_thread;
 
 k_tid_t sd_tid;
 
-
 /* STRUCTS AND ENUMS */
 
 // Enumerations
 // CANDO: typedef everything
 
-enum oasys_event_type { // currently not in use
+enum oasys_event_type
+{ // currently not in use
 	EVT_INIT,
 	EVT_UART,
 	EVT_MQTT
 };
 
 // Structs
-struct prog_param_t { // currently not in use
+struct prog_param_t
+{ // currently not in use
 	bool bttn_init;
 	bool leds_init;
 	bool uart_init;
 	bool mqtt_init;
 } prog_p;
 
-struct sens_param_t { // currently not in use
+struct sens_param_t
+{ // currently not in use
 	int freq_temp;
 	int freq_pres;
 	int freq_cond;
 } sens_p;
 
-struct oasys_param_t { // currently not in use
+struct oasys_param_t
+{ // currently not in use
 	int cycle_max;
 	int cycle_cur;
 	int depth_max;
@@ -57,7 +59,6 @@ struct oasys_param_t { // currently not in use
 	struct sens_param_t sens_param;
 } oasys_p;
 
-
 /* VARIABLE DECLARATIONS */
 
 // button variables
@@ -65,7 +66,6 @@ struct k_msgq button_msg_q;
 struct k_msgq button_msg_qr;
 static uint8_t button_msgq_buffer[3 * sizeof(int)];
 static int button_val; // value received from button, only used when button_config = 0
-
 
 // UART variables
 enum uart_device_type uart_dev1 = UART_1;
@@ -75,8 +75,8 @@ static uint8_t uart_msgq_buffer[3 * 128];
 static uint8_t uart_msg[128];
 
 // TODO: change to general data_array instead of just uart data
-static uint8_t uart_data_array[16][128] = { "" };
-int data_size = 0; // keeps track of no. of messages stored in data array. 
+static uint8_t uart_data_array[16][128] = {""};
+int data_size = 0; // keeps track of no. of messages stored in data array.
 				   // UPDATE THIS VALUE WHEN SAVING INTO DATA ARRAY
 
 // GPS variables
@@ -97,21 +97,21 @@ struct k_msgq sd_msg_q;
 static uint8_t sd_msgq_buffer[5 * sizeof(oasys_data_t)];
 
 // Time variables
-static uint16_t current_year	= -1;
-static uint8_t current_month 	= -1;
-static uint8_t current_day   	= -1;
-
+static uint16_t current_year = -1;
+static uint8_t current_month = -1;
+static uint8_t current_day = -1;
 
 /* FUNCTION DECLARATIONS */
 
 // publish all data that is currently saved from uart
 // REMINDER: Double check after implementing SD card
-static int publish_uart_data() 
+static int publish_uart_data()
 {
 	int i = 0;
 
-	while(strcmp(uart_data_array[i], "") != 0) {
-		app_data_publish(uart_data_array[i], strlen(uart_data_array[i])+1);
+	while (strcmp(uart_data_array[i], "") != 0)
+	{
+		app_data_publish(uart_data_array[i], strlen(uart_data_array[i]) + 1);
 		k_sleep(K_MSEC(500));
 		i++;
 	}
@@ -125,15 +125,18 @@ static int check_mqtt_msg(void *data, size_t len)
 {
 	int ret_value = 0;
 
-    if(strcmp(data, "LED") == 0) {
+	if (strcmp(data, "LED") == 0)
+	{
 		toggle_LED(1);
-    }
+	}
 
-	if (strcmp(data, "exit") == 0) {
+	if (strcmp(data, "exit") == 0)
+	{
 		ret_value = 1;
 	}
 
-	else if (strcmp(data, "button 2") == 0) {
+	else if (strcmp(data, "button 2") == 0)
+	{
 		ret_value = 2;
 	}
 
@@ -153,9 +156,11 @@ static int set_button_config(int local_button_config)
 static int button_wait()
 {
 	set_button_config(0);
-	while(1) {
+	while (1)
+	{
 		k_msgq_get(&button_msg_qr, &button_val, K_FOREVER);
-		if(button_val == 1) {
+		if (button_val == 1)
+		{
 			break;
 		}
 	}
@@ -182,7 +187,6 @@ static int sd_msg_fill_send(void *data_string, enum sd_event_type event)
 	return 0;
 }
 
-
 // initialize message queues
 //TODO: replace sizeof parameter with type instead of variable
 static int message_queue_init()
@@ -208,7 +212,7 @@ static int message_queue_init()
 
 //TODO: pass devices to initialise
 static int device_inits()
-{	
+{
 	button_dev_init();
 	dk_leds_init();
 	uart_dev_init(uart_dev1);
@@ -221,11 +225,12 @@ static int message_queue_reset()
 	// NOTE: THIS IS ONLY HERE UNTIL SD CARD STORAGE IS OKAY
 	data_size = 0;
 	int i = 0;
-	while(strcmp(uart_data_array[i], "") != 0) {
+	while (strcmp(uart_data_array[i], "") != 0)
+	{
 		strcpy(uart_data_array[i], "");
 		i++;
 	}
-	
+
 	k_msgq_purge(&button_msg_q);
 	k_msgq_purge(&uart_msg_q);
 	k_msgq_purge(&gps_msg_q);
@@ -242,17 +247,20 @@ static int uart_module()
 	printk("button 1: exit \nbutton 2: send uart signal\n\n");
 
 	/* UART loop */
-	for (int i = 0;; i++) {
+	for (int i = 0;; i++)
+	{
 		k_msgq_get(&uart_msg_q, &uart_msg, K_FOREVER);
 
 		// TODO: create function to check uart msg similar to mqtt
 
-		if (strcmp(uart_msg, "{exit}") == 0) {
+		if (strcmp(uart_msg, "{exit}") == 0)
+		{
 			uart_exit(uart_dev1);
 			data_available_to_send = true;
 			break;
 		}
-		else {
+		else
+		{
 
 			// TODO: test timestamp to check if new day
 
@@ -266,15 +274,18 @@ static int uart_module()
 	/* UART loop end */
 
 	// print all uart data
-	if(strcmp(uart_data_array[0], "") != 0) {
+	if (strcmp(uart_data_array[0], "") != 0)
+	{
 		int i = 0;
-		while(strcmp(uart_data_array[i], "") != 0){
+		while (strcmp(uart_data_array[i], "") != 0)
+		{
 			printk("\nArray %d: %s", i, uart_data_array[i]);
 			i++;
 			data_size++;
 		}
 	}
-	else {
+	else
+	{
 		printk("no data saved\n");
 	}
 
@@ -311,7 +322,7 @@ static int gps_module()
 
 	// send time to sensors
 	uint8_t time_millis_str[16];
-	uint32_t time_millis = ((gps_data.hour*60*60)+(gps_data.minute*60)+gps_data.seconds)*1000;
+	uint32_t time_millis = ((gps_data.hour * 60 * 60) + (gps_data.minute * 60) + gps_data.seconds) * 1000;
 	snprintf(time_millis_str, sizeof(time_millis_str), "%02u", time_millis);
 
 	uart_send(uart_dev1, time_millis_str);
@@ -336,13 +347,15 @@ static int wifi_module()
 	uart_send(uart_dev1, "{wifi}\n");
 
 	/* wifi loop */
-	for (int i = 0;; i++) {
+	for (int i = 0;; i++)
+	{
 
 		// test messages from wifi controller
 		k_msgq_get(&uart_msg_q, &uart_msg, K_FOREVER);
 		printk("\n%s", uart_msg);
 
-		if (strcmp(uart_msg, "{exit}") == 0) {
+		if (strcmp(uart_msg, "{exit}") == 0)
+		{
 			uart_exit(uart_dev1);
 			break;
 		}
@@ -367,7 +380,6 @@ static int wifi_module()
 		{
 			printk("\n%s", uart_msg);
 		}
-
 	}
 	/* wifi loop end */
 	return 0;
@@ -386,27 +398,32 @@ static int mqtt_module()
 	int err;
 
 	// mqtt init
-	if(!mqtt_init_complete) {
+	if (!mqtt_init_complete)
+	{
 
 		err = app_mqtt_init_and_connect();
-		if (err != 0) {
+		if (err != 0)
+		{
 			return err;
 		}
 
 		mqtt_init_complete = true;
 	}
 	// reconnect
-	else {
+	else
+	{
 
 		err = app_mqtt_connect();
-		if (err != 0) {
+		if (err != 0)
+		{
 			return err;
 		}
 	}
 
 	// TODO: store mqtt commands into an array
 	/* MQTT loop */
-	while (1) {
+	while (1)
+	{
 
 		// mqtt function
 		err = app_mqtt_run();
@@ -415,24 +432,28 @@ static int mqtt_module()
 		k_msgq_get(&mqtt_msg_q, &mqtt_msg, K_NO_WAIT);
 		int mqtt_val = check_mqtt_msg(&mqtt_msg, sizeof(mqtt_msg));
 
-		if (mqtt_val == 1 || err != 0) {
+		if (mqtt_val == 1 || err != 0)
+		{
 			strcpy(mqtt_msg, "");
 			break;
 		}
-		else if (mqtt_val == 2) {
+		else if (mqtt_val == 2)
+		{
 
 			printk("button choice: 2\n\n");
 			strcpy(mqtt_msg, "");
 		}
 
-		if (data_available_to_send) {
+		if (data_available_to_send)
+		{
 			publish_uart_data();
 		}
-	} 
+	}
 	/* MQTT loop end */
 
 	err = app_mqtt_disconnect();
-	if (err != 0) {
+	if (err != 0)
+	{
 		printk("\nDisconnect unsuccessful: %d", err);
 		printk("\n\nClosing program, check for errors in code lol");
 		return err;
@@ -453,20 +474,21 @@ void main(void)
 	message_queue_init();
 
 	// sd card thread
-	sd_tid = k_thread_create(&sd_thread, sd_stack_area, K_THREAD_STACK_SIZEOF(sd_stack_area),
-							 (k_thread_entry_t)app_sd_thread, NULL, NULL, NULL,
-							 7, 0, K_NO_WAIT);
+	// sd_tid = k_thread_create(&sd_thread, sd_stack_area, K_THREAD_STACK_SIZEOF(sd_stack_area),
+	// 						 (k_thread_entry_t)app_sd_thread, NULL, NULL, NULL,
+	// 						 7, 0, K_NO_WAIT);
 
 	printk("\n\n**** NordicOasys v0.5 - Started ****\n\n");
 	printk("press button 1 to start\n\n");
 
 	button_wait();
 
-	while(1) {
+	while (1)
+	{
 
 		message_queue_reset();
 
-		gps_module();
+		//gps_module();
 
 		// TEMPORARY TEST PRINTING WHAT WILL BE SENT TO SD CARD FROM GPS
 
@@ -477,16 +499,41 @@ void main(void)
 		// printk("\n%02d-%02d-%02d", test_data.year, test_data.month, test_data.day);
 		// printk("\n%s", test_data.json_string);
 
-
-		uart_module();
+		// uart_module();
 
 		// for testing purposes, read JSON
-		sd_msg_fill_send("", READ_JSON);
-		sd_msg_fill_send("", READ_JSON);
+		//sd_msg_fill_send("", READ_JSON);
+		//sd_msg_fill_send("", READ_JSON);
 
 		// read entire file
-		k_sleep(K_MSEC(2000));
-		sd_msg_fill_send("", READ_FILE);
+		uint8_t cnt = 0;
+		uint8_t ascii = 0;
+
+		while (1)
+		{
+			ascii = (cnt % 94) + 32;
+			uart_send(UART_1, &ascii);
+			cnt++;
+			k_sleep(K_MSEC(100));
+		}
+
+		k_sleep(K_MSEC(5000));
+
+		oasys_data_t sd_msg;
+
+		// printk("\nStarting SD file read");
+		// sd_msg.event = READ_FILE;
+
+		// sd_msg.year = 2021;
+		// sd_msg.month = 03;
+		// sd_msg.day = 04;
+
+		// strcpy(sd_msg.json_string, "hei");
+
+		// // add to sd card message queue
+		// k_sleep(K_MSEC(2000));
+		// k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
+		// sd_msg_fill_send("", READ_FILE);
 
 		// app_sd();
 
@@ -495,14 +542,14 @@ void main(void)
 		set_button_config(3);
 		k_msgq_get(&button_msg_qr, &button_val, K_FOREVER);
 
-		if (button_val == 1) {
+		if (button_val == 1)
+		{
 			mqtt_module();
 		}
-		else if (button_val == 2) {
+		else if (button_val == 2)
+		{
 			wifi_module();
 		}
-
-
 	}
 
 	printk("**** NordicOasys test end ****\n");

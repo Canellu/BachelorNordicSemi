@@ -18,7 +18,21 @@ const char* password = STAPSK;
 ESP8266WebServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(81);
 
+boolean on_wifi = false;
+enum {
+  WIFI_ON
+} nrf_commands_type;
 
+
+// convert single char to int
+int digit_to_int(char d)
+{
+ char str[2];
+
+ str[0] = d;
+ str[1] = '\0';
+ return (int) strtol(str, NULL, 10);
+}
 
 // load root site
 void handleRoot() {
@@ -33,9 +47,9 @@ void handleNotFound() {
   server.send(404, "text/plain", message);
 }
 
-void setup(void) {
-  pinMode(LED_BUILTIN, OUTPUT);
-  Serial.begin(115200);
+// host website and open websocket
+void website_init()
+{
   WiFi.softAP(ssid, password);
   
   Serial.println();
@@ -52,20 +66,55 @@ void setup(void) {
   webSocket.begin();
   webSocket.onEvent(webSocketEvent);
   
-  
   Serial.println("HTTP server started");
+}
+
+// read commands from nrf and perform respective operations
+void read_nrf_commands()
+{
+  if(Serial.available() > 0)
+  {
+    char nrf_command = Serial.read();
+    int nrf_command_int = digit_to_int(nrf_command);
+    
+    switch (nrf_command_int)
+    {
+      case WIFI_ON:
+        on_wifi = true;
+        website_init();
+        
+        break;
+      default:
+        break;
+    }
+  }
+
+}
+
+void setup(void) {
+  pinMode(LED_BUILTIN, OUTPUT);
+  Serial.begin(115200);
+
+  Serial.println("Waiting for command");
 }
 
 void loop(void) {
 
-  webSocket.loop();         // keeps tcp connection alive?
-  server.handleClient();    // checks if client is connected
-
-  // read input from serial and send to webpage
-  if(Serial.available() > 0) {
-    char c[] = {(char)Serial.read()};
-    Serial.print(c);
-    webSocket.broadcastTXT(c, sizeof(c));
+  if (on_wifi)
+  {
+    webSocket.loop();         // keeps tcp connection alive?
+    server.handleClient();    // checks if client is connected
+  
+    // read input from serial and send to webpage
+    if(Serial.available() > 0) {
+      char c[] = {(char)Serial.read()};
+      Serial.print(c);
+      webSocket.broadcastTXT(c, sizeof(c));
+    }
+  }
+  else
+  {
+    read_nrf_commands();
   }
 }
 
