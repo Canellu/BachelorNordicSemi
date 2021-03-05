@@ -382,13 +382,13 @@ const char web[] PROGMEM = R"====(
 
 
     <script>
-        init();
+        
         
         // var showFilesBtn = document.querySelector(".showFilesBtn");
         // showFilesBtn.addEventListener("click", () => {
            
         // })
-
+        init();
         var Socket;
         function init() {
           Socket = new WebSocket('ws://' + window.location.hostname + ':81/');

@@ -36149,6 +36149,23 @@
             saveAs(content, "GliderData.zip");
           });
       }
+
+      init();
+        var Socket;
+        function init() {
+          Socket = new WebSocket('ws://' + window.location.hostname + ':81/');
+          Socket.onmessage = function(event) {
+            console.log(event.data);
+            document.querySelector(".textAreaSD").value += event.data;
+          }
+        }
+
+        var terminalBtn = document.querySelector(".terminalBtn");
+        var textInput = document.querySelector(".textInput");
+        terminalBtn.addEventListener("click", () => {
+            Socket.send(textInput.value);
+            textInput.value = "";
+        });
     </script>
   </body>
 </html>
