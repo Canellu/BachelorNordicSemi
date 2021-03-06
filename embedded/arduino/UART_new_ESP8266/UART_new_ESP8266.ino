@@ -15,37 +15,37 @@ long sensor_millis = 0;
 // Doesn't seem to be working
 int receive_start_time()
 {
-  
-  unsigned long start_time_no = 0; 
+
+  unsigned long start_time_no = 0;
   static char *eptr;
-  
+
   static char start_time[32] = "";
   static boolean start_time_rcvd = false;
   static boolean data_rcvd = false;
   static int i = 0;
 
   Serial.println("Waiting for start time");
-  
-  while(!start_time_rcvd)
+
+  while (!start_time_rcvd)
   {
-    while(!Serial.available())
+    while (!Serial.available())
     {
-      if (strcmp(start_time, "")!= 0)
+      if (strcmp(start_time, "") != 0)
       {
         Serial.println(start_time);
         start_time_no = strtoul(start_time, &eptr, 10);
         Serial.println(start_time_no);
         start_time_rcvd = true;
         break;
-        }
+      }
       else
-        {
-          delay(200);
-        }
-      }   
-      char data = Serial.read();
-      start_time[i] = data;
-      i++;
+      {
+        delay(200);
+      }
+    }
+    char data = Serial.read();
+    start_time[i] = data;
+    i++;
 
   }
 
@@ -53,26 +53,27 @@ int receive_start_time()
 }
 
 void setup()
-{  
+{
   // Open serial communications and wait for port to open:
   //Serial.setRxBufferSize(256);
   Serial.begin(115200);
+  while (!Serial);
 
-  int br = Serial.baudrate();
+  int br = Serial.baudRate();
 
   Serial.printf("Serial is %d bps\n", br);
 
   /*
-  static char *eptr;
-  
-  static char start_time[32] = "";
-  static boolean start_time_rcvd = false;
-  static boolean data_rcvd = false;
-  static int i = 0;
+    static char *eptr;
 
-  Serial.println("Waiting for start time");
-  while(!start_time_rcvd)
-  {
+    static char start_time[32] = "";
+    static boolean start_time_rcvd = false;
+    static boolean data_rcvd = false;
+    static int i = 0;
+
+    Serial.println("Waiting for start time");
+    while(!start_time_rcvd)
+    {
     while(!Serial.available())
     {
       if (strcmp(start_time, "")!= 0)
@@ -92,35 +93,35 @@ void setup()
     char data = Serial.read();
     start_time[i] = data;
     i++;
-    
-  }
 
-  // timestamp = receive_start_time();
+    }
 
-  Serial.print("Time value in millis: ");
-  Serial.print(timestamp);
-  Serial.println();
-  starting_time = millis();
+    // timestamp = receive_start_time();
+
+    Serial.print("Time value in millis: ");
+    Serial.print(timestamp);
+    Serial.println();
+    starting_time = millis();
   */
 }
 void loop() // run over and over
 {
-  while(!Serial.available())
+  while (!Serial.available())
   {
-    if(strcmp(fromSerial, "") != 0)
+    if (strcmp(fromSerial, "") != 0)
     {
       /*char time_str[32] = "";
-      // "t":"9999", timestamp + current time - starting time CANDO: maybe numerical instead of string value
-      sprintf(time_str,"\"t\":\"%lu\",",timestamp+millis()-starting_time);
-      
-      strcat(fromSerial_JSON, "{");
-      strcat(fromSerial_JSON, time_str);
-      strcat(fromSerial_JSON, fromSerial);
-      strcat(fromSerial_JSON, "}");
-      
-      //mySerial.print(fromSerial_JSON); */
+        // "t":"9999", timestamp + current time - starting time CANDO: maybe numerical instead of string value
+        sprintf(time_str,"\"t\":\"%lu\",",timestamp+millis()-starting_time);
+
+        strcat(fromSerial_JSON, "{");
+        strcat(fromSerial_JSON, time_str);
+        strcat(fromSerial_JSON, fromSerial);
+        strcat(fromSerial_JSON, "}");
+
+        //mySerial.print(fromSerial_JSON); */
       Serial.println(fromSerial);
-      
+
       memset(fromSerial, 0, strlen(fromSerial));
       // memset(fromSerial_JSON, 0, strlen(fromSerial_JSON));
       arr_serial = 0;
