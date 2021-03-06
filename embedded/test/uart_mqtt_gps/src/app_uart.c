@@ -11,8 +11,8 @@ extern struct k_msgq uart_msg_q;
 const struct device *dev_uart1;
 const struct device *dev_uart2;
 
-static uint8_t rx_buf[128];
-static uint8_t tx_buf[128];
+static uint8_t rx_buf[256];
+static uint8_t tx_buf[256];
 
 static void uart_cb(const struct device *dev_uart, void *context)
 {
@@ -24,7 +24,6 @@ static void uart_cb(const struct device *dev_uart, void *context)
 	{
 		(void)uart_fifo_fill(dev_uart, tx_buf, sizeof(tx_buf));
 		uart_irq_tx_disable(dev_uart);
-		printk("\n%s", tx_buf);
 	}
 
 	// read uart msg, only reads in JSON format
@@ -48,7 +47,7 @@ static void uart_cb(const struct device *dev_uart, void *context)
 		}
 		else
 		{
-			strcat(rx_buf, buf);
+			//strcat(rx_buf, buf);
 		}
 	}
 }
@@ -110,9 +109,9 @@ void uart_exit(enum uart_device_type uart_dev_no)
 }
 
 // send data to uart device
-void uart_send(enum uart_device_type uart_dev_no, uint8_t *msg)
+void uart_send(enum uart_device_type uart_dev_no, void *msg, size_t len)
 {
-	strcpy(tx_buf, msg);
+	memcpy(tx_buf, msg, len);
 
 	switch (uart_dev_no)
 	{
@@ -124,6 +123,7 @@ void uart_send(enum uart_device_type uart_dev_no, uint8_t *msg)
 		uart_irq_tx_enable(dev_uart2);
 		break;
 	}
+	// printk("\n%s", tx_buf);
 }
 
 /* Function ideas and TODOs

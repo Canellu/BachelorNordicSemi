@@ -69,6 +69,7 @@ static int button_val; // value received from button, only used when button_conf
 
 // UART variables
 enum uart_device_type uart_dev1 = UART_1;
+enum uart_device_type uart_dev2 = UART_2;
 
 struct k_msgq uart_msg_q;
 static uint8_t uart_msgq_buffer[3 * 128];
@@ -216,6 +217,7 @@ static int device_inits()
 	button_dev_init();
 	dk_leds_init();
 	uart_dev_init(uart_dev1);
+	uart_dev_init(uart_dev2);
 	return 0;
 }
 
@@ -318,14 +320,14 @@ static int gps_module()
 	current_day = gps_data.day;
 
 	// save gps data on sd card
-	sd_msg_fill_send(gps_data.gps_string, WRITE_FILE);
+	// sd_msg_fill_send(gps_data.gps_string, WRITE_FILE);
 
 	// send time to sensors
 	uint8_t time_millis_str[16];
 	uint32_t time_millis = ((gps_data.hour * 60 * 60) + (gps_data.minute * 60) + gps_data.seconds) * 1000;
 	snprintf(time_millis_str, sizeof(time_millis_str), "%02u", time_millis);
 
-	uart_send(uart_dev1, time_millis_str);
+	uart_send(uart_dev1, time_millis_str, sizeof(time_millis_str));
 
 	// add to data array
 	strcpy(uart_data_array[data_size++], gps_data.gps_string);
@@ -344,7 +346,7 @@ static int wifi_module()
 	printk("\nwifi test start\n");
 
 	// send wifi command to wifi controller
-	uart_send(uart_dev1, "{wifi}\n");
+	uart_send(uart_dev1, "{wifi}\n", strlen("{wifi}\n"));
 
 	/* wifi loop */
 	for (int i = 0;; i++)
@@ -363,7 +365,7 @@ static int wifi_module()
 		else if (strcmp(uart_msg, "{wifi ok}") == 0)
 		{
 			printk("\nReceived wifi ok");
-			uart_send(uart_dev1, "{mqtt}\n");
+			uart_send(uart_dev1, "{mqtt}\n", strlen("{mqtt}\n"));
 		}
 		// send data from uart_data_array
 		else if (strcmp(uart_msg, "{mqtt ok}") == 0)
@@ -488,7 +490,7 @@ void main(void)
 
 		message_queue_reset();
 
-		//gps_module();
+		// gps_module();
 
 		// TEMPORARY TEST PRINTING WHAT WILL BE SENT TO SD CARD FROM GPS
 
@@ -505,21 +507,24 @@ void main(void)
 		//sd_msg_fill_send("", READ_JSON);
 		//sd_msg_fill_send("", READ_JSON);
 
-		// read entire file
+		// // read entire file
 		uint8_t cnt = 0;
 		uint8_t ascii = 0;
+		uint8_t esp_msg[] = "abcdefghijklmnopqrstuvwxyz\n";
+
+		printk("\nStarting send");
 
 		while (1)
 		{
 			ascii = (cnt % 94) + 32;
-			uart_send(UART_1, &ascii);
+			uart_send(UART_1, esp_msg, sizeof(esp_msg));
 			cnt++;
-			k_sleep(K_MSEC(100));
+			k_sleep(K_MSEC(20));
 		}
 
-		k_sleep(K_MSEC(5000));
+		// k_sleep(K_MSEC(5000));
 
-		oasys_data_t sd_msg;
+		// oasys_data_t sd_msg;
 
 		// printk("\nStarting SD file read");
 		// sd_msg.event = READ_FILE;
@@ -537,7 +542,7 @@ void main(void)
 
 		// app_sd();
 
-		printk("press button 1 to start mqtt\n");
+		printk("\npress button 1 to start mqtt\n");
 		printk("press button 2 to start wifi\n\n");
 		set_button_config(3);
 		k_msgq_get(&button_msg_qr, &button_val, K_FOREVER);

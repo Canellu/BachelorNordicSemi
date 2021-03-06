@@ -8,24 +8,24 @@ static void uart_cb(const struct device *dev, void *context)
 
 	uart_irq_update(dev);
 
-	if (uart_irq_tx_ready(dev)) {
+	if (uart_irq_tx_ready(dev))
+	{
 		(void)uart_fifo_fill(dev, buf, sizeof(buf));
 		uart_irq_tx_disable(dev);
 		// printk("sent\n");
 	}
 
-	if (uart_irq_rx_ready(dev)) {
+	if (uart_irq_rx_ready(dev))
+	{
 		uint8_t buf[10];
 		int len = uart_fifo_read(dev, buf, sizeof(buf));
 		// uart_buf[len] = 0;
 
-		printk("%s", buf, sizeof(buf));
+		printk("%s", buf);
 		// if (len) {
 		// 	printk("read %d bytes\n", len);
 		// }
 	}
-
-
 }
 
 void main(void)
@@ -36,7 +36,8 @@ void main(void)
 	uart_irq_callback_set(uart, uart_cb);
 	uart_irq_rx_enable(uart);
 	printk("UART loopback start!\n");
-	while (1) {
+	while (1)
+	{
 		uart_irq_tx_enable(uart);
 		k_sleep(K_MSEC(2000));
 	}
