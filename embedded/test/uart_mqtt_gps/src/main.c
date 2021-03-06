@@ -510,15 +510,16 @@ void main(void)
 		// // read entire file
 		uint8_t cnt = 0;
 		uint8_t ascii = 0;
+		uint8_t esp_msg[] = "abcdefghijklmnopqrstuvwxyz\n";
 
 		printk("\nStarting send");
 
 		while (1)
 		{
 			ascii = (cnt % 94) + 32;
-			uart_send(UART_1, &ascii, 2);
+			uart_send(UART_1, esp_msg, sizeof(esp_msg));
 			cnt++;
-			k_sleep(K_MSEC(100));
+			k_sleep(K_MSEC(20));
 		}
 
 		// k_sleep(K_MSEC(5000));
