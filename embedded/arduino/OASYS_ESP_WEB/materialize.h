@@ -7877,9 +7877,8 @@ const char web[] PROGMEM = R"====(
  <div class="card yellow accent-4">
  <div class="card-content black-text">
  <span class="card-title">Moar info</span>
- <p>
- Lorem ipsum dolor, sit amet consectetur adipisicing elit.
- Fugiat, ipsam.
+ <p class="midlertidigTerminal">
+ Hei
  </p>
  </div>
  </div>
