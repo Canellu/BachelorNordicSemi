@@ -8165,19 +8165,31 @@ const char web[] PROGMEM = R"====(
       var textToZip = "";
       
       
+      var filename = "";
+      var fileData = "";
+
       init();
       var Socket;
       function init() {
         Socket = new WebSocket("ws://" + window.location.hostname + ":81/");
         Socket.onmessage = function (event) {
-          console.log(`Event: ${event}`);
-          console.log(`Event.data: ${event.data}`);
-          console.log(`Type of Event: ${typeof event}`);
-          console.log(`Type of Event.data: ${typeof event.data}`);
+          
+          // Test, append to Moar Card
           document.querySelector(".midlertidigTerminal").innerText +=
             event.data;
           textToZip += event.data;
 
+
+          if(event.data.includes("TXT")) {
+            filename = event.data.slice(2, 10);
+          }
+          else if (event.data == "EOF") {
+            zip.file(filename, fileData);
+          }
+          else {
+            fileData += event.data;
+          }
+          
         };
       }
 
