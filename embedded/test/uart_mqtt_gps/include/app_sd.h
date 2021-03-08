@@ -2,20 +2,23 @@
 #ifndef _APP_SD_H_
 #define _APP_SD_H_
 
-enum sd_event_type {
+enum sd_event_type
+{
     READ_JSON,
+    SEND_FILE_INFO,
     READ_FILE,
     WRITE_FILE
 };
 
-typedef struct {
+typedef struct
+{
     enum sd_event_type event;
 
-    uint16_t	year;
-	uint8_t		month;
-	uint8_t		day;
-    
-    uint8_t     json_string[256];
+    uint16_t year;
+    uint8_t month;
+    uint8_t day;
+
+    uint8_t json_string[256];
 } oasys_data_t;
 
 void app_sd(void);

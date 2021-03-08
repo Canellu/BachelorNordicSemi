@@ -120,19 +120,18 @@ void loop(void)
     // read input from serial and send to webpage
     if (mySerial.available() > 0)
     {
-      char c[] = {mySerial.read()};
-      Serial.print(c);
-      webSocket.broadcastTXT(c, sizeof(c));
+      char b = mySerial.read();
+      uart_rx[arr_rx++] = b;
     }
     else if (Serial.available() > 0)
     {
       char c = Serial.read();
       uart_rx[arr_rx++] = c;
     }
-    else if (strlen(uart_rx) != 0)
+    else if (!mySerial.available() && !Serial.available() && strlen(uart_rx) != 0)
     {
       Serial.print(uart_rx);
-      webSocket.broadcastTXT(uart_rx, sizeof(uart_rx));
+      webSocket.broadcastTXT(uart_rx, strlen(uart_rx));
       memset(uart_rx, 0, sizeof(uart_rx));
       arr_rx = 0;
     }

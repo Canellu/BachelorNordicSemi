@@ -79,6 +79,48 @@ static int lsdir(const char *path)
 	return res;
 }
 
+static int send_all_file_info(const char *path)
+{
+	int res;
+	struct fs_dir_t dirp;
+	static struct fs_dirent entry;
+
+	res = fs_opendir(&dirp, path);
+	if (res)
+	{
+		printk("Error opening dir %s [%d]\n", path, res);
+		return res;
+	}
+
+	while (1)
+	{
+		/* Verify fs_readdir() */
+		res = fs_readdir(&dirp, &entry);
+
+		/* entry.name[0] == 0 means end-of-dir */
+		if (res || entry.name[0] == 0)
+		{
+			break;
+		}
+
+		if (entry.type == FS_DIR_ENTRY_FILE)
+		{
+			uint8_t file_data[128];
+			uint8_t temp_str[16];
+
+			strcat(file_data, "f:");
+			strcat(file_data, entry.name);
+			snprintf(temp_str, sizeof(temp_str), ",s:%u", entry.size);
+			strcat(file_data, temp_str);
+
+			// printk("\n%s", file_data);
+			uart_send(UART_1, file_data, sizeof(file_data));
+		}
+	}
+
+	return 0;
+}
+
 static int create_file_name(char *file_name, oasys_data_t *sd_msg)
 {
 
@@ -137,12 +179,13 @@ static int read_file(char *file_path, char *data, int size)
 	uint8_t buffer[16] = "";
 	while (1)
 	{
-		ret = fs_read(&file, &buffer, 8);
+		ret = fs_read(&file, &buffer, 15);
 		if (ret == 0)
 			break;
 		uart_send(UART_1, buffer, sizeof(buffer));
+		memset(buffer, 0, sizeof(buffer));
 		// printk("%s", buffer);
-		k_sleep(K_MSEC(20));
+		k_sleep(K_MSEC(10));
 	}
 
 	printk("\n\nFinished reading file");
@@ -293,16 +336,20 @@ void app_sd_thread(void *unused1, void *unused2, void *unused3)
 			write_file(file_path, sd_msg.json_string, strlen(sd_msg.json_string));
 
 			break;
+		case SEND_FILE_INFO:
+			send_all_file_info(disk_mount_pt);
+
+			break;
 		case READ_JSON:
 			read_JSON(file_path, json_text, sizeof(json_text), &cursor);
 			printk("\nJSON: %s, cursor: %d", json_text, cursor);
 
 			break;
 		case READ_FILE:
-			printk("\nIn read file\n");
 			read_file(file_path, file_text, sizeof(file_text));
-			printk("\nFile content:\n\n%s", file_text);
+			// printk("\nFile content:\n\n%s", file_text);
 			return;
+
 			break;
 		default:
 			printk("\nUnknown SD event type");
