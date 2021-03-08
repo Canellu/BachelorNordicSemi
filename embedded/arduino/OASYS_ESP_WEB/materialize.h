@@ -8143,39 +8143,39 @@ const char web[] PROGMEM = R"====(
  addFileRow("23rG", ">23r23r00");
 
   function createZip() {
-    var zip = new JSZip();
-    zip.file("TEST.txt", "Hello World\n");
-    zip.file("TEST1.txt", "YO BOI\n");
-    zip.file("TEST2.txt", "Another one\n");
-    zip.file("TEST3.txt", "Catz\n");
-    zip.file("dataFromSD.txt", textToZip);
-    zip
-        .generateAsync({
-        type: "blob",
-        compression: "STORE",
-        })
-        .then((content) => {
-        saveAs(content, "GliderData.zip");
-        });
-    }
+        var zip = new JSZip();
+        zip.file("TEST.txt", "Hello World\n");
+        zip.file("TEST1.txt", "YO BOI\n");
+        zip.file("TEST2.txt", "Another one\n");
+        zip.file("TEST3.txt", "Catz\n");
+        zip.file("dataFromSD.txt", textToZip);
+        zip
+          .generateAsync({
+            type: "blob",
+            compression: "STORE",
+          })
+          .then((content) => {
+            saveAs(content, "GliderData.zip");
+          });
+      }
 
 
-    var midlertidigTerminal = document.querySelector('.midlertidigTerminal');
-
-    var textToZip = "";
-
-
-    init();
-    var Socket;
-    function init() {
-    Socket = new WebSocket("ws://" + window.location.hostname + ":81/");
-    Socket.onmessage = function (event) {
-        console.log(event.data);
-        document.querySelector(".midlertidigTerminal").innerText += event.data;
-        textToZip += event.data;
-        
-    };
-    }
+      var midlertidigTerminal = document.querySelector('.midlertidigTerminal');
+      
+      var textToZip = "";
+      
+      
+      init();
+      var Socket;
+      function init() {
+        Socket = new WebSocket("ws://" + window.location.hostname + ":81/");
+        Socket.onmessage = function (event) {
+          console.log(event.data);
+          document.querySelector(".midlertidigTerminal").innerText += event.data;
+          textToZip += event.data;
+          
+        };
+      }
 
  // var terminalBtn = document.querySelector(".terminalBtn");
  // var textInput = document.querySelector(".textInput");
