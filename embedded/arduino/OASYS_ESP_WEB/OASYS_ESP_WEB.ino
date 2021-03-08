@@ -9,7 +9,6 @@
 // VARIABLES
 
 // UART
-
 SoftwareSerial mySerial(5, 4); // RX, TX  GPIO5 = D1, GPIO4 = D2
 
 // Wifi
@@ -20,6 +19,9 @@ SoftwareSerial mySerial(5, 4); // RX, TX  GPIO5 = D1, GPIO4 = D2
 
 const char *ssid = STASSID;
 const char *password = STAPSK;
+
+int arr_rx = 0;
+char uart_rx[128] = "";
 
 ESP8266WebServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(81);
@@ -124,9 +126,15 @@ void loop(void)
     }
     else if (Serial.available() > 0)
     {
-      char c[] = {Serial.read()};
-      Serial.print(c);
-      webSocket.broadcastTXT(c, sizeof(c));
+      char c = Serial.read();
+      uart_rx[arr_rx++] = c;
+    }
+    else if (strlen(uart_rx) != 0)
+    {
+      Serial.print(uart_rx);
+      webSocket.broadcastTXT(uart_rx, sizeof(uart_rx));
+      memset(uart_rx, 0, sizeof(uart_rx));
+      arr_rx = 0;
     }
   }
   else
