@@ -108,9 +108,8 @@ static int send_all_file_info(const char *path)
 			uint8_t file_data[128];
 			uint8_t temp_str[16];
 
-			strcat(file_data, "f:");
 			strcat(file_data, entry.name);
-			snprintf(temp_str, sizeof(temp_str), ",s:%u", entry.size);
+			snprintf(temp_str, sizeof(temp_str), ":%u", entry.size);
 			strcat(file_data, temp_str);
 
 			// printk("\n%s", file_data);
@@ -188,7 +187,7 @@ static int read_file(char *file_path, char *data, int size)
 		// printk("%s", buffer);
 		k_sleep(K_MSEC(10));
 	}
-	uart_send(UART_1, "EOF", sizeof("EOF"));
+	uart_send(UART_1, "BASE", sizeof("BASE"));
 
 	printk("\n\nFinished reading file");
 	fs_close(&file);

@@ -527,7 +527,18 @@ void main(void)
 		uart_send(UART_1, "0", sizeof("0"));
 		printk("\nsent command 0 to esp");
 
+		uint8_t wifi_response[128];
+		k_msgq_get(&uart_msg_q, wifi_response, K_FOREVER);
+		if (strcmp(wifi_response, "{connected}") != 0)
+		{
+			printk("\n\nSomething wrong, press button 1 to continue");
+		}
+		else
+		{
+			printk("\n\nConnect successful, press button 1 to continue");
+		}
 		button_wait();
+
 		printk("\nTesting SD file info");
 		sd_msg_fill_send("", SEND_FILE_INFO);
 
