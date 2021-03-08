@@ -8173,7 +8173,7 @@ const char web[] PROGMEM = R"====(
           console.log(event.data);
           document.querySelector(".midlertidigTerminal").innerText += event.data;
           textToZip += event.data;
-          console.log(textTopZip);
+          console.log(textToZip);
           
         };
       }
