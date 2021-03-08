@@ -1,3 +1,5 @@
+#include <SoftwareSerial.h>
+
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
@@ -7,6 +9,11 @@
 
 // VARIABLES
 
+// UART
+
+SoftwareSerial mySerial(5, 4); // RX, TX  GPIO5 = D1, GPIO4 = D2
+
+// Wifi
 #ifndef STASSID
 #define STASSID "OASYS-ESP"
 #define STAPSK  "aaaaaaaa"
@@ -72,9 +79,9 @@ void website_init()
 // read commands from nrf and perform respective operations
 void read_nrf_commands()
 {
-  if(Serial.available() > 0)
+  if(mySerial.available() > 0)
   {
-    char nrf_command = Serial.read();
+    char nrf_command = mySerial.read();
     int nrf_command_int = digit_to_int(nrf_command);
     
     switch (nrf_command_int)
@@ -94,8 +101,9 @@ void read_nrf_commands()
 void setup(void) {
   pinMode(LED_BUILTIN, OUTPUT);
   Serial.begin(115200);
+  mySerial.begin(115200);
 
-  Serial.println("Waiting for command");
+  Serial.println("Waiting for command 0");
 }
 
 void loop(void) {
@@ -106,8 +114,8 @@ void loop(void) {
     server.handleClient();    // checks if client is connected
   
     // read input from serial and send to webpage
-    if(Serial.available() > 0) {
-      char c[] = {(char)Serial.read()};
+    if(mySerial.available() > 0) {
+      char c[] = {mySerial.read()};
       Serial.print(c);
       webSocket.broadcastTXT(c, sizeof(c));
     }

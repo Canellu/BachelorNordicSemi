@@ -524,6 +524,10 @@ void main(void)
 
 		// k_sleep(K_MSEC(5000));
 
+		uart_send(UART_1, "0", sizeof("0"));
+		printk("\nsent command 0 to esp");
+		k_sleep(K_MSEC(2000));
+
 		oasys_data_t sd_msg;
 
 		printk("\nStarting SD file read");
