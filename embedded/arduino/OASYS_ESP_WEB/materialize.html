@@ -7965,15 +7965,15 @@ const char web[] PROGMEM = R"====(
           <div class="card yellow darken-1 center">
             <div class="card-content grey-text text-darken-3">
               <span class="card-title">Files</span>
-              <h4>20</h4>
+              <h4 class="totalFiles"></h4>
             </div>
           </div>
         </div>
         <div class="col s6">
           <div class="card yellow darken-1 center">
             <div class="card-content grey-text text-darken-3">
-              <span class="card-title">Size [mB]</span>
-              <h4>2349</h4>
+              <span class="card-title">Size</span>
+              <h4 class="totalSize"></h4>
             </div>
           </div>
         </div>
@@ -8012,15 +8012,15 @@ const char web[] PROGMEM = R"====(
       <div class="row valign-wrapper hide prog-bar mtop">
         <div class="col s10 m11">
           <div class="progress mtop">
-            <div class="determinate progressFill" style="width: 20%"></div>
+            <div class="determinate progressFill" style="width: 0%"></div>
           </div>
         </div>
         <div class="col s2 m1">
           <span
-            class="new badge"
+            class="new badge progressLabel"
             data-badge-caption=""
             style="font-size: 1.1rem; font-weight: 600"
-            >20%</span
+            >0%</span
           >
         </div>
       </div>
@@ -36059,6 +36059,8 @@ const char web[] PROGMEM = R"====(
     <script>
       // Get classes
       var progressBar = document.querySelector(".prog-bar");
+      var progressFill = document.querySelector(".determinate");
+      var progressLabel = document.querySelector(".progressLabel");
       var downloadBtn = document.querySelector(".download-btn");
       var fileList = document.querySelector(".tbodyFiles");
       var commandList = document.querySelector(".tbodyCommands");
@@ -36105,9 +36107,10 @@ const char web[] PROGMEM = R"====(
 
       downloadBtn.addEventListener("click", () => {
         createZip();
+        Socket.send("{generate_all}");
         // downloadBtn.classList.add("disabled");
         progressBar.classList.remove("hide");
-        progressFill = document.querySelector(".determinate");
+        
         M.toast({
           html: toastHTML,
           displayLength: 100000,
@@ -36165,9 +36168,8 @@ const char web[] PROGMEM = R"====(
       }
       createModalContent(validCommands);
 
-      addFileRow("TOO BIG", ">9000");
-      addFileRow("TOO23r BIG", ">9000");
-      addFileRow("23rG", ">23r23r00");
+      
+     
 
       var zip = new JSZip();
 
@@ -36185,12 +36187,21 @@ const char web[] PROGMEM = R"====(
       }
 
       var midlertidigTerminal = document.querySelector(".midlertidigTerminal");
+      var sizeCard = document.querySelector(".totalSize");
+      var fileCard = document.querySelector(".totalFiles");
 
       var textToZip = "";
 
       var filename = "";
       var fileData = "";
-        
+      var fileSize = 0;
+      var totalFileSize = 0;
+      var totalFiles = 0;
+      var rowsAdded = [];
+
+
+      var dataReceived = 0;
+
       init();
       var Socket;
       function init() {
@@ -36203,22 +36214,31 @@ const char web[] PROGMEM = R"====(
           textToZip += event.data;
 
           if (event.data.includes("TXT")) {
-            filename = event.data.slice(2, 10);
+            var split = event.data.split(":");
+            filename = split[0].toLowerCase();
+            fileSize = parseInt(split[1]);
+            
+            if(!rowsAdded.includes(filename)) {
+              rowsAdded.push(filename);
+              totalFileSize += fileSize;
+              totalFiles ++;
+              sizeCard.innerText = totalFileSize;
+              fileCard.innerText = totalFiles;
+              addFileRow(filename.slice(0, filename.length - 4), fileSize);
+            }
+              
           } else if (event.data == "BASE") {
-            filename = filename + ".txt";
             zip.file(filename, fileData);
           } else {
             fileData += event.data;
+            dataReceived += event.data.length;
+            let percentage = parseInt((dataReceived / totalFileSize)*100);
+            progressFill.style.width = `${percentage}%`;
+            progressLabel.innerText = `${percentage}%`;
           }
         };
       }
 
-      // var terminalBtn = document.querySelector(".terminalBtn");
-      // var textInput = document.querySelector(".textInput");
-      // terminalBtn.addEventListener("click", () => {
-      //   Socket.send(textInput.value);
-      //   textInput.value = "";
-      // });
     </script>
   </body>
 </html>
