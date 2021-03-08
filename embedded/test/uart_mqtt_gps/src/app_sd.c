@@ -140,9 +140,9 @@ static int read_file(char *file_path, char *data, int size)
 		ret = fs_read(&file, &buffer, 8);
 		if (ret == 0)
 			break;
-		// uart_send(UART_1, buffer);
-		printk("%s", buffer);
-		k_sleep(K_MSEC(1));
+		uart_send(UART_1, buffer, sizeof(buffer));
+		// printk("%s", buffer);
+		k_sleep(K_MSEC(20));
 	}
 
 	printk("\n\nFinished reading file");
@@ -302,7 +302,7 @@ void app_sd_thread(void *unused1, void *unused2, void *unused3)
 			printk("\nIn read file\n");
 			read_file(file_path, file_text, sizeof(file_text));
 			printk("\nFile content:\n\n%s", file_text);
-
+			return;
 			break;
 		default:
 			printk("\nUnknown SD event type");
