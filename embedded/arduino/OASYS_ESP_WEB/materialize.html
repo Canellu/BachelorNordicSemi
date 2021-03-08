@@ -36204,7 +36204,7 @@ const char web[] PROGMEM = R"====(
 
           if (event.data.includes("TXT")) {
             filename = event.data.slice(2, 10);
-          } else if (event.data == "EOF") {
+          } else if (event.data == "BASE") {
             filename = filename + ".txt";
             zip.file(filename, fileData);
           } else {
