@@ -115,6 +115,7 @@ static int send_all_file_info(const char *path)
 
 			// printk("\n%s", file_data);
 			uart_send(UART_1, file_data, sizeof(file_data));
+			k_sleep(K_MSEC(10));
 		}
 	}
 
@@ -187,6 +188,7 @@ static int read_file(char *file_path, char *data, int size)
 		// printk("%s", buffer);
 		k_sleep(K_MSEC(10));
 	}
+	uart_send(UART_1, "EOF", sizeof("EOF"));
 
 	printk("\n\nFinished reading file");
 	fs_close(&file);
