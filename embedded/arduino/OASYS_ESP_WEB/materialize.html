@@ -7877,9 +7877,8 @@ const char web[] PROGMEM = R"====(
           <div class="card yellow accent-4">
             <div class="card-content black-text">
               <span class="card-title">Moar info</span>
-              <p>
-                Lorem ipsum dolor, sit amet consectetur adipisicing elit.
-                Fugiat, ipsam.
+              <p class="midlertidigTerminal">
+                Hei
               </p>
             </div>
           </div>
@@ -8159,15 +8158,20 @@ const char web[] PROGMEM = R"====(
           });
       }
 
-      // init();
-      // var Socket;
-      // function init() {
-      //   Socket = new WebSocket("ws://" + window.location.hostname + ":81/");
-      //   Socket.onmessage = function (event) {
-      //     console.log(event.data);
-      //     document.querySelector(".textAreaSD").value += event.data;
-      //   };
-      // }
+
+      var midlertidigTerminal = document.querySelector('.midlertidigTerminal');
+    
+      console.log(midlertidigTerminal.innerText)
+      
+      init();
+      var Socket;
+      function init() {
+        Socket = new WebSocket("ws://" + window.location.hostname + ":81/");
+        Socket.onmessage = function (event) {
+          console.log(event.data);
+          document.querySelector(".midlertidigTerminal").innerText += event.data;
+        };
+      }
 
       // var terminalBtn = document.querySelector(".terminalBtn");
       // var textInput = document.querySelector(".textInput");

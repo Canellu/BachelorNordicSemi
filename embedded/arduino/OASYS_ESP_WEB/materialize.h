@@ -8159,15 +8159,19 @@ const char web[] PROGMEM = R"====(
  });
  }
 
- // init();
- // var Socket;
- // function init() {
- // Socket = new WebSocket("ws://" + window.location.hostname + ":81/");
- // Socket.onmessage = function (event) {
- // console.log(event.data);
- // document.querySelector(".textAreaSD").value += event.data;
- // };
- // }
+ var midlertidigTerminal = document.querySelector('.midlertidigTerminal');
+    
+      console.log(midlertidigTerminal.innerText)
+      
+      init();
+      var Socket;
+      function init() {
+        Socket = new WebSocket("ws://" + window.location.hostname + ":81/");
+        Socket.onmessage = function (event) {
+          console.log(event.data);
+          document.querySelector(".midlertidigTerminal").innerText += event.data;
+        };
+      }
 
  // var terminalBtn = document.querySelector(".terminalBtn");
  // var textInput = document.querySelector(".textInput");
