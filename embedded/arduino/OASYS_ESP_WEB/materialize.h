@@ -8171,8 +8171,11 @@ const char web[] PROGMEM = R"====(
         Socket = new WebSocket("ws://" + window.location.hostname + ":81/");
         Socket.onmessage = function (event) {
           console.log(event.data);
-          document.querySelector(".midlertidigTerminal").innerText += event.data;
+          console.log(typeof event.data);
+          document.querySelector(".midlertidigTerminal").innerText +=
+            event.data;
           textToZip += event.data;
+
         };
       }
 

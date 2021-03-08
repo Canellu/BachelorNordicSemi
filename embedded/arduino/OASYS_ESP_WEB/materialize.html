@@ -7877,9 +7877,7 @@ const char web[] PROGMEM = R"====(
           <div class="card yellow accent-4">
             <div class="card-content black-text">
               <span class="card-title">Moar info</span>
-              <p class="midlertidigTerminal">
-                Hei
-              </p>
+              <p class="midlertidigTerminal">Hei</p>
             </div>
           </div>
         </div>
@@ -8159,21 +8157,21 @@ const char web[] PROGMEM = R"====(
           });
       }
 
+      var midlertidigTerminal = document.querySelector(".midlertidigTerminal");
 
-      var midlertidigTerminal = document.querySelector('.midlertidigTerminal');
-      
       var textToZip = "";
-      
-      
+
       init();
       var Socket;
       function init() {
         Socket = new WebSocket("ws://" + window.location.hostname + ":81/");
         Socket.onmessage = function (event) {
           console.log(event.data);
-          document.querySelector(".midlertidigTerminal").innerText += event.data;
+          console.log(typeof event.data);
+          document.querySelector(".midlertidigTerminal").innerText +=
+            event.data;
           textToZip += event.data;
-          
+
         };
       }
 
