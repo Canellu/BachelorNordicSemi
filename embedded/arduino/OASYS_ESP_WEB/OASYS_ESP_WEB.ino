@@ -100,11 +100,30 @@ void read_nrf_commands()
   }
 }
 
+void flush_nrf_serial()
+{
+  while(mySerial.available() > 0)
+  {
+    mySerial.read();
+  }
+}
+
+void flush_serial()
+{
+  while(Serial.available() > 0)
+  {
+    Serial.read();
+  }
+}
+
 void setup(void)
 {
   pinMode(LED_BUILTIN, OUTPUT);
   Serial.begin(115200);
   mySerial.begin(115200);
+
+  flush_serial();
+  flush_nrf_serial();
 
   Serial.println("Waiting for command 0");
 }
@@ -139,10 +158,7 @@ void loop(void)
   else
   {
     read_nrf_commands();
-    while(mySerial.available() > 0)
-    {
-      mySerial.read();
-    }
+    flush_nrf_serial();
   }
 }
 
