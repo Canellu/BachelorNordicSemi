@@ -8170,9 +8170,14 @@ const char web[] PROGMEM = R"====(
       function init() {
         Socket = new WebSocket("ws://" + window.location.hostname + ":81/");
         Socket.onmessage = function (event) {
-          console.log(event.data);
-          document.querySelector(".midlertidigTerminal").innerText += event.data;
+          console.log(`Event: ${event}`);
+          console.log(`Event.data: ${event.data}`);
+          console.log(`Type of Event: ${typeof event}`);
+          console.log(`Type of Event.data: ${typeof event.data}`);
+          document.querySelector(".midlertidigTerminal").innerText +=
+            event.data;
           textToZip += event.data;
+
         };
       }
 
