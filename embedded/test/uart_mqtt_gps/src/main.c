@@ -526,24 +526,24 @@ void main(void)
 
 		uart_send(UART_1, "0", sizeof("0"));
 		printk("\nsent command 0 to esp");
-		k_sleep(K_MSEC(2000));
+
+		button_wait();
+		printk("\nTesting SD file info");
+		sd_msg_fill_send("", SEND_FILE_INFO);
 
 		oasys_data_t sd_msg;
-
-		printk("\nStarting SD file read");
 		sd_msg.event = READ_FILE;
-
 		sd_msg.year = 2021;
 		sd_msg.month = 03;
 		sd_msg.day = 04;
 
 		strcpy(sd_msg.json_string, "hei");
 
-		// add to sd card message queue
-		k_sleep(K_MSEC(2000));
+		button_wait();
+		printk("\nStarting SD file read");
 		k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
-		sd_msg_fill_send("", READ_FILE);
 
+		//sd_msg_fill_send("", READ_FILE);
 		// app_sd();
 
 		printk("\npress button 1 to start mqtt\n");
