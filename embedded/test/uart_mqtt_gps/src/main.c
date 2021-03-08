@@ -476,9 +476,9 @@ void main(void)
 	message_queue_init();
 
 	// sd card thread
-	// sd_tid = k_thread_create(&sd_thread, sd_stack_area, K_THREAD_STACK_SIZEOF(sd_stack_area),
-	// 						 (k_thread_entry_t)app_sd_thread, NULL, NULL, NULL,
-	// 						 7, 0, K_NO_WAIT);
+	sd_tid = k_thread_create(&sd_thread, sd_stack_area, K_THREAD_STACK_SIZEOF(sd_stack_area),
+							 (k_thread_entry_t)app_sd_thread, NULL, NULL, NULL,
+							 7, 0, K_NO_WAIT);
 
 	printk("\n\n**** NordicOasys v0.5 - Started ****\n\n");
 	printk("press button 1 to start\n\n");
@@ -504,41 +504,41 @@ void main(void)
 		// uart_module();
 
 		// for testing purposes, read JSON
-		//sd_msg_fill_send("", READ_JSON);
-		//sd_msg_fill_send("", READ_JSON);
+		// sd_msg_fill_send("", READ_JSON);
+		// sd_msg_fill_send("", READ_JSON);
 
 		// // read entire file
-		uint8_t cnt = 0;
-		uint8_t ascii = 0;
-		uint8_t esp_msg[] = "abcdefghijklmnopqrstuvwxyz\n";
+		// uint8_t cnt = 0;
+		// uint8_t ascii = 0;
+		// uint8_t esp_msg[] = "abcdefghijklmnopqrstuvwxyz\n";
 
-		printk("\nStarting send");
+		// printk("\nStarting send");
 
-		while (1)
-		{
-			ascii = (cnt % 94) + 32;
-			uart_send(UART_1, esp_msg, sizeof(esp_msg));
-			cnt++;
-			k_sleep(K_MSEC(20));
-		}
+		// while (1)
+		// {
+		// 	ascii = (cnt % 94) + 32;
+		// 	uart_send(UART_1, esp_msg, sizeof(esp_msg));
+		// 	cnt++;
+		// 	k_sleep(K_MSEC(20));
+		// }
 
 		// k_sleep(K_MSEC(5000));
 
-		// oasys_data_t sd_msg;
+		oasys_data_t sd_msg;
 
-		// printk("\nStarting SD file read");
-		// sd_msg.event = READ_FILE;
+		printk("\nStarting SD file read");
+		sd_msg.event = READ_FILE;
 
-		// sd_msg.year = 2021;
-		// sd_msg.month = 03;
-		// sd_msg.day = 04;
+		sd_msg.year = 2021;
+		sd_msg.month = 03;
+		sd_msg.day = 04;
 
-		// strcpy(sd_msg.json_string, "hei");
+		strcpy(sd_msg.json_string, "hei");
 
-		// // add to sd card message queue
-		// k_sleep(K_MSEC(2000));
-		// k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
-		// sd_msg_fill_send("", READ_FILE);
+		// add to sd card message queue
+		k_sleep(K_MSEC(2000));
+		k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
+		sd_msg_fill_send("", READ_FILE);
 
 		// app_sd();
 
