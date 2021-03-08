@@ -139,6 +139,10 @@ void loop(void)
   else
   {
     read_nrf_commands();
+    while(mySerial.available() > 0)
+    {
+      mySerial.read();
+    }
   }
 }
 
