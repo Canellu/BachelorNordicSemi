@@ -8148,6 +8148,7 @@ const char web[] PROGMEM = R"====(
         zip.file("TEST1.txt", "YO BOI\n");
         zip.file("TEST2.txt", "Another one\n");
         zip.file("TEST3.txt", "Catz\n");
+        zip.file("dataFromSD.txt", textToZip);
         zip
           .generateAsync({
             type: "blob",
@@ -8160,8 +8161,9 @@ const char web[] PROGMEM = R"====(
 
 
       var midlertidigTerminal = document.querySelector('.midlertidigTerminal');
-    
-      console.log(midlertidigTerminal.innerText)
+      
+      var textToZip = "";
+      
       
       init();
       var Socket;
@@ -8170,6 +8172,8 @@ const char web[] PROGMEM = R"====(
         Socket.onmessage = function (event) {
           console.log(event.data);
           document.querySelector(".midlertidigTerminal").innerText += event.data;
+          textToZip += event.data;
+          
         };
       }
 
