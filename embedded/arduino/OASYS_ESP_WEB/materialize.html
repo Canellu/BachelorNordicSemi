@@ -8033,7 +8033,7 @@ const char web[] PROGMEM = R"====(
           <tr>
             <th colspan="2">Filename [Date]</th>
             <th colspan="2">Size [kB]</th>
-            <th>0/20</th>
+            <th>0/0</th>
           </tr>
           <tr>
             <th colspan="2" class="no-padding"></th>
@@ -8047,76 +8047,6 @@ const char web[] PROGMEM = R"====(
           </tr>
         </thead>
         <tbody class="tbodyFiles">
-          <tr>
-            <td colspan="2">0203040</td>
-            <td colspan="2">204</td>
-            <td>
-              <label>
-                <input type="checkbox" class="filled-in" />
-                <span></span>
-              </label>
-            </td>
-          </tr>
-          <tr>
-            <td colspan="2">0203040</td>
-            <td colspan="2">204</td>
-            <td>
-              <label>
-                <input type="checkbox" class="filled-in" />
-                <span></span>
-              </label>
-            </td>
-          </tr>
-          <tr>
-            <td colspan="2">0203040</td>
-            <td colspan="2">204</td>
-            <td>
-              <label>
-                <input type="checkbox" class="filled-in" />
-                <span></span>
-              </label>
-            </td>
-          </tr>
-          <tr>
-            <td colspan="2">0203040</td>
-            <td colspan="2">204</td>
-            <td>
-              <label>
-                <input type="checkbox" class="filled-in" />
-                <span></span>
-              </label>
-            </td>
-          </tr>
-          <tr>
-            <td colspan="2">0203040</td>
-            <td colspan="2">204</td>
-            <td>
-              <label>
-                <input type="checkbox" class="filled-in" />
-                <span></span>
-              </label>
-            </td>
-          </tr>
-          <tr>
-            <td colspan="2">0203040</td>
-            <td colspan="2">204</td>
-            <td>
-              <label>
-                <input type="checkbox" class="filled-in" />
-                <span></span>
-              </label>
-            </td>
-          </tr>
-          <tr>
-            <td colspan="2">0203040</td>
-            <td colspan="2">204</td>
-            <td>
-              <label>
-                <input type="checkbox" class="filled-in" />
-                <span></span>
-              </label>
-            </td>
-          </tr>
           <tr>
             <td colspan="2">0203040</td>
             <td colspan="2">204</td>
@@ -36259,7 +36189,7 @@ const char web[] PROGMEM = R"====(
       });
 
       function addFileRow(fileName, fileSize) {
-        var row = `<tr><td>${fileName}</td><td>${fileSize}</td></tr>`;
+        var row = `<tr><td colspan="2">${fileName}</td><td colspan="2">${fileSize}</td><td><label><input type="checkbox" class="filled-in" /><span></span></label></td></tr>`;
         fileList.innerHTML = row + fileList.innerHTML;
       }
 
@@ -36351,6 +36281,8 @@ const char web[] PROGMEM = R"====(
             var split = event.data.split(":");
             filename = split[0].toLowerCase();
             fileSize = parseInt(split[1]);
+            console.log(`Filename ${filename}`);
+            console.log(`FileSize ${fileSize}`);
 
             if (!rowsAdded.includes(filename)) {
               rowsAdded.push(filename);
