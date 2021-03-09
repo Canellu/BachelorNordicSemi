@@ -113,7 +113,7 @@ static int send_all_file_info(const char *path)
 			strcat(file_data, temp_str);
 
 			// printk("\n%s", file_data);
-			uart_send(UART_1, file_data, sizeof(file_data));
+			uart_send(UART_2, file_data, sizeof(file_data));
 			k_sleep(K_MSEC(10));
 		}
 	}
@@ -182,12 +182,12 @@ static int read_file(char *file_path, char *data, int size)
 		ret = fs_read(&file, &buffer, 15);
 		if (ret == 0)
 			break;
-		uart_send(UART_1, buffer, sizeof(buffer));
+		uart_send(UART_2, buffer, sizeof(buffer));
 		memset(buffer, 0, sizeof(buffer));
 		// printk("%s", buffer);
 		k_sleep(K_MSEC(10));
 	}
-	uart_send(UART_1, "BASE", sizeof("BASE"));
+	uart_send(UART_2, "BASE", sizeof("BASE"));
 
 	printk("\n\nFinished reading file");
 	fs_close(&file);

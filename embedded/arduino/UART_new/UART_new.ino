@@ -1,3 +1,6 @@
+// #include <SoftwareSerial.h>
+
+// SoftwareSerial mySerial(2, 3); // RX, TX
 
 char fromSerial[128] = "";
 char fromSerial_JSON[128] = "";
@@ -10,52 +13,21 @@ long timestamp = 0;
 long starting_time = 0;
 long sensor_millis = 0;
 
-
-// Read time starting value in millis to be used for timestamps
-// Doesn't seem to be working
-int receive_start_time()
+void flush_serial()
 {
-  
-  unsigned long start_time_no = 0; 
-  static char *eptr;
-  
-  static char start_time[32] = "";
-  static boolean start_time_rcvd = false;
-  static boolean data_rcvd = false;
-  static int i = 0;
-
-  Serial.println("Waiting for start time");
-  
-  while(!start_time_rcvd)
+  while(Serial.available() > 0)
   {
-    while(!Serial.available())
-    {
-      if (strcmp(start_time, "")!= 0)
-      {
-        Serial.println(start_time);
-        start_time_no = strtoul(start_time, &eptr, 10);
-        Serial.println(start_time_no);
-        start_time_rcvd = true;
-        break;
-        }
-      else
-        {
-          delay(200);
-        }
-      }   
-      char data = Serial.read();
-      start_time[i] = data;
-      i++;
-
+    Serial.read();
   }
-
-  return start_time_no;
 }
 
 void setup()
 {  
   // Open serial communications and wait for port to open:
   Serial.begin(115200);
+  // mySerial.begin(115200);
+
+  flush_serial();
 
   static char *eptr;
   
@@ -82,7 +54,6 @@ void setup()
           delay(200);
       }
     }
-    // Serial.println("received data");
     char data = Serial.read();
     start_time[i] = data;
     i++;
@@ -94,6 +65,7 @@ void setup()
   Serial.print("Time value in millis: ");
   Serial.print(timestamp);
   Serial.println();
+  flush_serial();
   starting_time = millis();
 }
 void loop() // run over and over

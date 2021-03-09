@@ -47,7 +47,8 @@ static void uart_cb(const struct device *dev_uart, void *context)
 		}
 		else
 		{
-			//strcat(rx_buf, buf);
+			// printk("%s", buf);
+			// strcat(rx_buf, buf);
 		}
 	}
 }
