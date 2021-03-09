@@ -1,4 +1,4 @@
-const char web[] PROGMEM = R"====(
+<!-- const char web[] PROGMEM = R"====( -->
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -7680,7 +7680,7 @@ const char web[] PROGMEM = R"====(
 
     <!-- CUSTOM STYLES -->
     <style>
-      .download-btn {
+      .btn {
         margin-top: 30px;
       }
       #terminal {
@@ -7697,7 +7697,7 @@ const char web[] PROGMEM = R"====(
       }
       table tbody {
         display: block;
-        max-height: 40vh;
+        max-height: 50vh;
         overflow: auto;
       }
       thead,
@@ -7706,6 +7706,22 @@ const char web[] PROGMEM = R"====(
         width: 100%;
         table-layout: fixed;
       }
+      label span {
+        padding: 0 !important;
+        
+       
+      } 
+      
+      th label span {
+        padding-right: 17px !important;
+
+      }
+      
+
+      td p {
+        margin: 0;
+      }
+
       h4 {
         margin: 0;
       }
@@ -7768,14 +7784,51 @@ const char web[] PROGMEM = R"====(
       .borderB {
         border-bottom: 1px rgb(190, 190, 190) solid;
       }
+      /* width */
+      ::-webkit-scrollbar {
+        width: 10px;
+      }
+
+      /* Track */
+      ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+      }
+
+      /* Handle */
+      ::-webkit-scrollbar-thumb {
+        background: #fbc02d;
+      }
+
+      /* Handle on hover */
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgb(121, 121, 121);
+      }
+
+      @media screen and (max-width: 1200px) {
+        table tbody {
+        display: block;
+        max-height: 35vh;
+        overflow: auto;
+      }
+      }
 
       @media screen and (max-width: 480px) {
         .tabSelectorBottom {
           position: fixed;
           width: 100vw;
-          z-index: 1;
+          z-index: 999;
           bottom: 0;
         }
+
+        ::-webkit-scrollbar {
+          width: 4px;
+        }
+
+        label span {
+          padding-right: 10px !important;
+        }
+
+        
       }
     </style>
     <!-- CUSTOM STYLES -->
@@ -7796,9 +7849,9 @@ const char web[] PROGMEM = R"====(
     <div class="tabSelectorBottom yellow accent-4">
       <div class="container">
         <ul class="tabs tabs-fixed-width yellow accent-4">
-          <li class="tab"><a class="active" href="#info">Info</a></li>
+          <li class="tab"><a  href="#info">Info</a></li>
           <li class="tab"><a href="#terminal">Terminal</a></li>
-          <li class="tab"><a href="#files">Files</a></li>
+          <li class="tab"><a class="active" href="#files">Files</a></li>
         </ul>
       </div>
     </div>
@@ -7965,7 +8018,7 @@ const char web[] PROGMEM = R"====(
           <div class="card yellow darken-1 center">
             <div class="card-content grey-text text-darken-3">
               <span class="card-title">Files</span>
-              <h4 class="totalFiles"></h4>
+              <h4 class="totalFiles">0</h4>
             </div>
           </div>
         </div>
@@ -7973,7 +8026,7 @@ const char web[] PROGMEM = R"====(
           <div class="card yellow darken-1 center">
             <div class="card-content grey-text text-darken-3">
               <span class="card-title">Size</span>
-              <h4 class="totalSize"></h4>
+              <h4 class="totalSize">0</h4>
             </div>
           </div>
         </div>
@@ -7981,19 +8034,114 @@ const char web[] PROGMEM = R"====(
       <table class="striped centered borderB">
         <thead class="table-header yellow darken-2">
           <tr>
-            <th colspan="2"><h5>Files in microSD</h5></th>
+            <th colspan="5"><h5>Files in microSD</h5></th>
           </tr>
           <tr>
-            <th>Filename [Date]</th>
-            <th>Size [kB]</th>
+            <th colspan="2">Filename [Date]</th>
+            <th colspan="2">Size [kB]</th>
+            <th>0/20</th>
+          </tr>
+          <tr >
+            <th colspan="2" class="no-padding"></th>
+            <th colspan="2" class="no-padding"></th>
+            <th class="no-padding" >          
+              <label >
+                <input type="checkbox" class="filled-in" />
+                <span ></span>
+              </label>  
+            </th>
           </tr>
         </thead>
-        <tbody class="tbodyFiles"></tbody>
+        <tbody class="tbodyFiles">
+         
+          <tr>
+            <td colspan="2">0203040</td>
+            <td colspan="2">204</td>
+            <td>          
+              <label>
+                <input type="checkbox" class="filled-in" />
+                <span></span>
+              </label>  
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2">0203040</td>
+            <td colspan="2">204</td>
+            <td>          
+              <label>
+                <input type="checkbox" class="filled-in" />
+                <span></span>
+              </label>  
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2">0203040</td>
+            <td colspan="2">204</td>
+            <td>          
+              <label>
+                <input type="checkbox" class="filled-in" />
+                <span></span>
+              </label>  
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2">0203040</td>
+            <td colspan="2">204</td>
+            <td>          
+              <label>
+                <input type="checkbox" class="filled-in" />
+                <span></span>
+              </label>  
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2">0203040</td>
+            <td colspan="2">204</td>
+            <td>          
+              <label>
+                <input type="checkbox" class="filled-in" />
+                <span></span>
+              </label>  
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2">0203040</td>
+            <td colspan="2">204</td>
+            <td>          
+              <label>
+                <input type="checkbox" class="filled-in" />
+                <span></span>
+              </label>  
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2">0203040</td>
+            <td colspan="2">204</td>
+            <td>          
+              <label>
+                <input type="checkbox" class="filled-in" />
+                <span></span>
+              </label>  
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2">0203040</td>
+            <td colspan="2">204</td>
+            <td>          
+              <label>
+                <input type="checkbox" class="filled-in" />
+                <span></span>
+              </label>  
+            </td>
+          </tr>
+        </tbody>
       </table>
+    
       <div class="center">
+       
         <a class="download-btn waves-effect waves-light btn">
           generate & download
-          <i class="left" style="margin-top: 8px">
+          <i class="left">
             <svg
               width="14"
               height="17"
@@ -8026,7 +8174,7 @@ const char web[] PROGMEM = R"====(
       </div>
     </div>
     <!-- FILES TAB-->
-    
+
     <!-- materialize.min.js -->
     <script>
       var _get = function t(e, i, n) {
@@ -36103,18 +36251,18 @@ const char web[] PROGMEM = R"====(
       // M.AutoInit();
 
       var toastHTML =
-        '<span style="color: #c6ff00; font-weight: bold;">Do <u>NOT</u> close the browser while files are downloading!</span>';
+        '<span style="color: #c6ff00; font-weight: bold;">Do <u>NOT</u> close or refresh the browser while files are downloading!</span>';
 
       downloadBtn.addEventListener("click", () => {
         createZip();
         Socket.send("{generate_all}");
         // downloadBtn.classList.add("disabled");
         progressBar.classList.remove("hide");
-        
+
         M.toast({
           html: toastHTML,
-          displayLength: 100000,
-          classes: "rounded posTop",
+          displayLength: 5000,
+          classes: "rounded",
         });
       });
 
@@ -36168,13 +36316,9 @@ const char web[] PROGMEM = R"====(
       }
       createModalContent(validCommands);
 
-      
-     
-
       var zip = new JSZip();
 
       function createZip() {
-        
         zip.file("dataFromSD.txt", textToZip);
         zip
           .generateAsync({
@@ -36199,13 +36343,11 @@ const char web[] PROGMEM = R"====(
       var totalFiles = 0;
       var rowsAdded = [];
 
-
       var dataReceived = 0;
 
       init();
       var Socket;
       function init() {
-        
         Socket = new WebSocket("ws://" + window.location.hostname + ":81/");
         Socket.onmessage = function (event) {
           // Test, append to Moar Card
@@ -36217,30 +36359,28 @@ const char web[] PROGMEM = R"====(
             var split = event.data.split(":");
             filename = split[0].toLowerCase();
             fileSize = parseInt(split[1]);
-            
-            if(!rowsAdded.includes(filename)) {
+
+            if (!rowsAdded.includes(filename)) {
               rowsAdded.push(filename);
               totalFileSize += fileSize;
-              totalFiles ++;
+              totalFiles++;
               sizeCard.innerText = totalFileSize;
               fileCard.innerText = totalFiles;
               addFileRow(filename.slice(0, filename.length - 4), fileSize);
             }
-              
           } else if (event.data == "BASE") {
             zip.file(filename, fileData);
           } else {
             fileData += event.data;
             dataReceived += event.data.length;
-            let percentage = parseInt((dataReceived / totalFileSize)*100);
+            let percentage = parseInt((dataReceived / totalFileSize) * 100);
             progressFill.style.width = `${percentage}%`;
             progressLabel.innerText = `${percentage}%`;
           }
         };
       }
-
     </script>
   </body>
 </html>
 
-)====";
+<!-- )===="; -->
