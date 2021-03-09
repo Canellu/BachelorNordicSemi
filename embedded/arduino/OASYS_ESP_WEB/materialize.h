@@ -7680,7 +7680,7 @@ const char web[] PROGMEM = R"====(
 
  <!-- CUSTOM STYLES -->
  <style>
- .download-btn {
+ .btn {
  margin-top: 30px;
  }
  #terminal {
@@ -7697,7 +7697,7 @@ const char web[] PROGMEM = R"====(
  }
  table tbody {
  display: block;
- max-height: 40vh;
+ max-height: 50vh;
  overflow: auto;
  }
  thead,
@@ -7706,6 +7706,18 @@ const char web[] PROGMEM = R"====(
  width: 100%;
  table-layout: fixed;
  }
+ label span {
+ padding: 0 !important;
+ }
+
+ th label span {
+ padding-right: 17px !important;
+ }
+
+ td p {
+ margin: 0;
+ }
+
  h4 {
  margin: 0;
  }
@@ -7768,13 +7780,48 @@ const char web[] PROGMEM = R"====(
  .borderB {
  border-bottom: 1px rgb(190, 190, 190) solid;
  }
+ /* width */
+ ::-webkit-scrollbar {
+ width: 10px;
+ }
+
+ /* Track */
+ ::-webkit-scrollbar-track {
+ background: #f1f1f1;
+ }
+
+ /* Handle */
+ ::-webkit-scrollbar-thumb {
+ background: #fbc02d;
+ }
+
+ /* Handle on hover */
+ ::-webkit-scrollbar-thumb:hover {
+ background: rgb(121, 121, 121);
+ }
+
+ @media screen and (max-width: 1200px) {
+ table tbody {
+ display: block;
+ max-height: 35vh;
+ overflow: auto;
+ }
+ }
 
  @media screen and (max-width: 480px) {
  .tabSelectorBottom {
  position: fixed;
  width: 100vw;
- z-index: 1;
+ z-index: 999;
  bottom: 0;
+ }
+
+ ::-webkit-scrollbar {
+ width: 4px;
+ }
+
+ label span {
+ padding-right: 10px !important;
  }
  }
  </style>
@@ -7796,9 +7843,9 @@ const char web[] PROGMEM = R"====(
  <div class="tabSelectorBottom yellow accent-4">
  <div class="container">
  <ul class="tabs tabs-fixed-width yellow accent-4">
- <li class="tab"><a class="active" href="#info">Info</a></li>
+ <li class="tab"><a href="#info">Info</a></li>
  <li class="tab"><a href="#terminal">Terminal</a></li>
- <li class="tab"><a href="#files">Files</a></li>
+ <li class="tab"><a class="active" href="#files">Files</a></li>
  </ul>
  </div>
  </div>
@@ -7965,15 +8012,15 @@ const char web[] PROGMEM = R"====(
  <div class="card yellow darken-1 center">
  <div class="card-content grey-text text-darken-3">
  <span class="card-title">Files</span>
- <h4>20</h4>
+ <h4 class="totalFiles">0</h4>
  </div>
  </div>
  </div>
  <div class="col s6">
  <div class="card yellow darken-1 center">
  <div class="card-content grey-text text-darken-3">
- <span class="card-title">Size [mB]</span>
- <h4>2349</h4>
+ <span class="card-title">Size</span>
+ <h4 class="totalSize">0</h4>
  </div>
  </div>
  </div>
@@ -7981,19 +8028,112 @@ const char web[] PROGMEM = R"====(
  <table class="striped centered borderB">
  <thead class="table-header yellow darken-2">
  <tr>
- <th colspan="2"><h5>Files in microSD</h5></th>
+ <th colspan="5"><h5>Files in microSD</h5></th>
  </tr>
  <tr>
- <th>Filename [Date]</th>
- <th>Size [kB]</th>
+ <th colspan="2">Filename [Date]</th>
+ <th colspan="2">Size [kB]</th>
+ <th>0/20</th>
+ </tr>
+ <tr>
+ <th colspan="2" class="no-padding"></th>
+ <th colspan="2" class="no-padding"></th>
+ <th class="no-padding">
+ <label>
+ <input type="checkbox" class="filled-in" />
+ <span></span>
+ </label>
+ </th>
  </tr>
  </thead>
- <tbody class="tbodyFiles"></tbody>
+ <tbody class="tbodyFiles">
+ <tr>
+ <td colspan="2">0203040</td>
+ <td colspan="2">204</td>
+ <td>
+ <label>
+ <input type="checkbox" class="filled-in" />
+ <span></span>
+ </label>
+ </td>
+ </tr>
+ <tr>
+ <td colspan="2">0203040</td>
+ <td colspan="2">204</td>
+ <td>
+ <label>
+ <input type="checkbox" class="filled-in" />
+ <span></span>
+ </label>
+ </td>
+ </tr>
+ <tr>
+ <td colspan="2">0203040</td>
+ <td colspan="2">204</td>
+ <td>
+ <label>
+ <input type="checkbox" class="filled-in" />
+ <span></span>
+ </label>
+ </td>
+ </tr>
+ <tr>
+ <td colspan="2">0203040</td>
+ <td colspan="2">204</td>
+ <td>
+ <label>
+ <input type="checkbox" class="filled-in" />
+ <span></span>
+ </label>
+ </td>
+ </tr>
+ <tr>
+ <td colspan="2">0203040</td>
+ <td colspan="2">204</td>
+ <td>
+ <label>
+ <input type="checkbox" class="filled-in" />
+ <span></span>
+ </label>
+ </td>
+ </tr>
+ <tr>
+ <td colspan="2">0203040</td>
+ <td colspan="2">204</td>
+ <td>
+ <label>
+ <input type="checkbox" class="filled-in" />
+ <span></span>
+ </label>
+ </td>
+ </tr>
+ <tr>
+ <td colspan="2">0203040</td>
+ <td colspan="2">204</td>
+ <td>
+ <label>
+ <input type="checkbox" class="filled-in" />
+ <span></span>
+ </label>
+ </td>
+ </tr>
+ <tr>
+ <td colspan="2">0203040</td>
+ <td colspan="2">204</td>
+ <td>
+ <label>
+ <input type="checkbox" class="filled-in" />
+ <span></span>
+ </label>
+ </td>
+ </tr>
+ </tbody>
  </table>
+
  <div class="center">
  <a class="download-btn waves-effect waves-light btn">
  generate & download
- <i class="left" style="margin-top: 8px">
+ <i class="left">
  <svg
  width="14"
  height="17"
@@ -8012,21 +8152,21 @@ const char web[] PROGMEM = R"====(
  <div class="row valign-wrapper hide prog-bar mtop">
  <div class="col s10 m11">
  <div class="progress mtop">
- <div class="determinate progressFill" style="width: 20%"></div>
+ <div class="determinate progressFill" style="width: 0%"></div>
  </div>
  </div>
  <div class="col s2 m1">
  <span
- class="new badge"
+ class="new badge progressLabel"
  data-badge-caption=""
  style="font-size: 1.1rem; font-weight: 600"
- >20%</span
+ >0%</span
  >
  </div>
  </div>
  </div>
  <!-- FILES TAB-->
- 
+
  <!-- materialize.min.js -->
  <script>
  var _get = function t(e, i, n) {
@@ -36057,189 +36197,180 @@ const char web[] PROGMEM = R"====(
  </script>
  <!-- app.js -->
  <script>
-  // Get classes
-      var progressBar = document.querySelector(".prog-bar");
-      var progressFill = document.querySelector(".determinate");
-      var progressLabel = document.querySelector(".progressLabel");
-      var downloadBtn = document.querySelector(".download-btn");
-      var fileList = document.querySelector(".tbodyFiles");
-      var commandList = document.querySelector(".tbodyCommands");
-      var modalList = document.querySelector(".tbodyModal");
-      var form = document.querySelector("form");
-      var commandInput = document.querySelector("#commands");
-      var commandLabel = document.querySelector("label[for=commands]");
+ // Get classes
+ var progressBar = document.querySelector(".prog-bar");
+ var progressFill = document.querySelector(".determinate");
+ var progressLabel = document.querySelector(".progressLabel");
+ var downloadBtn = document.querySelector(".download-btn");
+ var fileList = document.querySelector(".tbodyFiles");
+ var commandList = document.querySelector(".tbodyCommands");
+ var modalList = document.querySelector(".tbodyModal");
+ var form = document.querySelector("form");
+ var commandInput = document.querySelector("#commands");
+ var commandLabel = document.querySelector("label[for=commands]");
 
-      // Init materialize elements
-      document.addEventListener("DOMContentLoaded", function () {
-        M.Tabs.init(document.querySelectorAll(".tabs"));
-        M.Modal.init(document.querySelectorAll(".modal"));
-      });
+ // Init materialize elements
+ document.addEventListener("DOMContentLoaded", function () {
+ M.Tabs.init(document.querySelectorAll(".tabs"));
+ M.Modal.init(document.querySelectorAll(".modal"));
+ });
 
-      form.addEventListener("submit", (e) => {
-        e.preventDefault();
-      });
-      commandInput.addEventListener("keypress", (e) => {
-        if (e.keyCode == 13) {
-          let split = commandInput.value.split(" ");
-          // Socket.send(commandInput.value);
-          addCommandRow(split[0], split[1]);
+ form.addEventListener("submit", (e) => {
+ e.preventDefault();
+ });
+ commandInput.addEventListener("keypress", (e) => {
+ if (e.keyCode == 13) {
+ let split = commandInput.value.split(" ");
+ // Socket.send(commandInput.value);
+ addCommandRow(split[0], split[1]);
 
-          // Validation
-          for (var key in validCommands) {
-            if (split[0] == key && split.length == 2) {
-              commandInput.classList.remove("invalid");
-              commandInput.classList.add("valid");
-              break;
-            } else {
-              commandInput.classList.remove("valid");
-              commandInput.classList.add("invalid");
-            }
-          }
+ // Validation
+ for (var key in validCommands) {
+ if (split[0] == key && split.length == 2) {
+ commandInput.classList.remove("invalid");
+ commandInput.classList.add("valid");
+ break;
+ } else {
+ commandInput.classList.remove("valid");
+ commandInput.classList.add("invalid");
+ }
+ }
 
-          commandInput.value = "";
-        }
-      });
+ commandInput.value = "";
+ }
+ });
 
-      // M.AutoInit();
+ // M.AutoInit();
 
-      var toastHTML =
-        '<span style="color: #c6ff00; font-weight: bold;">Do <u>NOT</u> close the browser while files are downloading!</span>';
+ var toastHTML =
+ '<span style="color: #c6ff00; font-weight: bold;">Do <u>NOT</u> close or refresh the browser while files are downloading!</span>';
 
-      downloadBtn.addEventListener("click", () => {
-        createZip();
-        Socket.send("{generate_all}");
-        // downloadBtn.classList.add("disabled");
-        progressBar.classList.remove("hide");
-        
-        M.toast({
-          html: toastHTML,
-          displayLength: 100000,
-          classes: "rounded posTop",
-        });
-      });
+ downloadBtn.addEventListener("click", () => {
+ createZip();
+ Socket.send("{generate_all}");
+ // downloadBtn.classList.add("disabled");
+ progressBar.classList.remove("hide");
 
-      function addFileRow(fileName, fileSize) {
-        var row = `<tr><td>${fileName}</td><td>${fileSize}</td></tr>`;
-        fileList.innerHTML = row + fileList.innerHTML;
-      }
+ M.toast({
+ html: toastHTML,
+ displayLength: 5000,
+ classes: "rounded",
+ });
+ });
 
-      function addCommandRow(key, value) {
-        var date = new Date();
-        var time =
-          date.getHours() +
-          ":" +
-          (date.getMinutes() < 10 ? "0" : "") +
-          date.getMinutes() +
-          ":" +
-          (date.getSeconds() < 10 ? "0" : "") +
-          date.getSeconds();
-        var row = `<tr><td>${time}</td><td>${key.toUpperCase()}</td><td>${value}</td></tr>`;
-        commandList.innerHTML = row + commandList.innerHTML;
-      }
+ function addFileRow(fileName, fileSize) {
+ var row = `<tr><td>${fileName}</td><td>${fileSize}</td></tr>`;
+ fileList.innerHTML = row + fileList.innerHTML;
+ }
 
-      var validCommands = {
-        T: "0 - 12",
-        P: "0 - 15",
-        C: "0 - 20",
-        D: "0 - 20",
-        E: "0 - 20",
-        F: "0 - 20",
-        G: "0 - 20",
-        H: "0 - 20",
-      };
-      var descriptions = [
-        "Temperature",
-        "Pressure",
-        "Conductivity",
-        "S",
-        "S",
-        "S",
-        "S",
-        "S",
-      ];
-      function createModalContent(commandObj) {
-        let count = 0;
-        for (var key in commandObj) {
-          var row = `<tr><td>${key}</td><td>${commandObj[key]}</td><td>${
-            descriptions[count++]
-          }</td></tr>`;
-          modalList.innerHTML += row;
-        }
-      }
-      createModalContent(validCommands);
+ function addCommandRow(key, value) {
+ var date = new Date();
+ var time =
+ date.getHours() +
+ ":" +
+ (date.getMinutes() < 10 ? "0" : "") +
+ date.getMinutes() +
+ ":" +
+ (date.getSeconds() < 10 ? "0" : "") +
+ date.getSeconds();
+ var row = `<tr><td>${time}</td><td>${key.toUpperCase()}</td><td>${value}</td></tr>`;
+ commandList.innerHTML = row + commandList.innerHTML;
+ }
 
-      
-     
+ var validCommands = {
+ T: "0 - 12",
+ P: "0 - 15",
+ C: "0 - 20",
+ D: "0 - 20",
+ E: "0 - 20",
+ F: "0 - 20",
+ G: "0 - 20",
+ H: "0 - 20",
+ };
+ var descriptions = [
+ "Temperature",
+ "Pressure",
+ "Conductivity",
+ "S",
+ "S",
+ "S",
+ "S",
+ "S",
+ ];
+ function createModalContent(commandObj) {
+ let count = 0;
+ for (var key in commandObj) {
+ var row = `<tr><td>${key}</td><td>${commandObj[key]}</td><td>${
+ descriptions[count++]
+ }</td></tr>`;
+ modalList.innerHTML += row;
+ }
+ }
+ createModalContent(validCommands);
 
-      var zip = new JSZip();
+ var zip = new JSZip();
 
-      function createZip() {
-        
-        zip.file("dataFromSD.txt", textToZip);
-        zip
-          .generateAsync({
-            type: "blob",
-            compression: "STORE",
-          })
-          .then((content) => {
-            saveAs(content, "GliderData.zip");
-          });
-      }
+ function createZip() {
+ zip.file("dataFromSD.txt", textToZip);
+ zip
+ .generateAsync({
+ type: "blob",
+ compression: "STORE",
+ })
+ .then((content) => {
+ saveAs(content, "GliderData.zip");
+ });
+ }
 
-      var midlertidigTerminal = document.querySelector(".midlertidigTerminal");
-      var sizeCard = document.querySelector(".totalSize");
-      var fileCard = document.querySelector(".totalFiles");
+ var midlertidigTerminal = document.querySelector(".midlertidigTerminal");
+ var sizeCard = document.querySelector(".totalSize");
+ var fileCard = document.querySelector(".totalFiles");
 
-      var textToZip = "";
+ var textToZip = "";
 
-      var filename = "";
-      var fileData = "";
-      var fileSize = 0;
-      var totalFileSize = 0;
-      var totalFiles = 0;
-      var rowsAdded = [];
+ var filename = "";
+ var fileData = "";
+ var fileSize = 0;
+ var totalFileSize = 0;
+ var totalFiles = 0;
+ var rowsAdded = [];
 
+ var dataReceived = 0;
 
-      var dataReceived = 0;
+ init();
+ var Socket;
+ function init() {
+ Socket = new WebSocket("ws://" + window.location.hostname + ":81/");
+ Socket.onmessage = function (event) {
+ // Test, append to Moar Card
+ document.querySelector(".midlertidigTerminal").innerText +=
+ event.data;
+ textToZip += event.data;
 
-      init();
-      var Socket;
-      function init() {
-        
-        Socket = new WebSocket("ws://" + window.location.hostname + ":81/");
-        Socket.onmessage = function (event) {
-          // Test, append to Moar Card
-          document.querySelector(".midlertidigTerminal").innerText +=
-            event.data;
-          textToZip += event.data;
+ if (event.data.includes("TXT")) {
+ var split = event.data.split(":");
+ filename = split[0].toLowerCase();
+ fileSize = parseInt(split[1]);
 
-          if (event.data.includes("TXT")) {
-            var split = event.data.split(":");
-            filename = split[0].toLowerCase();
-            fileSize = parseInt(split[1]);
-            
-            if(!rowsAdded.includes(filename)) {
-              rowsAdded.push(filename);
-              totalFileSize += fileSize;
-              totalFiles ++;
-              sizeCard.innerText = totalFileSize;
-              fileCard.innerText = totalFiles;
-              addFileRow(filename.slice(0, filename.length - 4), fileSize);
-            }
-              
-          } else if (event.data == "BASE") {
-            zip.file(filename, fileData);
-          } else {
-            fileData += event.data;
-            dataReceived += event.data.length;
-            let percentage = parseInt((dataReceived / totalFileSize)*100);
-            progressFill.style.width = `${percentage}%`;
-            progressLabel.innerText = `${percentage}%`;
-          }
-        };
-      }
-
-
+ if (!rowsAdded.includes(filename)) {
+ rowsAdded.push(filename);
+ totalFileSize += fileSize;
+ totalFiles++;
+ sizeCard.innerText = totalFileSize;
+ fileCard.innerText = totalFiles;
+ addFileRow(filename.slice(0, filename.length - 4), fileSize);
+ }
+ } else if (event.data == "BASE") {
+ zip.file(filename, fileData);
+ } else {
+ fileData += event.data;
+ dataReceived += event.data.length;
+ let percentage = parseInt((dataReceived / totalFileSize) * 100);
+ progressFill.style.width = `${percentage}%`;
+ progressLabel.innerText = `${percentage}%`;
+ }
+ };
+ }
  </script>
  </body>
 </html>
