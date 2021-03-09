@@ -330,8 +330,8 @@ static int gps_module()
 	uart_send(uart_dev1, time_millis_str, sizeof(time_millis_str));
 
 	// add to data array
-	strcpy(uart_data_array[data_size++], gps_data.gps_string);
-	data_available_to_send = true;
+	// strcpy(uart_data_array[data_size++], gps_data.gps_string);
+	// data_available_to_send = true;
 
 	printk("\ngps test end\n\n");
 
@@ -490,7 +490,7 @@ void main(void)
 
 		message_queue_reset();
 
-		// gps_module();
+		gps_module();
 
 		// TEMPORARY TEST PRINTING WHAT WILL BE SENT TO SD CARD FROM GPS
 
@@ -501,7 +501,7 @@ void main(void)
 		// printk("\n%02d-%02d-%02d", test_data.year, test_data.month, test_data.day);
 		// printk("\n%s", test_data.json_string);
 
-		// uart_module();
+		uart_module();
 
 		// for testing purposes, read JSON
 		// sd_msg_fill_send("", READ_JSON);
@@ -524,10 +524,21 @@ void main(void)
 
 		// k_sleep(K_MSEC(5000));
 
-		uart_send(UART_1, "0", sizeof("0"));
+		uart_send(UART_2, "0", sizeof("0"));
 		printk("\nsent command 0 to esp");
 
+		uint8_t wifi_response[128];
+		k_msgq_get(&uart_msg_q, wifi_response, K_FOREVER);
+		if (strcmp(wifi_response, "{connected}") != 0)
+		{
+			printk("\n\nSomething wrong, press button 1 to continue");
+		}
+		else
+		{
+			printk("\n\nConnect successful, press button 1 to continue");
+		}
 		button_wait();
+
 		printk("\nTesting SD file info");
 		sd_msg_fill_send("", SEND_FILE_INFO);
 

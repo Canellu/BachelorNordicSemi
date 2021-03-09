@@ -165,6 +165,11 @@ void loop(void)
 // callback function whenever we receive data from webpage
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
 {
+  if (type == WStype_CONNECTED)
+  {
+    Serial.print("\n{connected}");
+    mySerial.print("{connected}");
+  }
   if (type == WStype_TEXT)
   {
 
