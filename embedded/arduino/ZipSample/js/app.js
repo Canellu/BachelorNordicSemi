@@ -9,6 +9,35 @@ var modalList = document.querySelector(".tbodyModal");
 var form = document.querySelector("form");
 var commandInput = document.querySelector("#commands");
 var commandLabel = document.querySelector("label[for=commands]");
+var checkAll = document.querySelector("#checkAll");
+
+var toastHTML =
+  '<span style="color: #FBC02D; font-weight: bold;">Do <u>NOT</u> close or refresh the browser while files are downloading!</span>';
+
+var zip = new JSZip();
+
+// Listen for click on checkAll-box
+var checkVal = true;
+checkAll.addEventListener("click", () => {
+  let checkBoxes = document.querySelectorAll(".filled-in:not(#checkAll)");
+  checkBoxes.forEach((e) => {
+    e.checked = checkVal;
+  });
+  checkVal = !checkVal;
+});
+
+// Listen for clicks, update total files checked
+document.addEventListener("click", () => {
+  let checkBoxes = document.querySelectorAll(".filled-in:not(#checkAll)");
+  let checkedFiles = 0;
+  checkBoxes.forEach((e) => {
+    if (e.checked == true) checkedFiles++;
+  });
+
+  document.querySelector(
+    "#numChecked"
+  ).innerText = `${checkedFiles}/${checkBoxes.length}`;
+});
 
 // Init materialize elements
 document.addEventListener("DOMContentLoaded", function () {
@@ -16,15 +45,17 @@ document.addEventListener("DOMContentLoaded", function () {
   M.Modal.init(document.querySelectorAll(".modal"));
 });
 
+// Prevent default submit action when Enter
 form.addEventListener("submit", (e) => {
   e.preventDefault();
 });
+
+// Terminal inputField ON ENTER
 commandInput.addEventListener("keypress", (e) => {
   if (e.keyCode == 13) {
     let split = commandInput.value.split(" ");
     // Socket.send(commandInput.value);
     addCommandRow(split[0], split[1]);
-
     // Validation
     for (var key in validCommands) {
       if (split[0] == key && split.length == 2) {
@@ -36,34 +67,17 @@ commandInput.addEventListener("keypress", (e) => {
         commandInput.classList.add("invalid");
       }
     }
-
     commandInput.value = "";
   }
 });
 
-// M.AutoInit();
-
-var toastHTML =
-  '<span style="color: #c6ff00; font-weight: bold;">Do <u>NOT</u> close the browser while files are downloading!</span>';
-
-downloadBtn.addEventListener("click", () => {
-  createZip();
-  Socket.send("{generate_all}");
-  // downloadBtn.classList.add("disabled");
-  progressBar.classList.remove("hide");
-
-  M.toast({
-    html: toastHTML,
-    displayLength: 100000,
-    classes: "rounded posTop",
-  });
-});
-
+// Add row to file table
 function addFileRow(fileName, fileSize) {
-  var row = `<tr><td>${fileName}</td><td>${fileSize}</td></tr>`;
+  var row = `<tr><td colspan="2">${fileName}</td><td colspan="2">${fileSize}</td><td><label><input type="checkbox" class="filled-in" /><span></span></label></td></tr>`;
   fileList.innerHTML = row + fileList.innerHTML;
 }
 
+// Add row to command table
 function addCommandRow(key, value) {
   var date = new Date();
   var time =
@@ -78,6 +92,7 @@ function addCommandRow(key, value) {
   commandList.innerHTML = row + commandList.innerHTML;
 }
 
+// Modal data
 var validCommands = {
   T: "0 - 12",
   P: "0 - 15",
@@ -98,6 +113,8 @@ var descriptions = [
   "S",
   "S",
 ];
+
+// Populate modal table with data
 function createModalContent(commandObj) {
   let count = 0;
   for (var key in commandObj) {
@@ -109,8 +126,7 @@ function createModalContent(commandObj) {
 }
 createModalContent(validCommands);
 
-var zip = new JSZip();
-
+// Zips the files and creates a download on browser
 function createZip() {
   zip.file("dataFromSD.txt", textToZip);
   zip
@@ -123,51 +139,152 @@ function createZip() {
     });
 }
 
+function getRndInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+// Dummy data
+var tmpName = 202003001;
+for (let i = 0; i < 10; i++) {
+  addFileRow(`${tmpName + getRndInt(1, 29)}`, getRndInt(200, 800));
+}
+
+// Download button
+downloadBtn.addEventListener("click", () => {
+  // Iterate over rows to see if checkbox is true/false
+  requestList = [];
+  Array.from(fileList.rows).forEach((row) => {
+    let name = row.cells[0].textContent;
+    let size = parseInt(row.cells[1].textContent);
+    let checkBox = row.cells[2].querySelector("input[type=checkbox]").checked;
+    console.log(`${name} ${size} ${checkBox}`);
+    if (checkBox) {
+      requestList.push([name, size]);
+      currentTotalSize += size;
+    }
+  });
+  downloadBtn.classList.add("disabled");
+  progressBar.classList.remove("hide");
+
+  currentFile = requestList.shift();
+  name = currentFile[0];
+  console.log(`CurrentTotalSize: ${currentTotalSize}`);
+  console.log(`REQUESTING FILE: ${currentFile[0]}`);
+  requestFileData(currentFile);
+
+  M.toast({
+    html: toastHTML,
+    displayLength: 8000,
+    classes: "rounded",
+  });
+});
+
+function requestFileData(file) {
+  fileData = "";
+  sendingData = true;
+  dataReceived = 0;
+  currentSize = file[1];
+  Socket.send(`{D:${file[0]}}`);
+}
+
 var midlertidigTerminal = document.querySelector(".midlertidigTerminal");
 var sizeCard = document.querySelector(".totalSize");
 var fileCard = document.querySelector(".totalFiles");
+var checkedLabel = document.querySelector("#numChecked");
 
 var textToZip = "";
-
 var filename = "";
 var fileData = "";
 var fileSize = 0;
+var totalDataReceived = 0;
 var totalFileSize = 0;
 var totalFiles = 0;
 var rowsAdded = [];
 
+var sendingData = true;
+var currentTotalSize = 0;
+var totalReceived = 0;
+var requestList = [];
 var dataReceived = 0;
+var currentSize = 0;
+var currentFile = [];
 
-//init();
+var name = "";
+
 var Socket;
+
+function populateFileTable() {
+  if (event.data.includes("TXT")) {
+    sendingData = false;
+    var split = event.data.split(":");
+    filename = split[0].toLowerCase();
+    fileSize = parseInt(split[1]);
+    console.log(`Filename ${filename}`);
+    console.log(`FileSize ${fileSize}`);
+
+    if (!rowsAdded.includes(filename)) {
+      rowsAdded.push(filename);
+      totalFileSize += fileSize;
+      totalFiles++;
+      sizeCard.innerText = totalFileSize;
+      fileCard.innerText = totalFiles;
+      checkedLabel.innerText = `0/${totalFiles}`;
+      addFileRow(filename.slice(0, filename.length - 4), fileSize);
+    }
+  }
+}
+
+function sendFileRequest() {
+  if (dataReceived == currentSize) {
+    currentFile = requestList.shift();
+    if (typeof currentFile !== "undefined") {
+      console.log(`REQUESTING FILE: ${currentFile[0]}`);
+      name = currentFile[0] + ".txt";
+      requestFileData(currentFile);
+    } else {
+      downloadBtn.classList.remove("disabled");
+      progressBar.classList.add("hide");
+      currentSize = -1;
+    }
+  }
+}
+
+function updateProgressBar() {
+  dataReceived += parseInt(event.data.length);
+  totalReceived += parseInt(event.data.length);
+  let percentage = (totalReceived / currentTotalSize) * 100;
+  console.log(
+    `Total received: ${totalReceived}, Percentage: ${percentage}, dataReceived: ${dataReceived}`
+  );
+  progressFill.style.width = `${percentage}%`;
+  progressLabel.innerText = `${percentage}%`;
+}
+
+// init();
 function init() {
   Socket = new WebSocket("ws://" + window.location.hostname + ":81/");
   Socket.onmessage = function (event) {
     // Test, append to Moar Card
     document.querySelector(".midlertidigTerminal").innerText += event.data;
-    textToZip += event.data;
+    textToZip += event.data + "\n";
 
-    if (event.data.includes("TXT")) {
-      var split = event.data.split(":");
-      filename = split[0].toLowerCase();
-      fileSize = parseInt(split[1]);
+    populateFileTable();
 
-      if (!rowsAdded.includes(filename)) {
-        rowsAdded.push(filename);
-        totalFileSize += fileSize;
-        totalFiles++;
-        sizeCard.innerText = totalFileSize;
-        fileCard.innerText = totalFiles;
-        addFileRow(filename.slice(0, filename.length - 4), fileSize);
-      }
-    } else if (event.data == "BASE") {
-      zip.file(filename, fileData);
+    if (event.data == "BASE") {
+      console.log(`CREATING FILE WITH NAME: ${name}`);
+      zip.file(name, fileData);
     } else {
       fileData += event.data;
-      dataReceived += event.data.length;
-      let percentage = parseInt((dataReceived / totalFileSize) * 100);
-      progressFill.style.width = `${percentage}%`;
-      progressLabel.innerText = `${percentage}%`;
+      updateProgressBar();
+    }
+
+    sendFileRequest();
+
+    // Check if zip is already created
+    if (totalReceived == currentTotalSize && sendingData) {
+      sendingData = false;
+      console.log("CREATING ZIP");
+      createZip();
     }
   };
 }
