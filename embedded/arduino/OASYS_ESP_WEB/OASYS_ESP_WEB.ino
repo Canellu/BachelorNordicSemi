@@ -149,7 +149,7 @@ void loop(void)
     }
     else if (!mySerial.available() && !Serial.available() && strlen(uart_rx) != 0)
     {
-      Serial.print(uart_rx);
+      //Serial.print(uart_rx);
       webSocket.broadcastTXT(uart_rx, strlen(uart_rx));
       memset(uart_rx, 0, sizeof(uart_rx));
       arr_rx = 0;

@@ -513,7 +513,7 @@ void main(void)
 		{
 			k_msgq_get(&uart_msg_q, wifi_response, K_FOREVER);
 			printk("\n%s", wifi_response);
-			button_wait();
+			//button_wait();
 
 			if (strcmp(wifi_response, "{connected}") == 0)
 			{
@@ -542,7 +542,7 @@ void main(void)
 			// 	k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
 			// 	strcpy(wifi_response, "D:20200306");
 			// }
-			else if (wifi_response[0] == 'D')
+			else if (wifi_response[1] == 'D')
 			{
 				// convert string to date
 				// 2 - y	6 - m
@@ -550,16 +550,16 @@ void main(void)
 				// 4 - y	8 - d
 				// 5 - y	9 - d
 
-				int year_tmp =	(((wifi_response[2] - '0') * 1000) +
-								 ((wifi_response[3] - '0') * 100) +
-								 ((wifi_response[4] - '0') * 10) +
-								  (wifi_response[5] - '0'));
+				int year_tmp =	(((wifi_response[3] - '0') * 1000) +
+								 ((wifi_response[4] - '0') * 100) +
+								 ((wifi_response[5] - '0') * 10) +
+								  (wifi_response[6] - '0'));
 
-				int month_tmp =	(((wifi_response[6] - '0') * 10) +
-								  (wifi_response[7] - '0'));
+				int month_tmp =	(((wifi_response[7] - '0') * 10) +
+								  (wifi_response[8] - '0'));
 
-				int day_tmp =	(((wifi_response[8] - '0') * 10) +
-								  (wifi_response[9] - '0'));
+				int day_tmp =	(((wifi_response[9] - '0') * 10) +
+								  (wifi_response[10] - '0'));
 
 				printk("\n%d-%d-%d", year_tmp, month_tmp, day_tmp);
 

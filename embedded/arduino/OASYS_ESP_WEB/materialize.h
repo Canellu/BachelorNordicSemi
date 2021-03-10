@@ -36347,37 +36347,38 @@ const char web[] PROGMEM = R"====(
  requestList = [];
  Array.from(fileList.rows).forEach((row) => {
  let name = row.cells[0].textContent;
- let size = row.cells[1].textContent;
+ let size = parseInt(row.cells[1].textContent);
  let checkBox = row.cells[2].querySelector("input[type=checkbox]")
  .checked;
  console.log(`${name} ${size} ${checkBox}`);
  if (checkBox) {
  requestList.push([name, size]);
- currenTotalSize += size;
+ currentTotalSize += size;
  }
  });
  downloadBtn.classList.add("disabled");
  progressBar.classList.remove("hide");
 
  currentFile = requestList.shift();
-
+ name = currentFile[0];
+ console.log(`CurrentTotalSize: ${currentTotalSize}`);
+ console.log(`REQUESTING FILE: ${currentFile[0]}`);
  requestFileData(currentFile);
 
- // M.toast({
- // html: toastHTML,
- // displayLength: 8000,
- // classes: "rounded",
- // });
+ M.toast({
+ html: toastHTML,
+ displayLength: 8000,
+ classes: "rounded",
+ });
  });
 
  function requestFileData(file) {
+ fileData = "";
+ sendingData = true;
  dataReceived = 0;
  currentSize = file[1];
- Socket.send(`D:${file[0]}`);
+ Socket.send(`{D:${file[0]}}`);
  }
-
- // Do not run until progress
- // createZip();
 
  var midlertidigTerminal = document.querySelector(".midlertidigTerminal");
  var sizeCard = document.querySelector(".totalSize");
@@ -36388,39 +36389,26 @@ const char web[] PROGMEM = R"====(
  var filename = "";
  var fileData = "";
  var fileSize = 0;
+ var totalDataReceived = 0;
  var totalFileSize = 0;
  var totalFiles = 0;
  var rowsAdded = [];
 
- var currenTotalSize = 0;
+ var sendingData = true;
+ var currentTotalSize = 0;
+ var totalReceived = 0;
  var requestList = [];
  var dataReceived = 0;
  var currentSize = 0;
  var currentFile = [];
 
+ var name = "";
+
  var Socket;
- init();
 
- function init() {
- Socket = new WebSocket("ws://" + window.location.hostname + ":81/");
- Socket.onmessage = function (event) {
- // Test, append to Moar Card
- document.querySelector(".midlertidigTerminal").innerText +=
- event.data;
- textToZip += event.data;
-
- if (dataReceived == currentSize) {
- currentFile = requestList.shift();
- if (typeof currentFile !== "undefined") {
- requestFileData(currentFile);
- } else {
- downloadBtn.classList.remove("disabled");
- progressBar.classList.add("hide");
- currentSize = -1;
- }
- }
-
+ function populateFileTable() {
  if (event.data.includes("TXT")) {
+ sendingData = false;
  var split = event.data.split(":");
  filename = split[0].toLowerCase();
  fileSize = parseInt(split[1]);
@@ -36436,14 +36424,63 @@ const char web[] PROGMEM = R"====(
  checkedLabel.innerText = `0/${totalFiles}`;
  addFileRow(filename.slice(0, filename.length - 4), fileSize);
  }
- } else if (event.data == "BASE") {
- zip.file(filename, fileData);
+ }
+ }
+
+ function sendFileRequest() {
+ if (dataReceived == currentSize) {
+ currentFile = requestList.shift();
+ if (typeof currentFile !== "undefined") {
+ console.log(`REQUESTING FILE: ${currentFile[0]}`);
+ name = currentFile[0] + ".txt";
+ requestFileData(currentFile);
  } else {
- fileData += event.data;
- dataReceived += event.data.length;
- let percentage = parseInt((dataReceived / currenTotalSize) * 100);
+ downloadBtn.classList.remove("disabled");
+ progressBar.classList.add("hide");
+ currentSize = -1;
+ }
+ }
+ }
+
+ function updateProgressBar() {
+ dataReceived += parseInt(event.data.length);
+ totalReceived += parseInt(event.data.length);
+ let percentage = (totalReceived / currentTotalSize) * 100;
+ console.log(
+ `Total received: ${totalReceived}, Percentage: ${percentage}, dataReceived: ${dataReceived}`
+ );
  progressFill.style.width = `${percentage}%`;
  progressLabel.innerText = `${percentage}%`;
+ }
+
+
+
+ init();
+ function init() {
+ Socket = new WebSocket("ws://" + window.location.hostname + ":81/");
+ Socket.onmessage = function (event) {
+ // Test, append to Moar Card
+ document.querySelector(".midlertidigTerminal").innerText +=
+ event.data;
+ textToZip += event.data + "\n";
+
+ populateFileTable();
+
+ if (event.data == "BASE") {
+ console.log(`CREATING FILE WITH NAME: ${name}`);
+ zip.file(name, fileData);
+ } else {
+ fileData += event.data;
+ updateProgressBar();
+ }
+
+ sendFileRequest();
+
+ // Check if zip is already created
+ if (totalReceived == currentTotalSize && sendingData) {
+ sendingData = false;
+ console.log("CREATING ZIP");
+ createZip();
  }
  };
  }
