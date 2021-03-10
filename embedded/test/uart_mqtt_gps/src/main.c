@@ -511,7 +511,7 @@ void main(void)
 
 		while (1)
 		{
-			//k_msgq_get(&uart_msg_q, wifi_response, K_FOREVER);
+			k_msgq_get(&uart_msg_q, wifi_response, K_FOREVER);
 			printk("\n%s", wifi_response);
 			button_wait();
 
@@ -520,28 +520,28 @@ void main(void)
 				printk("\nTesting SD file info");
 				sd_msg_fill_send("", SEND_FILE_INFO);
 				printk("\n\nConnect successful, press button 1 to continue");
-				strcpy(wifi_response, "read1");
+				// strcpy(wifi_response, "read1");
 			}
-			else if (strcmp(wifi_response, "read1") == 0)
-			{
-				sd_msg.event = READ_FILE;
-				sd_msg.year = 2021;
-				sd_msg.month = 03;
-				sd_msg.day = 04;
-				printk("\nStarting SD file read1");
-				k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
-				strcpy(wifi_response, "read2");
-			}
-			else if (strcmp(wifi_response, "read2") == 0)
-			{
-				sd_msg.event = READ_FILE;
-				sd_msg.year = 2020;
-				sd_msg.month = 03;
-				sd_msg.day = 06;
-				printk("\nStarting SD file read2");
-				k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
-				strcpy(wifi_response, "D:20200306");
-			}
+			// else if (strcmp(wifi_response, "read1") == 0)
+			// {
+			// 	sd_msg.event = READ_FILE;
+			// 	sd_msg.year = 2021;
+			// 	sd_msg.month = 03;
+			// 	sd_msg.day = 04;
+			// 	printk("\nStarting SD file read1");
+			// 	k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
+			// 	strcpy(wifi_response, "read2");
+			// }
+			// else if (strcmp(wifi_response, "read2") == 0)
+			// {
+			// 	sd_msg.event = READ_FILE;
+			// 	sd_msg.year = 2020;
+			// 	sd_msg.month = 03;
+			// 	sd_msg.day = 06;
+			// 	printk("\nStarting SD file read2");
+			// 	k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
+			// 	strcpy(wifi_response, "D:20200306");
+			// }
 			else if (wifi_response[0] == 'D')
 			{
 				// convert string to date

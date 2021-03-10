@@ -82,9 +82,9 @@ void website_init()
 // read commands from nrf and perform respective operations
 void read_nrf_commands()
 {
-  if (mySerial.available() > 0)
+  if (Serial.available() > 0)
   {
-    char nrf_command = mySerial.read();
+    char nrf_command = Serial.read();
     int nrf_command_int = digit_to_int(nrf_command);
 
     switch (nrf_command_int)
@@ -176,7 +176,6 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
     // print to terminal
     for (int i = 0; i < length; i++)
     {
-      websocket_rx[i] = (char)payload[i];
       Serial.print((char)payload[i]);
       mySerial.print((char)payload[i]);
     }
