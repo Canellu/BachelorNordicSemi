@@ -540,6 +540,36 @@ void main(void)
 				sd_msg.day = 06;
 				printk("\nStarting SD file read2");
 				k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
+				strcpy(wifi_response, "D:20200306");
+			}
+			else if (wifi_response[0] == 'D')
+			{
+				// convert string to date
+				// 2 - y	6 - m
+				// 3 - y	7 - m
+				// 4 - y	8 - d
+				// 5 - y	9 - d
+
+				int year_tmp =	(((wifi_response[2] - '0') * 1000) +
+								 ((wifi_response[3] - '0') * 100) +
+								 ((wifi_response[4] - '0') * 10) +
+								  (wifi_response[5] - '0'));
+
+				int month_tmp =	(((wifi_response[6] - '0') * 10) +
+								  (wifi_response[7] - '0'));
+
+				int day_tmp =	(((wifi_response[8] - '0') * 10) +
+								  (wifi_response[9] - '0'));
+
+				printk("\n%d-%d-%d", year_tmp, month_tmp, day_tmp);
+
+				sd_msg.event = READ_FILE;
+				sd_msg.year = year_tmp;
+				sd_msg.month = month_tmp;
+				sd_msg.day = day_tmp;
+
+				printk("\nStarting SD file read2");
+				k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
 				strcpy(wifi_response, "read2");
 			}
 			else
