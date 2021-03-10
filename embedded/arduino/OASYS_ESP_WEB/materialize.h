@@ -7706,11 +7706,11 @@ const char web[] PROGMEM = R"====(
  width: 100%;
  table-layout: fixed;
  }
- label span {
+ #files label span {
  padding: 0 !important;
  }
 
- th label span {
+ #files th label span {
  padding-right: 17px !important;
  }
 
@@ -7805,6 +7805,20 @@ const char web[] PROGMEM = R"====(
  background: rgb(121, 121, 121);
  }
 
+ .range-field {
+ margin: 0;
+ }
+
+ input[type="range"] + .thumb.active .value {
+ font-size: 1rem;
+ margin-top: 4px;
+ margin-left: 0px;
+ }
+
+ label {
+ font-size: 0.9rem;
+ }
+
  @media screen and (max-width: 1200px) {
  table tbody {
  display: block;
@@ -7825,7 +7839,7 @@ const char web[] PROGMEM = R"====(
  width: 4px;
  }
 
- label span {
+ #files label span {
  padding-right: 10px !important;
  }
  }
@@ -8159,6 +8173,88 @@ const char web[] PROGMEM = R"====(
  </div>
  </div>
  <!-- FILES TAB-->
+ <!-- CONFIG TAB -->
+ <div class="container mtop" id="config">
+ <!-- Sliders -->
+ <div class="row">
+ <div
+ class="col s12 center yellow accent-4"
+ style="margin-bottom: 20px; padding-bottom: 10px"
+ >
+ <h5>Configure parameters</h5>
+ </div>
+ <div class="col s12">
+ <p class="range-field">
+ <label for="temperatureSldier">Temperature frequency</label>
+ <input type="range" id="temperatureSlider" min="0" max="10" />
+ </p>
+ </div>
+ <div class="col s12">
+ <p class="range-field">
+ <label for="temperatureSldier">Pressure frequency</label>
+ <input type="range" id="pressureSlider" min="0" max="10" />
+ </p>
+ </div>
+ <div class="col s12">
+ <p class="range-field">
+ <label for="temperatureSldier">Conductivity frequency</label>
+ <input type="range" id="conductivitySlider" min="0" max="10" />
+ </p>
+ </div>
+ </div>
+
+ <!-- Checkboxes -->
+ <div class="row">
+ <div class="col s6">
+ <label>
+ <input type="checkbox" class="filled-in" checked="checked" />
+ <span>Something</span>
+ </label>
+ </div>
+ <div class="col s6">
+ <label>
+ <input type="checkbox" class="filled-in" checked="checked" />
+ <span>Something</span>
+ </label>
+ </div>
+ </div>
+ <div class="row">
+ <div class="col s6">
+ <label>
+ <input type="checkbox" class="filled-in" checked="checked" />
+ <span>Something</span>
+ </label>
+ </div>
+ <div class="col s6">
+ <label>
+ <input type="checkbox" class="filled-in" checked="checked" />
+ <span>Something</span>
+ </label>
+ </div>
+ </div>
+
+ <!-- Configure button -->
+ <div class="center">
+ <a class="download-btn waves-effect waves-light btn">
+ configure
+ <i class="left">
+ <svg
+ width="22"
+ height="22"
+ viewBox="0 0 18 18"
+ fill="none"
+ xmlns="http://www.w3.org/2000/svg"
+ >
+ <path
+ d="M3.75 15H14.25V13.5H3.75V15ZM3.75 7.5H6.75V12H11.25V7.5H14.25L9 2.25L3.75 7.5Z"
+ fill="white"
+ />
+ </svg>
+ </i>
+ </a>
+ </div>
+ </div>
+ <!-- CONFIG TAB -->
 
  <!-- materialize.min.js -->
  <script>
@@ -36220,7 +36316,9 @@ const char web[] PROGMEM = R"====(
 
  // Listen for clicks, update total files checked
  document.addEventListener("click", () => {
- let checkBoxes = document.querySelectorAll(".filled-in:not(#checkAll)");
+ let checkBoxes = document.querySelectorAll(
+ "#files w.filled-in:not(#checkAll)"
+ );
  let checkedFiles = 0;
  checkBoxes.forEach((e) => {
  if (e.checked == true) checkedFiles++;
@@ -36452,8 +36550,6 @@ const char web[] PROGMEM = R"====(
  progressFill.style.width = `${percentage}%`;
  progressLabel.innerText = `${percentage}%`;
  }
-
-
 
  init();
  function init() {
