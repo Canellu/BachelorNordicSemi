@@ -4108,7 +4108,7 @@ const char web[] PROGMEM = R"====(
         position: absolute;
         bottom: 0;
         height: 2px;
-        background-color: #f6b2b5;
+        background-color: #ff7900;
         will-change: left, right;
       }
       @media only screen and (max-width: 992px) {
@@ -7722,7 +7722,7 @@ const char web[] PROGMEM = R"====(
         margin: 0;
       }
       .tabs .indicator {
-        background-color: #ff9100;
+        background-color: #ff6600;
       }
       .tabs .tab a {
         font-weight: 700;
@@ -36352,10 +36352,13 @@ const char web[] PROGMEM = R"====(
         addFileRow(`${tmpName + getRndInt(1, 29)}`, getRndInt(200, 800));
       }
 
+
+
+
       // Download button
       downloadBtn.addEventListener("click", () => {
         // Iterate over rows to see if checkbox is true/false
-        var requestList = [];
+
         Array.from(fileList.rows).forEach((row) => {
           let name = row.cells[0].textContent;
           let size = row.cells[1].textContent;
@@ -36365,24 +36368,33 @@ const char web[] PROGMEM = R"====(
           if (checkBox) requestList.push([name, size]);
         });
         console.log(requestList);
+
+
+        currentFile = requestList.shift();
+
+        requestFileData(currentFile);
+
+
+
+        // M.toast({
+        //   html: toastHTML,
+        //   displayLength: 8000,
+        //   classes: "rounded",
+        // });
       });
 
-      var currentFilePosition = 0;
-      function requestFile(requestList) {
-        Socket.send(`D:${requestList[currentFilePosition][0]}`);
-        currentFilePosition++;
+
+      function requestFileData(file) {
         dataReceived = 0;
+        currentSize = file[1]
+        // Socket.send(`D:${file[0]}`);
       }
 
       // Socket.send("D:20200304");
       // // downloadBtn.classList.add("disabled");
       // progressBar.classList.remove("hide");
 
-      // M.toast({
-      //   html: toastHTML,
-      //   displayLength: 8000,
-      //   classes: "rounded",
-      // });
+
 
       // Do not run until progress
       // createZip();
@@ -36399,17 +36411,28 @@ const char web[] PROGMEM = R"====(
       var totalFileSize = 0;
       var totalFiles = 0;
       var rowsAdded = [];
-      var dataReceived = 0;
 
-      // init();
+      var requestList = [];
+      var dataReceived = 0;
+      var currentSize = 0;
+      var currentFile = [];
+
       var Socket;
+      // init();
+
       function init() {
         Socket = new WebSocket("ws://" + window.location.hostname + ":81/");
         Socket.onmessage = function (event) {
+
+
           // Test, append to Moar Card
           document.querySelector(".midlertidigTerminal").innerText +=
             event.data;
           textToZip += event.data;
+
+          if ()
+
+
 
           if (event.data.includes("TXT")) {
             var split = event.data.split(":");
