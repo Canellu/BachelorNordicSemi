@@ -7724,22 +7724,27 @@ const char web[] PROGMEM = R"====(
       .tabs .indicator {
         background-color: #ff9100;
       }
-      .tabs .tab a.active {
-        color: #ff6d00;
+      .tabs .tab a {
+        font-weight: 700;
+        color: #9e9e9e;
       }
+      .tabs .tab a:hover,
+      .tabs .tab a.active {
+        color: #424242;
+        background-color: #f8a93c;
+      }
+
+      .tabs .tab a:focus,
+      .tabs .tab a:focus.active {
+        background-color: #f8a93c;
+      }
+
       textarea {
         cursor: none;
       }
       .collection {
         max-height: 40vh;
         overflow: auto;
-      }
-      .tabs .tab a {
-        font-weight: 700;
-        color: #9e9e9e;
-      }
-      .tabs .tab a.active {
-        color: #424242;
       }
       .input-field input[type="text"]:focus + label {
         color: #ffd600 !important;
@@ -7833,19 +7838,88 @@ const char web[] PROGMEM = R"====(
     <nav>
       <div class="nav-wrapper yellow accent-4">
         <div class="container">
-          <a href="/" class="center brand-logo grey-text text-darken-3">
+          <a href="#!" class="center brand-logo grey-text text-darken-3">
             Oasys
           </a>
         </div>
       </div>
     </nav>
-    <!-- TAB SELECTOR [info] [terminal] [files] -->
+    <!-- TAB SELECTOR [info] [cli] [file] [config] -->
     <div class="tabSelectorBottom yellow accent-4">
       <div class="container">
         <ul class="tabs tabs-fixed-width yellow accent-4">
-          <li class="tab"><a href="#info">Info</a></li>
-          <li class="tab"><a href="#terminal">Terminal</a></li>
-          <li class="tab"><a class="active" href="#files">Files</a></li>
+          <li class="tab valign-wrapper">
+            <a href="#info">
+              <p>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="22"
+                  height="22"
+                  fill="currentColor"
+                  class="bi bi-info-circle-fill"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412l-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"
+                  />
+                </svg>
+              </p>
+            </a>
+          </li>
+          <li class="tab valign-wrapper">
+            <a href="#terminal">
+              <p>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="22"
+                  height="22"
+                  fill="currentColor"
+                  class="bi bi-terminal-fill"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    d="M0 3a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3zm9.5 5.5h-3a.5.5 0 0 0 0 1h3a.5.5 0 0 0 0-1zm-6.354-.354a.5.5 0 1 0 .708.708l2-2a.5.5 0 0 0 0-.708l-2-2a.5.5 0 1 0-.708.708L4.793 6.5 3.146 8.146z"
+                  />
+                </svg>
+              </p>
+            </a>
+          </li>
+          <li class="tab valign-wrapper">
+            <a class="active" href="#files">
+              <p>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="22"
+                  height="22"
+                  fill="currentColor"
+                  class="bi bi-folder-fill"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    d="M9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31L.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3zm-8.322.12C1.72 3.042 1.95 3 2.19 3h5.396l-.707-.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981l.006.139z"
+                  />
+                </svg>
+              </p>
+            </a>
+          </li>
+          <li class="tab valign-wrapper">
+            <a href="#config">
+              <p>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="22"
+                  height="22"
+                  fill="currentColor"
+                  class="bi bi-gear-fill"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"
+                  />
+                </svg>
+              </p>
+            </a>
+          </li>
         </ul>
       </div>
     </div>
@@ -8025,7 +8099,7 @@ const char web[] PROGMEM = R"====(
           </div>
         </div>
       </div>
-      <table class="striped centered borderB">
+      <table class="striped centered borderB fileTable">
         <thead class="table-header yellow darken-2">
           <tr>
             <th colspan="5"><h5>Files in microSD</h5></th>
@@ -8033,14 +8107,14 @@ const char web[] PROGMEM = R"====(
           <tr>
             <th colspan="2">Filename [Date]</th>
             <th colspan="2">Size [kB]</th>
-            <th>0/0</th>
+            <th id="numChecked">0/0</th>
           </tr>
           <tr>
             <th colspan="2" class="no-padding"></th>
             <th colspan="2" class="no-padding"></th>
             <th class="no-padding">
               <label>
-                <input type="checkbox" class="filled-in" />
+                <input type="checkbox" id="checkAll" class="filled-in" />
                 <span></span>
               </label>
             </th>
@@ -36138,6 +36212,35 @@ const char web[] PROGMEM = R"====(
       var form = document.querySelector("form");
       var commandInput = document.querySelector("#commands");
       var commandLabel = document.querySelector("label[for=commands]");
+      var checkAll = document.querySelector("#checkAll");
+
+      var toastHTML =
+        '<span style="color: #FBC02D; font-weight: bold;">Do <u>NOT</u> close or refresh the browser while files are downloading!</span>';
+
+      var zip = new JSZip();
+
+      // Listen for click on checkAll-box
+      var checkVal = true;
+      checkAll.addEventListener("click", () => {
+        let checkBoxes = document.querySelectorAll(".filled-in:not(#checkAll)");
+        checkBoxes.forEach((e) => {
+          e.checked = checkVal;
+        });
+        checkVal = !checkVal;
+      });
+
+      // Listen for clicks, update total files checked
+      document.addEventListener("click", () => {
+        let checkBoxes = document.querySelectorAll(".filled-in:not(#checkAll)");
+        let checkedFiles = 0;
+        checkBoxes.forEach((e) => {
+          if (e.checked == true) checkedFiles++;
+        });
+
+        document.querySelector(
+          "#numChecked"
+        ).innerText = `${checkedFiles}/${checkBoxes.length}`;
+      });
 
       // Init materialize elements
       document.addEventListener("DOMContentLoaded", function () {
@@ -36145,15 +36248,17 @@ const char web[] PROGMEM = R"====(
         M.Modal.init(document.querySelectorAll(".modal"));
       });
 
+      // Prevent default submit action when Enter
       form.addEventListener("submit", (e) => {
         e.preventDefault();
       });
+
+      // Terminal inputField ON ENTER
       commandInput.addEventListener("keypress", (e) => {
         if (e.keyCode == 13) {
           let split = commandInput.value.split(" ");
           // Socket.send(commandInput.value);
           addCommandRow(split[0], split[1]);
-
           // Validation
           for (var key in validCommands) {
             if (split[0] == key && split.length == 2) {
@@ -36165,34 +36270,17 @@ const char web[] PROGMEM = R"====(
               commandInput.classList.add("invalid");
             }
           }
-
           commandInput.value = "";
         }
       });
 
-      // M.AutoInit();
-
-      var toastHTML =
-        '<span style="color: #c6ff00; font-weight: bold;">Do <u>NOT</u> close or refresh the browser while files are downloading!</span>';
-
-      downloadBtn.addEventListener("click", () => {
-        createZip();
-        Socket.send("{generate_all}");
-        // downloadBtn.classList.add("disabled");
-        progressBar.classList.remove("hide");
-
-        M.toast({
-          html: toastHTML,
-          displayLength: 5000,
-          classes: "rounded",
-        });
-      });
-
+      // Add row to file table
       function addFileRow(fileName, fileSize) {
         var row = `<tr><td colspan="2">${fileName}</td><td colspan="2">${fileSize}</td><td><label><input type="checkbox" class="filled-in" /><span></span></label></td></tr>`;
         fileList.innerHTML = row + fileList.innerHTML;
       }
 
+      // Add row to command table
       function addCommandRow(key, value) {
         var date = new Date();
         var time =
@@ -36207,6 +36295,7 @@ const char web[] PROGMEM = R"====(
         commandList.innerHTML = row + commandList.innerHTML;
       }
 
+      // Modal data
       var validCommands = {
         T: "0 - 12",
         P: "0 - 15",
@@ -36227,6 +36316,8 @@ const char web[] PROGMEM = R"====(
         "S",
         "S",
       ];
+
+      // Populate modal table with data
       function createModalContent(commandObj) {
         let count = 0;
         for (var key in commandObj) {
@@ -36238,8 +36329,7 @@ const char web[] PROGMEM = R"====(
       }
       createModalContent(validCommands);
 
-      var zip = new JSZip();
-
+      // Zips the files and creates a download on browser
       function createZip() {
         zip.file("dataFromSD.txt", textToZip);
         zip
@@ -36252,22 +36342,66 @@ const char web[] PROGMEM = R"====(
           });
       }
 
+      function getRndInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      }
+
+      // Dummy data
+      var tmpName = 202003001;
+      for (let i = 0; i < 10; i++) {
+        addFileRow(`${tmpName + getRndInt(1, 29)}`, getRndInt(200, 800));
+      }
+
+      // Download button
+      downloadBtn.addEventListener("click", () => {
+        // Iterate over rows to see if checkbox is true/false
+        var requestList = [];
+        Array.from(fileList.rows).forEach((row) => {
+          let name = row.cells[0].textContent;
+          let size = row.cells[1].textContent;
+          let checkBox = row.cells[2].querySelector("input[type=checkbox]")
+            .checked;
+          console.log(`${name} ${size} ${checkBox}`);
+          if (checkBox) requestList.push([name, size]);
+        });
+        console.log(requestList);
+      });
+
+      var currentFilePosition = 0;
+      function requestFile(requestList) {
+        Socket.send(`D:${requestList[currentFilePosition][0]}`);
+        currentFilePosition++;
+        dataReceived = 0;
+      }
+
+      // Socket.send("D:20200304");
+      // // downloadBtn.classList.add("disabled");
+      // progressBar.classList.remove("hide");
+
+      // M.toast({
+      //   html: toastHTML,
+      //   displayLength: 8000,
+      //   classes: "rounded",
+      // });
+
+      // Do not run until progress
+      // createZip();
+
       var midlertidigTerminal = document.querySelector(".midlertidigTerminal");
       var sizeCard = document.querySelector(".totalSize");
       var fileCard = document.querySelector(".totalFiles");
+      var checkedLabel = document.querySelector("#numChecked");
 
       var textToZip = "";
-
       var filename = "";
       var fileData = "";
       var fileSize = 0;
       var totalFileSize = 0;
       var totalFiles = 0;
       var rowsAdded = [];
-
       var dataReceived = 0;
 
-      init();
+      // init();
       var Socket;
       function init() {
         Socket = new WebSocket("ws://" + window.location.hostname + ":81/");
@@ -36290,6 +36424,7 @@ const char web[] PROGMEM = R"====(
               totalFiles++;
               sizeCard.innerText = totalFileSize;
               fileCard.innerText = totalFiles;
+              checkedLabel.innerText = `0/${totalFiles}`;
               addFileRow(filename.slice(0, filename.length - 4), fileSize);
             }
           } else if (event.data == "BASE") {
