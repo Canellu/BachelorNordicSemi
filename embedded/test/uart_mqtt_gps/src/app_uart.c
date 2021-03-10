@@ -42,13 +42,13 @@ static void uart_cb(const struct device *dev_uart, void *context)
 		else if (strcmp(buf, "}") == 0)
 		{
 			strcat(rx_buf, buf);
-			printk("\nuart msg received");
+			printk("\nuart rcvd");
 			k_msgq_put(&uart_msg_q, &rx_buf, K_NO_WAIT);
 		}
 		else
 		{
 			// printk("%s", buf);
-			// strcat(rx_buf, buf);
+			strcat(rx_buf, buf);
 		}
 	}
 }

@@ -176,8 +176,11 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
     // print to terminal
     for (int i = 0; i < length; i++)
     {
+      websocket_rx[i] = (char)payload[i];
       Serial.print((char)payload[i]);
+      mySerial.print((char)payload[i]);
     }
     Serial.println();
   }
+  
 }
