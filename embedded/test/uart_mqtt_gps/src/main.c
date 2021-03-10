@@ -490,72 +490,66 @@ void main(void)
 
 		message_queue_reset();
 
-		gps_module();
+		// gps_module();
 
-		// TEMPORARY TEST PRINTING WHAT WILL BE SENT TO SD CARD FROM GPS
+		// uart_module();
 
-		// oasys_data_t test_data;
+		printk("\n\npress button 1 to start wifi test\n\n");
 
-		// k_msgq_get(&sd_msg_q, &test_data, K_NO_WAIT);
+		button_wait();
 
-		// printk("\n%02d-%02d-%02d", test_data.year, test_data.month, test_data.day);
-		// printk("\n%s", test_data.json_string);
+		oasys_data_t sd_msg;
 
-		uart_module();
+		strcpy(sd_msg.json_string, "hei");
+		uint8_t wifi_response[128] = "{connected}";
+		uart_start(UART_2);
 
-		// for testing purposes, read JSON
-		// sd_msg_fill_send("", READ_JSON);
-		// sd_msg_fill_send("", READ_JSON);
-
-		// // read entire file
-		// uint8_t cnt = 0;
-		// uint8_t ascii = 0;
-		// uint8_t esp_msg[] = "abcdefghijklmnopqrstuvwxyz\n";
-
-		// printk("\nStarting send");
-
-		// while (1)
-		// {
-		// 	ascii = (cnt % 94) + 32;
-		// 	uart_send(UART_1, esp_msg, sizeof(esp_msg));
-		// 	cnt++;
-		// 	k_sleep(K_MSEC(20));
-		// }
-
-		// k_sleep(K_MSEC(5000));
+		printk("wifi test start\n");
 
 		uart_send(UART_2, "0", sizeof("0"));
 		printk("\nsent command 0 to esp");
 
-		uint8_t wifi_response[128];
-		k_msgq_get(&uart_msg_q, wifi_response, K_FOREVER);
-		if (strcmp(wifi_response, "{connected}") != 0)
+		while (1)
 		{
-			printk("\n\nSomething wrong, press button 1 to continue");
+			//k_msgq_get(&uart_msg_q, wifi_response, K_FOREVER);
+			printk("\n%s", wifi_response);
+			button_wait();
+
+			if (strcmp(wifi_response, "{connected}") == 0)
+			{
+				printk("\nTesting SD file info");
+				sd_msg_fill_send("", SEND_FILE_INFO);
+				printk("\n\nConnect successful, press button 1 to continue");
+				strcpy(wifi_response, "read1");
+			}
+			else if (strcmp(wifi_response, "read1") == 0)
+			{
+				sd_msg.event = READ_FILE;
+				sd_msg.year = 2021;
+				sd_msg.month = 03;
+				sd_msg.day = 04;
+				printk("\nStarting SD file read1");
+				k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
+				strcpy(wifi_response, "read2");
+			}
+			else if (strcmp(wifi_response, "read2") == 0)
+			{
+				sd_msg.event = READ_FILE;
+				sd_msg.year = 2020;
+				sd_msg.month = 03;
+				sd_msg.day = 06;
+				printk("\nStarting SD file read2");
+				k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
+				strcpy(wifi_response, "read2");
+			}
+			else
+			{
+				printk("\n\nSomething went wrong, press button 1 to continue");
+			}
 		}
-		else
-		{
-			printk("\n\nConnect successful, press button 1 to continue");
-		}
+
+		uart_exit(UART_2);
 		button_wait();
-
-		printk("\nTesting SD file info");
-		sd_msg_fill_send("", SEND_FILE_INFO);
-
-		oasys_data_t sd_msg;
-		sd_msg.event = READ_FILE;
-		sd_msg.year = 2021;
-		sd_msg.month = 03;
-		sd_msg.day = 04;
-
-		strcpy(sd_msg.json_string, "hei");
-
-		button_wait();
-		printk("\nStarting SD file read");
-		k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
-
-		//sd_msg_fill_send("", READ_FILE);
-		// app_sd();
 
 		printk("\npress button 1 to start mqtt\n");
 		printk("press button 2 to start wifi\n\n");

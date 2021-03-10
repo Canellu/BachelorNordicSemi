@@ -85,6 +85,9 @@ static int send_all_file_info(const char *path)
 	struct fs_dir_t dirp;
 	static struct fs_dirent entry;
 
+	uint8_t file_data[128];
+	uint8_t temp_str[16];
+
 	res = fs_opendir(&dirp, path);
 	if (res)
 	{
@@ -105,16 +108,16 @@ static int send_all_file_info(const char *path)
 
 		if (entry.type == FS_DIR_ENTRY_FILE)
 		{
-			uint8_t file_data[128];
-			uint8_t temp_str[16];
 
+			memset(file_data, 0, strlen(file_data));
 			strcat(file_data, entry.name);
 			snprintf(temp_str, sizeof(temp_str), ":%u", entry.size);
 			strcat(file_data, temp_str);
 
 			// printk("\n%s", file_data);
+			k_sleep(K_MSEC(20));
+
 			uart_send(UART_2, file_data, sizeof(file_data));
-			k_sleep(K_MSEC(10));
 		}
 	}
 
@@ -145,7 +148,7 @@ static int create_file_name(char *file_name, oasys_data_t *sd_msg)
 		snprintf(temp_str, sizeof(temp_str), "%02u.txt", sd_msg->day);
 		strcat(file_name, temp_str);
 
-		printk("\nCreated file path with name: %s", file_name);
+		// printk("\nUpdated file path: %s", file_name);
 	}
 
 	return 0;
@@ -347,9 +350,9 @@ void app_sd_thread(void *unused1, void *unused2, void *unused3)
 
 			break;
 		case READ_FILE:
+			printk("\nReading file: %s", file_name);
 			read_file(file_path, file_text, sizeof(file_text));
 			// printk("\nFile content:\n\n%s", file_text);
-			return;
 
 			break;
 		default:
