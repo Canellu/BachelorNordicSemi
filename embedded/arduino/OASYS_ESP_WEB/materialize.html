@@ -8120,18 +8120,7 @@ const char web[] PROGMEM = R"====(
             </th>
           </tr>
         </thead>
-        <tbody class="tbodyFiles">
-          <tr>
-            <td colspan="2">0203040</td>
-            <td colspan="2">204</td>
-            <td>
-              <label>
-                <input type="checkbox" class="filled-in" />
-                <span></span>
-              </label>
-            </td>
-          </tr>
-        </tbody>
+        <tbody class="tbodyFiles"></tbody>
       </table>
 
       <div class="center">
@@ -36347,34 +36336,32 @@ const char web[] PROGMEM = R"====(
       }
 
       // Dummy data
-      var tmpName = 202003001;
-      for (let i = 0; i < 10; i++) {
-        addFileRow(`${tmpName + getRndInt(1, 29)}`, getRndInt(200, 800));
-      }
-
-
-
+      // var tmpName = 202003001;
+      // for (let i = 0; i < 10; i++) {
+      //   addFileRow(`${tmpName + getRndInt(1, 29)}`, getRndInt(200, 800));
+      // }
 
       // Download button
       downloadBtn.addEventListener("click", () => {
         // Iterate over rows to see if checkbox is true/false
-
+        requestList = [];
         Array.from(fileList.rows).forEach((row) => {
           let name = row.cells[0].textContent;
           let size = row.cells[1].textContent;
           let checkBox = row.cells[2].querySelector("input[type=checkbox]")
             .checked;
           console.log(`${name} ${size} ${checkBox}`);
-          if (checkBox) requestList.push([name, size]);
+          if (checkBox) {
+            requestList.push([name, size]);
+            currenTotalSize += size;
+          }
         });
-        console.log(requestList);
-
+        downloadBtn.classList.add("disabled");
+        progressBar.classList.remove("hide");
 
         currentFile = requestList.shift();
 
         requestFileData(currentFile);
-
-
 
         // M.toast({
         //   html: toastHTML,
@@ -36383,18 +36370,11 @@ const char web[] PROGMEM = R"====(
         // });
       });
 
-
       function requestFileData(file) {
         dataReceived = 0;
-        currentSize = file[1]
-        // Socket.send(`D:${file[0]}`);
+        currentSize = file[1];
+        Socket.send(`D:${file[0]}`);
       }
-
-      // Socket.send("D:20200304");
-      // // downloadBtn.classList.add("disabled");
-      // progressBar.classList.remove("hide");
-
-
 
       // Do not run until progress
       // createZip();
@@ -36412,6 +36392,7 @@ const char web[] PROGMEM = R"====(
       var totalFiles = 0;
       var rowsAdded = [];
 
+      var currenTotalSize = 0;
       var requestList = [];
       var dataReceived = 0;
       var currentSize = 0;
@@ -36423,16 +36404,21 @@ const char web[] PROGMEM = R"====(
       function init() {
         Socket = new WebSocket("ws://" + window.location.hostname + ":81/");
         Socket.onmessage = function (event) {
-
-
           // Test, append to Moar Card
           document.querySelector(".midlertidigTerminal").innerText +=
             event.data;
           textToZip += event.data;
 
-          if ()
-
-
+          if (dataReceived == currentSize) {
+            currentFile = requestList.shift();
+            if (typeof currentFile !== "undefined") {
+              requestFileData(currentFile);
+            } else {
+              downloadBtn.classList.remove("disabled");
+              progressBar.classList.add("hide");
+              currentSize = -1;
+            }
+          }
 
           if (event.data.includes("TXT")) {
             var split = event.data.split(":");
@@ -36455,7 +36441,7 @@ const char web[] PROGMEM = R"====(
           } else {
             fileData += event.data;
             dataReceived += event.data.length;
-            let percentage = parseInt((dataReceived / totalFileSize) * 100);
+            let percentage = parseInt((dataReceived / currenTotalSize) * 100);
             progressFill.style.width = `${percentage}%`;
             progressLabel.innerText = `${percentage}%`;
           }
