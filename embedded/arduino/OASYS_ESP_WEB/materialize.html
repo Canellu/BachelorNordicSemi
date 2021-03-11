@@ -7707,11 +7707,12 @@ const char web[] PROGMEM = R"====(
         table-layout: fixed;
       }
       #files label span {
-        padding: 0 !important;
+        padding: 0;
+        padding-right: 18px;
       }
 
-      #files th label span {
-        padding-right: 17px !important;
+      .adjustForScrollbar {
+        padding-right: 0px !important;
       }
 
       td p {
@@ -7840,7 +7841,7 @@ const char web[] PROGMEM = R"====(
         }
 
         #files label span {
-          padding-right: 10px !important;
+          padding-right: 18px;
         }
       }
     </style>
@@ -8129,7 +8130,7 @@ const char web[] PROGMEM = R"====(
             <th class="no-padding">
               <label>
                 <input type="checkbox" id="checkAll" class="filled-in" />
-                <span></span>
+                <span class="checkSpan"></span>
               </label>
             </th>
           </tr>
@@ -36304,6 +36305,20 @@ const char web[] PROGMEM = R"====(
 
       var zip = new JSZip();
 
+      function adjustCheckboxesPosition() {
+        let checkBoxes = document.querySelectorAll(
+          "#files label span:not(.checkspan)"
+        );
+
+        // Has scrollbar if true
+        if (fileList.scrollHeight > fileList.offsetHeight) {
+          checkBoxes.forEach((e) => {
+            console.log("added");
+            e.classList.add("adjustForScrollbar");
+          });
+        }
+      }
+
       // Listen for click on checkAll-box
       var checkVal = true;
       checkAll.addEventListener("click", () => {
@@ -36317,8 +36332,9 @@ const char web[] PROGMEM = R"====(
       // Listen for clicks, update total files checked
       document.addEventListener("click", () => {
         let checkBoxes = document.querySelectorAll(
-          "#files w.filled-in:not(#checkAll)"
+          "#files .filled-in:not(#checkAll)"
         );
+        console.log(checkBoxes);
         let checkedFiles = 0;
         checkBoxes.forEach((e) => {
           if (e.checked == true) checkedFiles++;
@@ -36434,10 +36450,11 @@ const char web[] PROGMEM = R"====(
       }
 
       // Dummy data
-      // var tmpName = 202003001;
-      // for (let i = 0; i < 10; i++) {
-      //   addFileRow(`${tmpName + getRndInt(1, 29)}`, getRndInt(200, 800));
-      // }
+      var tmpName = 202003001;
+      for (let i = 0; i < 10; i++) {
+        addFileRow(`${tmpName + getRndInt(1, 29)}`, getRndInt(200, 800));
+      }
+      adjustCheckboxesPosition();
 
       // Download button
       downloadBtn.addEventListener("click", () => {
@@ -36505,6 +36522,7 @@ const char web[] PROGMEM = R"====(
       var Socket;
 
       function populateFileTable() {
+        adjustCheckboxesPosition();
         if (event.data.includes("TXT")) {
           sendingData = false;
           var split = event.data.split(":");

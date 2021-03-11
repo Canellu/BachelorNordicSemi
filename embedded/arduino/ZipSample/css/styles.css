@@ -25,11 +25,12 @@ tbody tr {
   table-layout: fixed;
 }
 #files label span {
-  padding: 0 !important;
+  padding: 0;
+  padding-right: 18px;
 }
 
-#files th label span {
-  padding-right: 17px !important;
+.adjustForScrollbar {
+  padding-right: 0px !important;
 }
 
 td p {
@@ -158,6 +159,6 @@ label {
   }
 
   #files label span {
-    padding-right: 10px !important;
+    padding-right: 18px !important;
   }
 }

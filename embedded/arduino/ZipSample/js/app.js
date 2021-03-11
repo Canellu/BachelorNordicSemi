@@ -11,6 +11,15 @@ var commandInput = document.querySelector("#commands");
 var commandLabel = document.querySelector("label[for=commands]");
 var checkAll = document.querySelector("#checkAll");
 
+// Dummy data
+var tmpName = 202003001;
+function createDummyRows() {
+  for (let i = 0; i < 6; i++) {
+    addFileRow(`${tmpName + getRndInt(1, 29)}`, getRndInt(200, 800));
+  }
+}
+createDummyRows();
+
 var toastHTML =
   '<span style="color: #FBC02D; font-weight: bold;">Do <u>NOT</u> close or refresh the browser while files are downloading!</span>';
 
@@ -26,9 +35,29 @@ checkAll.addEventListener("click", () => {
   checkVal = !checkVal;
 });
 
+function adjustCheckboxesPosition() {
+  let checkBoxes = document.querySelectorAll(
+    "#files label span:not(.checkspan)"
+  );
+
+  console.log(fileList.scrollHeight);
+  console.log(fileList.offsetHeight);
+  console.log(checkBoxes);
+
+  // Has scrollbar if true
+  if (fileList.scrollHeight > fileList.offsetHeight) {
+    checkBoxes.forEach((e) => {
+      console.log("added");
+      e.classList.add("adjustForScrollbar");
+    });
+  }
+}
+
 // Listen for clicks, update total files checked
 document.addEventListener("click", () => {
-  let checkBoxes = document.querySelectorAll(".filled-in:not(#checkAll)");
+  let checkBoxes = document.querySelectorAll(
+    "#files .filled-in:not(#checkAll)"
+  );
   let checkedFiles = 0;
   checkBoxes.forEach((e) => {
     if (e.checked == true) checkedFiles++;
@@ -41,6 +70,7 @@ document.addEventListener("click", () => {
 
 // Init materialize elements
 document.addEventListener("DOMContentLoaded", function () {
+  // Initialize materialize stuff
   M.Tabs.init(document.querySelectorAll(".tabs"));
   M.Modal.init(document.querySelectorAll(".modal"));
 });
@@ -141,12 +171,6 @@ function createZip() {
 
 function getRndInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-// Dummy data
-var tmpName = 202003001;
-for (let i = 0; i < 10; i++) {
-  addFileRow(`${tmpName + getRndInt(1, 29)}`, getRndInt(200, 800));
 }
 
 // Download button
@@ -260,7 +284,7 @@ function updateProgressBar() {
   progressLabel.innerText = `${percentage}%`;
 }
 
-// init();
+init();
 function init() {
   Socket = new WebSocket("ws://" + window.location.hostname + ":81/");
   Socket.onmessage = function (event) {
@@ -286,5 +310,39 @@ function init() {
       console.log("CREATING ZIP");
       createZip();
     }
+  };
+}
+
+function init() {
+  Socket = new WebSocket("ws://" + window.location.hostname + ":81/");
+  Socket.onmessage = function (event) {
+    /*
+       Higher-order-functions
+       map
+       filter
+       reduce
+       sort
+       foreach
+       some
+       every
+     */
+    // Create objects? Store in array.
+    /* var file = {
+           name : "20200304",
+           size : 204,
+           data : null;
+
+           methodName : function() { some action... };
+       }
+       */
+    // var files = [file, file, file]
+    // Access file properties with dot-notation. file.size, file.name
+    // or bracket-notation. file['size']
+    // Update card views table 0/0 and populate table.
+    // Length of files = number files.
+    // iterate files size to to update size-card
+    // Request file data, update progressbar, store data in files?
+    // iterate through table and look for checked == true.
+    // requestFiles
   };
 }
