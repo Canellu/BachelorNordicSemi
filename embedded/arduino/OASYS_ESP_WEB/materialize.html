@@ -36581,6 +36581,42 @@ const char web[] PROGMEM = R"====(
         };
       }
     </script>
+
+    <script>
+      function init() {
+        Socket = new WebSocket("ws://" + window.location.hostname + ":81/");
+        Socket.onmessage = function (event) {
+          /*
+            Higher-order-functions
+            map
+            filter
+            reduce
+            sort
+            foreach
+            some
+            every
+          */
+          // Create objects? Store in array.
+          /* var file = {
+                name : "20200304",
+                size : 204,
+                data : null;
+
+                methodName : function() { some action... };
+            }
+            */
+          // var files = [file, file, file]
+          // Access file properties with dot-notation. file.size, file.name
+          // or bracket-notation. file['size']
+          // Update card views table 0/0 and populate table.
+          // Length of files = number files.
+          // iterate files size to to update size-card
+          // Request file data, update progressbar, store data in files?
+          // iterate through table and look for checked == true.
+          // requestFiles
+        };
+      }
+    </script>
   </body>
 </html>
 
