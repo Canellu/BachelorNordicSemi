@@ -7712,7 +7712,11 @@ const char web[] PROGMEM = R"====(
       }
 
       .adjustForScrollbar {
+        padding-right: 5px !important;
+      }
+      .adjustForMiniScrollbar {
         padding-right: 0px !important;
+        padding-left: 6px !important;
       }
 
       td p {
@@ -7788,7 +7792,7 @@ const char web[] PROGMEM = R"====(
       }
       /* width */
       ::-webkit-scrollbar {
-        width: 10px;
+        width: 11px;
       }
 
       /* Track */
@@ -7841,7 +7845,7 @@ const char web[] PROGMEM = R"====(
         }
 
         #files label span {
-          padding-right: 18px;
+          padding-right: 18px !important;
         }
       }
     </style>
@@ -36287,54 +36291,66 @@ const char web[] PROGMEM = R"====(
     </script>
     <!-- app.js -->
     <script>
-      // Get classes
+      // UI VARIABLES
       var progressBar = document.querySelector(".prog-bar");
       var progressFill = document.querySelector(".determinate");
       var progressLabel = document.querySelector(".progressLabel");
       var downloadBtn = document.querySelector(".download-btn");
-      var fileList = document.querySelector(".tbodyFiles");
+      var fileListBody = document.querySelector(".tbodyFiles");
       var commandList = document.querySelector(".tbodyCommands");
       var modalList = document.querySelector(".tbodyModal");
       var form = document.querySelector("form");
       var commandInput = document.querySelector("#commands");
       var commandLabel = document.querySelector("label[for=commands]");
       var checkAll = document.querySelector("#checkAll");
-
+      var sizeCard = document.querySelector(".totalSize");
+      var fileCard = document.querySelector(".totalFiles");
+      var checkedLabel = document.querySelector("#numChecked");
       var toastHTML =
         '<span style="color: #FBC02D; font-weight: bold;">Do <u>NOT</u> close or refresh the browser while files are downloading!</span>';
 
-      var zip = new JSZip();
+      // FUNCTION VARIABLES
+      var Socket;
 
+      var zip = new JSZip();
+      var files = []; // Contains file objects
+      var requestList = [];
+      var requestFile;
+      var requestDataReceived = 0;
+      var requestTotalSize = 0;
+
+      var checkValAll = true;
+
+      // Adjusts checkbox position based on scrollbar presence
       function adjustCheckboxesPosition() {
         let checkBoxes = document.querySelectorAll(
           "#files label span:not(.checkspan)"
         );
 
         // Has scrollbar if true
-        if (fileList.scrollHeight > fileList.offsetHeight) {
+        if (fileListBody.scrollHeight > fileListBody.offsetHeight) {
           checkBoxes.forEach((e) => {
-            console.log("added");
             e.classList.add("adjustForScrollbar");
+            e.parentNode.parentNode.classList.add("adjustForMiniScrollbar");
           });
         }
       }
 
       // Listen for click on checkAll-box
-      var checkVal = true;
       checkAll.addEventListener("click", () => {
         let checkBoxes = document.querySelectorAll(".filled-in:not(#checkAll)");
-        checkBoxes.forEach((e) => {
-          e.checked = checkVal;
+        checkBoxes.forEach((checkbox) => {
+          checkbox.checked = checkValAll;
         });
-        checkVal = !checkVal;
+        checkValAll = !checkValAll;
       });
 
       // Listen for clicks, update total files checked
-      document.addEventListener("click", () => {
+      fileListBody.addEventListener("click", () => {
         let checkBoxes = document.querySelectorAll(
           "#files .filled-in:not(#checkAll)"
         );
-        console.log(checkBoxes);
+
         let checkedFiles = 0;
         checkBoxes.forEach((e) => {
           if (e.checked == true) checkedFiles++;
@@ -36380,7 +36396,7 @@ const char web[] PROGMEM = R"====(
       // Add row to file table
       function addFileRow(fileName, fileSize) {
         var row = `<tr><td colspan="2">${fileName}</td><td colspan="2">${fileSize}</td><td><label><input type="checkbox" class="filled-in" /><span></span></label></td></tr>`;
-        fileList.innerHTML = row + fileList.innerHTML;
+        fileListBody.innerHTML = row + fileListBody.innerHTML;
       }
 
       // Add row to command table
@@ -36432,53 +36448,62 @@ const char web[] PROGMEM = R"====(
       }
       createModalContent(validCommands);
 
-      // Zips the files and creates a download on browser
-      function createZip() {
-        zip.file("dataFromSD.txt", textToZip);
-        zip
-          .generateAsync({
-            type: "blob",
-            compression: "STORE",
-          })
-          .then((content) => {
-            saveAs(content, "GliderData.zip");
-          });
-      }
-
-      function getRndInt(min, max) {
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-      }
-
-      // Dummy data
-      var tmpName = 202003001;
-      for (let i = 0; i < 10; i++) {
-        addFileRow(`${tmpName + getRndInt(1, 29)}`, getRndInt(200, 800));
-      }
-      adjustCheckboxesPosition();
-
-      // Download button
       downloadBtn.addEventListener("click", () => {
+        // Resetting variables for next download
+        requestDataReceived = 0;
+        requestTotalSize = 0;
+        files.forEach((file) => {
+          file.checked = false;
+        });
+
         // Iterate over rows to see if checkbox is true/false
+
         requestList = [];
-        Array.from(fileList.rows).forEach((row) => {
+        Array.from(fileListBody.rows).forEach((row) => {
           let name = row.cells[0].textContent;
-          let size = parseInt(row.cells[1].textContent);
+          // let size = parseInt(row.cells[1].textContent);
           let checkBox = row.cells[2].querySelector("input[type=checkbox]")
             .checked;
-          console.log(`${name} ${size} ${checkBox}`);
+
           if (checkBox) {
-            requestList.push([name, size]);
-            currentTotalSize += size;
+            let file = files.filter((file) => {
+              return file.name == name;
+            });
+            file = file[0]; // file was list, de-listing file.
+            file.checked = true;
+
+            if (!file.complete) requestList.push(file);
+
+            requestTotalSize += file.size;
           }
         });
+
+        let isCheckedComplete = true;
+        files.forEach((file) => {
+          if (file.checked && !file.complete) {
+            isCheckedComplete = false;
+            return false;
+          }
+        });
+
+
+        // Update UI
         downloadBtn.classList.add("disabled");
         progressBar.classList.remove("hide");
 
-        currentFile = requestList.shift();
-        name = currentFile[0];
-        console.log(`CurrentTotalSize: ${currentTotalSize}`);
-        console.log(`REQUESTING FILE: ${currentFile[0]}`);
-        requestFileData(currentFile);
+
+        if (isCheckedComplete) createZip();
+          
+      
+
+
+        
+
+        // Request filedata from NRF
+        requestFile = requestList.shift();
+        if (typeof requestFile !== "undefined") {
+          Socket.send(`{D:${requestFile.name}}`);
+        }
 
         M.toast({
           html: toastHTML,
@@ -36487,84 +36512,75 @@ const char web[] PROGMEM = R"====(
         });
       });
 
-      function requestFileData(file) {
-        fileData = "";
-        sendingData = true;
-        dataReceived = 0;
-        currentSize = file[1];
-        Socket.send(`{D:${file[0]}}`);
+      function createZip() {
+      
+
+        files.forEach((file) => {
+          zip.remove(file.name);
+
+          if (file.checked) {
+            zip.file(file.name, file.data);
+          }
+        });
+
+        zip
+          .generateAsync({
+            type: "blob",
+            compression: "STORE",
+          })
+          .then((content) => {
+            saveAs(content, "GliderData.zip");
+          });
+
+        downloadBtn.classList.remove("disabled");
+        progressBar.classList.add("hide");
       }
 
-      var midlertidigTerminal = document.querySelector(".midlertidigTerminal");
-      var sizeCard = document.querySelector(".totalSize");
-      var fileCard = document.querySelector(".totalFiles");
-      var checkedLabel = document.querySelector("#numChecked");
+      function initFileTab(data) {
+        let split = data.split(":");
 
-      var textToZip = "";
-      var filename = "";
-      var fileData = "";
-      var fileSize = 0;
-      var totalDataReceived = 0;
-      var totalFileSize = 0;
-      var totalFiles = 0;
-      var rowsAdded = [];
+        // Create file object
+        let file = {
+          name: split[0].toLowerCase(), // 20200304.txt
+          size: parseInt(split[1]),
+          data: "",
+          complete: false,
+          checked: false,
+        };
 
-      var sendingData = true;
-      var currentTotalSize = 0;
-      var totalReceived = 0;
-      var requestList = [];
-      var dataReceived = 0;
-      var currentSize = 0;
-      var currentFile = [];
+        // Add to files array && table-row
+        files.push(file);
+        addFileRow(file.name, file.size);
 
-      var name = "";
+        //Update UI
+        fileCard.innerText = files.length;
 
-      var Socket;
+        // TODO, use reduce instead
+        let totalSize = 0;
+        files.forEach((file) => {
+          totalSize += file.size;
+        });
 
-      function populateFileTable() {
-        adjustCheckboxesPosition();
-        if (event.data.includes("TXT")) {
-          sendingData = false;
-          var split = event.data.split(":");
-          filename = split[0].toLowerCase();
-          fileSize = parseInt(split[1]);
-          console.log(`Filename ${filename}`);
-          console.log(`FileSize ${fileSize}`);
-
-          if (!rowsAdded.includes(filename)) {
-            rowsAdded.push(filename);
-            totalFileSize += fileSize;
-            totalFiles++;
-            sizeCard.innerText = totalFileSize;
-            fileCard.innerText = totalFiles;
-            checkedLabel.innerText = `0/${totalFiles}`;
-            addFileRow(filename.slice(0, filename.length - 4), fileSize);
-          }
-        }
+        sizeCard.innerText = totalSize;
+        checkedLabel.innerText = `0/${files.length}`;
       }
 
       function sendFileRequest() {
-        if (dataReceived == currentSize) {
-          currentFile = requestList.shift();
-          if (typeof currentFile !== "undefined") {
-            console.log(`REQUESTING FILE: ${currentFile[0]}`);
-            name = currentFile[0] + ".txt";
-            requestFileData(currentFile);
-          } else {
-            downloadBtn.classList.remove("disabled");
-            progressBar.classList.add("hide");
-            currentSize = -1;
-          }
+        requestFile = requestList.shift();
+
+        if (typeof requestFile !== "undefined") {
+          Socket.send(`{D:${requestFile.name}}`);
+        } else {
+          createZip();
         }
       }
 
       function updateProgressBar() {
-        dataReceived += parseInt(event.data.length);
-        totalReceived += parseInt(event.data.length);
-        let percentage = (totalReceived / currentTotalSize) * 100;
-        console.log(
-          `Total received: ${totalReceived}, Percentage: ${percentage}, dataReceived: ${dataReceived}`
+        requestDataReceived += parseInt(event.data.length);
+        let percentage = Math.floor(
+          (requestDataReceived / requestTotalSize) * 100
         );
+
         progressFill.style.width = `${percentage}%`;
         progressLabel.innerText = `${percentage}%`;
       }
@@ -36573,65 +36589,17 @@ const char web[] PROGMEM = R"====(
       function init() {
         Socket = new WebSocket("ws://" + window.location.hostname + ":81/");
         Socket.onmessage = function (event) {
-          // Test, append to Moar Card
-          document.querySelector(".midlertidigTerminal").innerText +=
-            event.data;
-          textToZip += event.data + "\n";
-
-          populateFileTable();
-
-          if (event.data == "BASE") {
-            console.log(`CREATING FILE WITH NAME: ${name}`);
-            zip.file(name, fileData);
+          // Populate files and update UI
+          if (event.data.includes("TXT")) {
+            initFileTab(event.data);
+            adjustCheckboxesPosition();
+          } else if (event.data == "EOF") {
+            requestFile.complete = true;
+            sendFileRequest();
           } else {
-            fileData += event.data;
+            requestFile.data += event.data;
             updateProgressBar();
           }
-
-          sendFileRequest();
-
-          // Check if zip is already created
-          if (totalReceived == currentTotalSize && sendingData) {
-            sendingData = false;
-            console.log("CREATING ZIP");
-            createZip();
-          }
-        };
-      }
-    </script>
-
-    <script>
-      function init() {
-        Socket = new WebSocket("ws://" + window.location.hostname + ":81/");
-        Socket.onmessage = function (event) {
-          /*
-            Higher-order-functions
-            map
-            filter
-            reduce
-            sort
-            foreach
-            some
-            every
-          */
-          // Create objects? Store in array.
-          /* var file = {
-                name : "20200304",
-                size : 204,
-                data : null;
-
-                methodName : function() { some action... };
-            }
-            */
-          // var files = [file, file, file]
-          // Access file properties with dot-notation. file.size, file.name
-          // or bracket-notation. file['size']
-          // Update card views table 0/0 and populate table.
-          // Length of files = number files.
-          // iterate files size to to update size-card
-          // Request file data, update progressbar, store data in files?
-          // iterate through table and look for checked == true.
-          // requestFiles
         };
       }
     </script>

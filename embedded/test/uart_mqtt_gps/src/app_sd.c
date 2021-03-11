@@ -188,9 +188,9 @@ static int read_file(char *file_path, char *data, int size)
 		uart_send(UART_2, buffer, sizeof(buffer));
 		memset(buffer, 0, sizeof(buffer));
 		// printk("%s", buffer);
-		k_sleep(K_MSEC(10));
+		k_sleep(K_MSEC(50));
 	}
-	uart_send(UART_2, "BASE", sizeof("BASE"));
+	uart_send(UART_2, "EOF", sizeof("EOF"));
 
 	printk("\n\nFinished reading file");
 	fs_close(&file);

@@ -19,6 +19,7 @@ function createDummyRows() {
   }
 }
 createDummyRows();
+adjustCheckboxesPosition();
 
 var toastHTML =
   '<span style="color: #FBC02D; font-weight: bold;">Do <u>NOT</u> close or refresh the browser while files are downloading!</span>';
@@ -49,6 +50,7 @@ function adjustCheckboxesPosition() {
     checkBoxes.forEach((e) => {
       console.log("added");
       e.classList.add("adjustForScrollbar");
+      e.parentNode.parentNode.classList.add("adjustForMiniScrollbar");
     });
   }
 }

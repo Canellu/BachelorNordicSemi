@@ -30,7 +30,11 @@ tbody tr {
 }
 
 .adjustForScrollbar {
+  padding-right: 5px !important;
+}
+.adjustForMiniScrollbar {
   padding-right: 0px !important;
+  padding-left: 6px !important;
 }
 
 td p {
@@ -106,7 +110,7 @@ th h5 {
 }
 /* width */
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 11px;
 }
 
 /* Track */
