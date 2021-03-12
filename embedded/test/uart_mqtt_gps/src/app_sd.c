@@ -109,13 +109,13 @@ static int send_all_file_info(const char *path)
 		if (entry.type == FS_DIR_ENTRY_FILE)
 		{
 
-			memset(file_data, 0, strlen(file_data));
+			memset(file_data, 0, sizeof(file_data));
 			strcat(file_data, entry.name);
 			snprintf(temp_str, sizeof(temp_str), ":%u", entry.size);
 			strcat(file_data, temp_str);
 
 			// printk("\n%s", file_data);
-			k_sleep(K_MSEC(20));
+			// k_sleep(K_MSEC(40));
 
 			uart_send(UART_2, file_data, sizeof(file_data));
 		}
@@ -186,7 +186,7 @@ static int read_file(char *file_path, char *data, int size)
 		if (ret == 0)
 			break;
 		
-		printk("%s", buffer);
+		//printk("%s", buffer);
 		uart_send(UART_2, buffer, sizeof(buffer));
 		memset(buffer, 0, sizeof(buffer));
 		// printk("%s", buffer);

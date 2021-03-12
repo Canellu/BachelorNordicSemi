@@ -511,11 +511,11 @@ void main(void)
 
 		while (1)
 		{
-			//k_msgq_get(&uart_msg_q, wifi_response, K_FOREVER);
+			k_msgq_get(&uart_msg_q, wifi_response, K_FOREVER);
 			printk("\n%s", wifi_response);
-			button_wait();
+			//button_wait();
 
-			strcpy(wifi_response, "{D:21212121.txt}");			
+			//strcpy(wifi_response, "{D:20202020.txt}");			
 
 			if (strcmp(wifi_response, "{connected}") == 0)
 			{

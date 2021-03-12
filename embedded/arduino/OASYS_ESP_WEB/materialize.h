@@ -36589,6 +36589,7 @@ const char web[] PROGMEM = R"====(
  function init() {
  Socket = new WebSocket("ws://" + window.location.hostname + ":81/");
  Socket.onmessage = function (event) {
+ console.log(`${event.data}`);
  // Populate files and update UI
  if (event.data.includes("TXT")) {
  initFileTab(event.data);

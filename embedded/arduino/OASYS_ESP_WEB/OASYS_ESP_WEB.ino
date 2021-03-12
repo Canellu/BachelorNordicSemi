@@ -8,9 +8,6 @@
 
 // VARIABLES
 
-// UART
-SoftwareSerial mySerial(5, 4); // RX, TX  GPIO5 = D1, GPIO4 = D2
-
 // Wifi
 #ifndef STASSID
 #define STASSID "OASYS-ESP"
@@ -27,10 +24,6 @@ ESP8266WebServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(81);
 
 boolean on_wifi = false;
-enum
-{
-  WIFI_ON
-} nrf_commands_type;
 
 // convert single char to int
 int digit_to_int(char d)
@@ -82,14 +75,13 @@ void website_init()
 // read commands from nrf and perform respective operations
 void read_nrf_commands()
 {
-  if (mySerial.available() > 0)
+  if (Serial.available() > 0)
   {
-    char nrf_command = mySerial.read();
-    int nrf_command_int = digit_to_int(nrf_command);
+    char nrf_command = Serial.read();
 
-    switch (nrf_command_int)
+    switch (nrf_command)
     {
-    case WIFI_ON:
+    case '0':
       on_wifi = true;
       website_init();
 
@@ -97,14 +89,6 @@ void read_nrf_commands()
     default:
       break;
     }
-  }
-}
-
-void flush_nrf_serial()
-{
-  while(mySerial.available() > 0)
-  {
-    mySerial.read();
   }
 }
 
@@ -120,10 +104,8 @@ void setup(void)
 {
   pinMode(LED_BUILTIN, OUTPUT);
   Serial.begin(115200);
-  mySerial.begin(115200);
 
   flush_serial();
-  flush_nrf_serial();
 
   Serial.println("Waiting for command 0");
 }
@@ -138,34 +120,23 @@ void loop(void)
     server.handleClient(); // checks if client is connected
 
     // read input from serial and send to webpage
-    if (mySerial.available() > 0)
+    if (Serial.available() > 0)
     {
-      char b = mySerial.read();
-      Serial.print(b);
-      //uart_rx[arr_rx++] = b;
+      char b = Serial.read();
+      uart_rx[arr_rx++] = b;
     }
-    /*
-    else if (Serial.available() > 0)
+    else if (!Serial.available() && strlen(uart_rx) != 0)
     {
-      char c = Serial.read();
-      uart_rx[arr_rx++] = c;
-    }
-    */
-    /*
-    else if (!mySerial.available() && !Serial.available() && strlen(uart_rx) != 0)
-    {
-      
-      Serial.print(uart_rx);
       webSocket.broadcastTXT(uart_rx, strlen(uart_rx));
+      
       memset(uart_rx, 0, sizeof(uart_rx));
       arr_rx = 0;
     }
-    */
   }
+  
   else
   {
     read_nrf_commands();
-    flush_nrf_serial();
   }
 }
 
@@ -175,7 +146,6 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
   if (type == WStype_CONNECTED)
   {
     Serial.print("\n{connected}");
-    mySerial.print("{connected}");
   }
   if (type == WStype_TEXT)
   {
@@ -184,7 +154,6 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
     for (int i = 0; i < length; i++)
     {
       Serial.print((char)payload[i]);
-      mySerial.print((char)payload[i]);
     }
     Serial.println();
   }
