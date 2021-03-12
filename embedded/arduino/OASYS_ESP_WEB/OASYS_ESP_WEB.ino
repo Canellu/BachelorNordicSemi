@@ -141,20 +141,26 @@ void loop(void)
     if (mySerial.available() > 0)
     {
       char b = mySerial.read();
-      uart_rx[arr_rx++] = b;
+      Serial.print(b);
+      //uart_rx[arr_rx++] = b;
     }
+    /*
     else if (Serial.available() > 0)
     {
       char c = Serial.read();
       uart_rx[arr_rx++] = c;
     }
+    */
+    /*
     else if (!mySerial.available() && !Serial.available() && strlen(uart_rx) != 0)
     {
+      
       Serial.print(uart_rx);
       webSocket.broadcastTXT(uart_rx, strlen(uart_rx));
       memset(uart_rx, 0, sizeof(uart_rx));
       arr_rx = 0;
     }
+    */
   }
   else
   {

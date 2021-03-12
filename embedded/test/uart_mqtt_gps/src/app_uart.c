@@ -22,7 +22,7 @@ static void uart_cb(const struct device *dev_uart, void *context)
 	// send uart msg, runs when uart_irq_tx_enable is run
 	if (uart_irq_tx_ready(dev_uart))
 	{
-		(void)uart_fifo_fill(dev_uart, tx_buf, sizeof(tx_buf));
+		(void)uart_fifo_fill(dev_uart, tx_buf, strlen(tx_buf));
 		uart_irq_tx_disable(dev_uart);
 	}
 

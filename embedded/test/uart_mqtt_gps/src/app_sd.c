@@ -179,17 +179,20 @@ static int read_file(char *file_path, char *data, int size)
 	fs_open(&file, file_path, FS_O_READ);
 
 	// Read characters until end of file
-	uint8_t buffer[16] = "";
+	uint8_t buffer[32] = "";
 	while (1)
 	{
-		ret = fs_read(&file, &buffer, 15);
+		ret = fs_read(&file, &buffer, 31);
 		if (ret == 0)
 			break;
+		
+		printk("%s", buffer);
 		uart_send(UART_2, buffer, sizeof(buffer));
 		memset(buffer, 0, sizeof(buffer));
 		// printk("%s", buffer);
-		k_sleep(K_MSEC(50));
+		//k_sleep(K_MSEC(50));
 	}
+	k_sleep(K_MSEC(10));
 	uart_send(UART_2, "EOF", sizeof("EOF"));
 
 	printk("\n\nFinished reading file");

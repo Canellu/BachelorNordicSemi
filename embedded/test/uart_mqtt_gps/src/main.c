@@ -506,14 +506,16 @@ void main(void)
 
 		printk("wifi test start\n");
 
-		uart_send(UART_2, "0", sizeof("0"));
+		uart_send(UART_2, "0", strlen("0"));
 		printk("\nsent command 0 to esp");
 
 		while (1)
 		{
-			k_msgq_get(&uart_msg_q, wifi_response, K_FOREVER);
+			//k_msgq_get(&uart_msg_q, wifi_response, K_FOREVER);
 			printk("\n%s", wifi_response);
-			//button_wait();
+			button_wait();
+
+			strcpy(wifi_response, "{D:21212121.txt}");			
 
 			if (strcmp(wifi_response, "{connected}") == 0)
 			{
@@ -576,6 +578,9 @@ void main(void)
 			{
 				printk("\n\nSomething went wrong, press button 1 to continue");
 			}
+
+			
+
 		}
 
 		uart_exit(UART_2);
