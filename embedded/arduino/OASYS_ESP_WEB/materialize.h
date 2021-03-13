@@ -1119,10 +1119,10 @@ const char web[] PROGMEM = R"====(
  color: #fdd835 !important;
  }
  .yellow.darken-2 {
- background-color: #fbc02d !important;
+ background-color: #ffc400 !important;
  }
  .yellow-text.text-darken-2 {
- color: #fbc02d !important;
+ color: #ffc400 !important;
  }
  .yellow.darken-3 {
  background-color: #f9a825 !important;
@@ -7680,6 +7680,22 @@ const char web[] PROGMEM = R"====(
 
  <!-- CUSTOM STYLES -->
  <style>
+ .penIcon {
+ display: flex;
+ height: 100%;
+ justify-content: center;
+ align-items: flex-start;
+ padding-top: 4px;
+ transform: scaleX(-1);
+ }
+ .icon {
+ margin: 0;
+ height: 100%;
+ width: 100%;
+ display: flex;
+ justify-content: center;
+ align-items: center;
+ }
  .btn {
  margin-top: 30px;
  }
@@ -7716,7 +7732,7 @@ const char web[] PROGMEM = R"====(
  }
  .adjustForMiniScrollbar {
  padding-right: 0px !important;
- padding-left: 6px !important;
+ padding-left: 7px !important;
  }
 
  td p {
@@ -7802,7 +7818,7 @@ const char web[] PROGMEM = R"====(
 
  /* Handle */
  ::-webkit-scrollbar-thumb {
- background: #fbc02d;
+ background: #ffc400;
  }
 
  /* Handle on hover */
@@ -7868,8 +7884,8 @@ const char web[] PROGMEM = R"====(
  <div class="container">
  <ul class="tabs tabs-fixed-width yellow accent-4">
  <li class="tab valign-wrapper">
- <a href="#info">
- <p>
+ <a href="#info" class="">
+ <p class="icon">
  <svg
  xmlns="http://www.w3.org/2000/svg"
  width="22"
@@ -7887,7 +7903,7 @@ const char web[] PROGMEM = R"====(
  </li>
  <li class="tab valign-wrapper">
  <a href="#terminal">
- <p>
+ <p class="icon">
  <svg
  xmlns="http://www.w3.org/2000/svg"
  width="22"
@@ -7905,7 +7921,7 @@ const char web[] PROGMEM = R"====(
  </li>
  <li class="tab valign-wrapper">
  <a class="active" href="#files">
- <p>
+ <p class="icon">
  <svg
  xmlns="http://www.w3.org/2000/svg"
  width="22"
@@ -7923,7 +7939,7 @@ const char web[] PROGMEM = R"====(
  </li>
  <li class="tab valign-wrapper">
  <a href="#config">
- <p>
+ <p class="icon">
  <svg
  xmlns="http://www.w3.org/2000/svg"
  width="22"
@@ -8030,7 +8046,22 @@ const char web[] PROGMEM = R"====(
  <div class="col s10 m11">
  <form autocomplete="off">
  <div class="input-field">
+ <i class="prefix penIcon">
+ <svg
+ xmlns="http://www.w3.org/2000/svg"
+ width="22"
+ height="22"
+ fill="currentColor"
+ class="bi bi-pen-fill"
+ viewBox="0 0 16 16"
+ >
+ <path
+ d="M13.498.795l.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001z"
+ />
+ </svg>
+ </i>
  <input id="commands" type="text" />
+
  <label for="commands">Insert command</label>
  <span
  class="helper-text"
@@ -8183,7 +8214,7 @@ const char web[] PROGMEM = R"====(
  <!-- Sliders -->
  <div class="row">
  <div
- class="col s12 center yellow accent-4"
+ class="col s12 center amber accent-3"
  style="margin-bottom: 20px; padding-bottom: 10px"
  >
  <h5>Configure parameters</h5>
@@ -36307,7 +36338,7 @@ const char web[] PROGMEM = R"====(
  var fileCard = document.querySelector(".totalFiles");
  var checkedLabel = document.querySelector("#numChecked");
  var toastHTML =
- '<span style="color: #FBC02D; font-weight: bold;">Do <u>NOT</u> close or refresh the browser while files are downloading!</span>';
+ '<span style="color: #ffc400; font-weight: bold;">Do <u>NOT</u> close or refresh the browser while files are downloading!</span>';
 
  // FUNCTION VARIABLES
  var Socket;
@@ -36324,7 +36355,7 @@ const char web[] PROGMEM = R"====(
  // Adjusts checkbox position based on scrollbar presence
  function adjustCheckboxesPosition() {
  let checkBoxes = document.querySelectorAll(
- "#files label span:not(.checkspan)"
+ "#files label span:not(span.checkSpan)"
  );
 
  // Has scrollbar if true
@@ -36395,9 +36426,16 @@ const char web[] PROGMEM = R"====(
 
  // Add row to file table
  function addFileRow(fileName, fileSize) {
- var row = `<tr><td colspan="2">${fileName}</td><td colspan="2">${fileSize}</td><td><label><input type="checkbox" class="filled-in" /><span></span></label></td></tr>`;
+ var row = `<tr><td colspan="2">${fileName}</td><td colspan="2">${
+ fileSize / 1000
+ }</td><td><label><input type="checkbox" class="filled-in" /><span></span></label></td></tr>`;
  fileListBody.innerHTML = row + fileListBody.innerHTML;
  }
+
+ for (let i = 0; i < 20; i++) {
+ addFileRow(20202020 + i, i + 100);
+ }
+ adjustCheckboxesPosition();
 
  // Add row to command table
  function addCommandRow(key, value) {
@@ -36466,10 +36504,11 @@ const char web[] PROGMEM = R"====(
  .checked;
 
  if (checkBox) {
- let file = files.filter((file) => {
+ // CHECK IF WORK
+ let file = files.find((file) => {
  return file.name == name;
  });
- file = file[0]; // file was list, de-listing file.
+
  file.checked = true;
 
  if (!file.complete) requestList.push(file);
@@ -36478,26 +36517,23 @@ const char web[] PROGMEM = R"====(
  }
  });
 
- let isCheckedComplete = true;
- files.forEach((file) => {
- if (file.checked && !file.complete) {
- isCheckedComplete = false;
- return false;
- }
+ // CHECK IF WORK
+ let isCheckedComplete = files.some((file) => {
+ return file.checked && !file.complete;
  });
-
+ // let isCheckedComplete = true;
+ // files.forEach((file) => {
+ // if (file.checked && !file.complete) {
+ // isCheckedComplete = false;
+ // return false;
+ // }
+ // });
 
  // Update UI
  downloadBtn.classList.add("disabled");
  progressBar.classList.remove("hide");
 
-
  if (isCheckedComplete) createZip();
- 
- 
-
-
- 
 
  // Request filedata from NRF
  requestFile = requestList.shift();
@@ -36513,8 +36549,6 @@ const char web[] PROGMEM = R"====(
  });
 
  function createZip() {
- 
-
  files.forEach((file) => {
  zip.remove(file.name);
 
@@ -36555,11 +36589,17 @@ const char web[] PROGMEM = R"====(
  //Update UI
  fileCard.innerText = files.length;
 
- // TODO, use reduce instead
- let totalSize = 0;
- files.forEach((file) => {
- totalSize += file.size;
- });
+ // CHECK IF WORK
+ sizeCard.innerText =
+ files.reduce((currentTotalSize, file) => {
+ return file.size + currentTotalSize;
+ }, 0) /
+ 1000000 +
+ " MB";
+ // let totalSize = 0;
+ // files.forEach((file) => {
+ // totalSize += file.size;
+ // });
 
  sizeCard.innerText = totalSize;
  checkedLabel.innerText = `0/${files.length}`;
@@ -36585,11 +36625,10 @@ const char web[] PROGMEM = R"====(
  progressLabel.innerText = `${percentage}%`;
  }
 
- init();
+ // init();
  function init() {
  Socket = new WebSocket("ws://" + window.location.hostname + ":81/");
  Socket.onmessage = function (event) {
- console.log(`${event.data}`);
  // Populate files and update UI
  if (event.data.includes("TXT")) {
  initFileTab(event.data);
