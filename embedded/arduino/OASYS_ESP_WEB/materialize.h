@@ -36625,7 +36625,7 @@ const char web[] PROGMEM = R"====(
  progressLabel.innerText = `${percentage}%`;
  }
 
- // init();
+ init();
  function init() {
  Socket = new WebSocket("ws://" + window.location.hostname + ":81/");
  Socket.onmessage = function (event) {
