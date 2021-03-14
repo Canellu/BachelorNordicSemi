@@ -115,7 +115,6 @@ void loop(void)
 
   if (on_wifi)
   { 
-    yield();
     webSocket.loop();      // keeps tcp connection alive?
     server.handleClient(); // checks if client is connected
 
