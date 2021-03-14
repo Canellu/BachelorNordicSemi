@@ -115,7 +115,6 @@ void loop(void)
 
   if (on_wifi)
   { 
-    yield();
     webSocket.loop();      // keeps tcp connection alive?
     server.handleClient(); // checks if client is connected
 
@@ -127,8 +126,8 @@ void loop(void)
     }
     else if (!Serial.available() && strlen(uart_rx) != 0)
     {
+      // Serial.print(uart_rx);
       webSocket.broadcastTXT(uart_rx, strlen(uart_rx));
-      
       memset(uart_rx, 0, sizeof(uart_rx));
       arr_rx = 0;
     }

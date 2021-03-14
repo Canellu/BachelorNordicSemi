@@ -515,7 +515,7 @@ void main(void)
 			printk("\n%s", wifi_response);
 			//button_wait();
 
-			//strcpy(wifi_response, "{D:20202020.txt}");			
+			//strcpy(wifi_response, "{D:20202020.txt}");
 
 			if (strcmp(wifi_response, "{connected}") == 0)
 			{
@@ -524,26 +524,6 @@ void main(void)
 				printk("\n\nConnect successful, press button 1 to continue");
 				// strcpy(wifi_response, "read1");
 			}
-			// else if (strcmp(wifi_response, "read1") == 0)
-			// {
-			// 	sd_msg.event = READ_FILE;
-			// 	sd_msg.year = 2021;
-			// 	sd_msg.month = 03;
-			// 	sd_msg.day = 04;
-			// 	printk("\nStarting SD file read1");
-			// 	k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
-			// 	strcpy(wifi_response, "read2");
-			// }
-			// else if (strcmp(wifi_response, "read2") == 0)
-			// {
-			// 	sd_msg.event = READ_FILE;
-			// 	sd_msg.year = 2020;
-			// 	sd_msg.month = 03;
-			// 	sd_msg.day = 06;
-			// 	printk("\nStarting SD file read2");
-			// 	k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
-			// 	strcpy(wifi_response, "D:20200306");
-			// }
 			else if (wifi_response[1] == 'D')
 			{
 				// convert string to date
@@ -552,16 +532,16 @@ void main(void)
 				// 4 - y	8 - d
 				// 5 - y	9 - d
 
-				int year_tmp =	(((wifi_response[3] - '0') * 1000) +
-								 ((wifi_response[4] - '0') * 100) +
-								 ((wifi_response[5] - '0') * 10) +
-								  (wifi_response[6] - '0'));
+				int year_tmp = (((wifi_response[3] - '0') * 1000) +
+								((wifi_response[4] - '0') * 100) +
+								((wifi_response[5] - '0') * 10) +
+								(wifi_response[6] - '0'));
 
-				int month_tmp =	(((wifi_response[7] - '0') * 10) +
-								  (wifi_response[8] - '0'));
+				int month_tmp = (((wifi_response[7] - '0') * 10) +
+								 (wifi_response[8] - '0'));
 
-				int day_tmp =	(((wifi_response[9] - '0') * 10) +
-								  (wifi_response[10] - '0'));
+				int day_tmp = (((wifi_response[9] - '0') * 10) +
+							   (wifi_response[10] - '0'));
 
 				printk("\n%d-%d-%d", year_tmp, month_tmp, day_tmp);
 
@@ -572,15 +552,11 @@ void main(void)
 
 				printk("\nStarting SD file read2");
 				k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
-				strcpy(wifi_response, "read2");
 			}
 			else
 			{
 				printk("\n\nSomething went wrong, press button 1 to continue");
 			}
-
-			
-
 		}
 
 		uart_exit(UART_2);
