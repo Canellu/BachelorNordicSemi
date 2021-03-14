@@ -11,20 +11,15 @@ exports.fromNRFtoFirestore = functions
   .pubsub.topic("data")
   .onPublish(async (message) => {
     // Decode the PubSub Message body.
-    const messageBody = message.data
-      ? Buffer.from(message.data, "base64").toString()
-      : null;
+    // const messageBody = message.data
+    //   ? Buffer.from(message.data, "base64").toString()
+    //   : null;
 
-    const writeMessage = await db.collection("fromNRF").add({
-      message: messageBody,
-    });
-
-    console.log("WriteMessage: ", writeMessage);
-
-    let json = null;
+    let dataJSON = null;
     try {
-      json = message.json;
-      console.log("JSON: ", json);
+      dataJSON = message.json;
+      console.log("JSON: ", dataJSON);
+      await db.collection("fromNRF").add(dataJSON);
     } catch (e) {
       console.error("PubSub message was not JSON", e);
     }
