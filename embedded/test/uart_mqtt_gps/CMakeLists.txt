@@ -8,24 +8,26 @@ cmake_minimum_required(VERSION 3.13.1)
 list(APPEND BOARD_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
-project(mqtt-simple)
+project(oasys_project)
+
+if(NOT EXISTS ${APPLICATION_SOURCE_DIR}/src/private_info/key.c)
+    message(FATAL_ERROR "!!!!!! Generate key file before continuing !!!!!!")
+endif()
 
 # NORDIC SDK APP START
 
-target_sources(app PRIVATE
-    src/main.c
-    src/app_button.c
-    src/app_uart.c
-    src/app_mqtt.c
-    src/app_gps.c
-    src/app_sd.c
+file(GLOB SRC_FILES
+    "src/*.c"
+)
+file(GLOB HEADER_FILES
+    "include/*.h"
+)
 
+target_sources(app PRIVATE
+
+    ${SRC_FILES}
+    ${HEADER_FILES}
     
-    include/app_button.h
-    include/app_uart.h
-    include/app_mqtt.h
-    include/app_gps.h
-    include/app_sd.h
     )
 
 zephyr_include_directories(include)

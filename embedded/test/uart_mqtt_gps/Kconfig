@@ -4,6 +4,40 @@
 # SPDX-License-Identifier: LicenseRef-BSD-5-Clause-Nordic
 #
 
+menu "Gcloud parameters"
+config GCLOUD_PROJECT_NAME
+    string "Name of the Google Cloud project"
+
+config GCLOUD_REGION
+    string "Google cloud region"
+
+config GCLOUD_REGISTRY_NAME
+    string "Name of the Google Cloud reigstry of the device"
+
+config GCLOUD_DEVICE_NAME
+    string "Name of the device in Google Cloud"
+          
+
+config DATE_TIME_UPDATE_INTERVAL_SECONDS
+    int "Date time update interval, in seconds"
+    default 10
+
+config GCLOUD_WATCHDOG_TIMEOUT_MSEC
+    int "Watchdog timeout in milliseconds"
+    default 10000
+
+config GCLOUD_LOG_LEVEL
+    int "App log level"
+    default 4
+
+endmenu
+    
+menuconfig DATE_TIME
+    bool "Date time library"
+    select AT_CMD
+    select SNTP
+    depends on BSD_LIBRARY
+
 menu "MQTT simple sample"
 config MQTT_PUB_TOPIC
 	string "MQTT publish topic"
@@ -27,11 +61,11 @@ config MQTT_BROKER_PORT
 
 config MQTT_MESSAGE_BUFFER_SIZE
 	int "MQTT message buffer size"
-	default 128
+	default 256
 
 config MQTT_PAYLOAD_BUFFER_SIZE
 	int "MQTT payload buffer size"
-	default 128
+	default 256
 
 config BUTTON_EVENT_PUBLISH_MSG
 	string "The message to publish on a button event"
@@ -85,6 +119,15 @@ config GPS_SAMPLE_ANTENNA_EXTERNAL
 endchoice
 
 endmenu
+
+config PRINTK
+    bool "Send printk() to console"
+    default y
+    help
+        This option directs printk() debugging output to the supported
+        console device, rather than suppressing the generation
+        of printk() output entirely. Output is sent immediately, without
+        any mutual exclusion or buffering.
 
 menu "Zephyr Kernel"
 source "Kconfig.zephyr"
