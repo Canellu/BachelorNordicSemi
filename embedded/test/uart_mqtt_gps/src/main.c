@@ -306,8 +306,7 @@ static int gps_module()
 
 	printk("gps test start\n");
 
-	// CANDO: change parameter to timeout instead of no. of retries
-	app_gps(5, 500);
+	app_gps(3000, 400);
 	k_msgq_get(&gps_msg_q, &gps_data, K_NO_WAIT);
 
 	// print to terminal
@@ -490,7 +489,7 @@ void main(void)
 
 		message_queue_reset();
 
-		// gps_module();
+		gps_module();
 
 		// uart_module();
 
