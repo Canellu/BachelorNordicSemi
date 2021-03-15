@@ -10,6 +10,7 @@
 #include "app_mqtt.h"
 #include "app_gps.h"
 #include "app_sd.h"
+#include "gcloud.h"
 
 /* Stack definition for application */
 static K_THREAD_STACK_DEFINE(sd_stack_area, 4096);
@@ -459,6 +460,12 @@ static int mqtt_module()
 		printk("\n\nClosing program, check for errors in code lol");
 		return err;
 	}
+
+	return 0;
+}
+
+static int gcloud_module()
+{
 
 	return 0;
 }
