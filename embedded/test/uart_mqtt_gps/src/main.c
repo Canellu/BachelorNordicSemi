@@ -94,6 +94,13 @@ static uint8_t mqtt_msg[128];
 static bool mqtt_init_complete = false;
 static bool data_available_to_send = false;
 
+// Gcloud variables
+struct k_msgq gcloud_msg_q;
+static uint8_t gcloud_msgq_buffer[3 * 128];
+static uint8_t gcloud_msg[128];
+
+static bool gcloud_init_complete = false;
+
 // SD Card variables
 struct k_msgq sd_msg_q;
 static uint8_t sd_msgq_buffer[5 * sizeof(oasys_data_t)];
@@ -206,6 +213,9 @@ static int message_queue_init()
 	// MQTT
 	k_msgq_init(&mqtt_msg_q, mqtt_msgq_buffer, sizeof(mqtt_msg), 3);
 
+	// GCloud
+	k_msgq_init(&gcloud_msg_q, gcloud_msgq_buffer, sizeof(gcloud_msg), 3);
+
 	// SD
 	k_msgq_init(&sd_msg_q, sd_msgq_buffer, sizeof(oasys_data_t), 5);
 
@@ -238,6 +248,7 @@ static int message_queue_reset()
 	k_msgq_purge(&uart_msg_q);
 	k_msgq_purge(&gps_msg_q);
 	k_msgq_purge(&mqtt_msg_q);
+	k_msgq_purge(&gcloud_msg_q);
 	return 0;
 }
 
@@ -295,6 +306,79 @@ static int uart_module()
 	printk("\nuart test end\n\n");
 
 	return 0;
+}
+
+static int sd_module()
+{
+	int err = 0;
+
+	printk("\n\npress button 1 to start wifi test\n\n");
+
+	button_wait();
+
+	oasys_data_t sd_msg;
+
+	strcpy(sd_msg.json_string, "hei");
+	uint8_t wifi_response[128] = "{connected}";
+	uart_start(UART_2);
+
+	printk("wifi test start\n");
+
+	uart_send(UART_2, "0", strlen("0"));
+	printk("\nsent command 0 to esp");
+
+	while (1)
+	{
+		k_msgq_get(&uart_msg_q, wifi_response, K_FOREVER);
+		printk("\n%s", wifi_response);
+		//button_wait();
+
+		//strcpy(wifi_response, "{D:20202020.txt}");
+
+		if (strcmp(wifi_response, "{connected}") == 0)
+		{
+			printk("\nTesting SD file info");
+			sd_msg_fill_send("", SEND_FILE_INFO);
+			printk("\n\nConnect successful, press button 1 to continue");
+			// strcpy(wifi_response, "read1");
+		}
+		else if (wifi_response[1] == 'D')
+		{
+			// convert string to date
+			// 2 - y	6 - m
+			// 3 - y	7 - m
+			// 4 - y	8 - d
+			// 5 - y	9 - d
+
+			int year_tmp = (((wifi_response[3] - '0') * 1000) +
+							((wifi_response[4] - '0') * 100) +
+							((wifi_response[5] - '0') * 10) +
+							(wifi_response[6] - '0'));
+
+			int month_tmp = (((wifi_response[7] - '0') * 10) +
+							 (wifi_response[8] - '0'));
+
+			int day_tmp = (((wifi_response[9] - '0') * 10) +
+						   (wifi_response[10] - '0'));
+
+			printk("\n%d-%d-%d", year_tmp, month_tmp, day_tmp);
+
+			sd_msg.event = READ_FILE;
+			sd_msg.year = year_tmp;
+			sd_msg.month = month_tmp;
+			sd_msg.day = day_tmp;
+
+			printk("\nStarting SD file read2");
+			k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
+		}
+		else
+		{
+			printk("\n\nSomething went wrong, press button 1 to continue");
+		}
+	}
+	uart_exit(UART_2);
+
+	return err;
 }
 
 // TODO: Test on separate thread?
@@ -466,7 +550,60 @@ static int mqtt_module()
 
 static int gcloud_module()
 {
+	printk("\n\npress button 1 to start gcloud test\n\n");
+	button_wait();
 
+	printk("gcloud test start\n");
+
+	int err;
+
+	// mqtt init
+	if (!gcloud_init_complete)
+	{
+
+		err = app_gcloud_init_and_connect();
+		if (err != 0)
+		{
+			return err;
+		}
+
+		gcloud_init_complete = true;
+	}
+	// reconnect
+	else
+	{
+
+		err = app_gcloud_reconnect();
+		if (err != 0)
+		{
+			return err;
+		}
+	}
+
+	/* Gcloud loop */
+	while (1)
+	{
+		// gcloud function
+		err = app_gcloud();
+
+		k_msgq_get(&gcloud_msg_q, &gcloud_msg, K_NO_WAIT);
+		printk("\nMain: %s", gcloud_msg);
+
+		if (strcmp(gcloud_msg, "test") == 0)
+		{
+			strcpy(gcloud_msg, "");
+			break;
+		}
+	}
+	/* Gcloud loop end */
+
+	err = app_gcloud_disconnect();
+	if (err != 0)
+	{
+		printk("\nDisconnect unsuccessful: %d", err);
+		printk("\n\nClosing program, check for errors in code lol");
+		return err;
+	}
 	return 0;
 }
 
@@ -496,91 +633,27 @@ void main(void)
 
 		message_queue_reset();
 
-		gps_module();
+		// gps_module();
 
 		// uart_module();
 
-		printk("\n\npress button 1 to start wifi test\n\n");
+		// sd_module();
 
-		button_wait();
+		gcloud_module();
 
-		oasys_data_t sd_msg;
+		// printk("\npress button 1 to start mqtt\n");
+		// printk("press button 2 to start wifi\n\n");
+		// set_button_config(3);
+		// k_msgq_get(&button_msg_qr, &button_val, K_FOREVER);
 
-		strcpy(sd_msg.json_string, "hei");
-		uint8_t wifi_response[128] = "{connected}";
-		uart_start(UART_2);
-
-		printk("wifi test start\n");
-
-		uart_send(UART_2, "0", strlen("0"));
-		printk("\nsent command 0 to esp");
-
-		while (1)
-		{
-			k_msgq_get(&uart_msg_q, wifi_response, K_FOREVER);
-			printk("\n%s", wifi_response);
-			//button_wait();
-
-			//strcpy(wifi_response, "{D:20202020.txt}");
-
-			if (strcmp(wifi_response, "{connected}") == 0)
-			{
-				printk("\nTesting SD file info");
-				sd_msg_fill_send("", SEND_FILE_INFO);
-				printk("\n\nConnect successful, press button 1 to continue");
-				// strcpy(wifi_response, "read1");
-			}
-			else if (wifi_response[1] == 'D')
-			{
-				// convert string to date
-				// 2 - y	6 - m
-				// 3 - y	7 - m
-				// 4 - y	8 - d
-				// 5 - y	9 - d
-
-				int year_tmp = (((wifi_response[3] - '0') * 1000) +
-								((wifi_response[4] - '0') * 100) +
-								((wifi_response[5] - '0') * 10) +
-								(wifi_response[6] - '0'));
-
-				int month_tmp = (((wifi_response[7] - '0') * 10) +
-								 (wifi_response[8] - '0'));
-
-				int day_tmp = (((wifi_response[9] - '0') * 10) +
-							   (wifi_response[10] - '0'));
-
-				printk("\n%d-%d-%d", year_tmp, month_tmp, day_tmp);
-
-				sd_msg.event = READ_FILE;
-				sd_msg.year = year_tmp;
-				sd_msg.month = month_tmp;
-				sd_msg.day = day_tmp;
-
-				printk("\nStarting SD file read2");
-				k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
-			}
-			else
-			{
-				printk("\n\nSomething went wrong, press button 1 to continue");
-			}
-		}
-
-		uart_exit(UART_2);
-		button_wait();
-
-		printk("\npress button 1 to start mqtt\n");
-		printk("press button 2 to start wifi\n\n");
-		set_button_config(3);
-		k_msgq_get(&button_msg_qr, &button_val, K_FOREVER);
-
-		if (button_val == 1)
-		{
-			mqtt_module();
-		}
-		else if (button_val == 2)
-		{
-			wifi_module();
-		}
+		// if (button_val == 1)
+		// {
+		// 	mqtt_module();
+		// }
+		// else if (button_val == 2)
+		// {
+		// 	wifi_module();
+		// }
 	}
 
 	printk("**** NordicOasys test end ****\n");

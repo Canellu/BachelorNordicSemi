@@ -17,7 +17,7 @@ typedef void (*received_config_handler_t)(const struct mqtt_publish_message *mes
  * @retval 0 or an error code indicating reason for failure.
  */
 // CANDO: Make it possible to publish gps to subtopics
-int gcloud_publish(uint8_t *data, uint32_t size, enum mqtt_qos qos);
+int gcloud_publish(uint8_t *data, uint32_t len, enum mqtt_qos qos);
 
 /**
  * @brief Publishes device state to Google Cloud.

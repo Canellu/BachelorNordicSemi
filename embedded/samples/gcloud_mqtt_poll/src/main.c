@@ -196,7 +196,7 @@ void main(void)
     modem_configure();
 
     LOG_INF("Initializing modem info\n");
-    modem_info_init();
+    // modem_info_init();
 
     date_time_update_async(date_time_handler);
     k_sem_take(&date_time_ok, K_FOREVER);
@@ -223,29 +223,33 @@ void main(void)
         LOG_INF("Connected to Google Cloud\n");
     }
 
+    bool data_sent = false;
     while (true)
     {
         app_mqtt_gcloud();
+        if (!data_sent)
+        {
+            /* PUBLISH */
+            //Get timestamp
+            int64_t curr_time;
+            date_time_now(&curr_time);
+
+            struct app_message message;
+            create_message(&message, "x", sizeof("x"), &curr_time);
+
+            int pub_success;
+            pub_success = gcloud_publish(message.data, message.len, MQTT_QOS_1_AT_LEAST_ONCE);
+            if (pub_success != 0)
+            {
+                LOG_INF("JSON data Publish failed\n");
+            }
+
+            data_sent = true;
+
+            // k_sleep(K_SECONDS(10));
+            /* PUBLISH END */
+        }
     }
 
     app_mqtt_disconnect();
-    /* PUBLISH */
-    // //Get timestamp
-    // int64_t curr_time;
-    // date_time_now(&curr_time);
-
-    // struct app_message message;
-    // create_message(&message, "x", sizeof("x"), &curr_time);
-
-    //     int pub_success;
-    // uint32_t cnt = 0;
-    // // pub_success = gcloud_publish(message.data, message.len, MQTT_QOS_1_AT_LEAST_ONCE);
-    // // if (pub_success != 0)
-    // // {
-    // //     LOG_INF("JSON data Publish failed\n");
-    // // }
-
-    // cnt++;
-    // k_sleep(K_SECONDS(10));
-    /* PUBLISH END */
 }

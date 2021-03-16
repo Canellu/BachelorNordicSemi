@@ -57,51 +57,12 @@
 
 #define JWT_BUFFER_SIZE 256
 
-#define GCLOUD_THREAD_STACK_SIZE 2048
-
-#define GCLOUD_THREAD_PRIORITY 7
-
 LOG_MODULE_REGISTER(gcloud);
 
 /* Buffers for MQTT client. */
 static uint8_t rx_buffer[CONFIG_MQTT_MESSAGE_BUFFER_SIZE];
 static uint8_t tx_buffer[CONFIG_MQTT_MESSAGE_BUFFER_SIZE];
-
-extern void gcloud_thread(void *, void *, void *);
-
-enum gcloud_event_type
-{
-    CONNECT,
-    INPUT_TIMEOUT,
-    LIVE_TIMEOUT,
-    PUBLISH_STATE,
-    PUBLISH,
-    RECONNECT_TIMEOUT,
-    DISCONNECT,
-    SUBSCRIBE
-};
-
-struct empty
-{
-};
-
-union gcloud_event_param
-{
-    struct empty connect;
-    struct empty input_timeout;
-    struct empty live_timeout;
-    struct mqtt_publish_message publish_state; // This could be a whole mqtt message, thus allowing custom topics
-    struct mqtt_publish_message publish;
-    struct empty reconnect_timeout;
-    struct empty disconnect;
-    struct empty subscribe; // Here we could add the list of topics to be subscribed to
-};
-
-struct gcloud_event
-{
-    enum gcloud_event_type type;
-    union gcloud_event_param param;
-};
+static uint8_t payload_buf[CONFIG_MQTT_MESSAGE_BUFFER_SIZE];
 
 static struct mqtt_client client;
 static struct sockaddr_storage mqtt_broker;
@@ -115,6 +76,7 @@ static struct mqtt_utf8 username = {
     .size = sizeof("unused")};
 
 static struct mqtt_topic gcloud_topics_list[] = {
+
     {.topic = {
          .utf8 = GCLOUD_CONFIG_TOPIC,
          .size = sizeof(GCLOUD_CONFIG_TOPIC) - 1},
@@ -127,17 +89,13 @@ static struct mqtt_topic gcloud_topics_list[] = {
 extern unsigned char zepfull_private_der[];
 extern unsigned int zepfull_private_der_len;
 
+/* Variables from Main */
+extern struct k_msgq gcloud_msg_q;
+
+/* Function declarations */
 static received_config_handler_t received_config_handler = NULL;
 
-#define N_MESSAGES 3
-K_MSGQ_DEFINE(gcloud_msgq, sizeof(struct gcloud_event), N_MESSAGES, 4);
-
 static void mqtt_event_handler(struct mqtt_client *client, const struct mqtt_evt *evt);
-
-void input_timer_handler(struct k_timer *timer_id);
-void reconnect_timer_handler(struct k_timer *timer_id);
-K_TIMER_DEFINE(input_timer, input_timer_handler, NULL);
-K_TIMER_DEFINE(reconnect_timer, reconnect_timer_handler, NULL);
 
 int k_msgq_get_atomic(struct k_msgq *q, void *data, k_timeout_t timeout);
 int k_msgq_put_atomic(struct k_msgq *q, void *data, k_timeout_t timeout);
@@ -145,8 +103,40 @@ int k_msgq_put_atomic(struct k_msgq *q, void *data, k_timeout_t timeout);
 static bool connected = false;
 static bool connecting = false;
 
+/* Semaphores */
+static K_SEM_DEFINE(date_time_ok, 0, 1);
+
 /* File descriptor */
 static struct pollfd fds;
+
+/* FUNCTIONS */
+
+// Callback function for date_time_update
+void date_time_handler(const struct date_time_evt *evt)
+{
+
+    switch (evt->type)
+    {
+    case DATE_TIME_OBTAINED_MODEM:
+        LOG_DBG("DATE_TIME: got time from modem.\n");
+        k_sem_give(&date_time_ok);
+        break;
+    case DATE_TIME_OBTAINED_NTP:
+        LOG_DBG("DATE_TIME: got time from NTP.\n");
+        k_sem_give(&date_time_ok);
+        break;
+    case DATE_TIME_OBTAINED_EXT:
+        LOG_DBG("DATE_TIME: got time from external.\n");
+        k_sem_give(&date_time_ok);
+        break;
+    case DATE_TIME_NOT_OBTAINED:
+        LOG_DBG("DATE_TIME: failed to get time.\n");
+        k_sem_give(&date_time_ok);
+        break;
+    default:
+        break;
+    }
+}
 
 /**@brief Resolves the configured hostname and
  * initializes the MQTT broker structure
@@ -249,7 +239,7 @@ static int make_jwt(char *buffer, size_t buffer_size)
     return err;
 }
 
-int gcloud_subscribe(void)
+static int gcloud_subscribe()
 {
     const struct mqtt_subscription_list subscriptions = {
         .list = (struct mqtt_topic *)&gcloud_topics_list,
@@ -308,30 +298,34 @@ static int client_init(void)
 
 // CANDO: Merge publish functions, and only have one publish command
 // (the public API can still have two separate functions)
-int gcloud_publish(uint8_t *data, uint32_t size, enum mqtt_qos qos)
+int gcloud_publish(uint8_t *data, uint32_t len, enum mqtt_qos qos)
 {
-    int err;
+
     if (!connected)
     {
         LOG_WRN("Cannot publish data while not connected to Google Cloud");
         return -ENOTCONN;
     }
 
-    struct gcloud_event cmd = {
-        .type = PUBLISH,
-        .param.publish = {
-            .topic = {
-                .topic = {
-                    .utf8 = GCLOUD_TOPIC,
-                    .size = strlen(GCLOUD_TOPIC)},
-                .qos = qos},
-            .payload = {.data = data, .len = size}}};
+    LOG_INF("Publishing to GCloud");
 
-    err = k_msgq_put_atomic(&gcloud_msgq, &cmd, K_FOREVER);
+    struct mqtt_publish_param param;
 
-    return err;
+    param.message.topic.qos = qos;
+    param.message.topic.topic.utf8 = GCLOUD_TOPIC;
+    param.message.topic.topic.size = strlen(GCLOUD_TOPIC);
+    param.message.payload.data = data;
+    param.message.payload.len = len;
+    param.message_id = k_uptime_get_32();
+    param.dup_flag = 0;
+    param.retain_flag = 0;
+
+    LOG_INF("Publishing: %s", log_strdup(param.message.payload.data));
+
+    return mqtt_publish(&client, &param);
 }
 
+/*
 int gcloud_publish_state(uint8_t *data, uint32_t size, enum mqtt_qos qos)
 {
     int err;
@@ -352,6 +346,7 @@ int gcloud_publish_state(uint8_t *data, uint32_t size, enum mqtt_qos qos)
     err = k_msgq_put_atomic(&gcloud_msgq, &state_cmd, K_FOREVER);
     return err;
 }
+*/
 
 int k_msgq_get_atomic(struct k_msgq *q, void *data, k_timeout_t timeout)
 {
@@ -369,33 +364,6 @@ int k_msgq_put_atomic(struct k_msgq *q, void *data, k_timeout_t timeout)
     return temp;
 }
 
-void input_timer_handler(struct k_timer *timer_id)
-{
-    struct gcloud_event cmd = {
-        .type = INPUT_TIMEOUT,
-        .param = {}};
-    int err = k_msgq_put(&gcloud_msgq, &cmd, K_NO_WAIT);
-    if (err)
-    {
-        LOG_ERR("k_msgq_put (input_timeout) failed: [%d] %s", err, strerror(-err));
-        // TODO: Find a way to report this error to the application.
-    }
-}
-
-void reconnect_timer_handler(struct k_timer *timer_id)
-{
-    struct gcloud_event cmd = {
-        .type = RECONNECT_TIMEOUT,
-        .param = {}};
-    int err = k_msgq_put(&gcloud_msgq, &cmd, K_NO_WAIT);
-
-    if (err)
-    {
-        LOG_ERR("k_msgq_put (reconnect_timeout) failed: [%d] %s", err, strerror(err));
-        // TODO: Find a way to report this error to the application.
-    }
-}
-
 /**@brief Handler for when receiving data from Google Cloud */
 static void gcloud_received_data_handler(const struct mqtt_publish_message *message)
 {
@@ -405,8 +373,7 @@ static void gcloud_received_data_handler(const struct mqtt_publish_message *mess
     cJSON_Delete(data_json);
 }
 
-/**@brief Initialize the file descriptor structure used by poll.
- */
+/**@brief Initialize the file descriptor structure used by poll */
 static int fds_init(struct mqtt_client *c)
 {
     if (c->transport.type == MQTT_TRANSPORT_NON_SECURE)
@@ -526,8 +493,6 @@ static void mqtt_event_handler(struct mqtt_client *client,
         connected = true;
         connecting = false;
 
-        k_timer_start(&reconnect_timer, GCLOUD_DISCONNECT_INTERVAL, GCLOUD_DISCONNECT_INTERVAL);
-
         err = gcloud_subscribe();
         if (err)
         {
@@ -569,38 +534,31 @@ static void mqtt_event_handler(struct mqtt_client *client,
         LOG_DBG("Topic: %s", log_strdup(evt->param.publish.message.topic.topic.utf8));
         LOG_DBG("QoS: %d", evt->param.publish.message.topic.qos);
 
-        uint8_t gcloud_msg[512];
-        mqtt_readall_publish_payload(client, gcloud_msg, evt->param.publish.message.payload.len);
+        mqtt_readall_publish_payload(client, payload_buf, evt->param.publish.message.payload.len);
+        LOG_DBG("Message:\n%s\n", log_strdup(payload_buf));
 
-        LOG_DBG("Message:\n%s\n", log_strdup(gcloud_msg));
+        char *gcloud_msg = calloc(evt->param.publish.message.payload.len, sizeof(char) + 1);
+        memcpy(gcloud_msg, payload_buf, evt->param.publish.message.payload.len);
 
-        struct mqtt_evt event = *evt;
+        LOG_DBG("Adding to message queue");
+        k_msgq_put(&gcloud_msg_q, gcloud_msg, K_NO_WAIT);
 
-        char *str = calloc(evt->param.publish.message.payload.len, sizeof(char) + 1);
-        memcpy(str, gcloud_msg, evt->param.publish.message.payload.len);
-        event.param.publish.message.payload.data = str;
+        free(gcloud_msg);
 
-        free(str);
         break;
 
     /* Disconnect event. MQTT Client Reference is no longer valid. */
     case MQTT_EVT_DISCONNECT:
-        LOG_DBG("MQTT client disconnected: [%d] %s", evt->result, strerror(-evt->result));
-        k_timer_stop(&input_timer);
-        k_timer_stop(&reconnect_timer);
-        // If we are connected, something has gone wrong, and we would like to reconnect
-        // CANDO: Notify the application that we are attempting a reconnect
 
-        // Purge message queue to make sure that there are no old messages waiting
-        k_msgq_purge(&gcloud_msgq);
+        LOG_DBG("MQTT client disconnected: [%d] %s", evt->result, strerror(-evt->result));
+        // If we are connected, something has gone wrong, and we would like to reconnect
 
         if (connected || connecting)
         {
             err = gcloud_connect(received_config_handler);
             if (err)
             {
-                LOG_ERR("k_msgq_put_atomic (reconnect) [%d] %s", err, strerror(err));
-                // TODO: Find a way to report this error to the application.
+                LOG_ERR("event handler reconnect failed [%d] %s", err, strerror(err));
             }
         }
         break;
@@ -688,138 +646,6 @@ static void mqtt_event_handler(struct mqtt_client *client,
     }
 }
 
-extern void gcloud_thread(void *unused1, void *unused2, void *unused3)
-{
-    int err;
-    bool sent_flag = false;
-
-    struct gcloud_event event;
-    struct mqtt_publish_param msg;
-
-    k_timer_init(&input_timer, input_timer_handler, NULL);
-    k_timer_init(&reconnect_timer, reconnect_timer_handler, NULL);
-
-    LOG_INF("Google Cloud Thread Running\n");
-    while (true)
-    {
-
-        k_msgq_get_atomic(&gcloud_msgq, &event, K_FOREVER);
-
-        switch (event.type)
-        {
-        case CONNECT:
-            LOG_INF("Got CONNECT command");
-
-            break;
-        case INPUT_TIMEOUT:
-            LOG_INF("Got INPUT_TIMEOUT command");
-            err = mqtt_input(&client);
-            if (err)
-            {
-                LOG_ERR("mqtt_input failed: [%d] %s", err, strerror(-err));
-                // TODO: Find a way to report this error to the application.
-            }
-            break;
-        case LIVE_TIMEOUT:
-            if (connected)
-            {
-                LOG_INF("Got LIVE_TIMEOUT command");
-                err = mqtt_live(&client);
-                if (err)
-                {
-                    LOG_ERR("mqtt_live failed: [%d] %s", err, strerror(-err));
-                    // TODO: Find a way to report this error to the application.
-                }
-            }
-            break;
-        case PUBLISH_STATE:
-            if (connected)
-            {
-                LOG_INF("Got PUBLISH_STATE command");
-                msg.message = event.param.publish_state;
-                msg.message_id = k_uptime_get_32();
-                msg.dup_flag = 0;
-                msg.retain_flag = 0;
-                err = mqtt_publish(&client, &msg);
-
-                if (err)
-                {
-                    LOG_ERR("mqtt_publish (state) failed: [%d] %s", err, strerror(-err));
-                    // TODO: Find a way to report this error to the application.
-                }
-            };
-            break;
-        // CANDO: Merge these publish cases?
-        case PUBLISH:
-            if (connected)
-            {
-                LOG_INF("Got PUBLISH command");
-                msg.message = event.param.publish;
-                msg.message_id = k_uptime_get_32();
-                msg.dup_flag = 0;
-                msg.retain_flag = 0;
-                err = mqtt_publish(&client, &msg);
-                if (err)
-                {
-                    LOG_ERR("mqtt_publish failed: [%d] %s", err, strerror(-err));
-                    // TODO: Find a way to report this error to the application.
-                }
-                sent_flag = true;
-            };
-            break;
-        case RECONNECT_TIMEOUT:
-            LOG_INF("Got RECONNECT_TIMEOUT command");
-        case DISCONNECT:
-            LOG_INF("Got DISCONNECT command");
-            if (connected)
-            {
-                k_timer_stop(&reconnect_timer);
-                LOG_DBG("Disconnecting mqtt");
-                err = mqtt_disconnect(&client);
-                if (err)
-                {
-                    LOG_ERR("mqtt_disconnect (reconnect) failed: [%d] %s", err, strerror(-err));
-                    // TODO: Find a way to report this error to the application.
-                }
-                /* purge message queue */
-                k_msgq_purge(&gcloud_msgq);
-
-                connected = false;
-                if (event.type == DISCONNECT)
-                {
-                    LOG_DBG("Not setting connecting flag");
-                    connecting = false;
-                }
-                else
-                {
-                    connecting = true;
-                }
-            };
-            break;
-        case SUBSCRIBE:
-            if (connected)
-            {
-                LOG_INF("Got SUBSCRIBE command");
-                err = gcloud_subscribe();
-                if (err)
-                {
-                    LOG_ERR("gcloud_subscribe failed: [%d] %s", err, strerror(-err));
-                    // TODO: Find a way to report this error to the application.
-                }
-            };
-            break;
-        default:
-            LOG_ERR("Unknown event type received");
-            // TODO: Find a way to report this error to the application.
-        }
-        /* If a message has been sent */
-        if (sent_flag == true)
-        {
-            sent_flag = false;
-        }
-    }
-}
-
 /**@brief Configures modem to provide LTE link. Blocks until link is
  * successfully established
  */
@@ -866,18 +692,6 @@ static int modem_reconnect()
     return err;
 }
 
-int gcloud_disconnect()
-{
-    int err = 0;
-
-    // send disconnect command
-    struct gcloud_event msg = {
-        .type = DISCONNECT};
-    err = k_msgq_put_atomic(&gcloud_msgq, &msg, K_FOREVER);
-
-    return err;
-}
-
 int app_gcloud_init_and_connect(void)
 {
     int err = 0;
@@ -893,6 +707,9 @@ int app_gcloud_init_and_connect(void)
             k_sleep(K_SECONDS(CONFIG_LTE_CONNECT_RETRY_DELAY_S));
         }
     } while (err);
+
+    date_time_update_async(date_time_handler);
+    k_sem_take(&date_time_ok, K_FOREVER);
 
     err = gcloud_provision();
     if (err)
@@ -936,6 +753,9 @@ int app_gcloud_reconnect(void)
         }
     } while (err);
 
+    date_time_update_async(date_time_handler);
+    k_sem_take(&date_time_ok, K_FOREVER);
+
     LOG_DBG("Connecting mqtt");
     connecting = true;
     err = mqtt_connect(&client);
@@ -951,7 +771,6 @@ int app_gcloud(void)
 {
     int err;
 
-    printk("Poll waiting for input\n");
     err = poll(&fds, 1, mqtt_keepalive_time_left(&client));
     if (err < 0)
     {
@@ -959,7 +778,6 @@ int app_gcloud(void)
         return err;
     }
 
-    printk("Running mqtt live\n");
     err = mqtt_live(&client);
     if ((err != 0) && (err != -EAGAIN))
     {
@@ -996,14 +814,21 @@ int app_gcloud_disconnect(void)
 {
     int err;
 
-    LOG_INF("Disconnecting MQTT client...");
+    LOG_INF("Disconnecting GCloud MQTT client...");
 
     connected = false;
 
     err = mqtt_disconnect(&client);
     if (err)
     {
-        LOG_ERR("Could not disconnect MQTT client: %d", err);
+        LOG_ERR("Could not disconnect GCloud MQTT client: %d", err);
+    }
+
+    // lte off
+    err = lte_lc_offline();
+    if (err)
+    {
+        LOG_ERR("Could not set modem to offline: %d", err);
     }
 
     return err;
@@ -1011,9 +836,6 @@ int app_gcloud_disconnect(void)
 
 /* TODO:
 
-    - Create publish
-    - Double check disconnect function
-    - Double check subscribe
     - Combine publish & publish state, maybe use enum to choose between the two
     - Reorganize functions
 
