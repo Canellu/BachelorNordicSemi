@@ -17,7 +17,6 @@ static K_THREAD_STACK_DEFINE(sd_stack_area, 4096);
 
 /* Threads */
 static struct k_thread sd_thread;
-
 k_tid_t sd_tid;
 
 /* STRUCTS AND ENUMS */
@@ -552,7 +551,6 @@ static int gcloud_module()
 {
 	printk("\n\npress button 1 to start gcloud test\n\n");
 	button_wait();
-
 	printk("gcloud test start\n");
 
 	int err;
@@ -560,19 +558,16 @@ static int gcloud_module()
 	// mqtt init
 	if (!gcloud_init_complete)
 	{
-
 		err = app_gcloud_init_and_connect();
 		if (err != 0)
 		{
 			return err;
 		}
-
 		gcloud_init_complete = true;
 	}
 	// reconnect
 	else
 	{
-
 		err = app_gcloud_reconnect();
 		if (err != 0)
 		{
@@ -589,11 +584,11 @@ static int gcloud_module()
 		k_msgq_get(&gcloud_msg_q, &gcloud_msg, K_NO_WAIT);
 		printk("\nMain: %s", gcloud_msg);
 
-		if (strcmp(gcloud_msg, "test") == 0)
-		{
-			strcpy(gcloud_msg, "");
-			break;
-		}
+		// if (strcmp(gcloud_msg, "test") == 0)
+		// {
+		// 	strcpy(gcloud_msg, "");
+		// 	break;
+		// }
 	}
 	/* Gcloud loop end */
 
