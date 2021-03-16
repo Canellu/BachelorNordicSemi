@@ -7,6 +7,51 @@ admin.initializeApp();
 
 const db = admin.firestore();
 
+const deviceId = "einarnrf9160dk";
+const cloudRegion = "europe-west1";
+const registryId = "OasysFleet";
+const projectId = "nordicoasys";
+
+const iotClient = new iot.v1.DeviceManagerClient({
+  // optional auth parameters.
+});
+
+const formattedName = iotClient.devicePath(
+  projectId,
+  cloudRegion,
+  registryId,
+  deviceId
+);
+
+exports.fromFirestoreToNRF = functions
+  .region("europe-west1")
+  .firestore.document("toNRF/{docId}")
+  .onWrite(async (change, context) => {
+    // TODO: Check only for changes in commands, do not send all
+    // compare change.before with change.after
+    const data = change.after.data();
+    console.log("P: ", data.P);
+    console.log("T: ", data.T);
+    console.log("maxDepth: ", data.maxDepth);
+    console.log("minDepth: ", data.minDepth);
+    console.log("DATA: ", data);
+
+    const stringData = JSON.stringify(data);
+    const binaryData = Buffer.from(stringData);
+    const request = {
+      name: formattedName,
+      binaryData: binaryData,
+    };
+
+    try {
+      const responses = await iotClient.sendCommandToDevice(request);
+
+      console.log("Sent command: ", responses[0]);
+    } catch (err) {
+      console.error("Could not send command:", err);
+    }
+  });
+
 exports.fromNRFtoFirestore = functions
   .region("europe-west1")
   .pubsub.topic("data")
@@ -24,17 +69,4 @@ exports.fromNRFtoFirestore = functions
     } catch (e) {
       console.error("PubSub message was not JSON", e);
     }
-  });
-
-exports.fromFirestoreToNRF = functions.firestore
-  .document("toNRF/{docId}")
-  .onWrite(async (change, context) => {
-    // TODO: Check only for changes in commands, do not send all
-    // compare change.before with change.after
-    const data = change.after.data();
-    console.log("P: ", data.P);
-    console.log("T: ", data.T);
-    console.log("maxDepth: ", data.maxDepth);
-    console.log("minDepth: ", data.minDepth);
-    console.log("DATA: ", data);
   });
