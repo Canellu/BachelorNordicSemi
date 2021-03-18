@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" href="styles.css" />
+    <title>Device</title>
+  </head>
+  <body class="bg-gray-50 font-montserrat pt-16 flex flex-col">
+    <script src="js/header.js"></script>
+
+    <main class="h-full min-h-screen">
+      <!--  NICE TO SEE -->
+      <div class="map">
+        <div class="w-full h-full bg-gray-600"></div>
+      </div>
+
+      <!-- TAB SELECTOR -->
+      <div
+        class="tabs h-16 bg-gray-800 flex justify-center text-white tracking-wider"
+      >
+        <button id="data-tab-btn" class="tabBtn activeTabBtn">
+          <p>DATA</p>
+        </button>
+
+        <button id="control-tab-btn" class="tabBtn">
+          <p>MISSION CONTROL</p>
+        </button>
+      </div>
+
+      <div id="data-tab" class="">
+        <div class="container m-auto my-8">
+          <div class="map bg-blue-300"></div>
+        </div>
+      </div>
+      <div id="control-tab" class="hidden">
+        <div class="container m-auto my-8">
+          <div class="map bg-green-300"></div>
+          <div class="controlPanel"></div>
+        </div>
+      </div>
+    </main>
+
+    <script src="js/footer.js"></script>
+
+    <script src="js/main.js"></script>
+  </body>
+</html>
