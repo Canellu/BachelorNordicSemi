@@ -24,11 +24,10 @@ file(GLOB HEADER_FILES
 )
 
 target_sources(app PRIVATE
-
     ${SRC_FILES}
     ${HEADER_FILES}
-    
-    )
+    src/private_info/key.c
+)
 
 zephyr_include_directories(include)
 

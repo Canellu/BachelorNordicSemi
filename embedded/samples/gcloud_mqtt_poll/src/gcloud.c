@@ -378,28 +378,31 @@ int gcloud_disconnect()
 
 // CANDO: Merge publish functions, and only have one publish command
 // (the public API can still have two separate functions)
-int gcloud_publish(uint8_t *data, uint32_t size, enum mqtt_qos qos)
+int gcloud_publish(uint8_t *data, uint32_t len, enum mqtt_qos qos)
 {
-    int err;
+
     if (!connected)
     {
         LOG_WRN("Cannot publish data while not connected to Google Cloud");
         return -ENOTCONN;
     }
 
-    struct gcloud_event cmd = {
-        .type = PUBLISH,
-        .param.publish = {
-            .topic = {
-                .topic = {
-                    .utf8 = GCLOUD_TOPIC,
-                    .size = strlen(GCLOUD_TOPIC)},
-                .qos = qos},
-            .payload = {.data = data, .len = size}}};
+    LOG_INF("Publishing to GCloud");
 
-    err = k_msgq_put_atomic(&gcloud_msgq, &cmd, K_FOREVER);
+    struct mqtt_publish_param param;
 
-    return err;
+    param.message.topic.qos = qos;
+    param.message.topic.topic.utf8 = GCLOUD_TOPIC;
+    param.message.topic.topic.size = strlen(GCLOUD_TOPIC);
+    param.message.payload.data = data;
+    param.message.payload.len = len;
+    param.message_id = k_uptime_get_32();
+    param.dup_flag = 0;
+    param.retain_flag = 0;
+
+    LOG_INF("Publishing: %s", log_strdup(param.message.payload.data));
+
+    return mqtt_publish(&client, &param);
 }
 
 int gcloud_publish_state(uint8_t *data, uint32_t size, enum mqtt_qos qos)
@@ -768,18 +771,6 @@ extern void gcloud_thread(void *unused1, void *unused2, void *unused3)
         case PUBLISH:
             if (connected)
             {
-                LOG_INF("Got PUBLISH command");
-                msg.message = event.param.publish;
-                msg.message_id = k_uptime_get_32();
-                msg.dup_flag = 0;
-                msg.retain_flag = 0;
-                err = mqtt_publish(&client, &msg);
-                if (err)
-                {
-                    LOG_ERR("mqtt_publish failed: [%d] %s", err, strerror(-err));
-                    // TODO: Find a way to report this error to the application.
-                }
-                sent_flag = true;
             };
             break;
         case RECONNECT_TIMEOUT:

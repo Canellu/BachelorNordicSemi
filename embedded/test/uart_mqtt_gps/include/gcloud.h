@@ -35,7 +35,6 @@ int gcloud_publish(uint8_t *data, uint32_t size, enum mqtt_qos qos);
  */
 int gcloud_publish_state(uint8_t *data, uint32_t size, enum mqtt_qos qos);
 
-int gcloud_subscribe(void);
 /**
  * @brief Initializes the module and provisions the modem so that an TLS 
  * connection can be established to Google Cloud.
@@ -47,18 +46,6 @@ int gcloud_subscribe(void);
  * @retval 0 or an error code indicating reason for failure.
  */
 int gcloud_provision(void);
-
-/**
- * @brief Disconnects the device from Google Cloud.
- * 
- * @retval 0 or an error code indicating reason for failure.
- */
-int gcloud_disconnect(void);
-
-/**
- * @brief Google Cloud Thread entry.
- */
-extern void gcloud_thread(void *unused1, void *unused2, void *unused3);
 
 int app_gcloud_init_and_connect(void);
 
