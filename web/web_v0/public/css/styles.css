@@ -18,7 +18,10 @@
 }
 
 .map {
-  height: 500px;
+  @apply object-cover w-full;
+  max-height: 500px;
+  min-height: 300px;
+  min-width: 244px;
 }
 
 .activeTabBtn {
@@ -31,4 +34,10 @@
 
 .headerBtn {
   @apply h-full flex flex-col justify-center items-center hover:bg-gray-200 hover:text-gray-800 transition duration-300;
+}
+
+.card {
+  @apply bg-gray-50 h-80 overflow-hidden flex flex-col justify-between shadow-lg rounded-lg transform transition-all duration-200 ease-in hover:scale-105 hover:shadow-2xl;
+
+  min-width: 244px;
 }

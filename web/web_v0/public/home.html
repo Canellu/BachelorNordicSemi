@@ -5,13 +5,11 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-         <!-- Firebase CORE -->
-   <script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-app.js"></script>
+    <!-- Firebase CORE -->
+    <script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-app.js"></script>
 
-   <!-- Firebase Firestore -->
-   <script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-firestore.js"></script>
-
-    
+    <!-- Firebase Firestore -->
+    <script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-firestore.js"></script>
 
     <!-- FONTAWESOME ICONS -->
     <link
@@ -40,19 +38,18 @@
 
     <main class="h-full py-8 min-h-screen">
       <!--  MAP -->
-      <div class="container px-20 m-auto map">
-        <div class="w-full h-full bg-gray-800"></div>
+      <div class="container px-20 m-auto map overflow-hidden">
+        <img src="assets/img/genshin_map.png" class="map" />
       </div>
 
       <!--  GRID -->
       <div
-        class="container px-20 m-auto pt-8 grid grid-cols-4 auto-cols-max gap-12"
+        id="deviceGrid"
+        class="container px-20 m-auto pt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md: auto-cols-max gap-12"
       >
         <!-- CARD -->
-        <a href="device.html">
-          <div
-            class="card bg-gray-50 h-80 overflow-hidden flex flex-col justify-between shadow-lg rounded-lg transform transition-all duration-200 ease-in hover:scale-105 hover:shadow-2xl"
-          >
+        <a href="devices/device.html">
+          <div class="card">
             <img
               class="object-cover center w-full h-44"
               src="https://source.unsplash.com/random"
@@ -68,16 +65,17 @@
             </div>
             <div class="badge w-full left-2 bg-gray-800 text-white p-2">
               <!-- <i class="far fa-clock fa-lg mr-2"></i> -->
-              <p class="tracking-wide">Last sync: 20-03-04</p>
+              <p class="tracking-wide text-center">Last sync: 20-03-04</p>
             </div>
-          </div></a
-        >
+          </div>
+        </a>
       </div>
     </main>
 
     <script src="js/footer.js"></script>
 
     <script src="js/firestore.js"></script>
-   
+    <script src="js/home.js"></script>
+    t
   </body>
 </html>
