@@ -1,5 +1,11 @@
+// Get apiKey from local
+var apiKey;
+fetch("../api_key.txt")
+  .then((response) => response.text())
+  .then((text) => (apiKey = text));
+
 var firebaseConfig = {
-  apiKey: "AIzaSyAil5xS0TQ6n0asypnjm6FJ34g04HJR83M",
+  apiKey: apiKey,
   authDomain: "nordicoasys.firebaseapp.com",
   projectId: "nordicoasys",
 };
