@@ -4,71 +4,82 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    <!-- FONTAWESOME ICONS -->
-    <link
-      rel="stylesheet"
-      href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css"
-      integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p"
-      crossorigin="anonymous"
-    />
-
-    <!-- BOOTSTRAP ICONS -->
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.0/font/bootstrap-icons.css"
-    />
-
-    <!-- MATERIAL ICONS -->
-    <link
-      href="https://fonts.googleapis.com/icon?family=Material+Icons"
-      rel="stylesheet"
-    />
     <link rel="stylesheet" href="styles.css" />
     <title>Oasys</title>
   </head>
-  <body class="bg-gray-50 font-montserrat pt-16 flex flex-col">
-    <script src="js/header.js"></script>
+  <body class="bg-gray-100 font-montserrat">
+    <main class="flex w-screen h-screen">
+      <div class="absolute top-20 left-20">
+        <h1 class="text-4xl font-bold tracking-wider text-gray-200">OASYS</h1>
+      </div>
+      <!-- Login card-->
+      <div
+        class="w-3/12 h-2/4 min-w-min max-w-screen-sm transform -translate-x-2/4 -translate-y-2/4 absolute left-1/2 top-1/2 rounded-3xl shadow-xl bg-gray-50"
+      >
+        <!-- card content -->
+        <div
+          class="h-full flex flex-col items-center py-8 px-8 rounded-xl overflow-hidden relative tracking-wider"
+        >
+          <!-- Login title -->
+          <h1 class="font-bold text-3xl mt-3 relative z-10">Login</h1>
 
-    <main class="h-full py-8 min-h-screen">
-      <!--  MAP -->
-      <div class="container px-20 m-auto map">
-        <div class="w-full h-full bg-gray-800"></div>
+          <!-- Form -->
+          <form
+            action=""
+            class="mt-6 text-lg font-medium w-96 relative z-10"
+            autocomplete="off"
+          >
+            <!-- username field -->
+            <div class="my-5">
+              <label for="username" class="ml-2 text-black">Username</label>
+              <input
+                type="text"
+                autofocus
+                id="username"
+                class="w-full rounded-xl px-4 py-2 mt-3 focus:bg-gray-500 focus:text-gray-50 bg-gray-200 focus:outline-none tracking-wider"
+                placeholder="Username"
+              />
+            </div>
+
+            <!-- password field -->
+            <div class="my-5">
+              <label for="password" class="ml-2 text-black">Password</label>
+              <input
+                type="password"
+                id="password"
+                class="w-full rounded-xl px-4 py-2 mt-3 focus:bg-gray-500 focus:text-gray-50 bg-gray-200 focus:outline-none tracking-wider"
+                placeholder="Password"
+              />
+
+              <!-- Forgot pass? -->
+              <div class="flex text-sm justify-end mt-2">
+                <a
+                  href=""
+                  class="text-gray-500 hover:text-black hover:underline p-2"
+                >
+                  Forgot Password?
+                </a>
+              </div>
+            </div>
+
+            <!-- login button -->
+            <button
+              class="text-center text-gray-200 font-semibold bg-gray-800 p-3 duration-200 rounded-md hover:bg-black w-full transform hover:scale-95"
+            >
+              Login
+            </button>
+          </form>
+        </div>
       </div>
 
-      <!--  GRID -->
-      <div
-        class="container px-20 m-auto pt-8 grid grid-cols-4 auto-cols-max gap-12"
-      >
-        <!-- CARD -->
-        <a href="device.html">
-          <div
-            class="card bg-gray-50 h-80 overflow-hidden relative flex flex-col justify-between shadow-lg rounded-lg"
-          >
-            <img
-              class="object-cover center w-full h-44"
-              src="https://source.unsplash.com/random"
-              alt=""
-            />
-            <div class="id flex-grow flex justify-center items-center mt-4">
-              <h4 class="text-2xl font-semibold tracking-wider">ID: 123420</h4>
-            </div>
-
-            <div class="indicator flex justify-evenly w-full my-2">
-              <span class="material-icons text-3xl"> battery_full </span>
-              <span class="material-icons text-3xl"> error </span>
-            </div>
-            <div
-              class="badge w-full flex justify-center left-2 bg-gray-800 text-white p-2 flex items-center w-36"
-            >
-              <!-- <i class="far fa-clock fa-lg mr-2"></i> -->
-              <p class="tracking-wide">Last sync: 20-03-04</p>
-            </div>
-          </div></a
-        >
+      <!-- Bbackground Jelly -->
+      <div class="w-1/2 h-screen bg-gray-800">
+        <img
+          class="object-cover w-full h-screen"
+          src="assets/img/jelly.jpg"
+          alt=""
+        />
       </div>
     </main>
-
-    <script src="js/footer.js"></script>
   </body>
 </html>

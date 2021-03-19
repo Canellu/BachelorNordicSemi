@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- FONTAWESOME ICONS -->
+    <link
+      rel="stylesheet"
+      href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css"
+      integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p"
+      crossorigin="anonymous"
+    />
+
+    <!-- BOOTSTRAP ICONS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.0/font/bootstrap-icons.css"
+    />
+
+    <!-- MATERIAL ICONS -->
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <title>Oasys</title>
+  </head>
+  <body class="bg-gray-50 font-montserrat pt-16 flex flex-col">
+    <script src="js/header.js"></script>
+
+    <main class="h-full py-8 min-h-screen">
+      <!--  MAP -->
+      <div class="container px-20 m-auto map">
+        <div class="w-full h-full bg-gray-800"></div>
+      </div>
+
+      <!--  GRID -->
+      <div
+        class="container px-20 m-auto pt-8 grid grid-cols-4 auto-cols-max gap-12"
+      >
+        <!-- CARD -->
+        <a href="device.html">
+          <div
+            class="card bg-gray-50 h-80 overflow-hidden flex flex-col justify-between shadow-lg rounded-lg transform transition-all duration-200 ease-in hover:scale-105 hover:shadow-2xl"
+          >
+            <img
+              class="object-cover center w-full h-44"
+              src="https://source.unsplash.com/random"
+              alt=""
+            />
+            <div class="id flex-grow place-self-center mt-4">
+              <h4 class="text-2xl font-semibold tracking-wider">ID: 123420</h4>
+            </div>
+
+            <div class="indicator flex justify-evenly w-full my-2">
+              <span class="material-icons text-3xl"> battery_full </span>
+              <span class="material-icons text-3xl"> error </span>
+            </div>
+            <div class="badge w-full left-2 bg-gray-800 text-white p-2">
+              <!-- <i class="far fa-clock fa-lg mr-2"></i> -->
+              <p class="tracking-wide">Last sync: 20-03-04</p>
+            </div>
+          </div></a
+        >
+      </div>
+    </main>
+
+    <script src="js/footer.js"></script>
+  </body>
+</html>
