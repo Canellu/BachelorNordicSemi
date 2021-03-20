@@ -71,6 +71,7 @@
 
 .landingPageBtn {
   @apply text-center tracking-wider text-gray-200 font-semibold mt-6 bg-gray-800 p-2 duration-200 rounded-md transform hover:scale-95 w-3/5 border border-gray-50;
+  backface-visibility: hidden;
 }
 
 .landingPageForm {

@@ -31395,6 +31395,8 @@ video {
 
 .landingPageBtn{
   transition-duration: 200ms;
+  -webkit-backface-visibility: hidden;
+          backface-visibility: hidden;
 }
 
 .landingPageForm {
