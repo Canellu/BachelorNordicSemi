@@ -41,3 +41,38 @@
 
   min-width: 244px;
 }
+
+.loginCard {
+  @apply h-2/4 max-w-screen-sm transform -translate-x-2/4 -translate-y-2/4 absolute left-1/2 top-1/2;
+
+  min-height: 550px;
+  min-width: 440px;
+}
+
+.flipCard {
+  transform: rotateY(180deg);
+}
+
+.cardContent {
+  @apply h-full w-full rounded-xl;
+  transition: all 0.5s ease;
+  transform-style: preserve-3d;
+}
+
+.front,
+.back {
+  @apply flex flex-col items-center py-8 px-10 absolute top-0 left-0 tracking-wider h-full w-full;
+  backface-visibility: hidden;
+}
+
+.back {
+  transform: rotateY(180deg);
+}
+
+.landingPageBtn {
+  @apply text-center tracking-wider text-gray-200 font-semibold mt-6 bg-gray-800 p-2 duration-200 rounded-md transform hover:scale-95 w-3/5 border border-gray-50;
+}
+
+.landingPageForm {
+  @apply mt-6 text-lg font-medium w-96 flex flex-col items-center;
+}

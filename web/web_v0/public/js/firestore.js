@@ -1,17 +1,9 @@
-// Get apiKey from local
-var apiKey;
-fetch("../api_key.txt")
-  .then((response) => response.text())
-  .then((text) => (apiKey = text));
-
-var firebaseConfig = {
-  apiKey: apiKey,
-  authDomain: "nordicoasys.firebaseapp.com",
-  projectId: "nordicoasys",
-};
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-var db = firebase.firestore();
+// Log out method
+const logout = document.querySelector("#logout");
+logout.addEventListener("click", async (e) => {
+  await auth.signOut();
+  location.replace("index.html");
+});
 
 const glidersCollection = db.collection("Gliders");
 

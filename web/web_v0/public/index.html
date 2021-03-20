@@ -5,10 +5,14 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+    <!-- Firebase CORE -->
+    <script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-app.js"></script>
 
- 
+    <!-- Firebase Authentication -->
+    <script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-auth.js"></script>
 
-
+    <!-- Firebase Firestore -->
+    <script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-firestore.js"></script>
 
     <link rel="stylesheet" href="styles.css" />
     <title>Oasys</title>
@@ -19,62 +23,94 @@
         <h1 class="text-4xl font-bold tracking-wider text-gray-200">OASYS</h1>
       </div>
       <!-- Login card-->
-      <div
-        class="w-3/12 h-2/4 min-w-min max-w-screen-sm transform -translate-x-2/4 -translate-y-2/4 absolute left-1/2 top-1/2 rounded-3xl shadow-xl bg-gray-50"
-      >
+      <div class="loginCard w-3/12">
         <!-- card content -->
-        <div
-          class="h-full flex flex-col items-center py-8 px-8 rounded-xl overflow-hidden relative tracking-wider"
-        >
-          <!-- Login title -->
-          <h1 class="font-bold text-3xl mt-3 relative z-10">Login</h1>
-
-          <!-- Form -->
-          <form
-            action=""
-            class="mt-6 text-lg font-medium w-96 relative z-10"
-            autocomplete="off"
-          >
-            <!-- username field -->
-            <div class="my-5">
-              <label for="email" class="ml-2 text-black">Email</label>
-              <input
-                type="email"
-                autofocus
-                id="email"
-                class="w-full rounded-xl px-4 py-2 mt-3 focus:bg-gray-500 focus:text-gray-50 bg-gray-200 focus:outline-none tracking-wider"
-                placeholder="Email"
-              />
-            </div>
-
-            <!-- password field -->
-            <div class="my-5">
-              <label for="password" class="ml-2 text-black">Password</label>
-              <input
-                type="password"
-                id="password"
-                class="w-full rounded-xl px-4 py-2 mt-3 focus:bg-gray-500 focus:text-gray-50 bg-gray-200 focus:outline-none tracking-wider"
-                placeholder="Password"
-              />
-
-              <!-- Forgot pass? -->
-              <div class="flex text-sm justify-end mt-2">
-                <a
-                  href=""
-                  class="text-gray-500 hover:text-black hover:underline p-2"
-                >
-                  Forgot Password?
-                </a>
+        <div class="cardContent">
+          <!-- front -->
+          <div class="front bg-gray-50 shadow-lg rounded-xl">
+            <h1 class="font-bold text-3xl mt-3">Login</h1>
+            <form id="loginForm" class="landingPageForm" autocomplete="off">
+              <!-- email field -->
+              <div class="my-5 w-full">
+                <label for="loginEmail" class="ml-2 text-black">Email</label>
+                <input
+                  type="email"
+                  autofocus
+                  id="loginEmail"
+                  class="w-full rounded-xl px-4 py-2 mt-3 focus:bg-gray-500 focus:text-gray-50 bg-gray-200 focus:outline-none tracking-wider"
+                  placeholder="Email"
+                  required
+                />
               </div>
-            </div>
 
-            <!-- login button -->
-            <button
-              class="text-center text-gray-200 font-semibold bg-gray-800 p-3 duration-200 rounded-md hover:bg-black w-full transform hover:scale-95"
-            >
-              Login
-            </button>
-          </form>
+              <!-- password field -->
+              <div class="w-full">
+                <label for="loginPassword" class="ml-2 text-black"
+                  >Password</label
+                >
+                <input
+                  type="password"
+                  id="loginPassword"
+                  class="w-full rounded-xl px-4 py-2 mt-3 focus:bg-gray-500 focus:text-gray-50 bg-gray-200 focus:outline-none tracking-wider"
+                  placeholder="Password"
+                  required
+                />
+
+                <!-- Forgot pass? -->
+                <div class="flex text-sm justify-end mt-2">
+                  <a
+                    href=""
+                    class="text-gray-500 hover:text-black hover:underline p-2"
+                  >
+                    Forgot Password?
+                  </a>
+                </div>
+              </div>
+
+              <!-- login button -->
+              <button id="loginBtn" class="landingPageBtn">Login</button>
+              <!-- signup button -->
+              <button id="toSignUp" class="landingPageBtn text-sm">
+                Need Account?
+              </button>
+            </form>
+          </div>
+
+          <!-- back-->
+          <div class="back bg-gray-800 shadow-lg rounded-xl text-gray-50">
+            <h1 class="font-bold text-3xl mt-3">Sign Up</h1>
+            <form id="signUpForm" class="landingPageForm" autocomplete="off">
+              <!-- email field -->
+              <div class="my-5 w-full">
+                <label for="signUpEmail" class="ml-2">Email</label>
+                <input
+                  type="email"
+                  autofocus
+                  id="signUpEmail"
+                  class="w-full rounded-xl px-4 py-2 mt-3 focus:bg-white text-black bg-gray-200 focus:outline-none tracking-wider"
+                  placeholder="Email address"
+                  required
+                />
+              </div>
+
+              <!-- password field -->
+              <div class="w-full">
+                <label for="signUpPassword" class="ml-2">Password</label>
+                <input
+                  type="password"
+                  id="signUpPassword"
+                  class="w-full rounded-xl px-4 py-2 mt-3 mb-11 focus:bg-white text-black bg-gray-200 focus:outline-none tracking-wider"
+                  placeholder="Choose password"
+                  required
+                />
+              </div>
+
+              <button id="signUpBtn" class="landingPageBtn">Sign Up</button>
+              <button id="toLogin" class="landingPageBtn text-sm">
+                Already have account?
+              </button>
+            </form>
+          </div>
         </div>
       </div>
 
@@ -88,8 +124,8 @@
       </div>
     </main>
 
-
- 
-    
+    <script src="js/firebase.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/index.js"></script>
   </body>
 </html>
