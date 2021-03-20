@@ -1,3 +1,32 @@
+
+// THIS SECTION IS EXPERIMENTAL
+Chart.defaults.LineWithLine = Chart.defaults.line;
+Chart.controllers.LineWithLine = Chart.controllers.line.extend({
+   draw: function(ease) {
+      Chart.controllers.line.prototype.draw.call(this, ease);
+
+      if (this.chart.tooltip._active && this.chart.tooltip._active.length) {
+         var activePoint = this.chart.tooltip._active[0],
+             ctx = this.chart.ctx,
+             x = activePoint.tooltipPosition().x,
+             topY = this.chart.scales['y-axis-0'].top,
+             bottomY = this.chart.scales['y-axis-0'].bottom;
+
+         // draw line
+         ctx.save();
+         ctx.beginPath();
+         ctx.moveTo(x, topY);
+         ctx.lineTo(x, bottomY);
+         ctx.lineWidth = 2;
+         ctx.strokeStyle = 'rgba(50, 170, 170, 0.5)';
+         ctx.stroke();
+         ctx.restore();
+      }
+   }
+});
+
+
+
 var ctx = document.getElementById("myChart");
 var ctx1 = document.getElementById("myChart1");
 var ctx2 = document.getElementById("myChart2");
@@ -125,3 +154,152 @@ var myChart = new Chart(ctx, {
     maintainAspectRatio: false,
   },
 });
+
+
+// Needs to be changed?
+// Key needs quotation marks and brackets around entire value
+// Firestore needs to save as string, so string will be in JSON format
+// {"00:00:16":"{"T":13.126, "P":3.927, "C":4.407}"}
+
+const dummyDate = '2021-03-20';
+
+const dummyData1 = [
+  {"00:00:16":{"T":13.126, "P":3.927, "C":4.407}},
+  {"00:20:34":{"T":5.207, "P":2.711, "C":5.706}},
+  {"00:24:14":{"T":18.241, "P":3.488, "C":4.089}}
+];
+
+// If time or date is less than 10, add 0.  09, 08 etc...
+function pad(n) {
+  return n < 10 ? "0" + n : n;
+}
+
+// Simple random number generator with min max parameters
+function randNum(min, max) {
+  return Math.floor(Math.random() * max) + min;
+}
+
+
+// Compares objects, used for sorting from lowest to highest value
+function compare( a, b ) {
+
+  if ( Object.keys(a) < Object.keys(b) ){
+    return -1;
+  }
+  if ( Object.keys(a) > Object.keys(b)){
+    return 1;
+  }
+  return 0;
+}
+
+// Create dummy data for graph
+function createGraphData() {
+  let dataArray = [];
+  for (let i = 0; i< 100; i++)
+  {
+    let hour = randNum(0, 23);
+    let min = randNum(0, 59);
+    let second = randNum(0, 59);
+    let timestamp = `${pad(hour)}:${pad(min)}:${pad(second)}`;
+    let temp = randNum(0, 20000) / 1000;
+    let pressure = randNum(0, 4000) / 1000;
+    let conductivity = randNum(4000, 6000) / 1000;
+    let jsonData = {
+      [timestamp]: {
+        T: temp,
+        P: pressure,
+        C: conductivity
+      }
+    };
+
+    dataArray.push(jsonData);
+  }
+
+  dataArray.sort(compare);
+
+  return dataArray;
+}
+
+const dummyData2 = createGraphData();
+
+// Convert "firestore" data into pairs that can be used in line graph,
+// Currently only returns time - temperature pair
+function parseFirestoreData() {
+  let timeArr = [];
+  let TemperatureArr = [];
+  // let PressureArr = [];
+  // let ConductivityArr = [];
+  
+  //console.log(dummyData2);
+
+  dummyData2.forEach((timestamp) => {
+    let keyVal = Object.keys(timestamp);
+    // console.log(timestamp[keyVal].T);
+    // console.log(keyVal);
+    timeArr.push(`${dummyDate}T${keyVal}`);
+    TemperatureArr.push(timestamp[keyVal].T);
+    // PressureArr.push(timestamp[keyVal].P);
+    // ConductivityArr.push(timestamp[keyVal].C);
+
+  });
+
+  let timeVarPair = [];
+  for (let i = 0; i<timeArr.length; i++)
+  {
+    timeVarPair.push({t: timeArr[i], y: TemperatureArr[i]})
+  }
+
+  return timeVarPair;
+}
+
+const firestoreCtx = document.getElementById("firestoreChart");
+
+const dataT = parseFirestoreData();
+
+const firestoreChart = new Chart(firestoreCtx, {
+  type: "LineWithLine",
+  data: {
+
+    // Currently controls number of and location of ticks
+    labels: ['2021-03-20T00:00:00', '2021-03-21T00:00:00'],
+    datasets: [
+      {
+        label: "Temperature",
+        lineTension: 0, // turns off interpolation (smooth graph)
+        data: dataT,
+        // backgroundColor: "rgba(0,0,0,0.5)",
+        borderColor: "rgba(50, 170, 170, 0.5)",
+        fill: false
+      },
+    ],
+  },
+  options: {
+      tooltips: {
+        intersect: false,
+        axis: 'x'
+    },
+    scales: {
+      xAxes: [
+        {
+          type:'time',
+          time: {
+            tooltipFormat: "YYYY-MM-DD HH:mm:ss"
+          },
+          distribution: 'linear',
+          ticks: {
+            source: 'labels' // labels control ticks
+          }
+        }
+      ],
+      yAxes: [
+        {
+          ticks: {
+            beginAtZero: true,
+          },
+        },
+      ],
+    },
+    maintainAspectRatio: false,
+  },
+});
+
