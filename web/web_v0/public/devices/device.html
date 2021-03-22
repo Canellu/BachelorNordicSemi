@@ -9,7 +9,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
 
     <!-- Chart JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js" integrity="sha512-hZf9Qhp3rlDJBvAKvmiG+goaaKRZA6LKUO35oK6EsM0/kjPK32Yw7URqrq3Q+Nvbbt8Usss+IekL7CRn83dYmw==" crossorigin="anonymous"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"
+      integrity="sha512-hZf9Qhp3rlDJBvAKvmiG+goaaKRZA6LKUO35oK6EsM0/kjPK32Yw7URqrq3Q+Nvbbt8Usss+IekL7CRn83dYmw=="
+      crossorigin="anonymous"
+    ></script>
+
+    <!-- HammerJS for pan/zoom gestures -->
+    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
 
     <!-- Firebase CORE -->
     <script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-app.js"></script>
@@ -18,7 +25,12 @@
     <script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-firestore.js"></script>
 
     <!-- Chart JS CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.css" integrity="sha512-C7hOmCgGzihKXzyPU/z4nv97W0d9bv4ALuuEbSf6hm93myico9qa0hv4dODThvCsqQUmKmLcJmlpRmCaApr83g==" crossorigin="anonymous" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.css"
+      integrity="sha512-C7hOmCgGzihKXzyPU/z4nv97W0d9bv4ALuuEbSf6hm93myico9qa0hv4dODThvCsqQUmKmLcJmlpRmCaApr83g=="
+      crossorigin="anonymous"
+    />
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="../styles.css" />
@@ -77,7 +89,7 @@
 
       <div id="data-tab" class="">
         <div class="container m-auto my-8">
-          <img src="../assets/img/genshin_map.png" class="map"></img>
+          <img src="../assets/img/genshin_map.png" class="map" />
         </div>
       </div>
       <div id="control-tab" class="hidden">
@@ -87,13 +99,11 @@
         </div>
       </div>
 
-      <div class="container m-auto pt-2 grid grid-cols-1 sm:grid-cols-2 auto-cols-max gap-8" >
-        
-        
-   
-       
+      <div
+        class="container m-auto pt-2 grid grid-cols-1 sm:grid-cols-2 auto-cols-max gap-8"
+      >
         <div class="h-80 w-full shadow-sm p-2 overflow-hidden">
-        <canvas id="myChart" class=""></canvas>
+          <canvas id="myChart" class=""></canvas>
         </div>
         <div class="h-80 w-full shadow-sm p-2 overflow-hidden">
           <canvas id="myChart1" class=""></canvas>
@@ -104,13 +114,12 @@
         <div class="h-80 w-full shadow-sm p-2 overflow-hidden">
           <canvas id="firestoreChart" class=""></canvas>
         </div>
-
       </div>
-     
     </main>
 
     <script src="../js/footer.js"></script>
     <script src="../js/device.js"></script>
+    <script src="../js/chartjs-zoompan-plugin.js"></script>
     <script src="../js/charts.js"></script>
   </body>
 </html>
