@@ -1,4 +1,11 @@
-async function createCard(uid, sync) {
+// Log out method
+const logout = document.querySelector("#logout");
+logout.addEventListener("click", async (e) => {
+  await auth.signOut();
+  location.replace("index.html");
+});
+
+async function createCard(uid, alias, sync) {
   let html = `  <div class="card">
   <img
     class="object-cover center w-full h-44"
@@ -17,7 +24,28 @@ async function createCard(uid, sync) {
     <!-- <i class="far fa-clock fa-lg mr-2"></i> -->
     <p class="tracking-wide text-center">Last sync: ${sync}</p>
   </div>
+
+  <div
+  class="badge absolute px-3 py-1 flex justify-center items-center bg-gray-800 top-4 left-4 rounded-lg font-semibold tracking-widest text-gray-200">${alias}</div>
 </div>`;
 
   document.querySelector("#deviceGrid").innerHTML += html;
 }
+
+async function createAllCards() {
+  const gliders = await db.collection("Gliders").get();
+  gliders.forEach((glider) => {
+    getGliderFields(glider.id);
+  });
+}
+
+async function getGliderFields(gliderID) {
+  const glider = db.collection("Gliders").doc(gliderID);
+  let data = await glider.get();
+  let uid = gliderID;
+  let alias = data.data()["Alias"];
+  let sync = data.data()["Last sync"];
+  createCard(uid, alias, sync);
+}
+
+// createAllCards();

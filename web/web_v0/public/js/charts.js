@@ -81,7 +81,7 @@ var myChart = new Chart(ctx, {
 var myChart1 = new Chart(ctx1, {
   type: "line",
   data: {
-    labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
+    labels: [],
     datasets: [
       {
         label: "# of Votes",
@@ -140,6 +140,13 @@ var myChart1 = new Chart(ctx1, {
       },
     },
     scales: {
+      xAxes: [
+        {
+          ticks: {
+            source: "data",
+          },
+        },
+      ],
       yAxes: [
         {
           ticks: {
@@ -297,7 +304,7 @@ const firestoreChart = new Chart(firestoreCtx, {
   type: "LineWithLine",
   data: {
     // Currently controls number of and location of ticks
-    labels: ["2021-03-20T00:00:00", "2021-03-21T00:00:00"],
+    // labels: ["2021-03-20T00:00:00", "2021-03-21T00:00:00"],
     datasets: [
       {
         label: "Temperature",
@@ -346,7 +353,7 @@ const firestoreChart = new Chart(firestoreCtx, {
           },
           distribution: "linear",
           ticks: {
-            source: "labels", // labels control ticks
+            source: "data", // labels control ticks
           },
         },
       ],

@@ -77,3 +77,7 @@
 .landingPageForm {
   @apply mt-6 text-lg font-medium w-96 flex flex-col items-center;
 }
+
+.mission {
+  @apply p-3 bg-gray-100 border-b-2 border-gray-300 hover:bg-gray-400 duration-200;
+}
