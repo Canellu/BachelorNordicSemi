@@ -5,11 +5,11 @@ logout.addEventListener("click", async (e) => {
   location.replace("index.html");
 });
 
-async function createCard(uid, alias, sync) {
+async function createCard(uid, alias, sync, img) {
   let html = `  <div class="card">
   <img
     class="object-cover center w-full h-44"
-    src="https://source.unsplash.com/random"
+    src=${img}
     alt=""
   />
   <div class="id flex-grow place-self-center mt-4">
@@ -39,13 +39,21 @@ async function createAllCards() {
   });
 }
 
+const images = [
+  "assets/img/jellyfish.jpg",
+  "assets/img/turtle.jpg",
+  "assets/img/shark.jpg",
+  "assets/img/water1.jpg",
+  "assets/img/water2.jpg",
+  "assets/img/fishies.jpg",
+];
 async function getGliderFields(gliderID) {
   const glider = db.collection("Gliders").doc(gliderID);
   let data = await glider.get();
   let uid = gliderID;
   let alias = data.data()["Alias"];
   let sync = data.data()["Last sync"];
-  createCard(uid, alias, sync);
+  createCard(uid, alias, sync, images[randNum(0, 5)]);
 }
 
-// createAllCards();
+createAllCards();
