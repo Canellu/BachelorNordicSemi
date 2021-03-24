@@ -81,3 +81,27 @@
 .mission {
   @apply p-3 bg-gray-100 border-b-2 border-gray-300 hover:bg-gray-400 duration-200;
 }
+
+.chartBtn {
+  @apply w-8 h-8 rounded-md flex justify-center items-center text-black border shadow-sm cursor-pointer transform hover:scale-110 hover:border-gray-800 duration-200;
+}
+
+.chartDropElement {
+  @apply flex items-center w-full  px-2 h-8 text-left hover:bg-gray-700 hover:text-gray-50;
+}
+
+.rangeContent {
+  @apply bg-gray-50 border shadow-md rounded-md absolute max-h-56 overflow-auto;
+  top: 35px;
+  right: -1px;
+  width: 140px;
+}
+
+.chartCard {
+  @apply h-80 w-full rounded-md border bg-gray-50 shadow-md px-4 overflow-hidden relative;
+}
+
+.activeRange {
+  border: 1px solid #1f2937;
+  transform: scale(1.1);
+}

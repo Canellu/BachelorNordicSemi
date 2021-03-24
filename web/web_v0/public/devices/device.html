@@ -27,6 +27,12 @@
     <!-- Firebase Authentication -->
     <script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-auth.js"></script>
 
+    <!-- Material Icon -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    />
+
     <!-- Bootstrap Icon -->
     <link
       rel="stylesheet"
@@ -96,22 +102,26 @@
         </button>
       </div>
 
+      <!-- MISSION SELECTOR -->
       <div
         id="missionSelector"
-        class="h-16 bg-gray-300 flex justify-center text-gray-800 tracking-wider"
+        class="h-16 w-52 text-gray-800 tracking-wider sticky top-1/3 transform -translate-x-40 hover:translate-x-0 z-50"
       >
-        <div class="container flex justify-start">
+        <div
+          class="dropDownBtn cursor-pointer relative px-5 flex items-center justify-center h-full bg-gray-800 text-center"
+        >
+          <p
+            class="missionIndicator w-12 h-10 absolute right-0 bg-gray-800 bottom-14 text-gray-200 flex justify-center items-center pt-2"
+          ></p>
+          <p class="inline-block text-white mr-4">Select Mission</p>
+          <i
+            class="absolute right-4 ml-4 inline-block bi bi-chevron-down text-white"
+          ></i>
           <div
-            class="dropDownBtn cursor-pointer relative px-5 flex items-center border h-full bg-gray-800 text-center"
+            class="dropDownContent border-2 hidden absolute left-0 w-full max-h-56 overflow-auto"
+            style="top: 63px"
           >
-            <p class="inline-block text-white">Select Mission</p>
-            <i class="ml-4 inline-block bi bi-chevron-down text-white"></i>
-            <div
-              class="dropDownContent border-2 hidden absolute left-0 w-full max-h-56 overflow-auto"
-              style="top: 63px"
-            >
-              <div class="mission">Mission 0</div>
-            </div>
+            <div class="mission">Mission 0</div>
           </div>
         </div>
       </div>
@@ -128,23 +138,14 @@
         </div>
       </div>
 
+      <!--  CHAAART -->
       <div
+        id="chartGrid"
         class="container m-auto pt-2 grid grid-cols-1 sm:grid-cols-2 auto-cols-max gap-8"
-      >
-        <div class="h-80 w-full shadow-sm p-2 overflow-hidden">
-          <canvas id="myChart" class=""></canvas>
-        </div>
-        <div class="h-80 w-full shadow-sm p-2 overflow-hidden">
-          <canvas id="myChart1" class=""></canvas>
-        </div>
-        <div class="h-80 w-full shadow-sm p-2 overflow-hidden">
-          <canvas id="myChart2" class=""></canvas>
-        </div>
-        <div class="h-80 w-full shadow-sm p-2 overflow-hidden">
-          <canvas id="firestoreChart" class=""></canvas>
-        </div>
-      </div>
+      ></div>
     </main>
+
+    <div class="h-96 filler"></div>
 
     <script src="../js/footer.js"></script>
     <script src="../js/firebase.js"></script>

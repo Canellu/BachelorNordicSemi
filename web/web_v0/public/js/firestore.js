@@ -23,7 +23,7 @@ function createGliders() {
 
   today = yyyy + "-" + mm + "-" + dd;
 
-  for (let i = 1; i <= 6; i++) {
+  for (let i = 1; i <= 3; i++) {
     let gliderID = randNum(100000, 899999).toString();
     db.collection("Gliders")
       .doc(gliderID)
@@ -38,9 +38,9 @@ function createGliders() {
 // Create documents with timestamp consisting of JSON data for each glider
 function createMission(gliderID, missionNum) {
   console.log("Creating doc for: ", gliderID);
-  let year = 2020;
-  let day = randNum(1, 31);
-  let month = randNum(1, 12);
+  let year = 2021;
+  let day = 25;
+  let month = 3;
   let date = `${year}-${pad(month)}-${pad(day)}`;
   let hour = randNum(0, 23);
   let min = randNum(0, 59);
@@ -62,13 +62,12 @@ function createMission(gliderID, missionNum) {
     });
 
   // Date Doc
-  for (let i = 0; i < 5; i++) {
-    let year = 2020;
-    let day = randNum(1, 31);
-    let month = randNum(1, 12);
+  for (let i = 0; i < 8; i++) {
+    let year = 2021;
+    day--;
     date = `${year}-${pad(month)}-${pad(day)}`;
     // Timestamp with data
-    for (let j = 0; j < 20; j++) {
+    for (let j = 0; j < 30; j++) {
       let hour = randNum(0, 23);
       let min = randNum(0, 59);
       let second = randNum(0, 59);
@@ -125,7 +124,7 @@ async function createGliderData() {
 async function getDocs() {
   const dataCollectionG1 = db
     .collection("Gliders")
-    .doc("114946")
+    .doc("807381")
     .collection("Missions");
   const docs = await dataCollectionG1.get();
 

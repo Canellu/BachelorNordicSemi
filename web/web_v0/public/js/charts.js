@@ -17,7 +17,7 @@ Chart.controllers.LineWithLine = Chart.controllers.line.extend({
       ctx.moveTo(x, topY);
       ctx.lineTo(x, bottomY);
       ctx.lineWidth = 2;
-      ctx.strokeStyle = "rgba(50, 170, 170, 0.5)";
+      ctx.strokeStyle = "rgba(245, 92, 56, 0.5)";
       ctx.stroke();
       ctx.restore();
     }
@@ -26,197 +26,8 @@ Chart.controllers.LineWithLine = Chart.controllers.line.extend({
 
 Chart.defaults.global.defaultFontFamily = "'Montserrat'";
 
-var ctx = document.getElementById("myChart");
-var ctx1 = document.getElementById("myChart1");
-var ctx2 = document.getElementById("myChart2");
-
-var myChart = new Chart(ctx, {
-  type: "doughnut",
-  data: {
-    labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
-    datasets: [
-      {
-        label: "# of Votes",
-        data: [12, 19, 3, 5, 2, 3],
-        backgroundColor: [
-          "rgba(255, 99, 132, 0.2)",
-          "rgba(54, 162, 235, 0.2)",
-          "rgba(255, 206, 86, 0.2)",
-          "rgba(75, 192, 192, 0.2)",
-          "rgba(153, 102, 255, 0.2)",
-          "rgba(255, 159, 64, 0.2)",
-        ],
-        borderColor: [
-          "rgba(255, 99, 132, 1)",
-          "rgba(54, 162, 235, 1)",
-          "rgba(255, 206, 86, 1)",
-          "rgba(75, 192, 192, 1)",
-          "rgba(153, 102, 255, 1)",
-          "rgba(255, 159, 64, 1)",
-        ],
-        borderWidth: 2,
-      },
-    ],
-  },
-  options: {
-    legend: {
-      position: "right",
-      labels: {
-        padding: 24,
-      },
-    },
-    // scales: {
-    //   yAxes: [
-    //     {
-    //       ticks: {
-    //         beginAtZero: true,
-    //       },
-    //     },
-    //   ],
-    // },
-    maintainAspectRatio: false,
-  },
-});
-
-var myChart1 = new Chart(ctx1, {
-  type: "line",
-  data: {
-    labels: [],
-    datasets: [
-      {
-        label: "# of Votes",
-        data: [12, 19, 3, 5, 2, 3],
-        backgroundColor: [
-          "rgba(255, 99, 132, 0.2)",
-          "rgba(54, 162, 235, 0.2)",
-          "rgba(255, 206, 86, 0.2)",
-          "rgba(75, 192, 192, 0.2)",
-          "rgba(153, 102, 255, 0.2)",
-          "rgba(255, 159, 64, 0.2)",
-        ],
-        borderColor: [
-          "rgba(255, 99, 132, 1)",
-          "rgba(54, 162, 235, 1)",
-          "rgba(255, 206, 86, 1)",
-          "rgba(75, 192, 192, 1)",
-          "rgba(153, 102, 255, 1)",
-          "rgba(255, 159, 64, 1)",
-        ],
-        borderWidth: 2,
-      },
-    ],
-  },
-  options: {
-    title: {
-      display: true,
-      text: "Temperature",
-      position: "top", //default, also left, right, bottom
-      fontSize: 20, // 12 default
-      fontColor: "#34455D", // #666 default
-      padding: 14, //default 10
-      lineHeight: 1.6, //default 1.2
-    },
-    plugins: {
-      zoom: {
-        // Container for pan options
-        pan: {
-          // Boolean to enable panning
-          enabled: true,
-
-          // Panning directions. Remove the appropriate direction to disable
-          // Eg. 'y' would only allow panning in the y direction
-          mode: "x",
-        },
-
-        // Container for zoom options
-        zoom: {
-          // Boolean to enable zooming
-          enabled: true,
-
-          // Zooming directions. Remove the appropriate direction to disable
-          // Eg. 'y' would only allow zooming in the y direction
-          mode: "x",
-        },
-      },
-    },
-    scales: {
-      xAxes: [
-        {
-          ticks: {
-            source: "data",
-          },
-        },
-      ],
-      yAxes: [
-        {
-          ticks: {
-            beginAtZero: true,
-          },
-        },
-      ],
-    },
-    maintainAspectRatio: false,
-    responsiveAnimationDuration: 500,
-    legend: {
-      display: false,
-    },
-  },
-});
-
-var myChart2 = new Chart(ctx2, {
-  type: "bar",
-  data: {
-    labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
-    datasets: [
-      {
-        label: "# of Votes",
-        data: [12, 19, 3, 5, 2, 3],
-        backgroundColor: [
-          "rgba(255, 99, 132, 0.2)",
-          "rgba(54, 162, 235, 0.2)",
-          "rgba(255, 206, 86, 0.2)",
-          "rgba(75, 192, 192, 0.2)",
-          "rgba(153, 102, 255, 0.2)",
-          "rgba(255, 159, 64, 0.2)",
-        ],
-        borderColor: [
-          "rgba(255, 99, 132, 1)",
-          "rgba(54, 162, 235, 1)",
-          "rgba(255, 206, 86, 1)",
-          "rgba(75, 192, 192, 1)",
-          "rgba(153, 102, 255, 1)",
-          "rgba(255, 159, 64, 1)",
-        ],
-        borderWidth: 2,
-      },
-    ],
-  },
-  options: {
-    scales: {
-      yAxes: [
-        {
-          ticks: {
-            beginAtZero: true,
-          },
-        },
-      ],
-    },
-    maintainAspectRatio: false,
-  },
-});
-
-// Needs to be changed?
-// Key needs quotation marks and brackets around entire value
-// Firestore needs to save as string, so string will be in JSON format
-// {"00:00:16":"{"T":13.126, "P":3.927, "C":4.407}"}
-
+const dummyData2 = createGraphData();
 const dummyDate = "2021-03-20";
-
-const dummyData1 = [
-  { "00:00:16": { T: 13.126, P: 3.927, C: 4.407 } },
-  { "00:20:34": { T: 5.207, P: 2.711, C: 5.706 } },
-  { "00:24:14": { T: 18.241, P: 3.488, C: 4.089 } },
-];
 
 // If time or date is less than 10, add 0.  09, 08 etc...
 function pad(n) {
@@ -266,8 +77,6 @@ function createGraphData() {
   return dataArray;
 }
 
-const dummyData2 = createGraphData();
-
 // Convert "firestore" data into pairs that can be used in line graph,
 // Currently only returns time - temperature pair
 function parseFirestoreData() {
@@ -295,76 +104,213 @@ function parseFirestoreData() {
 
   return timeVarPair;
 }
-
-const firestoreCtx = document.getElementById("firestoreChart");
-
 const dataT = parseFirestoreData();
 
-const firestoreChart = new Chart(firestoreCtx, {
-  type: "LineWithLine",
-  data: {
-    // Currently controls number of and location of ticks
-    // labels: ["2021-03-20T00:00:00", "2021-03-21T00:00:00"],
-    datasets: [
-      {
-        label: "Temperature",
-        lineTension: 0, // turns off interpolation (smooth graph)
-        data: dataT,
-        // backgroundColor: "rgba(0,0,0,0.5)",
-        borderColor: "rgba(50, 170, 170, 0.5)",
-        fill: false,
-      },
-    ],
-  },
-  options: {
-    plugins: {
-      zoom: {
-        // Container for pan options
-        pan: {
-          // Boolean to enable panning
-          enabled: true,
+function createChartHTML(type) {
+  let chartHTML = `
+      <div class="chartCard">
+        <div class="flex items-center w-full h-12 mt-2 px-1">
+          <!-- Chart header -->
+          <div class="flex-grow">
+            <h1 class="font-medium text-lg tracking-tight ml-2 opacity-75">
+              ${type}
+            </h1>
+          </div> 
 
-          // Panning directions. Remove the appropriate direction to disable
-          // Eg. 'y' would only allow panning in the y direction
-          mode: "x",
+          <!-- Chart buttons -->
+          <div class="graphButtons flex justify-between w-44">
+            
+            <!-- download btn -->
+            <div id="downloadBtn${type}" class="chartBtn">
+              <span class="material-icons text-gray-600"> download </span>
+            </div>
+
+            <!-- reset zoom -->
+            <div id="resetBtn${type}" class="chartBtn">
+              <span class="material-icons text-gray-600"> refresh </span>
+            </div>
+
+            <!-- chart ranger -->
+            <div
+              id="chartRange"
+              class="flex items-center h-full text-gray-800 tracking-wider"
+            > 
+              <div
+                id="rangeBtn${type}"
+                class="cursor-pointer relative border px-2 rounded-md h-8 text-left text-xs flex items-center justfiy-start shadow-sm hover:border-gray-800 transform hover:scale-110 duration-200"
+                style="width: 56px "
+              >
+                <span class="material-icons text-gray-600">
+                  calendar_today
+                </span>
+                <i class="ml-1 text-black bi bi-chevron-down"></i>
+                <div id="rangeContent${type}" class="rangeContent hidden">
+                  <div class="chartDropElement border-b">All</div>
+                  <div class="chartDropElement border-b">Last 24 hours</div>
+                  <div class="chartDropElement border-b">Last 7 days</div>
+                  <div class="chartDropElement">Last 30 days</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- chart settings -->
+            <div id="settingsBtn${type}" class="chartBtn">
+              <span class="material-icons text-gray-600"> settings </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="h-4/5">
+          <canvas id="chart${type}" class="tracking-tight"></canvas>
+        </div>
+      </div>
+    `;
+
+  document.querySelector("#chartGrid").innerHTML += chartHTML;
+}
+
+function createChartContent(type, ylabel, color, stepSize) {
+  let chartContent = {
+    type: "LineWithLine",
+    data: {
+      datasets: [
+        {
+          pointBorderColor: `${color},0.8)`,
+          pointRadius: 2,
+          label: type,
+          lineTension: 0, // turns off interpolation (smooth graph)
+          data: [],
+          backgroundColor: `${color},0.25)`,
+          borderColor: `${color},0.5)`,
+          fill: false,
         },
-
-        // Container for zoom options
+      ],
+    },
+    options: {
+      plugins: {
         zoom: {
-          // Boolean to enable zooming
-          enabled: true,
-
-          // Zooming directions. Remove the appropriate direction to disable
-          // Eg. 'y' would only allow zooming in the y direction
-          mode: "x",
+          pan: {
+            enabled: true,
+            mode: "x",
+          },
+          zoom: {
+            enabled: true,
+            mode: "x",
+          },
         },
       },
-    },
-    tooltips: {
-      intersect: false,
-      axis: "x",
-    },
-    scales: {
-      xAxes: [
-        {
-          type: "time",
-          time: {
-            tooltipFormat: "YYYY-MM-DD HH:mm:ss",
+      tooltips: {
+        intersect: false,
+        axis: "x",
+      },
+      scales: {
+        xAxes: [
+          {
+            scaleLabel: {
+              display: true,
+              labelString: "Time",
+            },
+            bounds: "ticks",
+            type: "time",
+            time: {
+              unitStepSize: 2,
+              displayFormats: {
+                minute: "HH:mm",
+                hour: "HH:mm",
+              },
+              tooltipFormat: "YYYY-MM-DD HH:mm:ss",
+            },
+            distribution: "linear",
+            ticks: {
+              source: "auto",
+            },
           },
-          distribution: "linear",
-          ticks: {
-            source: "data", // labels control ticks
+        ],
+        yAxes: [
+          {
+            scaleLabel: {
+              display: true,
+              labelString: ylabel,
+            },
+            ticks: {
+              beginAtZero: true,
+              stepSize: stepSize,
+            },
           },
-        },
-      ],
-      yAxes: [
-        {
-          ticks: {
-            beginAtZero: true,
-          },
-        },
-      ],
+        ],
+      },
+      maintainAspectRatio: false,
+      responsiveAnimationDuration: 1000,
+      legend: {
+        display: false,
+      },
     },
-    maintainAspectRatio: false,
-  },
-});
+  };
+
+  return chartContent;
+}
+
+function createAllCharts() {
+  createChartHTML("Conductivity");
+  createChartHTML("Pressure");
+  createChartHTML("Temperature");
+
+  const ctxPressure = document.querySelector("#chartPressure").getContext("2d");
+  const ctxTemperature = document
+    .querySelector("#chartTemperature")
+    .getContext("2d");
+  const ctxConductivity = document
+    .querySelector("#chartConductivity")
+    .getContext("2d");
+
+  const contentPressure = createChartContent(
+    "Pressure",
+    "Pressure MPa",
+    "rgba(19, 129, 194",
+    1
+  );
+
+  const contentConductivity = createChartContent(
+    "Conductivity",
+    "Conductivity  S/m",
+    "rgba(255, 108, 58",
+    2
+  );
+
+  const contentTemperature = createChartContent(
+    "Temperature",
+    "Temperature \xB0 C",
+    "rgba(245, 186, 97",
+    4
+  );
+
+  const chartConductivity = new Chart(ctxConductivity, contentConductivity);
+  const chartPressure = new Chart(ctxPressure, contentPressure);
+  const chartTemperature = new Chart(ctxTemperature, contentTemperature);
+
+  charts.push(chartConductivity);
+  charts.push(chartPressure);
+  charts.push(chartTemperature);
+}
+
+function createRangeBtns(btn, content) {
+  // Clicking dateranger shows, dropdown content
+  btn.addEventListener("click", () => {
+    content.classList.remove("hidden");
+    btn.classList.add("activeRange");
+  });
+
+  // Clicking elsewhere, hides dropdown content
+  window.addEventListener("click", (e) => {
+    if (e.target != btn && e.target.parentNode != btn) {
+      content.classList.add("hidden");
+      btn.classList.remove("activeRange");
+    }
+  });
+}
+
+function createResetZoomBtns(btn, chart) {
+  btn.addEventListener("click", () => {
+    chart.resetZoom();
+  });
+}
