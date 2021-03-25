@@ -132,7 +132,12 @@
             id="dateSelector"
             class="h-16 text-gray-200 bg-gray-50 shadow-md rounded-md border mr-2 tracking-wider flex items-center space-x-3 px-4"
           >
-            <span class="material-icons text-gray-800">calendar_today</span>
+            <div class="chartBtn cursor-pointer pt-1">
+              <label for="datePicker">
+                <span class="material-icons text-gray-600">calendar_today</span>
+              </label>
+            </div>
+
             <input
               id="datePicker"
               class="h-10 w-60 rounded border-2 text-gray-800 px-4"
@@ -148,7 +153,7 @@
           <!-- MISSION SELECTOR -->
           <div
             id="missionSelector"
-            class="h-16 text-gray-800 tracking-wider w-56"
+            class="h-16 text-gray-800 tracking-wider w-56 cursor-pointer"
           >
             <div
               class="dropDownBtn h-16 text-gray-800 bg-gray-50 shadow-md rounded-md border mr-2 tracking-wider flex items-center justify-center text-center relative"

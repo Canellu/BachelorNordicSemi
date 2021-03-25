@@ -21,15 +21,25 @@ controlTabBtn.addEventListener("click", () => {
   dataTabBtn.classList.remove("activeTabBtn");
 });
 
-dropDownBtn.addEventListener("mouseover", () => {
-  dropDownContent.classList.remove("hidden");
-  // let body = document.querySelector("body");
-  // document.body.style.overflow = "hidden";
+dropDownBtn.addEventListener("click", () => {
+  dropDownContent.classList.toggle("hidden");
 });
-dropDownBtn.addEventListener("mouseleave", () => {
-  dropDownContent.classList.add("hidden");
-  // document.body.style.overflow = "auto";
+
+window.addEventListener("click", (e) => {
+  if (e.target != dropDownBtn && e.target.parentNode != dropDownBtn) {
+    dropDownContent.classList.add("hidden");
+  }
 });
+
+// dropDownBtn.addEventListener("mouseover", () => {
+//   dropDownContent.classList.remove("hidden");
+//   // let body = document.querySelector("body");
+//   // document.body.style.overflow = "hidden";
+// });
+// dropDownBtn.addEventListener("mouseleave", () => {
+//   dropDownContent.classList.add("hidden");
+//   // document.body.style.overflow = "auto";
+// });
 
 // let url = window.location.pathname;
 // console.log(url.substring(url.lastIndexOf("/") + 1).replace(".html", ""));
