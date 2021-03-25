@@ -31195,46 +31195,15 @@ video {
      object-fit: cover;
   width: 100%;
   max-height: 500px;
-  min-height: 300px;
+  min-height: 500px;
   min-width: 244px;
 }
 
 .activeTabBtn {
-  --tw-bg-opacity: 1;
-  background-color: rgba(249, 250, 251, var(--tw-bg-opacity));
+  font-weight: 700;
   --tw-text-opacity: 1;
-  color: rgba(31, 41, 55, var(--tw-text-opacity));
-}
-
-.tabBtn:hover{
-  --tw-bg-opacity: 1;
-  background-color: rgba(229, 231, 235, var(--tw-bg-opacity));
-}
-
-.tabBtn{
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  height: 100%;
-}
-
-.tabBtn:focus{
-  outline: 2px solid transparent;
-  outline-offset: 2px;
-}
-
-.tabBtn:hover{
-  --tw-text-opacity: 1;
-  color: rgba(31, 41, 55, var(--tw-text-opacity));
-}
-
-.tabBtn{
-  width: 15rem;
-  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
-  transition-duration: 300ms;
+  color: rgba(0, 0, 0, var(--tw-text-opacity));
+  border-bottom: 2px solid #1f2937;
 }
 
 .headerBtn:hover{
@@ -31444,7 +31413,7 @@ video {
   --tw-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
   --tw-text-opacity: 1;
-  color: rgba(0, 0, 0, var(--tw-text-opacity));
+  color: rgba(75, 85, 99, var(--tw-text-opacity));
   width: 2rem;
   --tw-translate-x: 0;
   --tw-translate-y: 0;
@@ -31463,6 +31432,13 @@ video {
 
 .chartBtn{
   transition-duration: 200ms;
+}
+
+.chartBtn:active {
+  --tw-bg-opacity: 1;
+  background-color: rgba(31, 41, 55, var(--tw-bg-opacity));
+  --tw-text-opacity: 1;
+  color: rgba(229, 231, 235, var(--tw-text-opacity));
 }
 
 .chartDropElement:hover{
@@ -31521,6 +31497,13 @@ video {
 .activeRange {
   border: 1px solid #1f2937;
   transform: scale(1.1);
+}
+
+.rangeBtnActive:active {
+  --tw-bg-opacity: 1;
+  background-color: rgba(31, 41, 55, var(--tw-bg-opacity));
+  --tw-text-opacity: 1;
+  color: rgba(229, 231, 235, var(--tw-text-opacity));
 }
 
 @media (min-width: 640px){

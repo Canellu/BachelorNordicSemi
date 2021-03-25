@@ -42,9 +42,9 @@ var missionDataset = {};
 // When clicking on a dropdown mission, retrieve data from firestore and update charts
 async function listMissions() {
   // All mission documents for this glider
-  const missions = await db
+  let missions = await db
     .collection("Gliders")
-    .doc("807381")
+    .doc("311910")
     .collection("Missions")
     .get();
 
@@ -65,17 +65,25 @@ async function listMissions() {
   missionDivs.forEach((div) => {
     // When clicked, get data from firestore, update chart
     div.addEventListener("click", async () => {
-      document.querySelector(
-        ".missionIndicator"
-      ).innerText = div.innerText.split(" ")[1];
+      // Current mission data
+      let data;
 
       // Get data from firestore
       activeMission = div.innerText;
-      let data = await getMissionData(div.innerHTML.split(" ")[1]);
 
-      if (!(activeMission in missionDataset)) {
+      // Give missionSelector the current mission as text
+      document.querySelector(
+        "#missionSelector div p"
+      ).innerText = activeMission;
+
+      // Do not retrieve mission if data is already retrieved
+      if (activeMission in missionDataset) {
+        data = missionDataset[activeMission];
+        console.log(`Getting data from missionDataset: ${activeMission}`);
+      } else {
+        data = await getMissionData(div.innerHTML);
         missionDataset[activeMission] = data;
-        console.log(`Getting data from Active mission: ${activeMission}`);
+        console.log(`Getting data from firestore: ${activeMission}`);
       }
       // Update chart
       charts[0].data.datasets[0].data = data.C;
@@ -86,24 +94,25 @@ async function listMissions() {
         chart.update();
         chart.resetZoom();
       });
+
+      addMissionMarkers(activeMission);
     });
   });
 
-  // missionDivs[missionDivs.length - 1].click();
+  missionDivs[missionDivs.length - 1].click();
   document.querySelector("#missionSelector div p").innerText = activeMission;
-  document.querySelector(".missionIndicator").innerText = totalNumberOfMissions;
 }
 
 // Returns promise of missionData-object
-async function getMissionData(missionNum) {
+async function getMissionData(missionName) {
   let dataset = [];
 
   // Specific mission document
   let mission = await db
     .collection("Gliders")
-    .doc("807381")
+    .doc("311910")
     .collection("Missions")
-    .doc("Mission " + missionNum);
+    .doc(missionName);
 
   // // Mission commands!
   // let getCommands = await mission.get();
@@ -137,8 +146,24 @@ async function getMissionData(missionNum) {
   let dataC = getDataType(dataset, "C");
   let dataP = getDataType(dataset, "P");
   let dataT = getDataType(dataset, "T");
+  let dataLat = getDataType(dataset, "lat");
+  let dataLng = getDataType(dataset, "lng");
+  let coordinates = [];
 
-  return { T: dataT, P: dataP, C: dataC };
+  for (let i = 0; i < dataLat.length; i++) {
+    let t = dataLat[i].t;
+    let lat = parseFloat(dataLat[i].y);
+    let lng = parseFloat(dataLng[i].y);
+
+    coordinates.push({ t: t, lat: lat, lng: lng });
+  }
+
+  return {
+    T: dataT,
+    P: dataP,
+    C: dataC,
+    coordinates: coordinates,
+  };
 }
 
 // Returns an array with objects of time:val pair of given type

@@ -20,16 +20,13 @@
 .map {
   @apply object-cover w-full;
   max-height: 500px;
-  min-height: 300px;
+  min-height: 500px;
   min-width: 244px;
 }
 
 .activeTabBtn {
-  @apply bg-gray-50 text-gray-800;
-}
-
-.tabBtn {
-  @apply h-full w-60 flex justify-center items-center hover:bg-gray-200 hover:text-gray-800  transition duration-300 focus:outline-none  font-semibold;
+  @apply text-black font-bold;
+  border-bottom: 2px solid #1f2937;
 }
 
 .headerBtn {
@@ -83,7 +80,11 @@
 }
 
 .chartBtn {
-  @apply w-8 h-8 rounded-md flex justify-center items-center text-black border shadow-sm cursor-pointer transform hover:scale-110 hover:border-gray-800 duration-200;
+  @apply w-8 h-8 rounded-md flex justify-center items-center text-gray-600 border shadow-sm cursor-pointer transform hover:scale-110 hover:border-gray-800 duration-200;
+}
+
+.chartBtn:active {
+  @apply bg-gray-800 text-gray-200;
 }
 
 .chartDropElement {
@@ -104,4 +105,8 @@
 .activeRange {
   border: 1px solid #1f2937;
   transform: scale(1.1);
+}
+
+.rangeBtnActive:active {
+  @apply bg-gray-800 text-gray-200;
 }

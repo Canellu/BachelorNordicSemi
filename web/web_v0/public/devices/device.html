@@ -5,6 +5,19 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+    <!-- litePicker JS -->
+    <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/litepicker/dist/css/litepicker.css"
+    />
+
+    <!-- FileSaver JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"></script>
+
+    <!-- XLSX JS -->
+    <script src="../js/xlsx.full.min.js"></script>
+
     <!-- Moment JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
 
@@ -47,6 +60,9 @@
       crossorigin="anonymous"
     />
 
+    <!-- Maps Polyline -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+
     <!-- Custom CSS -->
     <link rel="stylesheet" href="../styles.css" />
     <title>Device</title>
@@ -84,52 +100,78 @@
     </header>
 
     <main class="h-full min-h-screen">
-      <!--  NICE TO SEE -->
-      <div class="map">
-        <div class="w-full h-full bg-gray-600"></div>
-      </div>
-
       <!-- TAB SELECTOR -->
       <div
-        class="tabs h-16 bg-gray-800 flex justify-center text-white tracking-wider"
+        class="container m-auto tabs rounded-b-md h-16 flex justify-center text-gray-500 tracking-wider sticky top-16 z-40 overflow-hidden shadow-sm"
       >
-        <button id="data-tab-btn" class="tabBtn activeTabBtn">
+        <button
+          id="data-tab-btn"
+          class="tabBtn activeTabBtn h-full w-full flex justify-center items-center transition duration-300 focus:outline-none font-semibold bg-gray-200"
+        >
           <p>DATA</p>
         </button>
 
-        <button id="control-tab-btn" class="tabBtn">
+        <button
+          id="control-tab-btn"
+          class="tabBtn h-full w-full flex justify-center items-center transition duration-300 focus:outline-none font-semibold bg-gray-200"
+        >
           <p>MISSION CONTROL</p>
         </button>
       </div>
 
-      <!-- MISSION SELECTOR -->
-      <div
-        id="missionSelector"
-        class="h-16 w-52 text-gray-800 tracking-wider sticky top-1/3 transform -translate-x-40 hover:translate-x-0 z-50"
-      >
-        <div
-          class="dropDownBtn cursor-pointer relative px-5 flex items-center justify-center h-full bg-gray-800 text-center"
-        >
-          <p
-            class="missionIndicator w-12 h-10 absolute right-0 bg-gray-800 bottom-14 text-gray-200 flex justify-center items-center pt-2"
-          ></p>
-          <p class="inline-block text-white mr-4">Select Mission</p>
-          <i
-            class="absolute right-4 ml-4 inline-block bi bi-chevron-down text-white"
-          ></i>
+      <div id="data-tab" class="py-12">
+        <!-- MAP -->
+        <div class="container m-auto mb-8">
+          <div id="dataMap" class="map h-full"></div>
+        </div>
+
+        <!-- DATA SELECTOR -->
+        <div class="container w-full h-16 m-auto flex mb-8">
+          <!-- DATE SELECTOR -->
           <div
-            class="dropDownContent border-2 hidden absolute left-0 w-full max-h-56 overflow-auto"
-            style="top: 63px"
+            id="dateSelector"
+            class="h-16 text-gray-200 bg-gray-50 shadow-md rounded-md border mr-2 tracking-wider flex items-center space-x-3 px-4"
           >
-            <div class="mission">Mission 0</div>
+            <span class="material-icons text-gray-800">calendar_today</span>
+            <input
+              id="datePicker"
+              class="h-10 w-60 rounded border-2 text-gray-800 px-4"
+            />
+
+            <div class="chartBtn">
+              <span onclick="applySelection()" class="material-icons">
+                send
+              </span>
+            </div>
+          </div>
+
+          <!-- MISSION SELECTOR -->
+          <div
+            id="missionSelector"
+            class="h-16 text-gray-800 tracking-wider w-56"
+          >
+            <div
+              class="dropDownBtn h-16 text-gray-800 bg-gray-50 shadow-md rounded-md border mr-2 tracking-wider flex items-center justify-center text-center relative"
+            >
+              <p class="inline-block text-gray-800 mr-4"></p>
+              <i
+                class="absolute right-4 ml-4 inline-block bi bi-chevron-down text-gray-800"
+              ></i>
+              <div
+                class="dropDownContent border-2 hidden absolute left-0 w-full max-h-56 overflow-auto z-10"
+                style="top: 63px"
+              >
+                <div class="mission">Mission 0</div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div id="data-tab" class="">
-        <div class="container m-auto my-8">
-          <img src="../assets/img/genshin_map.png" class="map" />
-        </div>
+        <!--  CHAAART -->
+        <div
+          id="chartGrid"
+          class="container m-auto pt-2 grid grid-cols-1 sm:grid-cols-2 auto-cols-max gap-8"
+        ></div>
       </div>
       <div id="control-tab" class="hidden">
         <div class="container m-auto my-8">
@@ -137,20 +179,20 @@
           <div class="controlPanel"></div>
         </div>
       </div>
-
-      <!--  CHAAART -->
-      <div
-        id="chartGrid"
-        class="container m-auto pt-2 grid grid-cols-1 sm:grid-cols-2 auto-cols-max gap-8"
-      ></div>
     </main>
-
-    <div class="h-96 filler"></div>
 
     <script src="../js/footer.js"></script>
     <script src="../js/firebase.js"></script>
     <script src="../js/chartjs-zoompan-plugin.js"></script>
     <script src="../js/charts.js"></script>
     <script src="../js/device.js"></script>
+    <script src="../js/xlsx.js"></script>
+    <script src="../js/datepicker.js"></script>
+
+    <script
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDZzRUT3kmnRoWV-slmYqcUkPn8hS9BQUw&callback=initMap&libraries=&v=weekly"
+      async
+    ></script>
+    <script src="../js/map.js"></script>
   </body>
 </html>

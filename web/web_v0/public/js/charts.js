@@ -26,7 +26,7 @@ Chart.controllers.LineWithLine = Chart.controllers.line.extend({
 
 Chart.defaults.global.defaultFontFamily = "'Montserrat'";
 
-// DUMMY DATA 
+// DUMMY DATA
 
 const dummyData2 = createGraphData();
 const dummyDate = "2021-03-20";
@@ -89,7 +89,6 @@ const dataT = parseFirestoreData();
 
 // DUMMY DATA END
 
-
 // Helper functions
 
 // If time or date is less than 10, add 0.  09, 08 etc...
@@ -111,8 +110,27 @@ function compare(a, b) {
   return 0;
 }
 
-
 // button configurators
+
+// configures download of data to xlsx-file
+function createDownloadBtns(btn, chart) {
+  btn.addEventListener("click", () => {
+    if (chart.data.datasets[0].data.length != 0) {
+      downloadExcel(
+        activeMission,
+        chart.data.datasets[0].label,
+        chart.data.datasets[0].data
+      );
+    }
+  });
+}
+
+// configures zoom reset for chart
+function createResetZoomBtns(btn, chart) {
+  btn.addEventListener("click", () => {
+    chart.resetZoom();
+  });
+}
 
 // configures date range functionality
 function createRangeBtns(btn, content) {
@@ -130,13 +148,6 @@ function createRangeBtns(btn, content) {
     }
   });
 }
-// configures zoom reset for chart
-function createResetZoomBtns(btn, chart) {
-  btn.addEventListener("click", () => {
-    chart.resetZoom();
-  });
-}
-
 
 // Fetch data within a specified timespan
 function filterData(chart, type, days) {
@@ -155,11 +166,9 @@ function filterData(chart, type, days) {
   chart.resetZoom();
 }
 
-
-
 // Main functions
 
-// Creates HTML for chart. 
+// Creates HTML for chart.
 // **HTML NEEDS TO BE CREATED FOR ALL CHARTS BEFORE ADDING CHART FUNCTIONALITY**
 function createChartHTML(type) {
   let chartHTML = `
@@ -177,12 +186,12 @@ function createChartHTML(type) {
             
             <!-- download btn -->
             <div id="downloadBtn${type}" class="chartBtn">
-              <span class="material-icons text-gray-600"> download </span>
+              <span class="material-icons "> download </span>
             </div>
 
             <!-- reset zoom -->
             <div id="resetBtn${type}" class="chartBtn">
-              <span class="material-icons text-gray-600"> refresh </span>
+              <span class="material-icons "> youtube_searched_for </span>
             </div>
 
             <!-- chart ranger -->
@@ -192,13 +201,13 @@ function createChartHTML(type) {
             > 
               <div
                 id="rangeBtn${type}"
-                class="cursor-pointer relative border px-2 rounded-md h-8 text-left text-xs flex items-center justfiy-start shadow-sm hover:border-gray-800 transform hover:scale-110 duration-200"
+                class="rangeBtnActive cursor-pointer relative border px-2 rounded-md h-8 text-left text-xs flex items-center justfiy-start shadow-sm hover:border-gray-800 transform hover:scale-110 duration-200"
                 style="width: 56px "
               >
-                <span class="material-icons text-gray-600">
+                <span class="material-icons">
                   calendar_today
                 </span>
-                <i class="ml-1 text-black bi bi-chevron-down"></i>
+                <i class="ml-1 rangeBtnActive bi bi-chevron-down"></i>
                 <div id="rangeContent${type}" class="rangeContent hidden">
                   <div class="chartDropElement border-b">All</div>
                   <div class="chartDropElement border-b">Last 24 hours</div>
@@ -210,7 +219,7 @@ function createChartHTML(type) {
 
             <!-- chart settings -->
             <div id="settingsBtn${type}" class="chartBtn">
-              <span class="material-icons text-gray-600"> settings </span>
+              <span class="material-icons"> settings </span>
             </div>
           </div>
         </div>
@@ -265,7 +274,7 @@ function createChartContent(type, ylabel, color, stepSize) {
         backgroundColor: "rgba(249, 250, 251, 1)",
         titleFontColor: "rgba(31, 41, 55, 1)",
         bodyFontColor: "rgba(31, 41, 55, 1)",
-        bodyFontStyle: 'bold',
+        bodyFontStyle: "bold",
         footerFontColor: "rgba(31, 41, 55, 1)",
         borderColor: "rgba(31, 41, 55, 1)",
         borderWidth: 1,
@@ -319,21 +328,24 @@ function createChartContent(type, ylabel, color, stepSize) {
 
 // Creates and fetches data for chart, adds functionality to buttons
 // **ONLY RUN WHEN ALL HTML FILES ARE CREATED**
-function createChartAndFunctions(name, dataType, ylabel, color, stepSize)
-{
+function createChartAndFunctions(name, dataType, ylabel, color, stepSize) {
   let chartObject = {
     ctx: document.querySelector(`#chart${name}`).getContext("2d"),
     content: createChartContent(name, ylabel, color, stepSize),
+    downloadBtn: document.querySelector(`#downloadBtn${name}`),
+    resetZoom: document.querySelector(`#resetBtn${name}`),
     rangeBtn: document.querySelector(`#rangeBtn${name}`),
     rangeContent: document.querySelector(`#rangeContent${name}`),
-    resetZoom: document.querySelector(`#resetBtn${name}`),
-    chartDropElement: document.querySelectorAll(`#rangeContent${name} .chartDropElement`)
-  }
+    chartDropElement: document.querySelectorAll(
+      `#rangeContent${name} .chartDropElement`
+    ),
+  };
 
   let chart = new Chart(chartObject.ctx, chartObject.content);
 
   createRangeBtns(chartObject.rangeBtn, chartObject.rangeContent);
   createResetZoomBtns(chartObject.resetZoom, chart);
+  createDownloadBtns(chartObject.downloadBtn, chart);
 
   // All
   chartObject.chartDropElement[0].addEventListener("click", () => {
@@ -355,7 +367,6 @@ function createChartAndFunctions(name, dataType, ylabel, color, stepSize)
   chartObject.chartDropElement[3].addEventListener("click", () => {
     filterData(chart, dataType, 30);
   });
-  
 
   return chart;
 }
@@ -363,25 +374,33 @@ function createChartAndFunctions(name, dataType, ylabel, color, stepSize)
 // Creates all the charts and adds to array of charts (may not be necessary?)
 // currently includes: Conductivity, Pressure, Temperature
 function createAllCharts() {
-
   createChartHTML("Conductivity");
   createChartHTML("Pressure");
   createChartHTML("Temperature");
 
-  const chartConductivity = createChartAndFunctions("Conductivity", 'C',
-                                                    "Conductivity  S/m",
-                                                    "rgba(255, 108, 58", 
-                                                    2);
+  const chartConductivity = createChartAndFunctions(
+    "Conductivity",
+    "C",
+    "Conductivity  S/m",
+    "rgba(255, 108, 58",
+    2
+  );
 
-  const chartPressure = createChartAndFunctions("Pressure", 'P',
-                                                "Pressure MPa", 
-                                                "rgba(245, 186, 97",
-                                                1);
+  const chartPressure = createChartAndFunctions(
+    "Pressure",
+    "P",
+    "Pressure MPa",
+    "rgba(245, 186, 97",
+    1
+  );
 
-  const chartTemperature = createChartAndFunctions("Temperature", 'T',
-                                                   "Temperature \xB0 C",
-                                                   "rgba(245, 186, 97",
-                                                   4);
+  const chartTemperature = createChartAndFunctions(
+    "Temperature",
+    "T",
+    "Temperature \xB0 C",
+    "rgba(136, 174, 204",
+    4
+  );
 
   charts.push(chartConductivity);
   charts.push(chartPressure);

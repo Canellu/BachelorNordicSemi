@@ -35,11 +35,13 @@ function createGliders() {
   }
 }
 
+let numDocs = 8;
+let day = 1;
 // Create documents with timestamp consisting of JSON data for each glider
 function createMission(gliderID, missionNum) {
   console.log("Creating doc for: ", gliderID);
   let year = 2021;
-  let day = 25;
+
   let month = 3;
   let date = `${year}-${pad(month)}-${pad(day)}`;
   let hour = randNum(0, 23);
@@ -53,7 +55,7 @@ function createMission(gliderID, missionNum) {
     .doc("Mission " + missionNum)
     .set({
       start: `${date} ${timestamp}`,
-      end: `${date} ${timestamp}`,
+      end: `${year}-${pad(month)}-${pad(day + 1 + numDocs)} ${timestamp}`,
       freqP: randNum(1, 10),
       freqT: randNum(1, 10),
       freqC: randNum(1, 10),
@@ -62,9 +64,9 @@ function createMission(gliderID, missionNum) {
     });
 
   // Date Doc
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < numDocs; i++) {
     let year = 2021;
-    day--;
+    day++;
     date = `${year}-${pad(month)}-${pad(day)}`;
     // Timestamp with data
     for (let j = 0; j < 30; j++) {
@@ -75,15 +77,16 @@ function createMission(gliderID, missionNum) {
       let temp = randNum(0, 20000) / 1000;
       let pressure = randNum(0, 4000) / 1000;
       let conductivity = randNum(4000, 6000) / 1000;
-      let longMax = 59.014248;
-      let latMax = 10.32792;
-      let longMin = 58.838464;
-      let latMin = 10.809945;
-      let longitude = randNum(longMin * 1000000, longMax * 1000000) / 1000000;
-      let latitude = randNum(latMin * 1000000, latMax * 1000000) / 1000000;
+      let latMax = 59.014248;
+      let longMax = 10.32792;
+      let latMin = 58.838464;
+      let longMin = 10.809945;
+      let longitude =
+        longMin + randNum(0, (longMax - longMin) * 1000000) / 1000000;
+      let latitude = latMin + randNum(0, (latMax - latMin) * 1000000) / 1000000;
       let jsonDATA = "";
 
-      if (randNum(1, 9) == 1) {
+      if (randNum(1, 14) == 1) {
         jsonDATA += `"lng":${longitude}, "lat":${latitude},`;
       }
       if (randNum(1, 4) <= 3) {
