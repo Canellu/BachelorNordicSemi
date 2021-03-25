@@ -26,29 +26,10 @@ Chart.controllers.LineWithLine = Chart.controllers.line.extend({
 
 Chart.defaults.global.defaultFontFamily = "'Montserrat'";
 
+// DUMMY DATA 
+
 const dummyData2 = createGraphData();
 const dummyDate = "2021-03-20";
-
-// If time or date is less than 10, add 0.  09, 08 etc...
-function pad(n) {
-  return n < 10 ? "0" + n : n;
-}
-
-// Simple random number generator with min max parameters
-function randNum(min, max) {
-  return Math.floor(Math.random() * max) + min;
-}
-
-// Compares objects, used for sorting from lowest to highest value
-function compare(a, b) {
-  if (Object.keys(a) < Object.keys(b)) {
-    return -1;
-  }
-  if (Object.keys(a) > Object.keys(b)) {
-    return 1;
-  }
-  return 0;
-}
 
 // Create dummy data for graph
 function createGraphData() {
@@ -106,6 +87,80 @@ function parseFirestoreData() {
 }
 const dataT = parseFirestoreData();
 
+// DUMMY DATA END
+
+
+// Helper functions
+
+// If time or date is less than 10, add 0.  09, 08 etc...
+function pad(n) {
+  return n < 10 ? "0" + n : n;
+}
+// Simple random number generator with min max parameters
+function randNum(min, max) {
+  return Math.floor(Math.random() * max) + min;
+}
+// Compares objects, used for sorting from lowest to highest value
+function compare(a, b) {
+  if (Object.keys(a) < Object.keys(b)) {
+    return -1;
+  }
+  if (Object.keys(a) > Object.keys(b)) {
+    return 1;
+  }
+  return 0;
+}
+
+
+// button configurators
+
+// configures date range functionality
+function createRangeBtns(btn, content) {
+  // Clicking dateranger shows, dropdown content
+  btn.addEventListener("click", () => {
+    content.classList.toggle("hidden");
+    btn.classList.toggle("activeRange");
+  });
+
+  // Clicking elsewhere, hides dropdown content
+  window.addEventListener("click", (e) => {
+    if (e.target != btn && e.target.parentNode != btn) {
+      content.classList.add("hidden");
+      btn.classList.remove("activeRange");
+    }
+  });
+}
+// configures zoom reset for chart
+function createResetZoomBtns(btn, chart) {
+  btn.addEventListener("click", () => {
+    chart.resetZoom();
+  });
+}
+
+
+// Fetch data within a specified timespan
+function filterData(chart, type, days) {
+  let datetimeNow = moment().format("YYYY-MM-DD[T]HH:mm:ss");
+  let datetimePast = moment(datetimeNow)
+    .subtract(days, "days")
+    .format("YYYY-MM-DD[T]HH:mm:ss");
+  let dataset = [];
+  missionDataset[activeMission][type].forEach((row) => {
+    if (datetimePast <= row.t && row.t <= datetimeNow) {
+      dataset.push(row);
+    }
+  });
+  chart.data.datasets[0].data = dataset;
+  chart.update();
+  chart.resetZoom();
+}
+
+
+
+// Main functions
+
+// Creates HTML for chart. 
+// **HTML NEEDS TO BE CREATED FOR ALL CHARTS BEFORE ADDING CHART FUNCTIONALITY**
 function createChartHTML(type) {
   let chartHTML = `
       <div class="chartCard">
@@ -169,6 +224,7 @@ function createChartHTML(type) {
   document.querySelector("#chartGrid").innerHTML += chartHTML;
 }
 
+// Configures variables for appearance of chart
 function createChartContent(type, ylabel, color, stepSize) {
   let chartContent = {
     type: "LineWithLine",
@@ -202,6 +258,17 @@ function createChartContent(type, ylabel, color, stepSize) {
       tooltips: {
         intersect: false,
         axis: "x",
+
+        xPadding: 10,
+        yPadding: 10,
+
+        backgroundColor: "rgba(249, 250, 251, 1)",
+        titleFontColor: "rgba(31, 41, 55, 1)",
+        bodyFontColor: "rgba(31, 41, 55, 1)",
+        bodyFontStyle: 'bold',
+        footerFontColor: "rgba(31, 41, 55, 1)",
+        borderColor: "rgba(31, 41, 55, 1)",
+        borderWidth: 1,
       },
       scales: {
         xAxes: [
@@ -218,7 +285,7 @@ function createChartContent(type, ylabel, color, stepSize) {
                 minute: "HH:mm",
                 hour: "HH:mm",
               },
-              tooltipFormat: "YYYY-MM-DD HH:mm:ss",
+              tooltipFormat: "YYYY-MM-DD   HH:mm:ss",
             },
             distribution: "linear",
             ticks: {
@@ -233,7 +300,7 @@ function createChartContent(type, ylabel, color, stepSize) {
               labelString: ylabel,
             },
             ticks: {
-              beginAtZero: true,
+              // beginAtZero: true,
               stepSize: stepSize,
             },
           },
@@ -250,67 +317,73 @@ function createChartContent(type, ylabel, color, stepSize) {
   return chartContent;
 }
 
+// Creates and fetches data for chart, adds functionality to buttons
+// **ONLY RUN WHEN ALL HTML FILES ARE CREATED**
+function createChartAndFunctions(name, dataType, ylabel, color, stepSize)
+{
+  let chartObject = {
+    ctx: document.querySelector(`#chart${name}`).getContext("2d"),
+    content: createChartContent(name, ylabel, color, stepSize),
+    rangeBtn: document.querySelector(`#rangeBtn${name}`),
+    rangeContent: document.querySelector(`#rangeContent${name}`),
+    resetZoom: document.querySelector(`#resetBtn${name}`),
+    chartDropElement: document.querySelectorAll(`#rangeContent${name} .chartDropElement`)
+  }
+
+  let chart = new Chart(chartObject.ctx, chartObject.content);
+
+  createRangeBtns(chartObject.rangeBtn, chartObject.rangeContent);
+  createResetZoomBtns(chartObject.resetZoom, chart);
+
+  // All
+  chartObject.chartDropElement[0].addEventListener("click", () => {
+    chart.data.datasets[0].data = missionDataset[activeMission][dataType];
+    chart.update();
+    chart.resetZoom();
+  });
+
+  // 24 Hours
+  chartObject.chartDropElement[1].addEventListener("click", () => {
+    filterData(chart, dataType, 1);
+  });
+
+  // 7 Days
+  chartObject.chartDropElement[2].addEventListener("click", () => {
+    filterData(chart, dataType, 7);
+  });
+  // 30 Days
+  chartObject.chartDropElement[3].addEventListener("click", () => {
+    filterData(chart, dataType, 30);
+  });
+  
+
+  return chart;
+}
+
+// Creates all the charts and adds to array of charts (may not be necessary?)
+// currently includes: Conductivity, Pressure, Temperature
 function createAllCharts() {
+
   createChartHTML("Conductivity");
   createChartHTML("Pressure");
   createChartHTML("Temperature");
 
-  const ctxPressure = document.querySelector("#chartPressure").getContext("2d");
-  const ctxTemperature = document
-    .querySelector("#chartTemperature")
-    .getContext("2d");
-  const ctxConductivity = document
-    .querySelector("#chartConductivity")
-    .getContext("2d");
+  const chartConductivity = createChartAndFunctions("Conductivity", 'C',
+                                                    "Conductivity  S/m",
+                                                    "rgba(255, 108, 58", 
+                                                    2);
 
-  const contentPressure = createChartContent(
-    "Pressure",
-    "Pressure MPa",
-    "rgba(19, 129, 194",
-    1
-  );
+  const chartPressure = createChartAndFunctions("Pressure", 'P',
+                                                "Pressure MPa", 
+                                                "rgba(245, 186, 97",
+                                                1);
 
-  const contentConductivity = createChartContent(
-    "Conductivity",
-    "Conductivity  S/m",
-    "rgba(255, 108, 58",
-    2
-  );
-
-  const contentTemperature = createChartContent(
-    "Temperature",
-    "Temperature \xB0 C",
-    "rgba(245, 186, 97",
-    4
-  );
-
-  const chartConductivity = new Chart(ctxConductivity, contentConductivity);
-  const chartPressure = new Chart(ctxPressure, contentPressure);
-  const chartTemperature = new Chart(ctxTemperature, contentTemperature);
+  const chartTemperature = createChartAndFunctions("Temperature", 'T',
+                                                   "Temperature \xB0 C",
+                                                   "rgba(245, 186, 97",
+                                                   4);
 
   charts.push(chartConductivity);
   charts.push(chartPressure);
   charts.push(chartTemperature);
-}
-
-function createRangeBtns(btn, content) {
-  // Clicking dateranger shows, dropdown content
-  btn.addEventListener("click", () => {
-    content.classList.remove("hidden");
-    btn.classList.add("activeRange");
-  });
-
-  // Clicking elsewhere, hides dropdown content
-  window.addEventListener("click", (e) => {
-    if (e.target != btn && e.target.parentNode != btn) {
-      content.classList.add("hidden");
-      btn.classList.remove("activeRange");
-    }
-  });
-}
-
-function createResetZoomBtns(btn, chart) {
-  btn.addEventListener("click", () => {
-    chart.resetZoom();
-  });
 }
