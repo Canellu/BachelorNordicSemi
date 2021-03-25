@@ -182,7 +182,7 @@ function createChartHTML(type) {
           </div> 
 
           <!-- Chart buttons -->
-          <div class="graphButtons flex justify-between w-44">
+          <div class="graphButtons flex space-x-2">
             
             <!-- download btn -->
             <div id="downloadBtn${type}" class="chartBtn">
@@ -197,12 +197,12 @@ function createChartHTML(type) {
             <!-- chart ranger -->
             <div
               id="chartRange"
-              class="flex items-center h-full text-gray-800 tracking-wider"
+              class="hidden flex items-center h-full text-gray-800 tracking-wider"
             > 
               <div
                 id="rangeBtn${type}"
                 class="rangeBtnActive cursor-pointer relative border px-2 rounded-md h-8 text-left text-xs flex items-center justfiy-start shadow-sm hover:border-gray-800 transform hover:scale-110 duration-200"
-                style="width: 56px "
+                style="width: 56px;"
               >
                 <span class="material-icons">
                   calendar_today

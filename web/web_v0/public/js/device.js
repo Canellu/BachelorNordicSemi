@@ -86,16 +86,7 @@ async function listMissions() {
         console.log(`Getting data from firestore: ${activeMission}`);
       }
       // Update chart
-      charts[0].data.datasets[0].data = data.C;
-      charts[1].data.datasets[0].data = data.P;
-      charts[2].data.datasets[0].data = data.T;
-
-      charts.forEach((chart) => {
-        chart.update();
-        chart.resetZoom();
-      });
-
-      addMissionMarkers(activeMission);
+      updateDataUI(data);
     });
   });
 
@@ -177,6 +168,20 @@ function getDataType(dataset, type) {
     }
   });
   return tyPair;
+}
+
+// Updates chart and map UI with data
+function updateDataUI(data) {
+  charts[0].data.datasets[0].data = data.C;
+  charts[1].data.datasets[0].data = data.P;
+  charts[2].data.datasets[0].data = data.T;
+
+  charts.forEach((chart) => {
+    chart.update();
+    chart.resetZoom();
+  });
+
+  addMissionMarkers(data.coordinates);
 }
 
 // Creates dropdownlist

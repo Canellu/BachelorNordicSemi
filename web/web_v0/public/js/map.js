@@ -22,7 +22,7 @@ function addMarker(location, icon, index) {
   markers.push(marker);
 }
 
-function addMissionMarkers(mission) {
+function addMissionMarkers(coordinates) {
   // Loop through markers and remove them from map.
   markers.forEach((marker) => {
     marker.setMap(null);
@@ -34,7 +34,6 @@ function addMissionMarkers(mission) {
   markers = [];
 
   // Add new markers to marker-array
-  let coordinates = missionDataset[mission].coordinates;
 
   coordinates.forEach((loc, index) => {
     let icon = "../assets/svg/triangleMarker.svg";

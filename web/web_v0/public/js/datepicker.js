@@ -44,15 +44,19 @@ async function applySelection() {
     missionList.forEach(async (missionName) => {
       if (missionName in missionDataset) {
         getRangedData(missionName, startDate, endDate, data);
-        console.log("Already got data");
+        console.log(`Getting data from missionDataset: ${missionName}`);
+
+        // Update chart
+        updateDataUI(data);
       } else {
-        console.log("Trying to fetch data");
-        data = await getMissionData(missionName);
-        console.log("Got data from firestore");
-        console.log({ data });
-        missionDataset[missionName] = data;
+        let fetchedData = await getMissionData(missionName);
+        console.log(`Getting data from firestore: ${missionName}`);
+
+        missionDataset[missionName] = fetchedData;
         getRangedData(missionName, startDate, endDate, data);
-        console.log(data);
+
+        // Update chart
+        updateDataUI(data);
       }
     });
   }
@@ -60,7 +64,7 @@ async function applySelection() {
 
 function getRangedData(missionName, startDate, endDate, data) {
   Object.keys(missionDataset[missionName]).forEach((type) => {
-    data[type] = [];
+    if (!(type in data)) data[type] = [];
     missionDataset[missionName][type].forEach((row) => {
       let testDate = parseInt(row.t.split("T")[0].replaceAll("-", ""));
       if (testDate >= startDate && testDate <= endDate) {
