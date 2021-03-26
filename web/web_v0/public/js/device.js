@@ -58,17 +58,23 @@ async function listMissions() {
     .collection("Missions")
     .get();
 
-  let totalNumberOfMissions = 0;
+  let latestMission = 0;
   // Loop through all mission-docs
   missions.forEach((mission) => {
+
+    // test if mission is newer than previously fetched
+    let missionNum = parseInt(mission.id.split(" ")[1]);
+    if (missionNum > latestMission)
+    {
+      latestMission = missionNum;
+    }
     // Create dropdown content for each mission
     document.querySelector(
       ".dropDownContent"
     ).innerHTML += `<div class="mission">${mission.id}</div>`;
-    totalNumberOfMissions++;
   });
 
-  activeMission = `Mission ${totalNumberOfMissions}`;
+  activeMission = `Mission ${latestMission}`;
 
   // Add click-event for each dropdown-content
   let missionDivs = document.querySelectorAll(".mission");
@@ -106,7 +112,11 @@ async function listMissions() {
 
 // Returns promise of missionData-object
 async function getMissionData(missionName) {
+  let dataObj = {};
   let dataset = [];
+
+  let dataCoordinatesRaw = {};
+  let coordinates = [];
 
   // Specific mission document
   let mission = await db
@@ -143,28 +153,43 @@ async function getMissionData(missionName) {
   // Sort the data, to display properly on chart
   dataset.sort(compare);
 
-  // Extract specific datatype for each chart.
-  let dataC = getDataType(dataset, "C");
-  let dataP = getDataType(dataset, "P");
-  let dataT = getDataType(dataset, "T");
-  let dataLat = getDataType(dataset, "lat");
-  let dataLng = getDataType(dataset, "lng");
-  let coordinates = [];
+  // Loop through to find each data type
+  let dataTypeFound = [];
+  dataset.forEach((dataRow) => {
+    timestamp = Object.keys(dataRow);
+    dataTypeArray = Object.keys(dataRow[timestamp]);
+    dataTypeArray.forEach((dataType) => {
+      if (!(dataTypeFound.includes(dataType))) {
+        dataTypeFound.push(dataType);
+      }
+    });
+  });
 
-  for (let i = 0; i < dataLat.length; i++) {
-    let t = dataLat[i].t;
-    let lat = parseFloat(dataLat[i].y);
-    let lng = parseFloat(dataLng[i].y);
+  // Loop through found datatypes and add to dataObj
+  // lat, lng need to be parsed further
+  dataTypeFound.forEach((dataType) => {
+    let data = getDataType(dataset, dataType);
+    if (dataType === "lng" || dataType === "lat")
+    {
+      dataCoordinatesRaw[dataType] = data;
+    }
+    else {
+      dataObj[dataType] = data;
+    }
+  });
+
+  // parsing of lat, lng before added to dataObj
+  for (let i = 0; i < dataCoordinatesRaw.lat.length; i++) {
+    let t = dataCoordinatesRaw.lat[i].t;
+    let lat = parseFloat(dataCoordinatesRaw.lat[i].y);
+    let lng = parseFloat(dataCoordinatesRaw.lng[i].y);
 
     coordinates.push({ t: t, lat: lat, lng: lng });
   }
+  // add coordinates to dataObj
+  dataObj["coordinates"] = coordinates;
 
-  return {
-    T: dataT,
-    P: dataP,
-    C: dataC,
-    coordinates: coordinates,
-  };
+  return dataObj;
 }
 
 // Returns an array with objects of time:val pair of given type
@@ -182,14 +207,11 @@ function getDataType(dataset, type) {
 
 // Updates chart and map UI with data
 function updateDataUI(data) {
-  charts[0].data.datasets[0].data = data.C;
-  charts[1].data.datasets[0].data = data.P;
-  charts[2].data.datasets[0].data = data.T;
-
-  charts.forEach((chart) => {
-    chart.update();
-    chart.resetZoom();
-  });
+  charts.forEach((chartObj) => {
+    chartObj.chart.data.datasets[0].data = data[chartObj.type];
+    chartObj.chart.update();
+    chartObj.chart.resetZoom();
+  })
 
   addMissionMarkers(data.coordinates);
 }

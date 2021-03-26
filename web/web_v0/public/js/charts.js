@@ -368,7 +368,7 @@ function createChartAndFunctions(name, dataType, ylabel, color, stepSize) {
     filterData(chart, dataType, 30);
   });
 
-  return chart;
+  return {type: dataType, chart: chart};
 }
 
 // Creates all the charts and adds to array of charts (may not be necessary?)
