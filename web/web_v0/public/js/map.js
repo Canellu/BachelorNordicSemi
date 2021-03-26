@@ -1,18 +1,27 @@
-let map;
+let dataMap;
+let missionMap;
 let markers = [];
 let gliderPath;
-let mapDiv = document.getElementById("dataMap");
+let dataMapDiv = document.getElementById("dataMap");
+let missionMapDiv = document.getElementById("missionMap");
+
 var defaultLocation = { lat: 59.921, lng: 10.734, zoom: 6 };
 function initMap() {
-  map = new google.maps.Map(mapDiv, {
+  dataMap = new google.maps.Map(dataMapDiv, {
     center: { lat: defaultLocation.lat, lng: defaultLocation.lng },
     zoom: defaultLocation.zoom,
   });
 }
 
-mapDiv.addEventListener("click", () => {});
+function initMissionMap() {
+  console.log("Loading mission map");
+  missionMap = new google.maps.Map(missionMapDiv, {
+    center: { lat: defaultLocation.lat, lng: defaultLocation.lng },
+    zoom: defaultLocation.zoom,
+  });
+}
 
-function addMarker(location, icon, index) {
+function addMarker(location, icon, index, map) {
   let marker = new google.maps.Marker({
     position: { lat: location.lat, lng: location.lng },
     map: map,
@@ -22,7 +31,7 @@ function addMarker(location, icon, index) {
   markers.push(marker);
 }
 
-function addMissionMarkers(coordinates) {
+function addDataMarkers(coordinates, map) {
   // Loop through markers and remove them from map.
   markers.forEach((marker) => {
     marker.setMap(null);
@@ -34,13 +43,14 @@ function addMissionMarkers(coordinates) {
   markers = [];
 
   // Add new markers to marker-array
-
+  let firstMarker;
   coordinates.forEach((loc, index) => {
     let icon = "../assets/svg/triangleMarker.svg";
 
     // If start give icon, if end, give another
     switch (index) {
       case 0:
+        firstMarker = { lat: loc.lat, lng: loc.lng };
         icon = "../assets/svg/startMarkerWhite.svg";
         break;
       case coordinates.length - 1:
@@ -48,7 +58,7 @@ function addMissionMarkers(coordinates) {
         break;
     }
 
-    addMarker(loc, icon, index);
+    addMarker(loc, icon, index, map);
   });
 
   let latlng = coordinates.map((e) => {
@@ -75,6 +85,7 @@ function addMissionMarkers(coordinates) {
     ],
     strokeOpacity: 0,
   });
-
+  map.panTo(firstMarker);
+  map.setZoom(10);
   gliderPath.setMap(map);
 }

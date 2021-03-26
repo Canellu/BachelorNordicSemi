@@ -31191,11 +31191,11 @@ video {
 }
 
 .map {
+  border-radius: 0.5rem;
   -o-object-fit: cover;
      object-fit: cover;
   width: 100%;
-  max-height: 500px;
-  min-height: 500px;
+  height: 700px;
   min-width: 244px;
 }
 
@@ -31381,19 +31381,27 @@ video {
 
 .mission {
   --tw-bg-opacity: 1;
-  background-color: rgba(243, 244, 246, var(--tw-bg-opacity));
+  background-color: rgba(249, 250, 251, var(--tw-bg-opacity));
 }
 
 .mission:hover{
   --tw-bg-opacity: 1;
-  background-color: rgba(156, 163, 175, var(--tw-bg-opacity));
+  background-color: rgba(31, 41, 55, var(--tw-bg-opacity));
 }
 
 .mission{
   --tw-border-opacity: 1;
-  border-color: rgba(209, 213, 219, var(--tw-border-opacity));
-  border-bottom-width: 2px;
+  border-color: rgba(229, 231, 235, var(--tw-border-opacity));
+  border-top-width: 1px;
   padding: 0.75rem;
+}
+
+.mission:hover{
+  --tw-text-opacity: 1;
+  color: rgba(249, 250, 251, var(--tw-text-opacity));
+}
+
+.mission{
   transition-duration: 200ms;
 }
 
@@ -31504,6 +31512,49 @@ video {
   background-color: rgba(31, 41, 55, var(--tw-bg-opacity));
   --tw-text-opacity: 1;
   color: rgba(229, 231, 235, var(--tw-text-opacity));
+}
+
+.noUi-handle {
+  cursor: pointer;
+  box-shadow: none;
+}
+
+.noUi-handle .noUi-handle-lower {
+  z-index: 1000 !important;
+}
+
+.sliderCard {
+  display: flex;
+  align-items: center;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  transition-duration: 200ms;
+}
+
+.noUi-connect {
+  background-color: #6bb7bf;
+}
+
+.noUi-handle:focus {
+  outline: none;
+  border-color: #8f8f8f;
+}
+
+.noUi-handle:active {
+  transform: scale(0.95);
+  cursor: -webkit-grabbing;
+  cursor: grabbing;
+}
+
+.sliderCard:hover h1 {
+  color: #6bb7bf;
+}
+
+.sliderCard h1 {
+  transition: all 0.2s;
+  min-width: 8rem;
 }
 
 @media (min-width: 640px){

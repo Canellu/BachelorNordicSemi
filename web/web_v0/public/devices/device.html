@@ -5,6 +5,13 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+    <!-- noUiSider JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.6.4/nouislider.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.6.4/nouislider.css"
+    />
+
     <!-- litePicker JS -->
     <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js"></script>
     <link
@@ -20,13 +27,6 @@
 
     <!-- Moment JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-
-    <!-- Chart JS -->
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"
-      integrity="sha512-hZf9Qhp3rlDJBvAKvmiG+goaaKRZA6LKUO35oK6EsM0/kjPK32Yw7URqrq3Q+Nvbbt8Usss+IekL7CRn83dYmw=="
-      crossorigin="anonymous"
-    ></script>
 
     <!-- HammerJS for pan/zoom gestures -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.js"></script>
@@ -52,12 +52,12 @@
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.0/font/bootstrap-icons.css"
     />
 
-    <!-- Chart JS CSS -->
+    <!-- Chart JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.css"
-      integrity="sha512-C7hOmCgGzihKXzyPU/z4nv97W0d9bv4ALuuEbSf6hm93myico9qa0hv4dODThvCsqQUmKmLcJmlpRmCaApr83g=="
-      crossorigin="anonymous"
     />
 
     <!-- Maps Polyline -->
@@ -119,15 +119,16 @@
         </button>
       </div>
 
-      <div id="data-tab" class="py-12">
+      <div id="data-tab" class="py-12 hidden">
         <!-- MAP -->
         <div class="container m-auto mb-8">
-          <div id="dataMap" class="map h-full"></div>
+          <div class="rounded-lg shadow-md overflow-hidden p-4 border">
+            <div id="dataMap" class="map h-full"></div>
+          </div>
         </div>
 
         <!-- DATA SELECTOR -->
         <div class="container w-full h-16 m-auto flex mb-8">
-          <!-- DATE SELECTOR -->
           <div
             id="dateSelector"
             class="h-16 text-gray-200 bg-gray-50 shadow-md rounded-md border mr-2 tracking-wider flex items-center space-x-3 px-4"
@@ -153,20 +154,28 @@
           <!-- MISSION SELECTOR -->
           <div
             id="missionSelector"
-            class="h-16 text-gray-800 tracking-wider w-56 cursor-pointer"
+            class="h-16 tracking-wider w-56 cursor-pointer"
           >
             <div
-              class="dropDownBtn h-16 text-gray-800 bg-gray-50 shadow-md rounded-md border mr-2 tracking-wider flex items-center justify-center text-center relative"
+              class="dropDownBtn h-16 bg-gray-50 shadow-md rounded-md border mr-2 tracking-wider flex items-center justify-center text-center relative transform hover:scale-95 hover:border-gray-800 duration-200 z-30 rangeBtnActive"
             >
-              <p class="inline-block text-gray-800 mr-4"></p>
+              <p class="inline-block mr-4"></p>
               <i
-                class="absolute right-4 ml-4 inline-block bi bi-chevron-down text-gray-800"
+                class="absolute right-4 ml-4 inline-block bi bi-chevron-down"
               ></i>
               <div
-                class="dropDownContent border-2 hidden absolute left-0 w-full max-h-56 overflow-auto z-10"
-                style="top: 63px"
+                class="dropDownContent hidden absolute rounded-md left-0 w-full max-h-56 top-16 z-10 shadow-md border-l border-r overflow-auto"
               >
-                <div class="mission">Mission 0</div>
+                <div class="mission">Mission 1</div>
+                <div class="mission">Mission 1</div>
+                <div class="mission">Mission 1</div>
+                <div class="mission">Mission 1</div>
+                <div class="mission">Mission 1</div>
+                <div class="mission">Mission 1</div>
+                <div class="mission">Mission 1</div>
+                <div class="mission">Mission 1</div>
+                <div class="mission">Mission 1</div>
+                <div class="mission">Mission 1</div>
               </div>
             </div>
           </div>
@@ -178,11 +187,32 @@
           class="container m-auto pt-2 grid grid-cols-1 sm:grid-cols-2 auto-cols-max gap-8"
         ></div>
       </div>
-      <div id="control-tab" class="hidden">
-        <div class="container m-auto my-8">
-          <div class="map bg-green-300"></div>
-          <div class="controlPanel"></div>
+      <div id="control-tab" class="py-12">
+        <!-- MAP -->
+        <div class="container m-auto mb-8">
+          <div class="rounded-lg shadow-md overflow-hidden p-4 border">
+            <div id="missionMap" class="map h-full"></div>
+          </div>
         </div>
+
+        <!-- CONTROL PANEL -->
+        <div class="container m-auto flex w-full space-x-10">
+          <!-- SLIDERS -->
+          <div
+            id="sliders"
+            class="flex flex-col flex-grow space-y-6 shadow-md rounded-md overflow-hidden p-4 border"
+          ></div>
+
+          <!-- PREVIEW -->
+          <div id="preview" class="w-1/3 h-96 border shadow-md rounded-md p-4 ">
+            <div id="sendMissionParams" class="w-1/2 m-auto h-10 border rounded-md shadow-md text-center font-medium tracking-wider text-lg"> Send parameters</div>
+            
+            </div>
+          </div>
+        </div>
+
+        <!--  DEVELOPER TERMINAL -->
+        <div class="terminal h-96"></div>
       </div>
     </main>
 
@@ -193,9 +223,11 @@
     <script src="../js/device.js"></script>
     <script src="../js/xlsx.js"></script>
     <script src="../js/datepicker.js"></script>
+    <script src="../js/wNumb.js"></script>
+    <script src="../js/sliders.js"></script>
 
     <script
-      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDZzRUT3kmnRoWV-slmYqcUkPn8hS9BQUw&callback=initMap&libraries=&v=weekly"
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDZzRUT3kmnRoWV-slmYqcUkPn8hS9BQUw&callback=&libraries=&v=weekly"
       async
     ></script>
     <script src="../js/map.js"></script>

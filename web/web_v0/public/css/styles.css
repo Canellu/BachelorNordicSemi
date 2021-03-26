@@ -18,9 +18,8 @@
 }
 
 .map {
-  @apply object-cover w-full;
-  max-height: 500px;
-  min-height: 500px;
+  @apply object-cover w-full rounded-lg;
+  height: 700px;
   min-width: 244px;
 }
 
@@ -76,7 +75,7 @@
 }
 
 .mission {
-  @apply p-3 bg-gray-100 border-b-2 border-gray-300 hover:bg-gray-400 duration-200;
+  @apply p-3 bg-gray-50 border-t border-gray-200 hover:bg-gray-800 duration-200 hover:text-gray-50;
 }
 
 .chartBtn {
@@ -109,4 +108,40 @@
 
 .rangeBtnActive:active {
   @apply bg-gray-800 text-gray-200;
+}
+
+.noUi-handle {
+  cursor: pointer;
+  box-shadow: none;
+}
+
+.noUi-handle .noUi-handle-lower {
+  z-index: 1000 !important;
+}
+
+.sliderCard {
+  @apply flex items-center px-4 py-3 duration-200;
+}
+
+.noUi-connect {
+  background-color: #6bb7bf;
+}
+
+.noUi-handle:focus {
+  outline: none;
+  border-color: #8f8f8f;
+}
+
+.noUi-handle:active {
+  transform: scale(0.95);
+  cursor: grabbing;
+}
+
+.sliderCard:hover h1 {
+  color: #6bb7bf;
+}
+
+.sliderCard h1 {
+  transition: all 0.2s;
+  min-width: 8rem;
 }

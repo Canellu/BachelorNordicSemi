@@ -197,7 +197,7 @@ function createChartHTML(type) {
             <!-- chart ranger -->
             <div
               id="chartRange"
-              class="hidden flex items-center h-full text-gray-800 tracking-wider"
+              class="flex items-center h-full text-gray-800 tracking-wider"
             > 
               <div
                 id="rangeBtn${type}"
@@ -368,7 +368,7 @@ function createChartAndFunctions(name, dataType, ylabel, color, stepSize) {
     filterData(chart, dataType, 30);
   });
 
-  return {type: dataType, chart: chart};
+  return { type: dataType, chart: chart };
 }
 
 // Creates all the charts and adds to array of charts (may not be necessary?)

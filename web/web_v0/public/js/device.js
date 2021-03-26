@@ -16,6 +16,9 @@ dataTabBtn.addEventListener("click", () => {
 controlTabBtn.addEventListener("click", () => {
   controlTab.classList.remove("hidden");
   dataTab.classList.add("hidden");
+  if (typeof missionMap == "undefined") {
+    // initMissionMap();
+  }
 
   controlTabBtn.classList.add("activeTabBtn");
   dataTabBtn.classList.remove("activeTabBtn");
@@ -30,16 +33,6 @@ window.addEventListener("click", (e) => {
     dropDownContent.classList.add("hidden");
   }
 });
-
-// dropDownBtn.addEventListener("mouseover", () => {
-//   dropDownContent.classList.remove("hidden");
-//   // let body = document.querySelector("body");
-//   // document.body.style.overflow = "hidden";
-// });
-// dropDownBtn.addEventListener("mouseleave", () => {
-//   dropDownContent.classList.add("hidden");
-//   // document.body.style.overflow = "auto";
-// });
 
 // let url = window.location.pathname;
 // console.log(url.substring(url.lastIndexOf("/") + 1).replace(".html", ""));
@@ -61,11 +54,9 @@ async function listMissions() {
   let latestMission = 0;
   // Loop through all mission-docs
   missions.forEach((mission) => {
-
     // test if mission is newer than previously fetched
     let missionNum = parseInt(mission.id.split(" ")[1]);
-    if (missionNum > latestMission)
-    {
+    if (missionNum > latestMission) {
       latestMission = missionNum;
     }
     // Create dropdown content for each mission
@@ -106,7 +97,8 @@ async function listMissions() {
     });
   });
 
-  missionDivs[missionDivs.length - 1].click();
+  // Click on latest mission
+  // missionDivs[missionDivs.length - 1].click();
   document.querySelector("#missionSelector div p").innerText = activeMission;
 }
 
@@ -153,13 +145,14 @@ async function getMissionData(missionName) {
   // Sort the data, to display properly on chart
   dataset.sort(compare);
 
+  // TODO: Find a simpler way to get UNIQUE types.
   // Loop through to find each data type
   let dataTypeFound = [];
   dataset.forEach((dataRow) => {
     timestamp = Object.keys(dataRow);
     dataTypeArray = Object.keys(dataRow[timestamp]);
     dataTypeArray.forEach((dataType) => {
-      if (!(dataTypeFound.includes(dataType))) {
+      if (!dataTypeFound.includes(dataType)) {
         dataTypeFound.push(dataType);
       }
     });
@@ -169,11 +162,9 @@ async function getMissionData(missionName) {
   // lat, lng need to be parsed further
   dataTypeFound.forEach((dataType) => {
     let data = getDataType(dataset, dataType);
-    if (dataType === "lng" || dataType === "lat")
-    {
+    if (dataType === "lng" || dataType === "lat") {
       dataCoordinatesRaw[dataType] = data;
-    }
-    else {
+    } else {
       dataObj[dataType] = data;
     }
   });
@@ -211,9 +202,9 @@ function updateDataUI(data) {
     chartObj.chart.data.datasets[0].data = data[chartObj.type];
     chartObj.chart.update();
     chartObj.chart.resetZoom();
-  })
+  });
 
-  addMissionMarkers(data.coordinates);
+  addDataMarkers(data.coordinates, dataMap);
 }
 
 // Creates dropdownlist

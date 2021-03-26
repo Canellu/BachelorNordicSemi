@@ -28,6 +28,8 @@ async function applySelection() {
     let missionList = [];
     let data = {};
 
+    // Get mission start and end dates as INT
+    // And push the mission if its within the specified date-range
     missions.forEach((mission) => {
       missionStartDate = parseInt(
         mission.data().start.split(" ")[0].replaceAll("-", "")
@@ -64,7 +66,6 @@ async function applySelection() {
 
 // get data within specified range, only checks data within passed mission
 function getRangedData(missionName, startDate, endDate, data) {
-
   // Loop through all data types
   Object.keys(missionDataset[missionName]).forEach((type) => {
     // check to ensure no overlaps between datatypes
@@ -72,7 +73,6 @@ function getRangedData(missionName, startDate, endDate, data) {
 
     // check each row
     missionDataset[missionName][type].forEach((row) => {
-
       // fetch date and test if within specified range, if valid, add entire row
       let testDate = parseInt(row.t.split("T")[0].replaceAll("-", ""));
       if (testDate >= startDate && testDate <= endDate) {
