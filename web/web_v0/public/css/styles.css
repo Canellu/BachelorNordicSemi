@@ -48,7 +48,7 @@ body {
 
 .map {
   @apply object-cover w-full rounded-lg;
-  height: 600px;
+  height: 650px;
   min-width: 244px;
 }
 

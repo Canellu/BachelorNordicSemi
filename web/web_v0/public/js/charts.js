@@ -173,7 +173,7 @@ function filterData(chart, type, days) {
 function createChartHTML(type) {
   let chartHTML = `
       <div class="chartCard">
-        <div class="flex items-center w-full h-12 mt-2 px-1">
+        <div class="flex items-center w-full h-12 px-1">
           <!-- Chart header -->
           <div class="flex-grow">
             <h1 class="font-medium text-lg tracking-tight ml-2 opacity-75">
