@@ -1,7 +1,7 @@
 const datePicker = new Litepicker({
   element: document.getElementById("datePicker"),
   singleMode: false,
-  delimiter: "    |   ",
+  delimiter: "    |    ",
 });
 
 document.getElementById("datePicker").addEventListener("click", () => {
@@ -9,7 +9,7 @@ document.getElementById("datePicker").addEventListener("click", () => {
 });
 
 async function applySelection() {
-  document.querySelector("#missionSelector div p").innerText = "Custom Range";
+  document.querySelector("#missionSelector div p").innerText = "Date range";
 
   let splitDate = document.getElementById("datePicker").value.split("|");
 

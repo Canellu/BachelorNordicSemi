@@ -67,6 +67,7 @@
     <link rel="stylesheet" href="../styles.css" />
     <title>Device</title>
   </head>
+
   <body class="bg-gray-50 font-montserrat pt-16 flex flex-col">
     <header class="fixed top-0 bg-gray-800 text-gray-50 h-16 w-full z-50">
       <div
@@ -99,51 +100,43 @@
       </div>
     </header>
 
-    <main class="h-full min-h-screen">
-      <!-- TAB SELECTOR -->
-      <div
-        class="container m-auto tabs rounded-b-md h-16 flex justify-center text-gray-500 tracking-wider sticky top-16 z-40 overflow-hidden shadow-sm"
-      >
-        <button
-          id="data-tab-btn"
-          class="tabBtn activeTabBtn h-full w-full flex justify-center items-center transition duration-300 focus:outline-none font-semibold bg-gray-200"
-        >
-          <p>DATA</p>
-        </button>
-
-        <button
-          id="control-tab-btn"
-          class="tabBtn h-full w-full flex justify-center items-center transition duration-300 focus:outline-none font-semibold bg-gray-200"
-        >
-          <p>MISSION CONTROL</p>
-        </button>
+    <main class="min-h-screen">
+      <!-- Tab selector -->
+      <div class="tabs m-auto rounded-shadow flex-col z-50 bg-gray-50">
+        <div class="flex h-9">
+          <button id="data-tab-btn" class="tabBtn activeTabBtn">DATA</button>
+          <button id="control-tab-btn" class="tabBtn">MISSION CONTROL</button>
+        </div>
+        <div id="tabUnderline" class="w-1/2 bg-gray-800 h-1 duration-300"></div>
       </div>
 
-      <div id="data-tab" class="py-12 hidden">
-        <!-- MAP -->
-        <div class="container m-auto mb-8">
-          <div class="rounded-lg shadow-md overflow-hidden p-4 border">
-            <div id="dataMap" class="map h-full"></div>
-          </div>
+      <!-- Data tab -->
+      <div id="data-tab" class="container m-auto py-8 space-y-8">
+        <!-- Map-->
+        <div class="rounded-shadow p-4">
+          <div id="dataMap" class="map h-full"></div>
         </div>
 
-        <!-- DATA SELECTOR -->
-        <div class="container w-full h-16 m-auto flex mb-8">
+        <!-- Data selector -->
+        <div class="flex space-x-4">
+          <!-- Datepicker -->
           <div
             id="dateSelector"
-            class="h-16 text-gray-200 bg-gray-50 shadow-md rounded-md border mr-2 tracking-wider flex items-center space-x-3 px-4"
+            class="h-12 rounded-shadow border tracking-wider flex items-center space-x-3 px-3"
           >
+            <!-- Date Icon -->
             <div class="chartBtn cursor-pointer pt-1">
               <label for="datePicker">
                 <span class="material-icons text-gray-600">calendar_today</span>
               </label>
             </div>
-
+            <!-- Date Field -->
             <input
+              readonly
               id="datePicker"
-              class="h-10 w-60 rounded border-2 text-gray-800 px-4"
+              class="h-8 w-60 text-center border rounded-md outline-none focus:border-gray-400 text-gray-800 font-semibold"
             />
-
+            <!-- Send Icon -->
             <div class="chartBtn">
               <span onclick="applySelection()" class="material-icons">
                 send
@@ -151,31 +144,24 @@
             </div>
           </div>
 
-          <!-- MISSION SELECTOR -->
-          <div
-            id="missionSelector"
-            class="h-16 tracking-wider w-56 cursor-pointer"
-          >
-            <div
-              class="dropDownBtn h-16 bg-gray-50 shadow-md rounded-md border mr-2 tracking-wider flex items-center justify-center text-center relative transform hover:scale-95 hover:border-gray-800 duration-200 z-30 rangeBtnActive"
-            >
-              <p class="inline-block mr-4"></p>
-              <i
-                class="absolute right-4 ml-4 inline-block bi bi-chevron-down"
-              ></i>
+          <!-- Missionpicker-->
+          <div id="missionSelector" class="h-12 w-48 cursor-pointer">
+            <div class="dropDownBtn activeBtn rounded-shadow relative">
+              <p class="inline-block font-semibold tracking-wider"></p>
+              <span class="material-icons absolute right-4"> expand_more </span>
               <div
-                class="dropDownContent hidden absolute rounded-md left-0 w-full max-h-56 top-16 z-10 shadow-md border-l border-r overflow-auto"
+                class="dropDownContent rounded-shadow max-h-56 w-full absolute left-0 top-12 overflow-auto"
               >
-                <div class="mission">Mission 1</div>
-                <div class="mission">Mission 1</div>
-                <div class="mission">Mission 1</div>
-                <div class="mission">Mission 1</div>
-                <div class="mission">Mission 1</div>
-                <div class="mission">Mission 1</div>
-                <div class="mission">Mission 1</div>
-                <div class="mission">Mission 1</div>
-                <div class="mission">Mission 1</div>
-                <div class="mission">Mission 1</div>
+                <div class="mission">Mission 10</div>
+                <div class="mission">Mission 11</div>
+                <div class="mission">Mission 12</div>
+                <div class="mission">Mission 13</div>
+                <div class="mission">Mission 14</div>
+                <div class="mission">Mission 15</div>
+                <div class="mission">Mission 16</div>
+                <div class="mission">Mission 17</div>
+                <div class="mission">Mission 18</div>
+                <div class="mission">Mission 19</div>
               </div>
             </div>
           </div>
@@ -187,7 +173,9 @@
           class="container m-auto pt-2 grid grid-cols-1 sm:grid-cols-2 auto-cols-max gap-8"
         ></div>
       </div>
-      <div id="control-tab" class="py-12">
+
+      <!-- MISSION CONTROL TAB -->
+      <div id="control-tab" class="py-12 hidden">
         <!-- MAP -->
         <div class="container m-auto mb-8">
           <div class="rounded-lg shadow-md overflow-hidden p-4 border">
@@ -205,18 +193,18 @@
 
           <!-- PREVIEW -->
           <div id="preview" class="w-1/3 h-96 border shadow-md rounded-md p-4">
-            <div
+            <button
               id="sendMissionParams"
-              class="w-1/2 m-auto h-10 border rounded-md shadow-md text-center font-medium tracking-wider text-lg"
+              class="w-1/2 m-auto h-10 border rounded-md shadow-md font-medium tracking-wider text-lg flex justify-center items-center"
             >
               Send parameters
-            </div>
+            </button>
           </div>
         </div>
-      </div>
 
-      <!--  DEVELOPER TERMINAL -->
-      <div class="terminal h-96"></div>
+        <!--  DEVELOPER TERMINAL -->
+        <div class="terminal h-96"></div>
+      </div>
     </main>
 
     <script src="../js/footer.js"></script>
@@ -229,8 +217,9 @@
     <script src="../js/wNumb.js"></script>
     <script src="../js/sliders.js"></script>
 
+    <!-- MAPS API with KEY -->
     <script
-      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDZzRUT3kmnRoWV-slmYqcUkPn8hS9BQUw&callback=&libraries=&v=weekly"
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDZzRUT3kmnRoWV-slmYqcUkPn8hS9BQUw&callback=initMap&libraries=&v=weekly"
       async
     ></script>
     <script src="../js/map.js"></script>

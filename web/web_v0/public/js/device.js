@@ -2,26 +2,32 @@ var dataTabBtn = document.querySelector("#data-tab-btn");
 var dataTab = document.querySelector("#data-tab");
 var controlTabBtn = document.querySelector("#control-tab-btn");
 var controlTab = document.querySelector("#control-tab");
+var tabUnderline = document.querySelector("#tabUnderline");
 var dropDownBtn = document.querySelector(".dropDownBtn");
 var dropDownContent = document.querySelector(".dropDownContent");
 
+// DATA TAB BUTTON
 dataTabBtn.addEventListener("click", () => {
+  tabUnderline.style.transform = "";
+
+  tabUnderline.classList.remove("activeTabUnderline");
   dataTab.classList.remove("hidden");
   controlTab.classList.add("hidden");
-
   dataTabBtn.classList.add("activeTabBtn");
   controlTabBtn.classList.remove("activeTabBtn");
 });
 
+// MISSION CONTROL TAB BUTTON
 controlTabBtn.addEventListener("click", () => {
+  tabUnderline.style.transform = "translateX(100%)";
+
   controlTab.classList.remove("hidden");
   dataTab.classList.add("hidden");
+  controlTabBtn.classList.add("activeTabBtn");
+  dataTabBtn.classList.remove("activeTabBtn");
   if (typeof missionMap == "undefined") {
     // initMissionMap();
   }
-
-  controlTabBtn.classList.add("activeTabBtn");
-  dataTabBtn.classList.remove("activeTabBtn");
 });
 
 dropDownBtn.addEventListener("click", () => {
@@ -32,6 +38,12 @@ window.addEventListener("click", (e) => {
   if (e.target != dropDownBtn && e.target.parentNode != dropDownBtn) {
     dropDownContent.classList.add("hidden");
   }
+});
+
+dropDownContent.addEventListener("wheel", (e) => {
+  e.preventDefault();
+  let scrollTo = (e.wheelDelta * -1) / 2;
+  dropDownContent.scrollTop = scrollTo + dropDownContent.scrollTop;
 });
 
 // let url = window.location.pathname;
@@ -60,9 +72,7 @@ async function listMissions() {
       latestMission = missionNum;
     }
     // Create dropdown content for each mission
-    document.querySelector(
-      ".dropDownContent"
-    ).innerHTML += `<div class="mission">${mission.id}</div>`;
+    dropDownContent.innerHTML += `<div class="mission">${mission.id}</div>`;
   });
 
   activeMission = `Mission ${latestMission}`;

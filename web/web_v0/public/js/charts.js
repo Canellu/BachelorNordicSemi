@@ -137,14 +137,14 @@ function createRangeBtns(btn, content) {
   // Clicking dateranger shows, dropdown content
   btn.addEventListener("click", () => {
     content.classList.toggle("hidden");
-    btn.classList.toggle("activeRange");
+    btn.classList.toggle("chartRangeBtnFocus");
   });
 
   // Clicking elsewhere, hides dropdown content
   window.addEventListener("click", (e) => {
     if (e.target != btn && e.target.parentNode != btn) {
       content.classList.add("hidden");
-      btn.classList.remove("activeRange");
+      btn.classList.remove("chartRangeBtnFocus");
     }
   });
 }
@@ -201,17 +201,17 @@ function createChartHTML(type) {
             > 
               <div
                 id="rangeBtn${type}"
-                class="rangeBtnActive cursor-pointer relative border px-2 rounded-md h-8 text-left text-xs flex items-center justfiy-start shadow-sm hover:border-gray-800 transform hover:scale-110 duration-200"
+                class="chartRangeBtn cursor-pointer relative border px-2 rounded-sm shadow-sm h-8 text-left text-xs flex items-center justfiy-start hover:border-gray-800 transform hover:scale-105 duration-200"
                 style="width: 56px;"
               >
                 <span class="material-icons">
                   calendar_today
                 </span>
-                <i class="ml-1 rangeBtnActive bi bi-chevron-down"></i>
+                <i class="ml-1 bi bi-chevron-down"></i>
                 <div id="rangeContent${type}" class="rangeContent hidden">
-                  <div class="chartDropElement border-b">All</div>
-                  <div class="chartDropElement border-b">Last 24 hours</div>
-                  <div class="chartDropElement border-b">Last 7 days</div>
+                  <div class="chartDropElement ">All</div>
+                  <div class="chartDropElement ">Last 24 hours</div>
+                  <div class="chartDropElement ">Last 7 days</div>
                   <div class="chartDropElement">Last 30 days</div>
                 </div>
               </div>

@@ -4,32 +4,64 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer utilities {
-  @variants responsive {
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
-    }
+/* width */
+::-webkit-scrollbar {
+  width: 8px;
+}
 
-    .no-scrollbar {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
-  }
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 20px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+body {
+  user-select: none;
+}
+
+.rounded-shadow {
+  @apply rounded-md shadow-md border;
+}
+
+.tabs {
+  @apply sticky top-20 z-40 h-10 text-gray-400 overflow-hidden bg-gray-50;
+  width: 600px;
+}
+
+.tabBtn {
+  @apply h-full w-full flex justify-center items-center focus:outline-none font-semibold text-sm tracking-wider;
+}
+
+.activeTabBtn {
+  @apply transform scale-105 text-gray-800 font-bold transition duration-200;
 }
 
 .map {
   @apply object-cover w-full rounded-lg;
-  height: 700px;
+  height: 600px;
   min-width: 244px;
-}
-
-.activeTabBtn {
-  @apply text-black font-bold;
-  border-bottom: 2px solid #1f2937;
 }
 
 .headerBtn {
   @apply h-full flex flex-col justify-center items-center hover:bg-gray-200 hover:text-gray-800 transition duration-300;
+}
+
+.dropDownBtn {
+  @apply h-full rounded-shadow flex items-center pl-8 hover:border-gray-400 duration-200 z-10;
+}
+
+.mission {
+  @apply px-6 py-4 tracking-wider text-sm bg-gray-50 border-l-4  border-gray-200 hover:border-gray-800 hover:bg-gray-100 duration-200;
 }
 
 .card {
@@ -74,12 +106,8 @@
   @apply mt-6 text-lg font-medium w-96 flex flex-col items-center;
 }
 
-.mission {
-  @apply p-3 bg-gray-50 border-t border-gray-200 hover:bg-gray-800 duration-200 hover:text-gray-50;
-}
-
 .chartBtn {
-  @apply w-8 h-8 rounded-md flex justify-center items-center text-gray-600 border shadow-sm cursor-pointer transform hover:scale-110 hover:border-gray-800 duration-200;
+  @apply w-8 h-8 rounded-sm shadow-sm  flex justify-center items-center text-gray-600 border cursor-pointer transform hover:scale-105 hover:border-gray-800 duration-200;
 }
 
 .chartBtn:active {
@@ -87,7 +115,7 @@
 }
 
 .chartDropElement {
-  @apply flex items-center w-full  px-2 h-8 text-left hover:bg-gray-700 hover:text-gray-50;
+  @apply flex items-center w-full px-4 h-8 text-left border-l-2 hover:border-gray-800 hover:bg-gray-100;
 }
 
 .rangeContent {
@@ -101,12 +129,16 @@
   @apply h-80 w-full rounded-md border bg-gray-50 shadow-md px-4 overflow-hidden relative;
 }
 
-.activeRange {
+.chartRangeBtnFocus {
   border: 1px solid #1f2937;
-  transform: scale(1.1);
+  transform: scale(1.05);
 }
 
-.rangeBtnActive:active {
+.chartRangeBtn:active {
+  @apply bg-gray-800 text-gray-200;
+}
+
+.activeBtn:active {
   @apply bg-gray-800 text-gray-200;
 }
 
