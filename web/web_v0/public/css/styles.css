@@ -4,6 +4,24 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  .bg-light {
+    @apply bg-gray-50;
+  }
+  .bg-dark {
+    @apply bg-gray-800;
+  }
+  .text-light {
+    @apply text-gray-50;
+  }
+  .text-dark {
+    @apply text-gray-800;
+  }
+  .hover-text-dark {
+    @apply hover:text-gray-800;
+  }
+}
+
 /* width */
 ::-webkit-scrollbar {
   width: 8px;
@@ -25,6 +43,19 @@
   background: #555;
 }
 
+.hideScrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hideScrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+*:focus {
+  outline: none !important;
+}
+
 body {
   user-select: none;
 }
@@ -34,7 +65,7 @@ body {
 }
 
 .tabs {
-  @apply sticky top-20 z-40 h-10 text-gray-400 overflow-hidden bg-gray-50;
+  @apply sticky top-20 z-40 h-10 text-gray-400 overflow-hidden;
   width: 600px;
 }
 
@@ -43,7 +74,7 @@ body {
 }
 
 .activeTabBtn {
-  @apply transform scale-105 text-gray-800 font-bold transition duration-200;
+  @apply transform scale-105 text-dark font-bold transition duration-200;
 }
 
 .map {
@@ -53,7 +84,7 @@ body {
 }
 
 .headerBtn {
-  @apply h-full flex flex-col justify-center items-center hover:bg-gray-200 hover:text-gray-800 transition duration-300;
+  @apply h-full flex flex-col justify-center items-center hover:bg-gray-200 hover-text-dark transition duration-300;
 }
 
 .dropDownBtn {
@@ -61,13 +92,41 @@ body {
 }
 
 .mission {
-  @apply px-6 py-4 tracking-wider text-sm bg-gray-50 border-l-4  border-gray-200 hover:border-gray-800 hover:bg-gray-100 duration-200;
+  @apply px-6 py-4 tracking-wider text-sm  border-l-4 border-gray-200 hover:border-gray-800 hover:bg-gray-200 duration-200;
 }
 
 .card {
-  @apply bg-gray-50 h-80 overflow-hidden flex flex-col justify-between shadow-lg rounded-lg transform transition-all duration-200 ease-in hover:scale-105 hover:shadow-2xl;
+  @apply h-80 overflow-hidden flex flex-col justify-between shadow-lg rounded-lg transform transition-all duration-200 ease-in hover:scale-105 hover:shadow-2xl;
 
   min-width: 244px;
+}
+
+/* DATEPICKER POPUP */
+.container__main {
+  @apply mt-2;
+}
+.month-item {
+  @apply bg-light rounded-shadow;
+}
+.day-item:hover {
+  @apply bg-gray-200;
+  color: #1f2937 !important;
+  box-shadow: inset 0 0 0 1px #1f2937 !important;
+}
+.day-item.is-start-date,
+.day-item.is-end-date {
+  background-color: #6e7082 !important;
+  color: #f9fafc !important;
+}
+
+.day-item.is-in-range {
+  background-color: #6bb7bf !important;
+  color: black !important;
+}
+
+.button-next-month:hover > svg,
+.button-previous-month:hover > svg {
+  fill: #1f2937 !important;
 }
 
 .loginCard {
@@ -98,7 +157,7 @@ body {
 }
 
 .landingPageBtn {
-  @apply text-center tracking-wider text-gray-200 font-semibold mt-6 bg-gray-800 p-2 duration-200 rounded-md transform hover:scale-95 w-3/5 border border-gray-50;
+  @apply text-center tracking-wider text-gray-50 font-semibold mt-6 bg-dark p-2 duration-200 rounded-md transform hover:scale-95 w-3/5 border border-gray-50;
   backface-visibility: hidden;
 }
 
@@ -110,23 +169,19 @@ body {
   @apply w-8 h-8 rounded-sm shadow-sm  flex justify-center items-center text-gray-600 border cursor-pointer transform hover:scale-105 hover:border-gray-800 duration-200;
 }
 
-.chartBtn:active {
-  @apply bg-gray-800 text-gray-200;
-}
-
 .chartDropElement {
-  @apply flex items-center w-full px-4 h-8 text-left border-l-2 hover:border-gray-800 hover:bg-gray-100;
+  @apply flex items-center w-full px-4 h-8 text-left border-l-2 hover:border-gray-800 hover:bg-gray-200;
 }
 
 .rangeContent {
-  @apply bg-gray-50 border shadow-md rounded-md absolute max-h-56 overflow-auto;
+  @apply border shadow-md rounded-md absolute max-h-56 overflow-auto;
   top: 35px;
   right: -1px;
   width: 140px;
 }
 
 .chartCard {
-  @apply h-80 w-full rounded-md border bg-gray-50 shadow-md px-4 overflow-hidden relative;
+  @apply h-80 w-full rounded-md border shadow-md px-4 overflow-hidden relative bg-light;
 }
 
 .chartRangeBtnFocus {
@@ -134,25 +189,15 @@ body {
   transform: scale(1.05);
 }
 
-.chartRangeBtn:active {
-  @apply bg-gray-800 text-gray-200;
-}
-
-.activeBtn:active {
-  @apply bg-gray-800 text-gray-200;
+.chartRangeBtn:active,
+.activeBtn:active,
+.chartBtn:active {
+  @apply bg-dark text-light;
 }
 
 .noUi-handle {
   cursor: pointer;
   box-shadow: none;
-}
-
-.noUi-handle .noUi-handle-lower {
-  z-index: 1000 !important;
-}
-
-.sliderCard {
-  @apply flex items-center px-4 py-3 duration-200;
 }
 
 .noUi-connect {
@@ -169,11 +214,26 @@ body {
   cursor: grabbing;
 }
 
-.sliderCard:hover h1 {
+.sliderBox:hover h1 {
   color: #6bb7bf;
 }
 
-.sliderCard h1 {
+.sliderBox h1 {
   transition: all 0.2s;
   min-width: 8rem;
+}
+
+.sliderBox {
+  @apply flex items-center px-4 py-3 duration-200;
+}
+
+.hour-item,
+.minute-item {
+  @apply border-l-2 hover:border-gray-800 hover:bg-gray-200 py-2 text-xs;
+}
+
+.saveTime:focus {
+  background-color: #1f2937 !important;
+  border-color: white !important;
+  color: white !important;
 }

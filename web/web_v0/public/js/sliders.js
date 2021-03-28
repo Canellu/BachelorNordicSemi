@@ -1,7 +1,7 @@
 function createSliderHTML(title, min, max) {
   let type = title.replaceAll(" ", "");
   let sliderHTML = `
-    <div class="sliderCard">
+    <div class="sliderBox">
       <h1 class="font-semibold text-gray-800">${title}</h1>
       <div id="slider${type}" class="cursor-pointer w-full mx-6 relative">
         <span class="absolute text-xs right-1">${max}</span>
@@ -55,7 +55,7 @@ let sliderList = [
   { title: "Pressure", min: 0, max: 20, start: 0 },
   { title: "Temperature", min: 0, max: 20, start: 0 },
   { title: "Min Depth", min: 0, max: 300, start: 0 },
-  { title: "Max Depth", min: 0, max: 300, start: 0 },
+  { title: "Max Depdth", min: 0, max: 300, start: 0 },
 ];
 
 sliderList.forEach((obj) => {

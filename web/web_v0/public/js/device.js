@@ -40,11 +40,20 @@ window.addEventListener("click", (e) => {
   }
 });
 
-dropDownContent.addEventListener("wheel", (e) => {
-  e.preventDefault();
-  let scrollTo = (e.wheelDelta * -1) / 2;
-  dropDownContent.scrollTop = scrollTo + dropDownContent.scrollTop;
-});
+/* ********************************************* */
+// Scrollock body when scrolling in this element
+// @params div lock body scroll on
+// @params Scrollspeed in % of default
+function addScrollLock(div, scrollSpeed = 100) {
+  div.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    let scrollTo = e.wheelDelta * -(scrollSpeed / 100);
+    div.scrollTop = scrollTo + div.scrollTop;
+  });
+}
+addScrollLock(dropDownContent, 50);
+addScrollLock(document.querySelector("#hours"), 50);
+addScrollLock(document.querySelector("#minutes"), 20);
 
 // let url = window.location.pathname;
 // console.log(url.substring(url.lastIndexOf("/") + 1).replace(".html", ""));

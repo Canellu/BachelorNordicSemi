@@ -197,18 +197,18 @@ function createChartHTML(type) {
             <!-- chart ranger -->
             <div
               id="chartRange"
-              class="flex items-center h-full text-gray-800 tracking-wider"
+              class="flex items-center h-full tracking-wider"
             > 
               <div
                 id="rangeBtn${type}"
-                class="chartRangeBtn cursor-pointer relative border px-2 rounded-sm shadow-sm h-8 text-left text-xs flex items-center justfiy-start hover:border-gray-800 transform hover:scale-105 duration-200"
+                class="chartRangeBtn cursor-pointer relative border px-2 rounded-sm shadow-sm h-8 text-left text-xs flex items-center justfiy-start hover:border-gray-800 transform hover:scale-105 duration-200 text-gray-600"
                 style="width: 56px;"
               >
                 <span class="material-icons">
                   calendar_today
                 </span>
                 <i class="ml-1 bi bi-chevron-down"></i>
-                <div id="rangeContent${type}" class="rangeContent hidden">
+                <div id="rangeContent${type}" class="rangeContent bg-light hidden">
                   <div class="chartDropElement ">All</div>
                   <div class="chartDropElement ">Last 24 hours</div>
                   <div class="chartDropElement ">Last 7 days</div>

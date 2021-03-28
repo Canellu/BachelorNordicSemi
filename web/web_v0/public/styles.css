@@ -31181,6 +31181,31 @@ video {
           animation: bounce 1s infinite;
 }
 
+.bg-light {
+  --tw-bg-opacity: 1;
+  background-color: rgba(249, 250, 251, var(--tw-bg-opacity));
+}
+
+.bg-dark {
+  --tw-bg-opacity: 1;
+  background-color: rgba(31, 41, 55, var(--tw-bg-opacity));
+}
+
+.text-light {
+  --tw-text-opacity: 1;
+  color: rgba(249, 250, 251, var(--tw-text-opacity));
+}
+
+.text-dark {
+  --tw-text-opacity: 1;
+  color: rgba(31, 41, 55, var(--tw-text-opacity));
+}
+
+.hover-text-dark:hover{
+  --tw-text-opacity: 1;
+  color: rgba(31, 41, 55, var(--tw-text-opacity));
+}
+
 /* width */
 
 ::-webkit-scrollbar {
@@ -31206,6 +31231,19 @@ video {
   background: #555;
 }
 
+.hideScrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hideScrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+*:focus {
+  outline: none !important;
+}
+
 body {
   -webkit-user-select: none;
      -moz-user-select: none;
@@ -31221,8 +31259,6 @@ body {
 }
 
 .tabs {
-  --tw-bg-opacity: 1;
-  background-color: rgba(249, 250, 251, var(--tw-bg-opacity));
   height: 2.5rem;
   overflow: hidden;
   position: sticky;
@@ -31255,8 +31291,6 @@ body {
 
 .activeTabBtn {
   font-weight: 700;
-  --tw-text-opacity: 1;
-  color: rgba(31, 41, 55, var(--tw-text-opacity));
   --tw-translate-x: 0;
   --tw-translate-y: 0;
   --tw-rotate: 0;
@@ -31271,6 +31305,8 @@ body {
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
   transition-duration: 200ms;
+  --tw-text-opacity: 1;
+  color: rgba(31, 41, 55, var(--tw-text-opacity));
 }
 
 .map {
@@ -31293,18 +31329,15 @@ body {
   align-items: center;
   justify-content: center;
   height: 100%;
+  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+  transition-duration: 300ms;
 }
 
 .headerBtn:hover{
   --tw-text-opacity: 1;
   color: rgba(31, 41, 55, var(--tw-text-opacity));
-}
-
-.headerBtn{
-  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
-  transition-duration: 300ms;
 }
 
 .dropDownBtn:hover{
@@ -31325,14 +31358,9 @@ body {
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
 
-.mission {
-  --tw-bg-opacity: 1;
-  background-color: rgba(249, 250, 251, var(--tw-bg-opacity));
-}
-
 .mission:hover{
   --tw-bg-opacity: 1;
-  background-color: rgba(243, 244, 246, var(--tw-bg-opacity));
+  background-color: rgba(229, 231, 235, var(--tw-bg-opacity));
 }
 
 .mission{
@@ -31358,8 +31386,6 @@ body {
 }
 
 .card {
-  --tw-bg-opacity: 1;
-  background-color: rgba(249, 250, 251, var(--tw-bg-opacity));
   border-radius: 0.5rem;
   display: flex;
   flex-direction: column;
@@ -31398,6 +31424,44 @@ body {
   transition-timing-function: cubic-bezier(0.4, 0, 1, 1);
   transition-duration: 200ms;
   min-width: 244px;
+}
+
+/* DATEPICKER POPUP */
+
+.container__main {
+  margin-top: 0.5rem;
+}
+
+.month-item {
+  --tw-bg-opacity: 1;
+  background-color: rgba(249, 250, 251, var(--tw-bg-opacity));
+  border-radius: 0.375rem;
+  border-width: 1px;
+  --tw-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
+.day-item:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgba(229, 231, 235, var(--tw-bg-opacity));
+  color: #1f2937 !important;
+  box-shadow: inset 0 0 0 1px #1f2937 !important;
+}
+
+.day-item.is-start-date,
+.day-item.is-end-date {
+  background-color: #6e7082 !important;
+  color: #f9fafc !important;
+}
+
+.day-item.is-in-range {
+  background-color: #6bb7bf !important;
+  color: black !important;
+}
+
+.button-next-month:hover > svg,
+.button-previous-month:hover > svg {
+  fill: #1f2937 !important;
 }
 
 .loginCard {
@@ -31459,8 +31523,6 @@ body {
 }
 
 .landingPageBtn {
-  --tw-bg-opacity: 1;
-  background-color: rgba(31, 41, 55, var(--tw-bg-opacity));
   --tw-border-opacity: 1;
   border-color: rgba(249, 250, 251, var(--tw-border-opacity));
   border-radius: 0.375rem;
@@ -31470,7 +31532,7 @@ body {
   padding: 0.5rem;
   text-align: center;
   --tw-text-opacity: 1;
-  color: rgba(229, 231, 235, var(--tw-text-opacity));
+  color: rgba(249, 250, 251, var(--tw-text-opacity));
   letter-spacing: 0.05em;
   width: 60%;
   --tw-translate-x: 0;
@@ -31490,6 +31552,8 @@ body {
 
 .landingPageBtn{
   transition-duration: 200ms;
+  --tw-bg-opacity: 1;
+  background-color: rgba(31, 41, 55, var(--tw-bg-opacity));
   -webkit-backface-visibility: hidden;
           backface-visibility: hidden;
 }
@@ -31542,16 +31606,9 @@ body {
   transition-duration: 200ms;
 }
 
-.chartBtn:active {
-  --tw-bg-opacity: 1;
-  background-color: rgba(31, 41, 55, var(--tw-bg-opacity));
-  --tw-text-opacity: 1;
-  color: rgba(229, 231, 235, var(--tw-text-opacity));
-}
-
 .chartDropElement:hover{
   --tw-bg-opacity: 1;
-  background-color: rgba(243, 244, 246, var(--tw-bg-opacity));
+  background-color: rgba(229, 231, 235, var(--tw-bg-opacity));
   --tw-border-opacity: 1;
   border-color: rgba(31, 41, 55, var(--tw-border-opacity));
 }
@@ -31568,8 +31625,6 @@ body {
 }
 
 .rangeContent {
-  --tw-bg-opacity: 1;
-  background-color: rgba(249, 250, 251, var(--tw-bg-opacity));
   border-radius: 0.375rem;
   border-width: 1px;
   max-height: 14rem;
@@ -31583,8 +31638,6 @@ body {
 }
 
 .chartCard {
-  --tw-bg-opacity: 1;
-  background-color: rgba(249, 250, 251, var(--tw-bg-opacity));
   border-radius: 0.375rem;
   border-width: 1px;
   height: 20rem;
@@ -31595,6 +31648,8 @@ body {
   --tw-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
   width: 100%;
+  --tw-bg-opacity: 1;
+  background-color: rgba(249, 250, 251, var(--tw-bg-opacity));
 }
 
 .chartRangeBtnFocus {
@@ -31602,37 +31657,16 @@ body {
   transform: scale(1.05);
 }
 
-.chartRangeBtn:active {
+.chartRangeBtn:active, .activeBtn:active, .chartBtn:active {
   --tw-bg-opacity: 1;
   background-color: rgba(31, 41, 55, var(--tw-bg-opacity));
   --tw-text-opacity: 1;
-  color: rgba(229, 231, 235, var(--tw-text-opacity));
-}
-
-.activeBtn:active {
-  --tw-bg-opacity: 1;
-  background-color: rgba(31, 41, 55, var(--tw-bg-opacity));
-  --tw-text-opacity: 1;
-  color: rgba(229, 231, 235, var(--tw-text-opacity));
+  color: rgba(249, 250, 251, var(--tw-text-opacity));
 }
 
 .noUi-handle {
   cursor: pointer;
   box-shadow: none;
-}
-
-.noUi-handle .noUi-handle-lower {
-  z-index: 1000 !important;
-}
-
-.sliderCard {
-  display: flex;
-  align-items: center;
-  padding-top: 0.75rem;
-  padding-bottom: 0.75rem;
-  padding-left: 1rem;
-  padding-right: 1rem;
-  transition-duration: 200ms;
 }
 
 .noUi-connect {
@@ -31650,13 +31684,44 @@ body {
   cursor: grabbing;
 }
 
-.sliderCard:hover h1 {
+.sliderBox:hover h1 {
   color: #6bb7bf;
 }
 
-.sliderCard h1 {
+.sliderBox h1 {
   transition: all 0.2s;
   min-width: 8rem;
+}
+
+.sliderBox {
+  display: flex;
+  align-items: center;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  transition-duration: 200ms;
+}
+
+.hour-item:hover, .minute-item:hover{
+  --tw-bg-opacity: 1;
+  background-color: rgba(229, 231, 235, var(--tw-bg-opacity));
+  --tw-border-opacity: 1;
+  border-color: rgba(31, 41, 55, var(--tw-border-opacity));
+}
+
+.hour-item, .minute-item{
+  border-left-width: 2px;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.saveTime:focus {
+  background-color: #1f2937 !important;
+  border-color: white !important;
+  color: white !important;
 }
 
 @media (min-width: 640px){

@@ -1,17 +1,101 @@
-const datePicker = new Litepicker({
-  element: document.getElementById("datePicker"),
+const datepickerDataDiv = document.querySelector("#datepickerData");
+const datepickerControlDiv = document.querySelector("#datepickerControl");
+
+// ********** functions/declarations for DATEpicker in CONTROL tab ****************
+const datepickerControl = new Litepicker({
+  element: datepickerControlDiv,
+  singleMode: true,
+});
+
+datepickerControlDiv.addEventListener("click", () => {
+  datepickerControl.clearSelection();
+});
+
+// ********** functions/declarations for TIMEpicker in CONTROL tab ****************
+
+let timeField = document.querySelector("#timepickerInputControl");
+let timeContent = document.querySelector("#timepickerContentControl");
+let hoursDiv = document.querySelector("#hours");
+let minutesDiv = document.querySelector("#minutes");
+let time = [];
+// Fill hour/minute divs with items
+function createHourMinuteItems() {
+  // Fill in hours
+  for (let i = 0; i < 24; i++) {
+    hoursDiv.innerHTML += `<div class="hour-item saveTime" tabindex="-1">${pad(
+      i
+    )}</div>`;
+  }
+
+  // Fill in minutes
+  for (let i = 0; i < 60; i += 5) {
+    minutesDiv.innerHTML += `<div class="minute-item saveTime" tabindex="-1">${pad(
+      i
+    )}</div>`;
+  }
+
+  document.querySelectorAll(".saveTime").forEach((item) => {
+    item.addEventListener("click", (e) => {
+      if (e.target.classList.contains("hour-item")) {
+        time[0] = e.target.innerText;
+      } else {
+        time[1] = e.target.innerText;
+      }
+
+      if (time.length == 2 && !time.includes(undefined)) {
+        timeField.value = `${time[0]}:${time[1]}`;
+        time = [];
+        timeContent.classList.add("hidden");
+      }
+
+      let clicked = e.target.innerText;
+      let time0 = time[0];
+      let time1 = time[1];
+      let length = time.length;
+
+      console.log({ clicked, time0, time1, length });
+    });
+  });
+}
+
+timeField.addEventListener("click", (e) => {
+  timeContent.classList.toggle("hidden");
+  hoursDiv.scrollTop = 0;
+  minutesDiv.scrollTop = 0;
+  timeField.value = "";
+});
+
+window.addEventListener("click", (e) => {
+  let timeDivCondition =
+    !e.target.classList.contains("saveTime") &&
+    e.target.id != "hours" &&
+    e.target.id != "minutes" &&
+    e.target != timeField;
+
+  if (timeDivCondition) {
+    timeContent.classList.add("hidden");
+  }
+});
+
+createHourMinuteItems();
+
+// *********** functions/declarations for DATEpicker in DATA tab ******************
+const datepickerData = new Litepicker({
+  element: datepickerDataDiv,
   singleMode: false,
   delimiter: "    |    ",
 });
 
-document.getElementById("datePicker").addEventListener("click", () => {
-  datePicker.clearSelection();
+// Clearing date selection on click
+datepickerDataDiv.addEventListener("click", () => {
+  datepickerData.clearSelection();
 });
 
+// Apply dates to show only data within specified dates
 async function applySelection() {
   document.querySelector("#missionSelector div p").innerText = "Date range";
 
-  let splitDate = document.getElementById("datePicker").value.split("|");
+  let splitDate = datepickerDataDiv.value.split("|");
 
   if (splitDate.length > 1) {
     var startDate = parseInt(splitDate[0].replaceAll("-", "").trim());

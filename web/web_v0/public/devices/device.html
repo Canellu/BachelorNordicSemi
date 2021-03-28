@@ -68,8 +68,8 @@
     <title>Device</title>
   </head>
 
-  <body class="bg-gray-50 font-montserrat pt-16 flex flex-col">
-    <header class="fixed top-0 bg-gray-800 text-gray-50 h-16 w-full z-50">
+  <body class="bg-gray-100 font-montserrat pt-16 flex flex-col">
+    <header class="fixed top-0 bg-dark text-light h-16 w-full z-50">
       <div
         class="container flex justify-between m-auto h-full items-center px-10"
       >
@@ -102,38 +102,36 @@
 
     <main class="min-h-screen">
       <!-- Tab selector -->
-      <div class="tabs m-auto rounded-shadow flex-col z-50 bg-gray-50">
+      <div class="tabs m-auto rounded-shadow flex flex-col z-50 bg-light">
         <div class="flex h-9">
           <button id="data-tab-btn" class="tabBtn activeTabBtn">DATA</button>
           <button id="control-tab-btn" class="tabBtn">MISSION CONTROL</button>
         </div>
-        <div id="tabUnderline" class="w-1/2 bg-gray-800 h-1 duration-300"></div>
+        <div id="tabUnderline" class="w-1/2 bg-dark h-1 duration-300"></div>
       </div>
 
-      <!-- Data tab -->
-      <div id="data-tab" class="container m-auto py-12 space-y-4">
+      <!-- ********************* Data tab ********************* -->
+      <div id="data-tab" class="hidden container m-auto py-12 space-y-4">
         <!-- Map-->
-        <div class="rounded-shadow p-4">
+        <div class="rounded-shadow p-4 bg-light">
           <div id="dataMap" class="map h-full"></div>
         </div>
 
         <!-- Data selector -->
         <div class="flex space-x-4">
-          <!-- Datepicker -->
+          <!-- Datepicker Data -->
           <div
-            id="dateSelector"
-            class="h-12 rounded-shadow border tracking-wider flex items-center space-x-3 px-3"
+            class="h-12 rounded-shadow border tracking-wider flex items-center space-x-3 px-3 bg-light"
           >
             <!-- Date Icon -->
-            <div class="chartBtn cursor-pointer pt-1">
-              <label for="datePicker">
-                <span class="material-icons text-gray-600">calendar_today</span>
-              </label>
-            </div>
+            <label for="datepickerData" class="chartBtn cursor-pointer">
+              <span class="material-icons">calendar_today</span>
+            </label>
+
             <!-- Date Field -->
             <input
               readonly
-              id="datePicker"
+              id="datepickerData"
               class="h-8 w-60 text-center border rounded-md outline-none focus:border-gray-400 text-gray-800 font-medium"
             />
             <!-- Send Icon -->
@@ -146,11 +144,11 @@
 
           <!-- Missionpicker-->
           <div id="missionSelector" class="h-12 w-48 cursor-pointer">
-            <div class="dropDownBtn activeBtn rounded-shadow relative">
+            <div class="dropDownBtn activeBtn rounded-shadow relative bg-light">
               <p class="inline-block font-medium tracking-wider"></p>
               <span class="material-icons absolute right-4"> expand_more </span>
               <div
-                class="dropDownContent hidden rounded-shadow max-h-56 w-full absolute left-0 top-12 overflow-auto"
+                class="dropDownContent hidden rounded-shadow max-h-56 w-full absolute left-0 top-12 overflow-auto bg-light"
               >
                 <div class="mission">Mission 10</div>
                 <div class="mission">Mission 11</div>
@@ -174,31 +172,86 @@
         ></div>
       </div>
 
-      <!-- Mission Control Tab -->
-      <div id="control-tab" class="py-12 hidden">
+      <!-- ***************Mission Control Tab ***************** -->
+      <div id="control-tab" class="container m-auto py-12 space-y-4">
         <!-- Map -->
-        <div class="container m-auto mb-8">
-          <div class="rounded-lg shadow-md overflow-hidden p-4 border">
-            <div id="missionMap" class="map h-full"></div>
+        <div class="rounded-shadow p-4 bg-light">
+          <div id="missionMap" class="map h-full"></div>
+        </div>
+
+        <!-- Datetime picker -->
+        <div
+          class="h-12 w-min rounded-shadow tracking-wider flex items-center space-x-3 px-3 bg-light"
+        >
+          <div class="w-32 font-medium">Start dive at</div>
+          <!-- Date Icon -->
+          <label for="datepickerControl" class="chartBtn cursor-pointer">
+            <span class="material-icons">calendar_today</span>
+          </label>
+          <!-- Date Field -->
+          <input
+            readonly
+            id="datepickerControl"
+            class="h-8 w-32 text-center border rounded-md outline-none focus:border-gray-400 text-gray-800 font-medium"
+          />
+
+          <!-- Time Icon -->
+          <label for="timepickerInputControl" class="chartBtn cursor-pointer">
+            <span class="material-icons">access_time</span>
+          </label>
+          <!-- Time Field -->
+          <div class="relative z-50">
+            <input
+              readonly
+              id="timepickerInputControl"
+              class="h-8 w-20 text-center border rounded-md outline-none focus:border-gray-400 text-gray-800 font-medium"
+            />
+            <div
+              id="timepickerContentControl"
+              class="w-36 h-44 bg-light rounded-shadow overflow-hidden absolute top-10 flex"
+            >
+              <div
+                id="hours"
+                class="w-1/2 text-center overflow-auto hideScrollbar"
+              ></div>
+              <div
+                id="minutes"
+                class="w-1/2 text-center overflow-auto hideScrollbar"
+              ></div>
+            </div>
           </div>
         </div>
 
         <!-- Control Panel -->
         <div class="container m-auto flex w-full space-x-10">
-          <!-- SLIDERS -->
+          <!-- Sliders -->
           <div
             id="sliders"
-            class="flex flex-col flex-grow space-y-6 shadow-md rounded-md overflow-hidden p-4 border"
+            class="flex flex-col flex-grow space-y-6 rounded-shadow p-2 bg-light"
           ></div>
 
-          <!-- PREVIEW -->
-          <div id="preview" class="w-1/3 h-96 border shadow-md rounded-md p-4">
-            <button
-              id="sendMissionParams"
-              class="w-1/2 m-auto h-10 border rounded-md shadow-md font-medium tracking-wider text-lg flex justify-center items-center"
+          <!-- PREVIEW section-->
+          <div class="w-1/3 rounded-shadow p-4 relative bg-light flex flex-col">
+            <h1 class="font-semibold tracking-wide">Preview parameters</h1>
+            <textarea class="rounded flex-grow resize-none p-2">
+Lorem, ipsum dolor sit amet consectetur adipisicing elit. Placeat deserunt voluptas aut expedita possimus voluptatum iusto alias sed reiciendis eaque nobis dignissimos sint sit suscipit, quos nostrum voluptatibus ad veniam voluptates fugit neque, accusamus dolore veritatis? Explicabo, suscipit dolore reiciendis dicta vel quasi, porro laboriosam, labore ipsa modi fugit nulla? Iusto earum omnis vel, expedita culpa, maxime officiis fugit officia quibusdam deserunt voluptatum quidem, ex voluptate delectus ducimus non quae molestias illo. Eius omnis perferendis autem ipsam tenetur at quod numquam voluptates mollitia eveniet deserunt magnam itaque voluptatibus voluptate, commodi rerum incidunt, inventore illum. Dolore dicta quas iure tenetur voluptatibus esse reprehenderit consequatur quis dolores ipsam quia ipsum veniam, unde commodi sequi ratione architecto sint? Tempore architecto laudantium distinctio nobis.</textarea
             >
-              Send parameters
-            </button>
+
+            <!-- Send/Reset button row -->
+            <div class="flex absolute left-0 -bottom-12 w-full space-x-4">
+              <button
+                id="resetMissionParams"
+                class="w-1/2 h-10 border rounded-shadow font-medium tracking-wider text-sm flex justify-center items-center bg-light"
+              >
+                Reset
+              </button>
+              <button
+                id="sendMissionParams"
+                class="w-1/2 h-10 border rounded-shadow font-medium tracking-wider text-sm flex justify-center items-center bg-light relative"
+              >
+                Send
+              </button>
+            </div>
           </div>
         </div>
 
