@@ -229,7 +229,7 @@ body {
 
 .hour-item,
 .minute-item {
-  @apply border-l-2 hover:border-gray-800 hover:bg-gray-200 py-2 text-xs;
+  @apply border-l-2 hover:border-gray-800 hover:bg-gray-200 py-2 text-xs cursor-pointer;
 }
 
 .saveTime:focus {

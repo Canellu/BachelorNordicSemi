@@ -31712,6 +31712,7 @@ body {
 
 .hour-item, .minute-item{
   border-left-width: 2px;
+  cursor: pointer;
   font-size: 0.75rem;
   line-height: 1rem;
   padding-top: 0.5rem;
