@@ -27,7 +27,7 @@ controlTabBtn.addEventListener("click", () => {
   controlTabBtn.classList.add("activeTabBtn");
   dataTabBtn.classList.remove("activeTabBtn");
   if (typeof missionMap == "undefined") {
-    // initMissionMap();
+    initMissionMap();
   }
 
   document.querySelector("#latestMissionNumber").innerText =
