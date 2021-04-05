@@ -25,7 +25,7 @@ class DevicePage extends StatelessWidget with NavigationStates {
                 child: Icon(Icons.menu, color: Colors.white),
                 onTap: onMenuTap,
               ),
-              Text("Messages",
+              Text("My devices",
                   style: TextStyle(fontSize: 24, color: Colors.white)),
               Icon(Icons.settings, color: Colors.white),
             ],

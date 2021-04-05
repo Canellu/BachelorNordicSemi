@@ -15,7 +15,10 @@ abstract class NavigationStates {}
 class NavigationBloc extends Bloc<NavigationEvents, NavigationStates> {
   final Function onMenuTap;
 
-  NavigationBloc({this.onMenuTap});
+  NavigationBloc({this.onMenuTap})
+      : super(MyAccountPage(
+          onMenuTap: onMenuTap,
+        ));
 
   @override
   NavigationStates get initialState => MyAccountPage(

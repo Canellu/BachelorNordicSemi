@@ -56,7 +56,7 @@ class Menu extends StatelessWidget {
                     onMenuItemClicked();
                   },
                   child: Text(
-                    "Messages",
+                    "My devices",
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 22,
@@ -74,7 +74,7 @@ class Menu extends StatelessWidget {
                     onMenuItemClicked();
                   },
                   child: Text(
-                    "Utility Bills",
+                    "Settings",
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 22,
@@ -85,11 +85,6 @@ class Menu extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 30),
-                Text("Funds Transfer",
-                    style: TextStyle(color: Colors.white, fontSize: 22)),
-                SizedBox(height: 30),
-                Text("Branches",
-                    style: TextStyle(color: Colors.white, fontSize: 22)),
               ],
             ),
           ),

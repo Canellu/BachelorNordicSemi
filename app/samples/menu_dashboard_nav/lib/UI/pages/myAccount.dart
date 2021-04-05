@@ -29,7 +29,7 @@ class MyAccountPage extends StatelessWidget with NavigationStates {
                     child: Icon(Icons.menu, color: Colors.white),
                     onTap: onMenuTap,
                   ),
-                  Text("My Cards",
+                  Text("Dashboard",
                       style: TextStyle(fontSize: 24, color: Colors.white)),
                   Icon(Icons.settings, color: Colors.white),
                 ],
@@ -62,10 +62,10 @@ class MyAccountPage extends StatelessWidget with NavigationStates {
               ),
               SizedBox(height: 20),
               Text(
-                "Transactions",
+                "Active devices",
                 style: TextStyle(color: Colors.white, fontSize: 20),
               ),
-              ListView.separated(
+              /*ListView.separated(
                 shrinkWrap: true,
                 itemBuilder: (context, index) {
                   return ListTile(
@@ -78,7 +78,7 @@ class MyAccountPage extends StatelessWidget with NavigationStates {
                   return Divider(height: 16);
                 },
                 itemCount: 10,
-              ),
+              ),*/
               SizedBox(height: 20),
             ],
           ),
