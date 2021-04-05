@@ -25,16 +25,12 @@ const formattedName = iotClient.devicePath(
 
 exports.fromFirestoreToNRF = functions
   .region("europe-west1")
-  .firestore.document("toNRF/{docId}")
+  .firestore.document("Gliders/{gliderId}/Missions/{mission}")
   .onWrite(async (change, context) => {
     // TODO: Check only for changes in commands, do not send all
     // compare change.before with change.after
     const data = change.after.data();
-    console.log("P: ", data.P);
-    console.log("T: ", data.T);
-    console.log("maxDepth: ", data.maxDepth);
-    console.log("minDepth: ", data.minDepth);
-    console.log("DATA: ", data);
+    console.log(data);
 
     const stringData = JSON.stringify(data);
     const binaryData = Buffer.from(stringData);

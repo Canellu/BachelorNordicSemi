@@ -15,6 +15,7 @@ dataTabBtn.addEventListener("click", () => {
   controlTab.classList.add("hidden");
   dataTabBtn.classList.add("activeTabBtn");
   controlTabBtn.classList.remove("activeTabBtn");
+  listMissions();
 });
 
 // MISSION CONTROL TAB BUTTON
@@ -28,6 +29,9 @@ controlTabBtn.addEventListener("click", () => {
   if (typeof missionMap == "undefined") {
     // initMissionMap();
   }
+
+  document.querySelector("#latestMissionNumber").innerText =
+    "Mission " + (latestMission + 1);
 });
 
 dropDownBtn.addEventListener("click", () => {
@@ -60,11 +64,13 @@ addScrollLock(document.querySelector("#minutes"), 20);
 
 var charts = []; //Conductivity, Pressure, Temperature
 var activeMission = "";
+var latestMission = 0;
+
 // Store all chartdata from clicked missions
 var missionDataset = {};
-
 // When clicking on a dropdown mission, retrieve data from firestore and update charts
 async function listMissions() {
+  dropDownContent.innerHTML = "";
   // All mission documents for this glider
   let missions = await db
     .collection("Gliders")
@@ -72,7 +78,6 @@ async function listMissions() {
     .collection("Missions")
     .get();
 
-  let latestMission = 0;
   // Loop through all mission-docs
   missions.forEach((mission) => {
     // test if mission is newer than previously fetched

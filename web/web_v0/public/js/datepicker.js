@@ -5,10 +5,17 @@ const datepickerControlDiv = document.querySelector("#datepickerControl");
 const datepickerControl = new Litepicker({
   element: datepickerControlDiv,
   singleMode: true,
+  setup: (picker) => {
+    picker.on("selected", (date) => {
+      let val = document.querySelector("#datepickerControl").value;
+      document.querySelector("#previewDate").innerText = val;
+    });
+  },
 });
 
 datepickerControlDiv.addEventListener("click", () => {
   datepickerControl.clearSelection();
+  document.querySelector("#previewDate").innerText = "YYYY-MM-DD";
 });
 
 // ********** functions/declarations for TIMEpicker in CONTROL tab ****************
@@ -46,14 +53,8 @@ function createHourMinuteItems() {
         timeField.value = `${time[0]}:${time[1]}`;
         time = [];
         timeContent.classList.add("hidden");
+        document.querySelector("#previewTime").innerText = timeField.value;
       }
-
-      let clicked = e.target.innerText;
-      let time0 = time[0];
-      let time1 = time[1];
-      let length = time.length;
-
-      console.log({ clicked, time0, time1, length });
     });
   });
 }
