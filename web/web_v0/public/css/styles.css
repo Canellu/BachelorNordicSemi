@@ -38,6 +38,15 @@
   border-radius: 20px;
 }
 
+#previewBox::-webkit-scrollbar-thumb {
+  background: #c0c1c3;
+  border-radius: 20px;
+}
+#previewBox::-webkit-scrollbar,
+.dropDownContent::-webkit-scrollbar {
+  width: 4px;
+}
+
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
@@ -71,10 +80,6 @@ body {
 
 .tabBtn {
   @apply h-full w-full flex justify-center items-center focus:outline-none font-semibold text-sm tracking-wider;
-}
-
-.activeTabBtn {
-  @apply transform scale-105 text-dark font-bold transition duration-200;
 }
 
 .map {

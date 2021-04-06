@@ -1,9 +1,23 @@
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
 function createSliderHTML(title, min, max) {
   let type = title.replaceAll(" ", "");
 
-  let previewHTML = `<p>${title}:  </p> <p id="preview${type}"> 0 </p>`;
+  let previewHTML = `<div class="flex justify-between width-full border-b"><p>${title}:  </p><p id="preview${type}"> 0 </p></div>`;
 
-  document.querySelector("#previewBox").innerHTML += previewHTML;
+  document.querySelector("#previewParams").innerHTML += previewHTML;
 
   let sliderHTML = `
     <div class="sliderBox">
@@ -78,7 +92,7 @@ sliderList.forEach((obj) => {
 
 let sendMissionParamsBtn = document.querySelector("#sendMissionParams");
 let resetMissionParamsBtn = document.querySelector("#resetMissionParams");
-let sliderPreviews = document.querySelectorAll("#previewBox > [id^=preview]");
+let sliderPreviews = document.querySelectorAll("#previewParams [id^=preview]");
 
 resetMissionParamsBtn.addEventListener("click", () => {
   // Reset sliders to 0
@@ -87,16 +101,21 @@ resetMissionParamsBtn.addEventListener("click", () => {
   });
 
   // Reset sliderpreviews to 0
-
   sliderPreviews.forEach((preview) => {
     preview.innerText = "0";
   });
 
-  // Reset datetimes to blank
+  // // Reset datetimes to blank
   document.querySelector("#datepickerControl").value = "";
   document.querySelector("#timepickerInputControl").value = "";
   document.querySelector("#previewDate").innerText = "YYYY-MM-DD";
   document.querySelector("#previewTime").innerText = "--:--";
+
+  // Reset waypoints added to Map
+  let path = missionWaypoints.getPath();
+  path.forEach(() => {
+    path.pop();
+  });
 });
 
 sendMissionParamsBtn.addEventListener("click", async () => {
@@ -110,8 +129,20 @@ sendMissionParamsBtn.addEventListener("click", async () => {
   sliderPreviews.forEach((preview) => {
     let propertyName = preview.id.replace("preview", "");
     let propertyVal = preview.innerText;
+    console.log({ propertyName, propertyVal });
     missionParameters[propertyName] = propertyVal;
   });
+
+  let waypoints = missionWaypoints.getPath().Nb;
+  let waypointsToSend = [];
+
+  waypoints.forEach((waypoint) => {
+    let lat = waypoint.lat();
+    let lng = waypoint.lng();
+    waypointsToSend.push(`${lat}, ${lng}`);
+  });
+
+  missionParameters["Waypoints"] = waypointsToSend;
 
   let latestMissionNumber = document.querySelector("#latestMissionNumber")
     .innerText;

@@ -31225,6 +31225,16 @@ video {
   border-radius: 20px;
 }
 
+#previewBox::-webkit-scrollbar-thumb {
+  background: #c0c1c3;
+  border-radius: 20px;
+}
+
+#previewBox::-webkit-scrollbar,
+.dropDownContent::-webkit-scrollbar {
+  width: 4px;
+}
+
 /* Handle on hover */
 
 ::-webkit-scrollbar-thumb:hover {
@@ -31287,26 +31297,6 @@ body {
 .tabBtn{
   letter-spacing: 0.05em;
   width: 100%;
-}
-
-.activeTabBtn {
-  font-weight: 700;
-  --tw-translate-x: 0;
-  --tw-translate-y: 0;
-  --tw-rotate: 0;
-  --tw-skew-x: 0;
-  --tw-skew-y: 0;
-  --tw-scale-x: 1;
-  --tw-scale-y: 1;
-  transform: translateX(var(--tw-translate-x)) translateY(var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-  --tw-scale-x: 1.05;
-  --tw-scale-y: 1.05;
-  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
-  transition-duration: 200ms;
-  --tw-text-opacity: 1;
-  color: rgba(31, 41, 55, var(--tw-text-opacity));
 }
 
 .map {

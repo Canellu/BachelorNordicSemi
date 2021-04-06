@@ -9,23 +9,16 @@ var dropDownContent = document.querySelector(".dropDownContent");
 // DATA TAB BUTTON
 dataTabBtn.addEventListener("click", () => {
   tabUnderline.style.transform = "";
-
-  tabUnderline.classList.remove("activeTabUnderline");
   dataTab.classList.remove("hidden");
   controlTab.classList.add("hidden");
-  dataTabBtn.classList.add("activeTabBtn");
-  controlTabBtn.classList.remove("activeTabBtn");
   listMissions();
 });
 
 // MISSION CONTROL TAB BUTTON
 controlTabBtn.addEventListener("click", () => {
   tabUnderline.style.transform = "translateX(100%)";
-
   controlTab.classList.remove("hidden");
   dataTab.classList.add("hidden");
-  controlTabBtn.classList.add("activeTabBtn");
-  dataTabBtn.classList.remove("activeTabBtn");
   if (typeof missionMap == "undefined") {
     initMissionMap();
   }
@@ -58,6 +51,8 @@ function addScrollLock(div, scrollSpeed = 100) {
 addScrollLock(dropDownContent, 50);
 addScrollLock(document.querySelector("#hours"), 50);
 addScrollLock(document.querySelector("#minutes"), 20);
+addScrollLock(document.querySelector("#previewBox"), 20);
+addScrollLock(document.querySelector("#sliders"), 30);
 
 // let url = window.location.pathname;
 // console.log(url.substring(url.lastIndexOf("/") + 1).replace(".html", ""));

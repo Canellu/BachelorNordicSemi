@@ -8,7 +8,7 @@ let missionMapDiv = document.getElementById("missionMap");
 var flightPlanCoordinates;
 
 var defaultLocation = { lat: 59.921, lng: 10.734, zoom: 6 };
-function initMap() {
+function initDataMap() {
   dataMap = new google.maps.Map(dataMapDiv, {
     center: { lat: defaultLocation.lat, lng: defaultLocation.lng },
     zoom: defaultLocation.zoom,
@@ -61,9 +61,9 @@ function addDataMarkers(coordinates, map) {
 
   const lineSymbol = {
     path: "M 0,-1 0,1",
-    strokeOpacity: 1,
-    strokeColor: "#1F2937",
-    strokeWeight: 1.5,
+    strokeColor: "#FF0000",
+    strokeOpacity: 1.0,
+    strokeWeight: 2,
     scale: 4,
   };
 
@@ -95,11 +95,32 @@ function initMissionMap() {
     strokeColor: "#FF0000",
     editable: true,
     strokeOpacity: 1.0,
-    strokeWeight: 3,
+    strokeWeight: 2,
     map: missionMap,
   });
 
-  missionMap.addListener("click", addLatLng);
+  google.maps.event.addListener(
+    missionWaypoints,
+    "dragend",
+    createPreviewWaypoints
+  );
+  google.maps.event.addListener(
+    missionWaypoints.getPath(),
+    "insert_at",
+    createPreviewWaypoints
+  );
+  google.maps.event.addListener(
+    missionWaypoints.getPath(),
+    "remove_at",
+    createPreviewWaypoints
+  );
+  google.maps.event.addListener(
+    missionWaypoints.getPath(),
+    "set_at",
+    createPreviewWaypoints
+  );
+
+  var mapListener = missionMap.addListener("click", addLatLng);
 
   /**
    * A menu that lets a user delete a selected vertex of a path.
@@ -113,6 +134,10 @@ function initMissionMap() {
       const menu = this;
       google.maps.event.addDomListener(this.div_, "click", () => {
         menu.removeVertex();
+        google.maps.event.removeListener(mapListener);
+        setTimeout(() => {
+          mapListener = missionMap.addListener("click", addLatLng);
+        }, 1);
       });
     }
     onAdd() {
@@ -153,10 +178,14 @@ function initMissionMap() {
         return;
       }
       const point = projection.fromLatLngToDivPixel(position);
-      this.div_.style.width = "30px";
-      this.div_.style.height = "30px";
-      this.div_.style.top = point.y + "px";
-      this.div_.style.left = point.x + "px";
+      this.div_.style.width = "40px";
+      this.div_.style.borderRadius = "6px";
+      this.div_.style.border = "1px solid #adadad";
+      this.div_.style.padding = "6px 4px 4px 4px";
+      this.div_.style.backgroundColor = "#fff";
+      this.div_.style.top = point.y - 20 + "px";
+      this.div_.style.left = point.x + 10 + "px";
+      this.div_.style.position = "relative";
     }
     /**
      * Opens the menu at a vertex of a given path.
@@ -167,10 +196,6 @@ function initMissionMap() {
       this.set("vertex", vertex);
       this.setMap(map);
       this.draw();
-
-      console.log(vertex);
-      console.log(path);
-      console.log(path.getAt(vertex));
     }
     /**
      * Deletes the vertex from the path.
@@ -203,6 +228,25 @@ function addLatLng(event) {
   // Because path is an MVCArray, we can simply append a new coordinate
   // and it will automatically appear.
   path.push(event.latLng);
+}
 
-  console.log(path.Nb);
+function createPreviewWaypoints() {
+  let waypoints = missionWaypoints.getPath().Nb;
+  let waypointDiv = document.querySelector("#waypoints");
+
+  waypointDiv.innerHTML = `
+  <h1 class="text-center">No.</h1>
+  <h1 class="col-span-3 text-right">Lat</h1>
+  <h1 class="col-span-3 text-right">Lng</h1>`;
+
+  waypoints.forEach((waypoint, index) => {
+    let lat = waypoint.lat();
+    let lng = waypoint.lng();
+    let waypointHTML = `
+      <p class="col-span-1 text-center">${index + 1}</p>
+      <p class="truncate col-span-3 text-right">${lat}</p>
+      <p class="truncate col-span-3 text-right">${lng}</p>`;
+
+    waypointDiv.innerHTML += waypointHTML;
+  });
 }
