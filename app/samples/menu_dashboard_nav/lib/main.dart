@@ -9,6 +9,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      //Remove the debug banner at the right top
+      debugShowCheckedModeBanner: false,
       title: 'Menu and Dashbord',
       theme: ThemeData(
         primarySwatch: Colors.blue,

@@ -130,16 +130,6 @@ class _MenuDashboardPageState extends State<MenuDashboardPage>
                           color: greenShade,
                           width: 100,
                         ),
-                        Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 8),
-                          color: yellowShade,
-                          width: 100,
-                        ),
-                        Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 8),
-                          color: orangeShade,
-                          width: 100,
-                        ),
                       ],
                     ),
                   ),
