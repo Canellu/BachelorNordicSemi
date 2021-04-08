@@ -114,6 +114,10 @@ body {
 }
 
 /* DATEPICKER POPUP */
+.litepicker {
+  z-index: 30 !important;
+}
+
 .container__main {
   @apply mt-2;
 }

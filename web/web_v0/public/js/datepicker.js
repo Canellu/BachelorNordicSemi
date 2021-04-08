@@ -20,7 +20,7 @@ datepickerControlDiv.addEventListener("click", () => {
 
 // ********** functions/declarations for TIMEpicker in CONTROL tab ****************
 
-let timeField = document.querySelector("#timepickerInputControl");
+let timeField = document.querySelector("#timepickerControl");
 let timeContent = document.querySelector("#timepickerContentControl");
 let hoursDiv = document.querySelector("#hours");
 let minutesDiv = document.querySelector("#minutes");

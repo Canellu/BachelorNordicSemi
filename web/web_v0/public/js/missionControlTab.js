@@ -78,6 +78,9 @@ sliderList.forEach((obj) => {
 });
 
 // *********************** WAYPOINTS ***********************************
+
+let clearBtnScaleVal = 0;
+
 let latInput = document.querySelector("#addLat");
 let lngInput = document.querySelector("#addLng");
 
@@ -99,6 +102,9 @@ function addWaypoint() {
 }
 
 function renderWaypointList() {
+  document.querySelector("#addLatLngIndex").innerText =
+    missionWaypoints.getPath().length + 1;
+
   let waypointList = document.querySelector("#waypointList");
   waypointList.innerHTML = "";
 
@@ -123,11 +129,16 @@ function renderWaypointList() {
           value="${lng.toFixed(6)}"
         />
     
-        <span onclick="deleteWaypoint(this)" class="col-span-1 material-icons chartBtn"> clear </span>
+        <span onclick="deleteWaypoint(this)" class="col-span-1 material-icons chartBtn" style="transform: scale(${clearBtnScaleVal});"> clear </span>
    
       </div>`;
 
     waypointList.innerHTML += waypointItem;
+
+    clearBtnScaleVal = 0;
+    document.querySelectorAll(".waypoint-item span").forEach((btn) => {
+      btn.style.transform = "scale(0)";
+    });
   });
 }
 
@@ -147,6 +158,12 @@ editWaypointsBtn.addEventListener("click", () => {
       input.removeAttribute("readonly");
       input.style.backgroundColor = "white";
     });
+
+    clearBtnScaleVal = 1;
+    document.querySelectorAll(".waypoint-item span").forEach((btn) => {
+      btn.style.transform = "scale(1)";
+    });
+
     editWaypointsBtn.innerText = "done";
   } else {
     editWaypointsBtn.innerText = "edit";
@@ -157,18 +174,35 @@ editWaypointsBtn.addEventListener("click", () => {
       input.style.backgroundColor = "#F9FAFB";
     });
 
+    let path = missionWaypoints.getPath();
+    let updatedWaypoints = [];
+
+    console.log(typeof missionWaypoints.getPath());
+    console.log(typeof updatedWaypoints);
     document.querySelectorAll(".waypoint-item").forEach((row) => {
       let children = row.children;
       let lat = children[1].value;
       let lng = children[2].value;
+
+      updatedWaypoints.push(new google.maps.LatLng(lat, lng));
       let index = row.getAttribute("data-index");
-      console.log({ lat, lng, index });
+    });
+
+    path.forEach(() => {
+      path.pop();
+    });
+
+    updatedWaypoints.forEach((waypoint) => {
+      path.push(waypoint);
     });
   }
 });
 
 // ************************* PREVIEW ***********************************
 let sendMissionParamsBtn = document.querySelector("#sendMissionParams");
+let confirmMissionParamsBtn = document.querySelector("#confirmMissionParams");
+let yesMissionParamsBtn = document.querySelector("#yesMissionParams");
+let noMissionParamsBtn = document.querySelector("#noMissionParams");
 let resetMissionParamsBtn = document.querySelector("#resetMissionParams");
 let sliderPreviews = document.querySelectorAll("#previewParams [id^=preview]");
 
@@ -185,7 +219,7 @@ resetMissionParamsBtn.addEventListener("click", () => {
 
   // // Reset datetimes to blank
   document.querySelector("#datepickerControl").value = "";
-  document.querySelector("#timepickerInputControl").value = "";
+  document.querySelector("#timepickerControl").value = "";
   document.querySelector("#previewDate").innerText = "YYYY-MM-DD";
   document.querySelector("#previewTime").innerText = "--:--";
 
@@ -196,7 +230,7 @@ resetMissionParamsBtn.addEventListener("click", () => {
   });
 });
 
-sendMissionParamsBtn.addEventListener("click", async () => {
+yesMissionParamsBtn.addEventListener("click", async () => {
   let date = document.querySelector("#previewDate").innerText;
   let time = document.querySelector("#previewTime").innerText;
 
@@ -236,4 +270,33 @@ sendMissionParamsBtn.addEventListener("click", async () => {
   //   .collection("Missions")
   //   .doc(latestMissionNumber)
   //   .set(missionParameters);
+
+  confirmMissionParamsBtn.style.transform = "scale(0)";
+  sendMissionParamsBtn.style.transform = "scale(1)";
+
+  setTimeout(() => {
+    confirmMissionParamsBtn.classList.add("hidden");
+    sendMissionParamsBtn.classList.remove("hidden");
+  }, 200);
+
+  console.log("clicked yes");
+});
+
+noMissionParamsBtn.addEventListener("click", () => {
+  confirmMissionParamsBtn.style.transform = "scale(0)";
+  sendMissionParamsBtn.style.transform = "scale(1)";
+
+  setTimeout(() => {
+    confirmMissionParamsBtn.classList.add("hidden");
+    sendMissionParamsBtn.classList.remove("hidden");
+  }, 200);
+});
+
+sendMissionParamsBtn.addEventListener("click", () => {
+  sendMissionParamsBtn.style.transform = "scale(0)";
+  confirmMissionParamsBtn.style.transform = "scale(1)";
+  setTimeout(() => {
+    sendMissionParamsBtn.classList.add("hidden");
+    confirmMissionParamsBtn.classList.remove("hidden");
+  }, 200);
 });

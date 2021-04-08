@@ -172,6 +172,7 @@
           id="chartGrid"
           class="container m-auto pt-2 grid grid-cols-1 sm:grid-cols-2 auto-cols-max gap-8"
         ></div>
+        <div class="terminal h-96"></div>
       </div>
 
       <!-- ***************Mission Control Tab ***************** -->
@@ -198,14 +199,14 @@
           />
 
           <!-- Time Icon -->
-          <label for="timepickerInputControl" class="chartBtn cursor-pointer">
+          <label for="timepickerControl" class="chartBtn cursor-pointer">
             <span class="material-icons">access_time</span>
           </label>
           <!-- Time Field -->
-          <div class="relative z-50">
+          <div class="relative z-30">
             <input
               readonly
-              id="timepickerInputControl"
+              id="timepickerControl"
               class="h-8 w-20 text-center border rounded-md outline-none focus:border-gray-400 text-dark font-medium"
             />
             <div
@@ -263,27 +264,7 @@
             <div
               id="waypointList"
               class="flex-col max-h-72 overflow-y-auto overflow-x-hidden space-y-2 py-1 pr-1"
-            >
-              <div class="waypoint-item grid grid-cols-8 gap-x-2">
-                <h1
-                  class="col-span-1 flex justify-center items-center text-sm font-medium mt-2"
-                >
-                  1
-                </h1>
-                <input
-                  readonly
-                  class="col-span-3 text-right text-sm font-medium pl-1 rounded-sm focus:outline-none bg-light pr-2 border-b-2"
-                  value="20.232342"
-                />
-                <input
-                  class="col-span-3 text-right text-sm font-medium pl-1 rounded-sm focus:outline-none bg-light pr-2 border-b-2"
-                  value="32.232323"
-                />
-                <div class="col-span-1 flex space-x-1">
-                  <span class="material-icons chartBtn"> clear </span>
-                </div>
-              </div>
-            </div>
+            ></div>
 
             <!-- ADD NEW ROW -->
             <div class="grid grid-cols-8 w-full gap-x-2 pr-1">
@@ -291,7 +272,7 @@
                 id="addLatLngIndex"
                 class="col-span-1 flex justify-center items-center font-medium"
               >
-                2
+                1
               </p>
               <input
                 type="number"
@@ -361,12 +342,32 @@
             >
               Reset
             </button>
-            <button
-              id="sendMissionParams"
-              class="w-1/2 h-10 border rounded-shadow font-medium tracking-wider text-sm flex justify-center items-center bg-light relative"
-            >
-              Send
-            </button>
+            <div class="w-1/2 h-10">
+              <button
+                id="sendMissionParams"
+                class="w-full h-full rounded-shadow font-medium tracking-wider text-sm flex justify-center items-center bg-light transform transition duration-200"
+              >
+                Send
+              </button>
+              <div
+                id="confirmMissionParams"
+                class="w-full flex h-full space-x-1 transform transition scale-0 hidden duration-200"
+              >
+                <button
+                  id="yesMissionParams"
+                  class="w-1/2 h-full rounded-shadow font-medium tracking-wider text-sm flex justify-center items-center bg-green-300"
+                >
+                  Yes
+                </button>
+
+                <button
+                  id="noMissionParams"
+                  class="w-1/2 h-full rounded-shadow font-medium tracking-wider text-sm flex justify-center items-center bg-red-300"
+                >
+                  No
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 

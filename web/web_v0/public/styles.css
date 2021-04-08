@@ -31425,6 +31425,10 @@ body {
 
 /* DATEPICKER POPUP */
 
+.litepicker {
+  z-index: 30 !important;
+}
+
 .container__main {
   margin-top: 0.5rem;
 }
