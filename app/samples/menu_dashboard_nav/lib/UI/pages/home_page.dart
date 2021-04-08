@@ -1,6 +1,8 @@
 import 'package:bachelor_app/bloc/nav_bloc/navigation_bloc.dart';
 import 'package:flutter/material.dart';
 
+import 'map_screen.dart';
+
 class HomePage extends StatelessWidget with NavigationStates {
   final Function onMenuTap;
 
@@ -34,18 +36,16 @@ class HomePage extends StatelessWidget with NavigationStates {
                   Icon(Icons.settings, color: Colors.white),
                 ],
               ),
-              SizedBox(height: 50),
+              SizedBox(height: 20),
               Container(
                 height: 200,
                 child: PageView(
-                  controller: PageController(viewportFraction: 0.8),
+                  controller: PageController(viewportFraction: 1),
                   scrollDirection: Axis.horizontal,
                   pageSnapping: true,
                   children: <Widget>[
                     Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 8),
-                      color: Colors.white,
-                      width: 100,
+                        child: MapScreen()
                     ),
                   ],
                 ),

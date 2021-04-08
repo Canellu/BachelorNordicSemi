@@ -19,10 +19,11 @@ class _MapScreenState extends State<MapScreen> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      //Remove the debug banner at the right top
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
-        body: Column(
-          children: <Widget>[
-            Container(
+        body: SingleChildScrollView(
+          child: Container(
               height: MediaQuery.of(context).size.height / 3,
               width: MediaQuery.of(context).size.width,
               child: GoogleMap(
@@ -33,7 +34,6 @@ class _MapScreenState extends State<MapScreen> {
                 ),
               ),
             ),
-          ],
         ),
       ),
     );
