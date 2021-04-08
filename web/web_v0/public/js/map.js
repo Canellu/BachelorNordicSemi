@@ -232,16 +232,17 @@ function addLatLng(event) {
 
 function createPreviewWaypoints() {
   let waypoints = missionWaypoints.getPath().Nb;
-  let waypointDiv = document.querySelector("#waypoints");
+  let waypointDiv = document.querySelector("#previewWaypoints");
 
   waypointDiv.innerHTML = `
+  <h1 class="border-b col-span-7">Waypoints</h1>
   <h1 class="text-center">No.</h1>
   <h1 class="col-span-3 text-right">Lat</h1>
   <h1 class="col-span-3 text-right">Lng</h1>`;
 
   waypoints.forEach((waypoint, index) => {
-    let lat = waypoint.lat();
-    let lng = waypoint.lng();
+    let lat = waypoint.lat().toFixed(6);
+    let lng = waypoint.lng().toFixed(6);
     let waypointHTML = `
       <p class="col-span-1 text-center">${index + 1}</p>
       <p class="truncate col-span-3 text-right">${lat}</p>
@@ -249,4 +250,6 @@ function createPreviewWaypoints() {
 
     waypointDiv.innerHTML += waypointHTML;
   });
+
+  renderWaypointList();
 }

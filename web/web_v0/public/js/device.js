@@ -53,6 +53,7 @@ addScrollLock(document.querySelector("#hours"), 50);
 addScrollLock(document.querySelector("#minutes"), 20);
 addScrollLock(document.querySelector("#previewBox"), 20);
 addScrollLock(document.querySelector("#sliders"), 30);
+addScrollLock(document.querySelector("#waypointList"), 34);
 
 // let url = window.location.pathname;
 // console.log(url.substring(url.lastIndexOf("/") + 1).replace(".html", ""));

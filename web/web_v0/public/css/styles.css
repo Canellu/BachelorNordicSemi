@@ -22,6 +22,12 @@
   }
 }
 
+#waypoints input::-webkit-outer-spin-button,
+#waypoints input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 /* width */
 ::-webkit-scrollbar {
   width: 8px;
@@ -43,7 +49,8 @@
   border-radius: 20px;
 }
 #previewBox::-webkit-scrollbar,
-.dropDownContent::-webkit-scrollbar {
+.dropDownContent::-webkit-scrollbar,
+#waypointList::-webkit-scrollbar {
   width: 4px;
 }
 
@@ -172,6 +179,7 @@ body {
 
 .chartBtn {
   @apply w-8 h-8 rounded-sm shadow-sm  flex justify-center items-center text-gray-600 border cursor-pointer transform hover:scale-105 hover:border-gray-800 duration-200;
+  min-width: 32px;
 }
 
 .chartDropElement {
@@ -241,4 +249,8 @@ body {
   background-color: #1f2937 !important;
   border-color: white !important;
   color: white !important;
+}
+
+.redBorder {
+  border: 1px solid red;
 }

@@ -31206,6 +31206,12 @@ video {
   color: rgba(31, 41, 55, var(--tw-text-opacity));
 }
 
+#waypoints input::-webkit-outer-spin-button,
+#waypoints input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 /* width */
 
 ::-webkit-scrollbar {
@@ -31231,7 +31237,8 @@ video {
 }
 
 #previewBox::-webkit-scrollbar,
-.dropDownContent::-webkit-scrollbar {
+.dropDownContent::-webkit-scrollbar,
+#waypointList::-webkit-scrollbar {
   width: 4px;
 }
 
@@ -31594,6 +31601,7 @@ body {
 
 .chartBtn{
   transition-duration: 200ms;
+  min-width: 32px;
 }
 
 .chartDropElement:hover{
@@ -31713,6 +31721,10 @@ body {
   background-color: #1f2937 !important;
   border-color: white !important;
   color: white !important;
+}
+
+.redBorder {
+  border: 1px solid red;
 }
 
 @media (min-width: 640px){

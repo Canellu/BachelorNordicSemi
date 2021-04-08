@@ -1,17 +1,4 @@
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
+// *********************** SLIDEEEEEERS *************************
 function createSliderHTML(title, min, max) {
   let type = title.replaceAll(" ", "");
 
@@ -21,7 +8,7 @@ function createSliderHTML(title, min, max) {
 
   let sliderHTML = `
     <div class="sliderBox">
-      <h1 class="font-semibold text-gray-800">${title}</h1>
+      <h1 class="font-medium text-gray-800">${title}</h1>
       <div id="slider${type}" class="cursor-pointer w-full mx-6 relative">
         <span class="absolute text-xs right-1">${max}</span>
       </div>
@@ -31,7 +18,7 @@ function createSliderHTML(title, min, max) {
         min="0"
         step="1"
         id="input${type}"
-        class="w-16 text-lg font-medium border pl-1 rounded-sm focus:outline-none"
+        class="w-16 text-md font-medium text-dark border pl-1 rounded-sm focus:outline-none"
       />
     </div>`;
 
@@ -90,6 +77,97 @@ sliderList.forEach((obj) => {
   createSlider(obj.title, obj.min, obj.max, obj.start);
 });
 
+// *********************** WAYPOINTS ***********************************
+let latInput = document.querySelector("#addLat");
+let lngInput = document.querySelector("#addLng");
+
+function resetInput() {
+  latInput.classList.remove("redBorder");
+  lngInput.classList.remove("redBorder");
+}
+function addWaypoint() {
+  if (latInput.value != "" && lngInput.value != "") {
+    let path = missionWaypoints.getPath();
+    let latLng = new google.maps.LatLng(latInput.value, lngInput.value);
+    path.push(latLng);
+  } else {
+    if (latInput.value == "") latInput.classList.add("redBorder");
+    if (lngInput.value == "") lngInput.classList.add("redBorder");
+  }
+
+  renderWaypointList();
+}
+
+function renderWaypointList() {
+  let waypointList = document.querySelector("#waypointList");
+  waypointList.innerHTML = "";
+
+  missionWaypoints.getPath().forEach((waypoint, index) => {
+    let lat = waypoint.lat();
+    let lng = waypoint.lng();
+    let waypointItem = `
+      <div class="waypoint-item grid grid-cols-8 gap-x-2"  data-index="${index}">
+        <h1
+          class="col-span-1 flex justify-center items-center text-sm font-medium mt-2">${
+            index + 1
+          }
+        </h1>
+        <input
+          readonly
+          class="col-span-3 text-right text-sm font-medium pl-1 rounded-sm focus:outline-none bg-light pr-2 border-b-2"
+          value="${lat.toFixed(6)}"
+        />
+        <input
+          readonly
+          class="col-span-3 text-right text-sm font-medium pl-1 rounded-sm focus:outline-none bg-light pr-2 border-b-2"
+          value="${lng.toFixed(6)}"
+        />
+    
+        <span onclick="deleteWaypoint(this)" class="col-span-1 material-icons chartBtn"> clear </span>
+   
+      </div>`;
+
+    waypointList.innerHTML += waypointItem;
+  });
+}
+
+function deleteWaypoint(clearBtn) {
+  let index = parseInt(clearBtn.parentElement.getAttribute("data-index"));
+  missionWaypoints.getPath().removeAt(index);
+}
+
+let editWaypointsBtn = document.querySelector("#editWaypointsBtn");
+
+editWaypointsBtn.addEventListener("click", () => {
+  let waypointListInputs = document.querySelectorAll(".waypoint-item input");
+
+  if (editWaypointsBtn.innerText == "edit") {
+    // Remove readonly and whiten bg
+    waypointListInputs.forEach((input) => {
+      input.removeAttribute("readonly");
+      input.style.backgroundColor = "white";
+    });
+    editWaypointsBtn.innerText = "done";
+  } else {
+    editWaypointsBtn.innerText = "edit";
+
+    // Set input readonly and "remove" bg
+    waypointListInputs.forEach((input) => {
+      input.setAttribute("readonly", "");
+      input.style.backgroundColor = "#F9FAFB";
+    });
+
+    document.querySelectorAll(".waypoint-item").forEach((row) => {
+      let children = row.children;
+      let lat = children[1].value;
+      let lng = children[2].value;
+      let index = row.getAttribute("data-index");
+      console.log({ lat, lng, index });
+    });
+  }
+});
+
+// ************************* PREVIEW ***********************************
 let sendMissionParamsBtn = document.querySelector("#sendMissionParams");
 let resetMissionParamsBtn = document.querySelector("#resetMissionParams");
 let sliderPreviews = document.querySelectorAll("#previewParams [id^=preview]");
@@ -129,7 +207,7 @@ sendMissionParamsBtn.addEventListener("click", async () => {
   sliderPreviews.forEach((preview) => {
     let propertyName = preview.id.replace("preview", "");
     let propertyVal = preview.innerText;
-    console.log({ propertyName, propertyVal });
+    // console.log({ propertyName, propertyVal });
     missionParameters[propertyName] = propertyVal;
   });
 
@@ -137,8 +215,9 @@ sendMissionParamsBtn.addEventListener("click", async () => {
   let waypointsToSend = [];
 
   waypoints.forEach((waypoint) => {
-    let lat = waypoint.lat();
-    let lng = waypoint.lng();
+    let lat = waypoint.lat().toFixed(6);
+    let lng = waypoint.lng().toFixed(6);
+    // console.log({ lat, lng });
     waypointsToSend.push(`${lat}, ${lng}`);
   });
 
@@ -151,10 +230,10 @@ sendMissionParamsBtn.addEventListener("click", async () => {
   document.querySelector("#latestMissionNumber").innerText =
     "Mission " + (latestMission + 1);
 
-  let missions = await db
-    .collection("Gliders")
-    .doc("311910")
-    .collection("Missions")
-    .doc(latestMissionNumber)
-    .set(missionParameters);
+  // let missions = await db
+  //   .collection("Gliders")
+  //   .doc("311910")
+  //   .collection("Missions")
+  //   .doc(latestMissionNumber)
+  //   .set(missionParameters);
 });
