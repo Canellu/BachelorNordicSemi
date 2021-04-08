@@ -38,7 +38,7 @@ class Menu extends StatelessWidget {
                     onMenuItemClicked();
                   },
                   child: Text(
-                    "Dashboard",
+                    "Home page",
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 22,
@@ -56,7 +56,7 @@ class Menu extends StatelessWidget {
                     onMenuItemClicked();
                   },
                   child: Text(
-                    "My devices",
+                    "Add device",
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 22,

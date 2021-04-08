@@ -1,5 +1,5 @@
-import 'package:bachelor_app/UI/pages/devicePage.dart';
-import 'package:bachelor_app/UI/pages/myAccount.dart';
+import 'package:bachelor_app/UI/pages/add_device.dart';
+import 'package:bachelor_app/UI/pages/home_page.dart';
 import 'package:bachelor_app/UI/pages/settings.dart';
 import 'package:bloc/bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,12 +16,12 @@ class NavigationBloc extends Bloc<NavigationEvents, NavigationStates> {
   final Function onMenuTap;
 
   NavigationBloc({this.onMenuTap})
-      : super(MyAccountPage(
+      : super(HomePage(
           onMenuTap: onMenuTap,
         ));
 
   @override
-  NavigationStates get initialState => MyAccountPage(
+  NavigationStates get initialState => HomePage(
         onMenuTap: onMenuTap,
       );
 
@@ -29,12 +29,12 @@ class NavigationBloc extends Bloc<NavigationEvents, NavigationStates> {
   Stream<NavigationStates> mapEventToState(NavigationEvents event) async* {
     switch (event) {
       case NavigationEvents.DashboardClickedEvent:
-        yield MyAccountPage(
+        yield HomePage(
           onMenuTap: onMenuTap,
         );
         break;
       case NavigationEvents.DeviceClickedEvent:
-        yield DevicePage(
+        yield AddDevice(
           onMenuTap: onMenuTap,
         );
         break;

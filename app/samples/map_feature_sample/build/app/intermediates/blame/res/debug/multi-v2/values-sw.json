@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "/Users/saodatmansurova/AndroidStudioProjects/map_feature_sample/build/app/intermediates/incremental/mergeDebugResources/merged.dir/values-sw/values-sw.xml",
+            "outputFile": "/Users/saodatmansurova/Desktop/git_rep/BachelorNordicSemi/app/samples/map_feature_sample/build/app/intermediates/incremental/mergeDebugResources/merged.dir/values-sw/values-sw.xml",
             "map": [
                 {
                     "source": "/Users/saodatmansurova/.gradle/caches/transforms-2/files-2.1/7c90628348521fa806e5a37f037cde98/jetified-play-services-basement-17.0.0/res/values-sw/values.xml",

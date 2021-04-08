@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "/Users/saodatmansurova/AndroidStudioProjects/map_feature_sample/build/app/intermediates/incremental/mergeDebugResources/merged.dir/values-bg/values-bg.xml",
+            "outputFile": "/Users/saodatmansurova/Desktop/git_rep/BachelorNordicSemi/app/samples/map_feature_sample/build/app/intermediates/incremental/mergeDebugResources/merged.dir/values-bg/values-bg.xml",
             "map": [
                 {
                     "source": "/Users/saodatmansurova/.gradle/caches/transforms-2/files-2.1/30a8c856d8fe9a20d62f614b9db1a8ff/play-services-base-17.0.0/res/values-bg/values.xml",

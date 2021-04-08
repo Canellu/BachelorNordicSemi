@@ -1,10 +1,10 @@
-import 'package:bachelor_app/UI/pages/devicePage.dart';
-import 'package:bachelor_app/UI/pages/myAccount.dart';
+import 'package:bachelor_app/UI/pages/add_device.dart';
+import 'package:bachelor_app/UI/pages/home_page.dart';
 import 'package:bachelor_app/UI/pages/settings.dart';
 import 'package:bachelor_app/bloc/nav_bloc/navigation_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'dashboard.dart';
+import 'animate_page.dart';
 import 'menu.dart';
 
 final Color backgroundColor = Color(0xFF4A4A58);
@@ -81,7 +81,7 @@ class _MenuDashboardLayoutState extends State<MenuDashboardLayout>
                     onMenuItemClicked: onMenuItemClicked);
               },
             ),
-            Dashboard(
+            AnimatePage(
               duration: duration,
               onMenuTap: onMenuTap,
               scaleAnimation: _scaleAnimation,
@@ -101,9 +101,9 @@ class _MenuDashboardLayoutState extends State<MenuDashboardLayout>
   }
 
   int findSelectedIndex(NavigationStates navigationState) {
-    if (navigationState is MyAccountPage) {
+    if (navigationState is HomePage) {
       return 0;
-    } else if (navigationState is DevicePage) {
+    } else if (navigationState is AddDevice) {
       return 1;
     } else if (navigationState is SettingsPage) {
       return 2;

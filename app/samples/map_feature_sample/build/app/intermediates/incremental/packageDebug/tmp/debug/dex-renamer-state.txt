@@ -1,4 +1,4 @@
-#Wed Mar 03 10:21:55 CET 2021
-base.0=/Users/saodatmansurova/AndroidStudioProjects/map_feature_sample/build/app/intermediates/dex/debug/mergeDexDebug/out/classes.dex
+#Tue Apr 06 02:52:34 CEST 2021
+base.0=/Users/saodatmansurova/Desktop/git_rep/BachelorNordicSemi/app/samples/map_feature_sample/build/app/intermediates/dex/debug/mergeDexDebug/out/classes.dex
 path.0=classes.dex
 renamed.0=classes.dex
