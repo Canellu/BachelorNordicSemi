@@ -79,7 +79,7 @@ sliderList.forEach((obj) => {
 
 // *********************** WAYPOINTS ***********************************
 
-let clearBtnScaleVal = 0;
+let isEditMode = 0;
 
 let latInput = document.querySelector("#addLat");
 let lngInput = document.querySelector("#addLng");
@@ -93,6 +93,8 @@ function addWaypoint() {
     let path = missionWaypoints.getPath();
     let latLng = new google.maps.LatLng(latInput.value, lngInput.value);
     path.push(latLng);
+    latInput.value = "";
+    lngInput.value = "";
   } else {
     if (latInput.value == "") latInput.classList.add("redBorder");
     if (lngInput.value == "") lngInput.classList.add("redBorder");
@@ -101,16 +103,40 @@ function addWaypoint() {
   renderWaypointList();
 }
 
+function lockIt(e) {
+  e.preventDefault();
+  let div = document.querySelector("#waypointList");
+  let scrollTo = e.wheelDelta * -(100 / 100);
+  div.scrollTop = scrollTo + div.scrollTop;
+}
+
+function toggleScrollBar() {
+  let div = document.querySelector("#waypointList");
+  let scrollBar = div.clientHeight < div.scrollHeight;
+  if (scrollBar) {
+    div.addEventListener("wheel", lockIt);
+  } else {
+    div.removeEventListener("wheel", lockIt);
+  }
+}
+
 function renderWaypointList() {
+  let waypointList = document.querySelector("#waypointList");
   document.querySelector("#addLatLngIndex").innerText =
     missionWaypoints.getPath().length + 1;
 
-  let waypointList = document.querySelector("#waypointList");
   waypointList.innerHTML = "";
 
   missionWaypoints.getPath().forEach((waypoint, index) => {
     let lat = waypoint.lat();
     let lng = waypoint.lng();
+    let bg = "";
+    if (isEditMode) {
+      bg = "bg-white";
+    } else {
+      bg = "bg-light";
+    }
+
     let waypointItem = `
       <div class="waypoint-item grid grid-cols-8 gap-x-2"  data-index="${index}">
         <h1
@@ -120,26 +146,23 @@ function renderWaypointList() {
         </h1>
         <input
           readonly
-          class="col-span-3 text-right text-sm font-medium pl-1 rounded-sm focus:outline-none bg-light pr-2 border-b-2"
+          class="col-span-3 text-right text-sm font-medium pl-1 rounded-sm focus:outline-none ${bg} pr-2 border-b-2"
           value="${lat.toFixed(6)}"
         />
         <input
           readonly
-          class="col-span-3 text-right text-sm font-medium pl-1 rounded-sm focus:outline-none bg-light pr-2 border-b-2"
+          class="col-span-3 text-right text-sm font-medium pl-1 rounded-sm focus:outline-none ${bg} pr-2 border-b-2"
           value="${lng.toFixed(6)}"
         />
     
-        <span onclick="deleteWaypoint(this)" class="col-span-1 material-icons chartBtn" style="transform: scale(${clearBtnScaleVal});"> clear </span>
+        <span onclick="deleteWaypoint(this)" class="col-span-1 material-icons chartBtn" style="transform: scale(${isEditMode});"> clear </span>
    
       </div>`;
 
     waypointList.innerHTML += waypointItem;
-
-    clearBtnScaleVal = 0;
-    document.querySelectorAll(".waypoint-item span").forEach((btn) => {
-      btn.style.transform = "scale(0)";
-    });
   });
+
+  toggleScrollBar();
 }
 
 function deleteWaypoint(clearBtn) {
@@ -159,13 +182,14 @@ editWaypointsBtn.addEventListener("click", () => {
       input.style.backgroundColor = "white";
     });
 
-    clearBtnScaleVal = 1;
+    isEditMode = 1;
     document.querySelectorAll(".waypoint-item span").forEach((btn) => {
       btn.style.transform = "scale(1)";
     });
 
     editWaypointsBtn.innerText = "done";
   } else {
+    isEditMode = 0;
     editWaypointsBtn.innerText = "edit";
 
     // Set input readonly and "remove" bg
@@ -177,24 +201,25 @@ editWaypointsBtn.addEventListener("click", () => {
     let path = missionWaypoints.getPath();
     let updatedWaypoints = [];
 
-    console.log(typeof missionWaypoints.getPath());
-    console.log(typeof updatedWaypoints);
     document.querySelectorAll(".waypoint-item").forEach((row) => {
       let children = row.children;
       let lat = children[1].value;
       let lng = children[2].value;
 
       updatedWaypoints.push(new google.maps.LatLng(lat, lng));
-      let index = row.getAttribute("data-index");
     });
 
-    path.forEach(() => {
-      path.pop();
+    path.forEach((waypoint, index) => {
+      let currentLat = updatedWaypoints[index].lat();
+      let currentLng = updatedWaypoints[index].lng();
+
+      if (currentLat != waypoint.lat() || currentLng != waypoint.lng()) {
+        path.setAt(index, updatedWaypoints[index]);
+        console.log("Changed!");
+      }
     });
 
-    updatedWaypoints.forEach((waypoint) => {
-      path.push(waypoint);
-    });
+    renderWaypointList();
   }
 });
 
@@ -224,10 +249,7 @@ resetMissionParamsBtn.addEventListener("click", () => {
   document.querySelector("#previewTime").innerText = "--:--";
 
   // Reset waypoints added to Map
-  let path = missionWaypoints.getPath();
-  path.forEach(() => {
-    path.pop();
-  });
+  missionWaypoints.getPath().clear();
 });
 
 yesMissionParamsBtn.addEventListener("click", async () => {

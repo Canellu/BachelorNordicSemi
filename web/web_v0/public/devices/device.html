@@ -182,49 +182,6 @@
           <div id="missionMap" class="map h-full"></div>
         </div>
 
-        <!-- Datetime picker -->
-        <div
-          class="h-12 w-min rounded-shadow tracking-wider flex items-center space-x-3 px-3 bg-light"
-        >
-          <div class="w-32 font-medium">Start dive at</div>
-          <!-- Date Icon -->
-          <label for="datepickerControl" class="chartBtn cursor-pointer">
-            <span class="material-icons">calendar_today</span>
-          </label>
-          <!-- Date Field -->
-          <input
-            readonly
-            id="datepickerControl"
-            class="h-8 w-32 text-center border rounded-md outline-none focus:border-gray-400 text-gray-800 font-medium"
-          />
-
-          <!-- Time Icon -->
-          <label for="timepickerControl" class="chartBtn cursor-pointer">
-            <span class="material-icons">access_time</span>
-          </label>
-          <!-- Time Field -->
-          <div class="relative z-30">
-            <input
-              readonly
-              id="timepickerControl"
-              class="h-8 w-20 text-center border rounded-md outline-none focus:border-gray-400 text-dark font-medium"
-            />
-            <div
-              id="timepickerContentControl"
-              class="w-36 h-44 bg-light rounded-shadow overflow-hidden absolute top-10 flex hidden text-dark"
-            >
-              <div
-                id="hours"
-                class="w-1/2 text-center overflow-auto hideScrollbar"
-              ></div>
-              <div
-                id="minutes"
-                class="w-1/2 text-center overflow-auto hideScrollbar"
-              ></div>
-            </div>
-          </div>
-        </div>
-
         <!-- Control Panel -->
         <div class="container m-auto flex w-full space-x-4">
           <!-- Sliders -->
@@ -293,6 +250,49 @@
               >
                 add
               </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Datetime picker -->
+        <div
+          class="h-12 w-min rounded-shadow tracking-wider flex items-center space-x-3 px-3 bg-light"
+        >
+          <div class="w-32 font-medium">Start dive at</div>
+          <!-- Date Icon -->
+          <label for="datepickerControl" class="chartBtn cursor-pointer">
+            <span class="material-icons">calendar_today</span>
+          </label>
+          <!-- Date Field -->
+          <input
+            readonly
+            id="datepickerControl"
+            class="h-8 w-32 text-center border rounded-md outline-none focus:border-gray-400 text-gray-800 font-medium"
+          />
+
+          <!-- Time Icon -->
+          <label for="timepickerControl" class="chartBtn cursor-pointer">
+            <span class="material-icons">access_time</span>
+          </label>
+          <!-- Time Field -->
+          <div class="relative z-30">
+            <input
+              readonly
+              id="timepickerControl"
+              class="h-8 w-20 text-center border rounded-md outline-none focus:border-gray-400 text-dark font-medium"
+            />
+            <div
+              id="timepickerContentControl"
+              class="w-36 h-44 bg-light rounded-shadow overflow-hidden absolute top-10 flex hidden text-dark"
+            >
+              <div
+                id="hours"
+                class="w-1/2 text-center overflow-auto hideScrollbar"
+              ></div>
+              <div
+                id="minutes"
+                class="w-1/2 text-center overflow-auto hideScrollbar"
+              ></div>
             </div>
           </div>
         </div>
