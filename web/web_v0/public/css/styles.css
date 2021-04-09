@@ -96,7 +96,7 @@ body {
 }
 
 .headerBtn {
-  @apply h-full flex flex-col justify-center items-center hover:bg-gray-200 hover-text-dark transition duration-300;
+  @apply h-full flex flex-col  justify-center items-center hover:bg-gray-50 hover-text-dark  transition duration-300;
 }
 
 .dropDownBtn {
@@ -208,7 +208,8 @@ body {
 
 .chartRangeBtn:active,
 .activeBtn:active,
-.chartBtn:active {
+.chartBtn:active,
+.activeBtnStyle:active {
   @apply bg-dark text-light;
 }
 

@@ -20,7 +20,7 @@ controlTabBtn.addEventListener("click", () => {
   controlTab.classList.remove("hidden");
   dataTab.classList.add("hidden");
   if (typeof missionMap == "undefined") {
-    initMissionMap();
+    //initMissionMap();
   }
 
   document.querySelector("#latestMissionNumber").innerText =
@@ -53,9 +53,6 @@ addScrollLock(document.querySelector("#hours"), 50);
 addScrollLock(document.querySelector("#minutes"), 20);
 addScrollLock(document.querySelector("#previewBox"), 20);
 // addScrollLock(document.querySelector("#sliders"), 30);
-
-// let url = window.location.pathname;
-// console.log(url.substring(url.lastIndexOf("/") + 1).replace(".html", ""));
 
 var charts = []; //Conductivity, Pressure, Temperature
 var activeMission = "";

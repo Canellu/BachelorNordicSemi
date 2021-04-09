@@ -69,51 +69,20 @@
   </head>
 
   <body class="bg-gray-100 font-montserrat pt-16 flex flex-col">
-    <header class="fixed top-0 bg-dark text-light h-16 w-full z-50">
-      <div
-        class="container flex justify-between m-auto h-full items-center px-10"
-      >
-        <a href="../home.html"> <h4 class="text-2xl font-bold">OASYS</h4></a>
-
-        <div class="w-4/12 grid grid-cols-3 font-semibold h-full items-center">
-          <a
-            href="../home.html"
-            class="h-full flex flex-col justify-center items-center hover:bg-gray-200 hover:text-gray-800 transition duration-300"
-          >
-            <h4>Devices</h4>
-          </a>
-
-          <a
-            href="#"
-            class="h-full flex justify-center items-center hover:bg-gray-200 hover:text-gray-800 transition duration-300"
-          >
-            <h4>Data</h4>
-          </a>
-
-          <a
-            href="#"
-            class="h-full flex justify-center items-center hover:bg-gray-200 hover:text-gray-800 transition duration-300"
-          >
-            <h4>About</h4>
-          </a>
-        </div>
-      </div>
-    </header>
+    <script src="../js/header.js"></script>
 
     <main class="min-h-screen">
       <!-- Tab selector -->
       <div class="tabs m-auto rounded-shadow flex flex-col z-50 bg-light">
         <div class="flex h-9">
-          <button id="data-tab-btn" class="tabBtn">DATA</button>
-          <button id="control-tab-btn" class="tabBtn activeTabBtn">
-            MISSION CONTROL
-          </button>
+          <button id="data-tab-btn" class="tabBtn activeTabBtn">DATA</button>
+          <button id="control-tab-btn" class="tabBtn">MISSION CONTROL</button>
         </div>
         <div id="tabUnderline" class="w-1/2 bg-dark h-1 duration-300"></div>
       </div>
 
       <!-- ********************* Data tab ********************* -->
-      <div id="data-tab" class="hidden container m-auto py-12 space-y-4">
+      <div id="data-tab" class="container m-auto py-12 space-y-4">
         <!-- Map-->
         <div class="rounded-shadow p-4 bg-light">
           <div id="dataMap" class="map h-full"></div>
@@ -176,7 +145,7 @@
       </div>
 
       <!-- ***************Mission Control Tab ***************** -->
-      <div id="control-tab" class="container m-auto py-12 space-y-4">
+      <div id="control-tab" class="hidden container m-auto py-12 space-y-4">
         <!-- Map -->
         <div class="rounded-shadow p-4 bg-light">
           <div id="missionMap" class="map h-full"></div>
@@ -382,6 +351,7 @@
     </script>
     <script src="../js/footer.js"></script>
     <script src="../js/firebase.js"></script>
+    <script src="../js/auth.js"></script>
     <script src="../js/chartjs-zoompan-plugin.js"></script>
     <script src="../js/charts.js"></script>
     <script src="../js/device.js"></script>

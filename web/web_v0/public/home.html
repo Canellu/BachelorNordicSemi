@@ -5,6 +5,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+    <!-- JSZIP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.5.0/jszip.min.js"></script>
+
     <!-- Firebase CORE -->
     <script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-app.js"></script>
 
@@ -30,28 +33,97 @@
 
     <!-- MATERIAL ICONS -->
     <link
-      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      href="https://fonts.googleapis.com/css?family=Material+Icons|Material+Icons+Outlined|Material+Icons+Two+Tone|Material+Icons+Round|Material+Icons+Sharp"
       rel="stylesheet"
     />
+
+    <!--  CUSTOM CSS -->
     <link rel="stylesheet" href="styles.css" />
     <title>Oasys</title>
   </head>
-  <body class="bg-gray-50 font-montserrat pt-16 flex flex-col">
+  <body class="bg-gray-100 font-montserrat pt-16 flex flex-col">
     <script src="js/header.js"></script>
 
-    <main class="h-full py-8 min-h-screen">
+    <main class="h-full py-8 min-h-screen space-y-6">
       <!--  MAP -->
       <div class="container px-20 m-auto map overflow-hidden">
-        <img src="assets/img/genshin_map.png" class="map" />
+        <img src="assets/img/genshin_map.png" class="map rounded-shadow" />
+      </div>
+
+      <!-- UPLOAD AND CREATE DEVICE bUTTONS -->
+      <div class="container px-20 m-auto flex space-x-4">
+        <button
+          class="activeBtnStyle rounded-shadow w-48 px-2 h-10 flex justify-center items-center font-medium tracking-wide cursor-pointer duration-200 border border-gray-100 hover:border-gray-400"
+        >
+          Add new Glider
+          <span class="material-icons-outlined ml-2"> add </span>
+        </button>
+        <button
+          onclick="showModal()"
+          class="activeBtnStyle rounded-shadow w-44 px-2 h-10 flex justify-center items-center font-medium tracking-wide cursor-pointer duration-200 border border-gray-100 hover:border-gray-400"
+        >
+          Upload Data
+          <span class="material-icons-outlined ml-2"> file_upload </span>
+        </button>
+      </div>
+
+      <!-- UPLOAD MODAL -->
+      <div
+        id="uploadModal"
+        class="w-screen h-screen fixed top-0 left-0 z-10 bg-opacity-60 bg-gray-800"
+      >
+        <div
+          id="uploadModalContent"
+          class="max-w-xl w-full h-full max-h-96 m-auto fixed top-40 left-1/2 transform -translate-x-1/2 bg-light rounded-shadow flex justify-center items-center pb-20 px-10 pt-8"
+        >
+          <!-- DRAG & DROP -->
+          <div
+            id="dragDropBox"
+            class="w-full h-full border-dashed border-2 rounded-lg p-4 border-gray-300 flex flex-col justify-center items-center relative"
+          >
+            <!-- Cloud Box -->
+            <div
+              id="cloudBox"
+              class="flex flex-col justfiy-center items-center pointer-events-none"
+            >
+              <span class="material-icons-outlined text-6xl text-gray-300">
+                cloud_upload
+              </span>
+              <p class="font-medium">Drag zip-file to upload</p>
+            </div>
+
+            <!-- Selected Files -->
+            <div id="selectedFiles" class="hidden h-full w-full flex flex-col">
+              <h1 class="font-medium tracking-wide">Content:</h1>
+              <div id="uploadFileList" class="h-full m-1 overflow-auto"></div>
+            </div>
+          </div>
+
+          <!-- Select file button -->
+          <button
+            onclick="uploadData()"
+            id="selectZipBtn"
+            class="w-56 px-2 h-10 flex justify-center items-center font-medium tracking-wide cursor-pointer duration-200 rounded-shadow transform text-sm bg-dark text-light absolute bottom-4"
+          >
+            Select zip-file to upload
+          </button>
+
+          <!-- BUTTON, FINISH, CLOSE MODAL -->
+          <button
+            class="activeBtnStyle rounded-shadow w-20 px-2 h-8 flex justify-center items-center font-medium cursor-pointer duration-200 border bg-gray-100 border-gray-100 hover:border-gray-400 absolute bottom-4 right-4 text-sm"
+          >
+            Done
+          </button>
+        </div>
       </div>
 
       <!--  GRID -->
       <div
         id="deviceGrid"
-        class="container px-20 m-auto pt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md: auto-cols-max gap-12"
+        class="container px-20 m-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md: auto-cols-max gap-12"
       >
         <!-- CARD -->
-        <a href="devices/device.html?gliderUID=1234">
+        <!-- <a href="devices/device.html?gliderUID=1234">
           <div class="card">
             <img
               class="object-cover center w-full h-44"
@@ -67,7 +139,6 @@
               <span class="material-icons text-3xl"> error </span>
             </div>
             <div class="w-full left-2 bg-gray-800 text-white p-2">
-              <!-- <i class="far fa-clock fa-lg mr-2"></i> -->
               <p class="tracking-wide text-center">Last sync: 20-03-04</p>
             </div>
 
@@ -77,12 +148,13 @@
               G1233
             </div>
           </div>
-        </a>
+        </a> -->
       </div>
     </main>
 
     <script src="js/footer.js"></script>
     <script src="js/firebase.js"></script>
+    <script src="js/auth.js"></script>
     <script src="js/firestore.js"></script>
     <script src="js/home.js"></script>
   </body>

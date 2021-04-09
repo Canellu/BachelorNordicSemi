@@ -1,10 +1,3 @@
-// Log out method
-const logout = document.querySelector("#logout");
-logout.addEventListener("click", async (e) => {
-  await auth.signOut();
-  location.replace("index.html");
-});
-
 async function createCard(uid, alias, sync, img) {
   let html = ` 
     <a href="devices/device.html?gliderUID=${uid}">
@@ -58,5 +51,68 @@ async function getGliderFields(gliderID) {
   let sync = data.data()["Last sync"];
   createCard(uid, alias, sync, images[randNum(0, 5)]);
 }
+
+let modal = document.querySelector("#uploadModal");
+function showModal() {
+  modal.classList.remove("hidden");
+  modal.addEventListener("wheel", (e) => {
+    e.preventDefault();
+  });
+  document.querySelector("#selectedFiles").classList.add("hidden");
+  document.querySelector("#cloudBox").classList.remove("hidden");
+}
+
+modal.addEventListener("mouseup", (e) => {
+  let zipBtn = document.querySelector("#selectZipBtn");
+  let selectBtn = document.querySelector("#dragDropBox");
+  let content = document.querySelector("#uploadModalContent");
+  let condition =
+    e.target != zipBtn && e.target != selectBtn && e.target != content;
+  if (condition) {
+    modal.classList.add("hidden");
+  }
+});
+let uploadFileListDiv = document.querySelector("#uploadFileList");
+
+function uploadData() {
+  uploadFileListDiv.innerHTML = "";
+
+  let input = document.createElement("input");
+  input.setAttribute("multiple", "");
+  input.type = "file";
+
+  input.onchange = async (e) => {
+    // you can use this method to get file and perform respective operations
+    let zipFiles = Array.from(input.files);
+    zipFiles.forEach((zip) => {
+      let zipFileHTML = `<p>${zip.name}</p>`;
+      uploadFileListDiv.innerHTML += zipFileHTML;
+    });
+
+    var zipHolder = new JSZip();
+    // more files !
+    let zipContent = await zipHolder.loadAsync(zipFiles[0]);
+
+    console.time("Timer");
+    let awaits = [];
+    for (let key in zipContent.files) {
+      awaits.push(zipContent.file(key).async("string"));
+    }
+    let contents = await Promise.all(awaits);
+    console.log(contents);
+    console.timeEnd("Timer");
+
+    document.querySelector("#selectedFiles").classList.remove("hidden");
+    document.querySelector("#cloudBox").classList.add("hidden");
+  };
+
+  input.click();
+}
+
+uploadFileListDiv.addEventListener("wheel", (e) => {
+  e.preventDefault();
+  let scrollTo = e.wheelDelta * -(50 / 100);
+  uploadFileListDiv.scrollTop = scrollTo + uploadFileListDiv.scrollTop;
+});
 
 createAllCards();

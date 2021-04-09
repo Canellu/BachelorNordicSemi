@@ -122,22 +122,3 @@ async function createGliderData() {
 
 // createGliders();
 // createGliderData();
-
-// TODO
-async function getDocs() {
-  const dataCollectionG1 = db
-    .collection("Gliders")
-    .doc("807381")
-    .collection("Missions");
-  const docs = await dataCollectionG1.get();
-
-  docs.forEach((doc) => {
-    console.log("Getting missions...");
-    console.log(doc.id);
-    // var fieldList = Object.keys(doc.data());
-    // console.log(fieldList);
-    // console.log(doc.data()[fieldList[0]]);
-  });
-}
-
-// getDocs();
