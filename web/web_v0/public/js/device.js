@@ -9,6 +9,8 @@ var dropDownContent = document.querySelector(".dropDownContent");
 // DATA TAB BUTTON
 dataTabBtn.addEventListener("click", () => {
   tabUnderline.style.transform = "";
+  dataTabBtn.classList.add("activeTabBtn");
+  controlTabBtn.classList.remove("activeTabBtn");
   dataTab.classList.remove("hidden");
   controlTab.classList.add("hidden");
   listMissions();
@@ -17,6 +19,8 @@ dataTabBtn.addEventListener("click", () => {
 // MISSION CONTROL TAB BUTTON
 controlTabBtn.addEventListener("click", () => {
   tabUnderline.style.transform = "translateX(100%)";
+  dataTabBtn.classList.remove("activeTabBtn");
+  controlTabBtn.classList.add("activeTabBtn");
   controlTab.classList.remove("hidden");
   dataTab.classList.add("hidden");
   if (typeof missionMap == "undefined") {

@@ -206,11 +206,23 @@ body {
   transform: scale(1.05);
 }
 
+.activeTabBtn {
+  @apply text-dark;
+}
+
 .chartRangeBtn:active,
 .activeBtn:active,
 .chartBtn:active,
 .activeBtnStyle:active {
   @apply bg-dark text-light;
+}
+
+.reverseActiveBtnStyle:active {
+  @apply bg-light text-dark;
+}
+
+.disableBtn {
+  @apply pointer-events-none shadow-none bg-gray-200 text-gray-400;
 }
 
 .noUi-handle {

@@ -74,11 +74,21 @@
       >
         <div
           id="uploadModalContent"
-          class="max-w-xl w-full h-full max-h-96 m-auto fixed top-40 left-1/2 transform -translate-x-1/2 bg-light rounded-shadow flex justify-center items-center pb-20 px-10 pt-8"
+          class="max-w-xl w-full h-full max-h-96 m-auto fixed top-40 left-1/2 transform -translate-x-1/2 bg-light rounded-shadow flex flex-col justify-center items-center p-8 space-y-4"
         >
+          <button
+            id="closeModalBtn"
+            onclick="hideModal()"
+            class="absolute right-2 top-2 flex rounded-full hover:bg-gray-300 duration-200 p-1"
+          >
+            <span class="material-icons-outlined"> close </span>
+          </button>
           <!-- DRAG & DROP -->
           <div
             id="dragDropBox"
+            ondrop="dropHandler(event);"
+            ondragover="dragOverHandler(event);"
+            ondragleave="dragOverLeave(event)"
             class="w-full h-full border-dashed border-2 rounded-lg p-4 border-gray-300 flex flex-col justify-center items-center relative"
           >
             <!-- Cloud Box -->
@@ -93,27 +103,41 @@
             </div>
 
             <!-- Selected Files -->
-            <div id="selectedFiles" class="hidden h-full w-full flex flex-col">
-              <h1 class="font-medium tracking-wide">Content:</h1>
-              <div id="uploadFileList" class="h-full m-1 overflow-auto"></div>
+            <div id="selectedFiles" class="hidden w-full h-full flex flex-col">
+              <h1 class="font-medium tracking-wide">Files to upload:</h1>
+              <div
+                id="uploadFileList"
+                class="overflow-auto h-44 max-h-44 space-y-1 mt-2 text-sm"
+              ></div>
             </div>
           </div>
 
-          <!-- Select file button -->
-          <button
-            onclick="uploadData()"
-            id="selectZipBtn"
-            class="w-56 px-2 h-10 flex justify-center items-center font-medium tracking-wide cursor-pointer duration-200 rounded-shadow transform text-sm bg-dark text-light absolute bottom-4"
-          >
-            Select zip-file to upload
-          </button>
+          <!-- BUTTON ROW -->
+          <div id="modalBtnRow" class="w-full h-10 flex">
+            <!-- Select file button -->
+            <button
+              onclick="uploadData()"
+              id="selectZipBtn"
+              class="reverseActiveBtnStyle border border-gray-800 rounded-md shadow-md text-light w-52 px-2 flex justify-center items-center font-medium cursor-pointer duration-200 bg-dark text-sm mr-32"
+            >
+              Select zip-file to upload
+            </button>
 
-          <!-- BUTTON, FINISH, CLOSE MODAL -->
-          <button
-            class="activeBtnStyle rounded-shadow w-20 px-2 h-8 flex justify-center items-center font-medium cursor-pointer duration-200 border bg-gray-100 border-gray-100 hover:border-gray-400 absolute bottom-4 right-4 text-sm"
-          >
-            Done
-          </button>
+            <!-- CONFIRM/CANCEL BUTTONS -->
+            <button
+              id="confirmBtn"
+              class="activeBtnStyle rounded-shadow w-20 px-2 flex justify-center items-center font-medium cursor-pointer duration-200 border bg-gray-50 border-gray-100 hover:border-gray-400 text-sm mr-3 disableBtn"
+            >
+              Confirm
+            </button>
+            <button
+              id="cancelBtn"
+              onclick="hideModal()"
+              class="activeBtnStyle rounded-shadow w-20 px-2 flex justify-center items-center font-medium cursor-pointer duration-200 border bg-gray-50 border-gray-100 hover:border-gray-400 text-sm"
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       </div>
 
@@ -150,6 +174,12 @@
           </div>
         </a> -->
       </div>
+
+      <div class="h-96"></div>
+      <div class="h-96"></div>
+      <div class="h-96"></div>
+      <div class="h-96"></div>
+      <div class="h-96"></div>
     </main>
 
     <script src="js/footer.js"></script>

@@ -1,3 +1,4 @@
+// ****************** CARD-GRID SECTION ******************
 async function createCard(uid, alias, sync, img) {
   let html = ` 
     <a href="devices/device.html?gliderUID=${uid}">
@@ -43,6 +44,7 @@ const images = [
   "assets/img/water2.jpg",
   "assets/img/fishies.jpg",
 ];
+
 async function getGliderFields(gliderID) {
   const glider = db.collection("Gliders").doc(gliderID);
   let data = await glider.get();
@@ -52,30 +54,45 @@ async function getGliderFields(gliderID) {
   createCard(uid, alias, sync, images[randNum(0, 5)]);
 }
 
+// ************** FILE UPLOAD SECTION *********************
 let modal = document.querySelector("#uploadModal");
+let dropBox = document.querySelector("#dragDropBox");
+let uploadFileListDiv = document.querySelector("#uploadFileList");
+let content = document.querySelector("#uploadModalContent");
+let btnRow = document.querySelector("#modalBtnRow");
+let zipBtn = document.querySelector("#selectZipBtn");
+let confirmBtn = document.querySelector("#confirmBtn");
+
 function showModal() {
   modal.classList.remove("hidden");
   modal.addEventListener("wheel", (e) => {
     e.preventDefault();
   });
+  uploadFileListDiv.innerHTML = "";
   document.querySelector("#selectedFiles").classList.add("hidden");
   document.querySelector("#cloudBox").classList.remove("hidden");
+  confirmBtn.classList.add("disableBtn");
 }
 
+function hideModal() {
+  modal.classList.add("hidden");
+}
+
+// REMOVE MAYBE? CUZ OF DOUBLE CLICK ISSUE ON FILE SELECT
 modal.addEventListener("mouseup", (e) => {
-  let zipBtn = document.querySelector("#selectZipBtn");
-  let selectBtn = document.querySelector("#dragDropBox");
-  let content = document.querySelector("#uploadModalContent");
   let condition =
-    e.target != zipBtn && e.target != selectBtn && e.target != content;
+    e.target != zipBtn &&
+    e.target != btnRow &&
+    e.target != content &&
+    e.target != dropBox;
   if (condition) {
     modal.classList.add("hidden");
   }
 });
-let uploadFileListDiv = document.querySelector("#uploadFileList");
 
 function uploadData() {
   uploadFileListDiv.innerHTML = "";
+  confirmBtn.classList.add("disableBtn");
 
   let input = document.createElement("input");
   input.setAttribute("multiple", "");
@@ -85,28 +102,57 @@ function uploadData() {
     // you can use this method to get file and perform respective operations
     let zipFiles = Array.from(input.files);
     zipFiles.forEach((zip) => {
-      let zipFileHTML = `<p>${zip.name}</p>`;
+      let zipFileHTML = `<p class="border-b">${zip.name}</p>`;
       uploadFileListDiv.innerHTML += zipFileHTML;
     });
 
-    var zipHolder = new JSZip();
-    // more files !
-    let zipContent = await zipHolder.loadAsync(zipFiles[0]);
+    // var zipHolder = new JSZip();
+    // let zipContent = await zipHolder.loadAsync(zipFiles[0]);
 
-    console.time("Timer");
-    let awaits = [];
-    for (let key in zipContent.files) {
-      awaits.push(zipContent.file(key).async("string"));
-    }
-    let contents = await Promise.all(awaits);
-    console.log(contents);
-    console.timeEnd("Timer");
+    // console.time("Timer");
+    // let awaits = [];
+    // for (let key in zipContent.files) {
+    //   awaits.push(zipContent.file(key).async("string"));
+    // }
+    // let contents = await Promise.all(awaits);
+    // console.log(contents);
+    // console.timeEnd("Timer");
 
     document.querySelector("#selectedFiles").classList.remove("hidden");
     document.querySelector("#cloudBox").classList.add("hidden");
+    confirmBtn.classList.remove("disableBtn");
   };
 
   input.click();
+}
+
+function dropHandler(e) {
+  e.preventDefault(); // Prevent file from being insta-opened
+
+  let zipFiles = Array.from(e.dataTransfer.items);
+  zipFiles.forEach((zip) => {
+    let zipFile = zip.getAsFile();
+    let zipFileHTML = `<p class="border-b">${zipFile.name}</p>`;
+    uploadFileListDiv.innerHTML += zipFileHTML;
+  });
+
+  document.querySelector("#selectedFiles").classList.remove("hidden");
+  document.querySelector("#cloudBox").classList.add("hidden");
+  confirmBtn.classList.remove("disableBtn");
+  dropBox.style.borderColor = "#D1D5DB";
+}
+
+function dragOverHandler(e) {
+  uploadFileListDiv.innerHTML = "";
+  document.querySelector("#selectedFiles").classList.add("hidden");
+  document.querySelector("#cloudBox").classList.remove("hidden");
+  confirmBtn.classList.add("disableBtn");
+  dropBox.style.borderColor = "#5F7EA9";
+  e.preventDefault();
+}
+
+function dragOverLeave(e) {
+  dropBox.style.borderColor = "#D1D5DB";
 }
 
 uploadFileListDiv.addEventListener("wheel", (e) => {
