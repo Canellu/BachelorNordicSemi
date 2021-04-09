@@ -104,7 +104,7 @@ async function applySelection() {
 
     const missions = await db
       .collection("Gliders")
-      .doc("311910")
+      .doc(gliderUID)
       .collection("Missions")
       .get();
 

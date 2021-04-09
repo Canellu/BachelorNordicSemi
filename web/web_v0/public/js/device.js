@@ -69,7 +69,7 @@ async function listMissions() {
   // All mission documents for this glider
   let missions = await db
     .collection("Gliders")
-    .doc("311910")
+    .doc(gliderUID)
     .collection("Missions")
     .get();
 
@@ -132,7 +132,7 @@ async function getMissionData(missionName) {
   // Specific mission document
   let mission = await db
     .collection("Gliders")
-    .doc("311910")
+    .doc(gliderUID)
     .collection("Missions")
     .doc(missionName);
 

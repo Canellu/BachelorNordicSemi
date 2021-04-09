@@ -375,7 +375,11 @@
         <div class="terminal h-96"></div>
       </div>
     </main>
-
+    <script>
+      let gliderUID = new URLSearchParams(window.location.search).get(
+        "gliderUID"
+      );
+    </script>
     <script src="../js/footer.js"></script>
     <script src="../js/firebase.js"></script>
     <script src="../js/chartjs-zoompan-plugin.js"></script>

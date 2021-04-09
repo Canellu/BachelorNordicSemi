@@ -288,7 +288,7 @@ yesMissionParamsBtn.addEventListener("click", async () => {
 
   // let missions = await db
   //   .collection("Gliders")
-  //   .doc("311910")
+  //   .doc(gliderUID)
   //   .collection("Missions")
   //   .doc(latestMissionNumber)
   //   .set(missionParameters);
