@@ -222,7 +222,7 @@ body {
 }
 
 .disableBtn {
-  @apply pointer-events-none shadow-none bg-gray-200 text-gray-400;
+  @apply pointer-events-none shadow-none bg-gray-200 text-gray-400 border-gray-200;
 }
 
 .noUi-handle {

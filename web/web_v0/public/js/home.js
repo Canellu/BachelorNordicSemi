@@ -62,6 +62,8 @@ let content = document.querySelector("#uploadModalContent");
 let btnRow = document.querySelector("#modalBtnRow");
 let zipBtn = document.querySelector("#selectZipBtn");
 let confirmBtn = document.querySelector("#confirmBtn");
+let cloudBox = document.querySelector("#cloudBox");
+let selectedBox = document.querySelector("#selectedFiles");
 
 function showModal() {
   modal.classList.remove("hidden");
@@ -69,8 +71,8 @@ function showModal() {
     e.preventDefault();
   });
   uploadFileListDiv.innerHTML = "";
-  document.querySelector("#selectedFiles").classList.add("hidden");
-  document.querySelector("#cloudBox").classList.remove("hidden");
+  selectedBox.classList.add("hidden");
+  cloudBox.classList.remove("hidden");
   confirmBtn.classList.add("disableBtn");
 }
 
@@ -118,8 +120,8 @@ function uploadData() {
     // console.log(contents);
     // console.timeEnd("Timer");
 
-    document.querySelector("#selectedFiles").classList.remove("hidden");
-    document.querySelector("#cloudBox").classList.add("hidden");
+    selectedBox.classList.remove("hidden");
+    cloudBox.classList.add("hidden");
     confirmBtn.classList.remove("disableBtn");
   };
 
@@ -136,16 +138,16 @@ function dropHandler(e) {
     uploadFileListDiv.innerHTML += zipFileHTML;
   });
 
-  document.querySelector("#selectedFiles").classList.remove("hidden");
-  document.querySelector("#cloudBox").classList.add("hidden");
+  selectedBox.classList.remove("hidden");
+  cloudBox.classList.add("hidden");
   confirmBtn.classList.remove("disableBtn");
   dropBox.style.borderColor = "#D1D5DB";
 }
 
 function dragOverHandler(e) {
   uploadFileListDiv.innerHTML = "";
-  document.querySelector("#selectedFiles").classList.add("hidden");
-  document.querySelector("#cloudBox").classList.remove("hidden");
+  selectedBox.classList.add("hidden");
+  cloudBox.classList.remove("hidden");
   confirmBtn.classList.add("disableBtn");
   dropBox.style.borderColor = "#5F7EA9";
   e.preventDefault();

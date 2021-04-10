@@ -53,14 +53,14 @@
       <!-- UPLOAD AND CREATE DEVICE bUTTONS -->
       <div class="container px-20 m-auto flex space-x-4">
         <button
-          class="activeBtnStyle rounded-shadow w-48 px-2 h-10 flex justify-center items-center font-medium tracking-wide cursor-pointer duration-200 border border-gray-100 hover:border-gray-400"
+          class="activeBtnStyle rounded-shadow w-48 px-2 h-10 flex justify-center items-center font-medium tracking-wide cursor-pointer duration-200 border bg-light hover:border-gray-400"
         >
           Add new Glider
           <span class="material-icons-outlined ml-2"> add </span>
         </button>
         <button
           onclick="showModal()"
-          class="activeBtnStyle rounded-shadow w-44 px-2 h-10 flex justify-center items-center font-medium tracking-wide cursor-pointer duration-200 border border-gray-100 hover:border-gray-400"
+          class="activeBtnStyle rounded-shadow w-44 px-2 h-10 flex justify-center items-center font-medium tracking-wide cursor-pointer duration-200 border bg-light hover:border-gray-400"
         >
           Upload Data
           <span class="material-icons-outlined ml-2"> file_upload </span>
@@ -74,7 +74,7 @@
       >
         <div
           id="uploadModalContent"
-          class="max-w-xl w-full h-full max-h-96 m-auto fixed top-40 left-1/2 transform -translate-x-1/2 bg-light rounded-shadow flex flex-col justify-center items-center p-8 space-y-4"
+          class="max-w-xl w-full h-full max-h-96 m-auto fixed top-40 left-1/2 transform -translate-x-1/2 bg-gray-100 rounded-shadow flex flex-col justify-center items-center p-8 space-y-4"
         >
           <button
             id="closeModalBtn"
@@ -118,7 +118,7 @@
             <button
               onclick="uploadData()"
               id="selectZipBtn"
-              class="reverseActiveBtnStyle border border-gray-800 rounded-md shadow-md text-light w-52 px-2 flex justify-center items-center font-medium cursor-pointer duration-200 bg-dark text-sm mr-32"
+              class="activeBtnStyle rounded-shadow w-52 px-2 flex justify-center items-center font-medium cursor-pointer duration-200 text-sm mr-32 bg-light text-dark hover:border-gray-800"
             >
               Select zip-file to upload
             </button>
@@ -126,14 +126,14 @@
             <!-- CONFIRM/CANCEL BUTTONS -->
             <button
               id="confirmBtn"
-              class="activeBtnStyle rounded-shadow w-20 px-2 flex justify-center items-center font-medium cursor-pointer duration-200 border bg-gray-50 border-gray-100 hover:border-gray-400 text-sm mr-3 disableBtn"
+              class="activeBtnStyle rounded-shadow w-20 px-2 flex justify-center items-center font-medium cursor-pointer duration-200 bg-light border-gray-100 hover:border-gray-400 text-sm mr-3 disableBtn"
             >
               Confirm
             </button>
             <button
               id="cancelBtn"
               onclick="hideModal()"
-              class="activeBtnStyle rounded-shadow w-20 px-2 flex justify-center items-center font-medium cursor-pointer duration-200 border bg-gray-50 border-gray-100 hover:border-gray-400 text-sm"
+              class="activeBtnStyle rounded-shadow w-20 px-2 flex justify-center items-center font-medium cursor-pointer duration-200 bg-light border-gray-100 hover:border-gray-400 text-sm"
             >
               Cancel
             </button>
