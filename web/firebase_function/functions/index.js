@@ -3,6 +3,7 @@ const iot = require("@google-cloud/iot");
 
 // The Firebase Admin SDK to access Firestore.
 const admin = require("firebase-admin");
+
 admin.initializeApp();
 
 const db = admin.firestore();
@@ -30,8 +31,8 @@ exports.fromFirestoreToNRF = functions
     // TODO: Check only for changes in commands, do not send all
     // compare change.before with change.after
     const data = change.after.data();
-    console.log(data);
 
+    console.log(data);
     const stringData = JSON.stringify(data);
     const binaryData = Buffer.from(stringData);
     const request = {
