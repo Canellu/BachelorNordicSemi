@@ -55,6 +55,8 @@ async function getGliderFields(gliderID) {
 }
 
 // ************** FILE UPLOAD SECTION *********************
+let fileObjectList = [];
+
 let modal = document.querySelector("#uploadModal");
 let dropBox = document.querySelector("#dragDropBox");
 let uploadFileListDiv = document.querySelector("#uploadFileList");
@@ -81,18 +83,90 @@ function hideModal() {
 }
 
 // REMOVE MAYBE? CUZ OF DOUBLE CLICK ISSUE ON FILE SELECT
-modal.addEventListener("mouseup", (e) => {
-  let condition =
-    e.target != zipBtn &&
-    e.target != btnRow &&
-    e.target != content &&
-    e.target != dropBox;
-  if (condition) {
-    modal.classList.add("hidden");
+// modal.addEventListener("mouseup", (e) => {
+//   let condition =
+//     e.target != zipBtn &&
+//     e.target != btnRow &&
+//     e.target != content &&
+//     e.target != dropBox;
+//   if (condition) {
+//     modal.classList.add("hidden");
+//   }
+// });
+
+async function getFilesFromZip(zipFile) {
+  var zipHolder = new JSZip();
+  let zipContent = await zipHolder.loadAsync(zipFile);
+
+  let fileNames = [];
+
+  let awaits = [];
+  for (let key in zipContent.files) {
+    fileNames.push(key);
+    awaits.push(zipContent.file(key).async("string"));
   }
-});
+  let fileContents = await Promise.all(awaits);
+
+  fileNames.forEach((name, index) => {
+    let fileObject = {};
+    fileObject[name] = fileContents[index];
+
+    fileObjectList.push(fileObject);
+  });
+}
+
+// function strBetween(text, str1, str2){
+
+// }
+
+function uploadToFirebase() {
+  fileObjectList.forEach((fileObject) => {
+    let fileName = Object.keys(fileObject)[0];
+
+    let gliderID = fileName.slice(0, 6);
+    let missionNum = fileName.substring(
+      fileName.lastIndexOf("ID") + 2,
+      fileName.lastIndexOf("M")
+    );
+
+    let dateRaw = fileName.substring(
+      fileName.lastIndexOf("M") + 1,
+      fileName.lastIndexOf(".")
+    );
+    let date =
+      dateRaw.substring(0, 4) +
+      "-" +
+      dateRaw.substring(4, 6) +
+      "-" +
+      dateRaw.substring(6, 8);
+
+    let dateValue = {};
+
+    fileObject[fileName].split("&").forEach((row) => {
+      try {
+        let JSONRow = JSON.parse(row);
+        let timestamp = Object.keys(JSONRow)[0];
+        let value = JSON.stringify(JSONRow[timestamp]).slice(1, -1);
+        dateValue[timestamp] = value;
+      } catch (e) {
+        console.log("not JSON");
+      }
+    });
+
+    // db.collection("Gliders")
+    //   .doc(gliderID)
+    //   .collection("Missions")
+    //   .doc("Mission " + missionNum)
+    //   .collection("Data")
+    //   .doc(date)
+    //   .set(dateValue, { merge: true });
+  });
+  let uploadSuccessDiv = document.querySelector("#uploadSuccess");
+  uploadSuccessDiv.classList.remove("hidden");
+}
 
 function uploadData() {
+  fileObjectList = [];
   uploadFileListDiv.innerHTML = "";
   confirmBtn.classList.add("disableBtn");
 
@@ -106,19 +180,8 @@ function uploadData() {
     zipFiles.forEach((zip) => {
       let zipFileHTML = `<p class="border-b">${zip.name}</p>`;
       uploadFileListDiv.innerHTML += zipFileHTML;
+      getFilesFromZip(zip);
     });
-
-    // var zipHolder = new JSZip();
-    // let zipContent = await zipHolder.loadAsync(zipFiles[0]);
-
-    // console.time("Timer");
-    // let awaits = [];
-    // for (let key in zipContent.files) {
-    //   awaits.push(zipContent.file(key).async("string"));
-    // }
-    // let contents = await Promise.all(awaits);
-    // console.log(contents);
-    // console.timeEnd("Timer");
 
     selectedBox.classList.remove("hidden");
     cloudBox.classList.add("hidden");
@@ -129,6 +192,7 @@ function uploadData() {
 }
 
 function dropHandler(e) {
+  fileObjectList = [];
   e.preventDefault(); // Prevent file from being insta-opened
 
   let zipFiles = Array.from(e.dataTransfer.items);
@@ -136,6 +200,7 @@ function dropHandler(e) {
     let zipFile = zip.getAsFile();
     let zipFileHTML = `<p class="border-b">${zipFile.name}</p>`;
     uploadFileListDiv.innerHTML += zipFileHTML;
+    getFilesFromZip(zip);
   });
 
   selectedBox.classList.remove("hidden");
