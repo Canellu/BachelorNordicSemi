@@ -602,6 +602,25 @@ static int gcloud_module()
 	return 0;
 }
 
+static int satellite_module()
+{
+
+	printk("\n\npress button 1 to start satellite test\n\n");
+	button_wait();
+
+	uart_start(uart_dev1);
+
+	uart_send(uart_dev1, "AT\r", strlen("AT\r"));
+
+	k_sleep(K_MSEC(2000));
+	uart_send(uart_dev1, "AT+CGSN\r", strlen("AT+CGSN\r"));
+
+	k_sleep(K_MSEC(2000));
+	uart_exit(uart_dev1);
+
+	return 0;
+}
+
 /* MAIN */
 
 void main(void)
@@ -614,9 +633,9 @@ void main(void)
 	message_queue_init();
 
 	// sd card thread
-	sd_tid = k_thread_create(&sd_thread, sd_stack_area, K_THREAD_STACK_SIZEOF(sd_stack_area),
-							 (k_thread_entry_t)app_sd_thread, NULL, NULL, NULL,
-							 7, 0, K_NO_WAIT);
+	// sd_tid = k_thread_create(&sd_thread, sd_stack_area, K_THREAD_STACK_SIZEOF(sd_stack_area),
+	// 						 (k_thread_entry_t)app_sd_thread, NULL, NULL, NULL,
+	// 						 7, 0, K_NO_WAIT);
 
 	printk("\n\n**** NordicOasys v0.5 - Started ****\n\n");
 	printk("press button 1 to start\n\n");
@@ -634,7 +653,9 @@ void main(void)
 
 		// sd_module();
 
-		gcloud_module();
+		// gcloud_module();
+
+		satellite_module();
 
 		// printk("\npress button 1 to start mqtt\n");
 		// printk("press button 2 to start wifi\n\n");
@@ -664,4 +685,54 @@ void main(void)
 
 - Save messages received from MQTT into array similar to data.
 
+*/
+
+
+/* CURRENT FLOW FOR HOW MISSION SEQUENCE WILL OPERATE
+
+1st time start (1 way to test is if .txt file for mission params exist):
+	-turn on UART peripherals, SD card module
+	-wait for local (wifi) connection trigger
+		--might have to be separate thread so that it can be interrupted whenever triggered
+	-get gps fix
+	-search for 4G connection to upload mission params
+		--this is necessary whenever it gets parameters through wifi
+	-get to first waypoint (signifies start of mission)
+	-idle until start time
+		--might have to periodically get gps fix to see if time/position is synchronized
+
+If local wifi is triggered:
+	-enable wifi module (send data, receive commands)
+	-get gps fix
+	-search for 4G connection to upload mission params
+		--this is necessary whenever it gets parameters through wifi
+	-get to first waypoint (signifies start of mission)
+	-idle until start time
+		--might have to periodically get gps fix to see if time/position is synchronized
+
+
+If mission is sent through 4G:
+	-get gps fix
+	-get to first waypoint (signifies start of mission)
+	-idle until start time
+		--might have to periodically get gps fix to see if time/position is synchronized
+
+
+Mission loop:
+	-send dive command
+	-start sensor readings
+		--send timestamp to sensors for logging purposes
+	-save readings to sd card
+	-on resurface:
+		--get gps fix
+		--turn on 4G
+			---on success, send data, check for changes in commands (CHECK CLOUD FUNCTION LOGIC FOR SENDING CONFIGURATIONS INSTEAD OF ONE-TIME COMMANDS)
+			---else, turn on satellite modem and send gps location + health status
+	-continue dive
+	-repeat until last waypoint
+	-get gps fix
+	-turn on 4G
+		--check if any new missions
+		--else, idle
+			---periodically check 4G for any new missions, else enable satellite modem to send gps location + health status
 */
