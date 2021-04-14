@@ -32173,6 +32173,55 @@ body {
   border: 1px solid red;
 }
 
+.uploadSuccess {
+  -webkit-animation: slideIn 5s ease-in-out forwards;
+          animation: slideIn 5s ease-in-out forwards;
+}
+
+@-webkit-keyframes slideIn {
+  0% {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+
+  10% {
+    transform: translateX(0%);
+    opacity: 1;
+  }
+
+  90% {
+    transform: translateX(0%);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+}
+
+@keyframes slideIn {
+  0% {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+
+  10% {
+    transform: translateX(0%);
+    opacity: 1;
+  }
+
+  90% {
+    transform: translateX(0%);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+}
+
 @media (min-width: 640px){
   .sm\:container{
     width: 100%;

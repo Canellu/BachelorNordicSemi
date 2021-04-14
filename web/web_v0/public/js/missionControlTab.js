@@ -263,7 +263,24 @@ yesMissionParamsBtn.addEventListener("click", async () => {
   sliderPreviews.forEach((preview) => {
     let propertyName = preview.id.replace("preview", "");
     let propertyVal = preview.innerText;
-    // console.log({ propertyName, propertyVal });
+    console.log({ propertyName, propertyVal });
+    switch (propertyName) {
+      case "Conductivity":
+        propertyName = "C";
+        break;
+      case "Pressure":
+        propertyName = "P";
+        break;
+      case "Temperature":
+        propertyName = "T";
+        break;
+      case "MinDepth":
+        propertyName = "minD";
+        break;
+      case "MaxDepth":
+        propertyName = "maxD";
+        break;
+    }
     missionParameters[propertyName] = propertyVal;
   });
 
@@ -277,7 +294,7 @@ yesMissionParamsBtn.addEventListener("click", async () => {
     waypointsToSend.push(`${lat}, ${lng}`);
   });
 
-  missionParameters["Waypoints"] = waypointsToSend;
+  missionParameters["WP"] = waypointsToSend;
 
   let latestMissionNumber = document.querySelector("#latestMissionNumber")
     .innerText;

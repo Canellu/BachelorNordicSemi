@@ -162,7 +162,26 @@ function uploadToFirebase() {
     //   .set(dateValue, { merge: true });
   });
   let uploadSuccessDiv = document.querySelector("#uploadSuccess");
-  uploadSuccessDiv.classList.remove("hidden");
+  generatePopup();
+}
+
+let popUpCount = 0;
+function generatePopup() {
+  let popUpHTML = `
+    <div
+      id="uploadSuccess${popUpCount}"
+      class="uploadSuccess h-14 w-56 bg-green-400 flex justify-center items-center rounded-shadow border-green-800 fixed right-10 bottom-20 font-medium z-10 pointer-events-none"
+    >
+      Upload successful
+    </div>`;
+  modal.innerHTML += popUpHTML;
+  setTimeout(() => {
+    let div = document.querySelector(`#uploadSuccess${popUpCount}`);
+    console.log(div);
+    div.remove();
+    console.log("Removing");
+  }, 3000);
+  popUpCount++;
 }
 
 function uploadData() {
