@@ -1,5 +1,6 @@
 const functions = require("firebase-functions");
 const iot = require("@google-cloud/iot");
+const moment = require("moment-timezone");
 
 // The Firebase Admin SDK to access Firestore.
 const admin = require("firebase-admin");
@@ -67,3 +68,40 @@ exports.fromNRFtoFirestore = functions
       console.error("PubSub message was not JSON", e);
     }
   });
+
+exports.satellite = functions.https.onRequest(async (req, res) => {
+  function hex_to_ascii(str1) {
+    let hex = str1.toString();
+    let str = "";
+    for (var n = 0; n < hex.length; n += 2) {
+      str += String.fromCharCode(parseInt(hex.substr(n, 2), 16));
+    }
+    return str;
+  }
+
+  let payload = JSON.parse(req.rawBody.toString());
+  let gliders = await db.collection("Gliders").get();
+
+  gliders.forEach(async (glider) => {
+    let gliderFields = await db.collection("Gliders").doc(glider.id).get();
+
+    if (gliderFields.data()["Sat IMEI"] == payload.imei) {
+      let utcDate = moment(
+        "20" + payload.transmit_time.replace(" ", "T") + "Z"
+      );
+      let localTime = utcDate.tz("Europe/Oslo").format("YYYY-MM-DD HH:mm:ss");
+
+      db.collection("Gliders")
+        .doc(glider.id)
+        .set(
+          {
+            "Last seen": hex_to_ascii(payload.data),
+            "Last sync": localTime,
+          },
+          { merge: true }
+        );
+    }
+  });
+
+  res.status(200).send();
+});
