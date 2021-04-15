@@ -17,11 +17,8 @@
 #include "app_uart.h"
 #include "app_sd.h"
 
+extern struct k_msgq main_msg_q;
 extern struct k_msgq sd_msg_q;
-
-uint16_t current_year = -1;
-uint8_t current_month = -1;
-uint8_t current_day = -1;
 
 static FATFS fat_fs;
 /* mounting info */
@@ -79,6 +76,53 @@ static int lsdir(const char *path)
 	return res;
 }
 
+static int look_for_file(const char *path, const char *filename)
+{
+	int res;
+	struct fs_dir_t dirp;
+	static struct fs_dirent entry;
+
+	bool mission_params = false;
+
+	res = fs_opendir(&dirp, path);
+	if (res)
+	{
+		printk("Error opening dir %s [%d]\n", path, res);
+		return res;
+	}
+
+	while (1)
+	{
+		/* Verify fs_readdir() */
+		res = fs_readdir(&dirp, &entry);
+
+		/* entry.name[0] == 0 means end-of-dir */
+		if (res || entry.name[0] == 0)
+		{
+			break;
+		}
+
+		if (entry.type == FS_DIR_ENTRY_FILE)
+		{
+			printk("%s\n", entry.name);
+
+			if (strcmp(entry.name, filename) == 0)
+			{
+				mission_params = true;
+
+				k_msgq_put(&main_msg_q, &mission_params, K_NO_WAIT);
+
+				return 0;
+			}
+		}
+	}
+
+	printk("File not found\n");
+	k_msgq_put(&main_msg_q, &mission_params, K_NO_WAIT);
+
+	return 0;
+}
+
 static int send_all_file_info(const char *path)
 {
 	int res;
@@ -125,36 +169,6 @@ static int send_all_file_info(const char *path)
 	return 0;
 }
 
-static int create_file_name(char *file_name, oasys_data_t *sd_msg)
-{
-
-	// test date vs currently saved
-	if (current_year != sd_msg->year || current_month != sd_msg->month || current_day != sd_msg->day)
-	{
-		// update date
-		current_year = sd_msg->year;
-		current_month = sd_msg->month;
-		current_day = sd_msg->day;
-
-		// create filename, format: [yyyy-mm-dd]
-		uint8_t temp_str[16];
-
-		// empty file_name
-		strcpy(file_name, "");
-
-		snprintf(temp_str, sizeof(temp_str), "%02u", sd_msg->year);
-		strcat(file_name, temp_str);
-		snprintf(temp_str, sizeof(temp_str), "%02u", sd_msg->month);
-		strcat(file_name, temp_str);
-		snprintf(temp_str, sizeof(temp_str), "%02u.txt", sd_msg->day);
-		strcat(file_name, temp_str);
-
-		// printk("\nUpdated file path: %s", file_name);
-	}
-
-	return 0;
-}
-
 // Create absolute path for filename
 static void create_file_path(char *file_path, char *filename)
 {
@@ -177,30 +191,39 @@ static int read_file(char *file_path, char *data, int size)
 	int ret = 1;
 
 	struct fs_file_t file;
-	fs_open(&file, file_path, FS_O_READ);
+	ret = fs_open(&file, file_path, FS_O_READ);
 
 	// Read characters until end of file
-	uint8_t buffer[32] = "";
-	while (1)
-	{
-		ret = fs_read(&file, &buffer, 31);
-		if (ret == 0)
-			break;
 
-		//printk("%s", buffer);
-		//strcat(buffer, ";");
-		uart_send(UART_2, buffer, sizeof(buffer));
+	if (ret == 0)
+	{
+		uint8_t buffer[32] = "";
+		while (1)
+		{
+			ret = fs_read(&file, &buffer, 31);
+			if (ret == 0)
+				break;
+
+			//printk("%s", buffer);
+			//strcat(buffer, ";");
+			uart_send(UART_2, buffer, sizeof(buffer));
+			uart_send(UART_2, ";", sizeof(";"));
+
+			memset(buffer, 0, sizeof(buffer));
+			k_sleep(K_MSEC(20));
+		}
+		k_sleep(K_MSEC(10));
+		uart_send(UART_2, "EOF", sizeof("EOF"));
 		uart_send(UART_2, ";", sizeof(";"));
 
-		memset(buffer, 0, sizeof(buffer));
-		k_sleep(K_MSEC(20));
-	}
-	k_sleep(K_MSEC(10));
-	uart_send(UART_2, "EOF", sizeof("EOF"));
-	uart_send(UART_2, ";", sizeof(";"));
+		printk("\n\nFinished reading file");
 
-	printk("\n\nFinished reading file");
-	fs_close(&file);
+		fs_close(&file);
+	}
+	else
+	{
+		printk("Error in reading file\n");
+	}
 
 	return 0;
 }
@@ -214,40 +237,47 @@ static int read_JSON(char *file_path, char *data, int size, uint32_t *cursor)
 
 	// Open file for reading, if file doesnt exist, create one.
 	struct fs_file_t file;
-	fs_open(&file, file_path, FS_O_READ);
+	ret = fs_open(&file, file_path, FS_O_READ);
 
-	// TODO: seek end to read cursor value
-
-	fs_seek(&file, *cursor, FS_SEEK_SET);
-
-	uint8_t buffer[8] = "";
-
-	while (1)
+	if (ret == 0)
 	{
-		ret = fs_read(&file, &buffer, 1);
-		if (ret == 0)
-		{
-			break;
-		}
-		else if (strcmp(buffer, "{") == 0)
-		{
-			strcpy(data, "");
-			strcat(data, buffer);
-		}
-		else if (strcmp(buffer, "}") == 0)
-		{
-			strcat(data, buffer);
-			*cursor = fs_tell(&file);
-			// printk("\n%s %d", data, *cursor);
-			return 0;
-		}
-		else
-		{
-			strcat(data, buffer);
-		}
-	}
+		// TODO: seek end to read cursor value
 
-	fs_close(&file);
+		fs_seek(&file, *cursor, FS_SEEK_SET);
+
+		uint8_t buffer[8] = "";
+
+		while (1)
+		{
+			ret = fs_read(&file, &buffer, 1);
+			if (ret == 0)
+			{
+				break;
+			}
+			else if (strcmp(buffer, "{") == 0)
+			{
+				strcpy(data, "");
+				strcat(data, buffer);
+			}
+			else if (strcmp(buffer, "}") == 0)
+			{
+				strcat(data, buffer);
+				*cursor = fs_tell(&file);
+				// printk("\n%s %d", data, *cursor);
+				return 0;
+			}
+			else
+			{
+				strcat(data, buffer);
+			}
+		}
+
+		fs_close(&file);
+	}
+	else
+	{
+		printk("Error in reading file\n");
+	}
 
 	return 0;
 }
@@ -322,7 +352,6 @@ void app_sd_thread(void *unused1, void *unused2, void *unused3)
 {
 	oasys_data_t sd_msg;
 
-	uint8_t file_name[16] = "";
 	char file_path[32] = "";
 
 	uint8_t file_text[1024] = "";
@@ -336,15 +365,17 @@ void app_sd_thread(void *unused1, void *unused2, void *unused3)
 		// get msg from main
 		k_msgq_get(&sd_msg_q, &sd_msg, K_FOREVER);
 
-		// create file name if it does not exist
-		create_file_name(file_name, &sd_msg);
-		// create file path
-		create_file_path(file_path, file_name);
-
 		switch (sd_msg.event)
 		{
 		case WRITE_FILE:
+			// create file path
+			create_file_path(file_path, sd_msg.filename);
 			write_file(file_path, sd_msg.json_string, strlen(sd_msg.json_string));
+
+			break;
+		case FIND_FILE:
+			// find specified file
+			look_for_file(disk_mount_pt, sd_msg.filename);
 
 			break;
 		case SEND_FILE_INFO:
@@ -352,12 +383,16 @@ void app_sd_thread(void *unused1, void *unused2, void *unused3)
 
 			break;
 		case READ_JSON:
+			// create file path
+			create_file_path(file_path, sd_msg.filename);
 			read_JSON(file_path, json_text, sizeof(json_text), &cursor);
 			printk("\nJSON: %s, cursor: %d", json_text, cursor);
 
 			break;
 		case READ_FILE:
-			printk("\nReading file: %s", file_name);
+			printk("\nReading file: %s", sd_msg.filename);
+			// create file path
+			create_file_path(file_path, sd_msg.filename);
 			read_file(file_path, file_text, sizeof(file_text));
 			// printk("\nFile content:\n\n%s", file_text);
 

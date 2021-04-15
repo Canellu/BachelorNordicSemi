@@ -4,6 +4,8 @@
 #include <kernel.h>
 #include <string.h>
 #include <stdio.h>
+#include <modem/at_cmd.h>
+#include <logging/log.h>
 
 #include "app_button.h"
 #include "app_uart.h"
@@ -11,6 +13,8 @@
 #include "app_gps.h"
 #include "app_sd.h"
 #include "gcloud.h"
+
+LOG_MODULE_REGISTER(main);
 
 /* Stack definition for application */
 static K_THREAD_STACK_DEFINE(sd_stack_area, 4096);
@@ -24,42 +28,57 @@ k_tid_t sd_tid;
 // Enumerations
 // CANDO: typedef everything
 
-enum oasys_event_type
-{ // currently not in use
+enum glider_event_type
+{
 	EVT_INIT,
-	EVT_UART,
-	EVT_MQTT
+	EVT_NEWGLIDER,
+	EVT_IDLE,
+	EVT_GPS,
+	EVT_SENSOR,
+	EVT_MQTT,
+	EVT_WIFI,
+	EVT_SATELLITE
 };
 
 // Structs
 struct prog_param_t
-{ // currently not in use
+{
 	bool bttn_init;
 	bool leds_init;
 	bool uart_init;
 	bool mqtt_init;
-} prog_p;
+};
 
 struct sens_param_t
-{ // currently not in use
-	int freq_temp;
-	int freq_pres;
-	int freq_cond;
-} sens_p;
+{
+	int freq_t;
+	int freq_p;
+	int freq_c;
+};
 
-struct oasys_param_t
-{ // currently not in use
-	int cycle_max;
-	int cycle_cur;
-	int depth_max;
-	int depth_min;
+struct mission_param_t
+{
 	int wp_max;
 	int wp_cur;
-	struct prog_param_t prog_param;
+	int depth_max;
+	int depth_min;
 	struct sens_param_t sens_param;
-} oasys_p;
+};
+
+struct glider_t
+{ // currently not in use
+	uint8_t uid[7];
+	struct mission_param_t mission_param;
+	struct prog_param_t prog_param;
+	enum glider_event_type event;
+};
 
 /* VARIABLE DECLARATIONS */
+
+// Main message queue, used for getting responses from other modules
+struct k_msgq main_msg_q;
+static uint8_t main_msgq_buffer[3 * 128];
+static uint8_t main_msg[128];
 
 // button variables
 struct k_msgq button_msg_q;
@@ -110,6 +129,8 @@ static uint8_t current_month = -1;
 static uint8_t current_day = -1;
 
 /* FUNCTION DECLARATIONS */
+
+/* HELPER FUNCTIONS */
 
 // publish all data that is currently saved from uart
 // REMINDER: Double check after implementing SD card
@@ -163,11 +184,12 @@ static int set_button_config(int local_button_config)
 // waiting function, waits for button 1 to be pressed
 static int button_wait()
 {
+	uint8_t test = 0;
 	set_button_config(0);
 	while (1)
 	{
-		k_msgq_get(&button_msg_qr, &button_val, K_FOREVER);
-		if (button_val == 1)
+		k_msgq_get(&button_msg_qr, &test, K_FOREVER);
+		if (test == 1)
 		{
 			break;
 		}
@@ -177,17 +199,23 @@ static int button_wait()
 }
 
 // fills out current date, sends string and event type
-static int sd_msg_fill_send(void *data_string, enum sd_event_type event)
+static int sd_save_data(void *data_string)
 {
 	oasys_data_t sd_msg;
+	sd_msg.event = WRITE_FILE;
 
-	sd_msg.event = event;
+	// create filename, format: [yyyymmdd]
+	uint8_t temp_str[16];
 
-	strcpy(sd_msg.json_string, data_string);
+	snprintf(temp_str, sizeof(temp_str), "%02u", current_year);
+	strcat(sd_msg.filename, temp_str);
+	snprintf(temp_str, sizeof(temp_str), "%02u", current_month);
+	strcat(sd_msg.filename, temp_str);
+	snprintf(temp_str, sizeof(temp_str), "%02u.txt", current_day);
+	strcat(sd_msg.filename, temp_str);
 
-	sd_msg.year = current_year;
-	sd_msg.month = current_month;
-	sd_msg.day = current_day;
+	// fill string to be saved
+	memcpy(sd_msg.json_string, data_string, strlen(data_string));
 
 	// add to sd card message queue
 	k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
@@ -199,6 +227,9 @@ static int sd_msg_fill_send(void *data_string, enum sd_event_type event)
 //TODO: replace sizeof parameter with type instead of variable
 static int message_queue_init()
 {
+	// main
+	k_msgq_init(&main_msg_q, main_msgq_buffer, sizeof(main_msg), 3);
+
 	// button
 	k_msgq_init(&button_msg_q, button_msgq_buffer, sizeof(int), 3);
 	k_msgq_init(&button_msg_qr, button_msgq_buffer, sizeof(int), 3);
@@ -251,12 +282,14 @@ static int message_queue_reset()
 	return 0;
 }
 
-static int uart_module()
+/* MODULES */
+
+static int sensor_module()
 {
 	set_button_config(1);
 	uart_start(uart_dev1);
 
-	printk("\nuart test start\n");
+	printk("\nsensor test start\n");
 	printk("button 1: exit \nbutton 2: send uart signal\n\n");
 
 	/* UART loop */
@@ -277,7 +310,7 @@ static int uart_module()
 
 			// TODO: test timestamp to check if new day
 
-			sd_msg_fill_send(uart_msg, WRITE_FILE);
+			sd_save_data(uart_msg);
 
 			// printk("\nUART message: %s", uart_msg);
 			// add to data array
@@ -302,12 +335,12 @@ static int uart_module()
 		printk("no data saved\n");
 	}
 
-	printk("\nuart test end\n\n");
+	printk("\nsensor test end\n\n");
 
 	return 0;
 }
 
-static int sd_module()
+static int wifi_module()
 {
 	int err = 0;
 
@@ -315,10 +348,7 @@ static int sd_module()
 
 	button_wait();
 
-	oasys_data_t sd_msg;
-
-	strcpy(sd_msg.json_string, "hei");
-	uint8_t wifi_response[128] = "{connected}";
+	uint8_t wifi_response[128] = "";
 	uart_start(UART_2);
 
 	printk("wifi test start\n");
@@ -336,36 +366,26 @@ static int sd_module()
 
 		if (strcmp(wifi_response, "{connected}") == 0)
 		{
-			printk("\nTesting SD file info");
-			sd_msg_fill_send("", SEND_FILE_INFO);
+			oasys_data_t sd_msg;
+			sd_msg.event = SEND_FILE_INFO;
+			k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
+
 			printk("\n\nConnect successful, press button 1 to continue");
 			// strcpy(wifi_response, "read1");
 		}
 		else if (wifi_response[1] == 'D')
 		{
-			// convert string to date
-			// 2 - y	6 - m
-			// 3 - y	7 - m
-			// 4 - y	8 - d
-			// 5 - y	9 - d
+			oasys_data_t sd_msg;
 
-			int year_tmp = (((wifi_response[3] - '0') * 1000) +
-							((wifi_response[4] - '0') * 100) +
-							((wifi_response[5] - '0') * 10) +
-							(wifi_response[6] - '0'));
+			// fetch filename
+			// format yyyymmdd.txt
+			char *date = wifi_response + 3;
+			date[strlen(date) - 1] = 0;
 
-			int month_tmp = (((wifi_response[7] - '0') * 10) +
-							 (wifi_response[8] - '0'));
-
-			int day_tmp = (((wifi_response[9] - '0') * 10) +
-						   (wifi_response[10] - '0'));
-
-			printk("\n%d-%d-%d", year_tmp, month_tmp, day_tmp);
+			memcpy(sd_msg.filename, date, 13);
+			printk("\n%s", sd_msg.filename);
 
 			sd_msg.event = READ_FILE;
-			sd_msg.year = year_tmp;
-			sd_msg.month = month_tmp;
-			sd_msg.day = day_tmp;
 
 			printk("\nStarting SD file read2");
 			k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
@@ -403,7 +423,7 @@ static int gps_module()
 	current_day = gps_data.day;
 
 	// save gps data on sd card
-	// sd_msg_fill_send(gps_data.gps_string, WRITE_FILE);
+	sd_save_data(gps_data.gps_string);
 
 	// send time to sensors
 	uint8_t time_millis_str[16];
@@ -421,7 +441,8 @@ static int gps_module()
 	return 0;
 }
 
-static int wifi_module()
+// currently not in use
+static int wifi_mqtt_module()
 {
 	set_button_config(1);
 	uart_start(uart_dev1);
@@ -621,10 +642,16 @@ static int satellite_module()
 	return 0;
 }
 
-/* MAIN */
-
-void main(void)
+static int glider_init(struct glider_t *glider)
 {
+
+	/* Fetch serial number (uid) */
+	uint8_t imei[18];
+	uint8_t uid[18];
+	at_cmd_write("AT+CGSN", imei, sizeof(imei), NULL);
+	memcpy(uid, imei + 8, strlen(imei) - 8);
+	memcpy(glider->uid, uid, 6);
+	glider->uid[sizeof(glider->uid) - 1] = 0;
 
 	/* device inits and configurations */
 	device_inits();
@@ -633,29 +660,92 @@ void main(void)
 	message_queue_init();
 
 	// sd card thread
-	// sd_tid = k_thread_create(&sd_thread, sd_stack_area, K_THREAD_STACK_SIZEOF(sd_stack_area),
-	// 						 (k_thread_entry_t)app_sd_thread, NULL, NULL, NULL,
-	// 						 7, 0, K_NO_WAIT);
+	sd_tid = k_thread_create(&sd_thread, sd_stack_area, K_THREAD_STACK_SIZEOF(sd_stack_area),
+							 (k_thread_entry_t)app_sd_thread, NULL, NULL, NULL,
+							 7, 0, K_NO_WAIT);
 
-	printk("\n\n**** NordicOasys v0.5 - Started ****\n\n");
-	printk("press button 1 to start\n\n");
+	printk("Init complete. Press button 1 to start\n\n");
 
 	button_wait();
 
+	return 0;
+}
+
+/* MAIN */
+
+void main(void)
+{
+	printk("\n\n**** NordicOasys v0.99 - Started ****\n\n");
+
+	struct glider_t glider;
+	glider.event = EVT_INIT;
+
 	while (1)
 	{
-
 		message_queue_reset();
 
-		// gps_module();
+		switch (glider.event)
+		{
+		case EVT_INIT:
+			glider_init(&glider);
 
-		// uart_module();
+			oasys_data_t sd_msg;
+			sd_msg.event = FIND_FILE;
+			static const char file[] = "MISSIONPARAMS.TXT";
+			memcpy(sd_msg.filename, file, sizeof(file));
 
-		// sd_module();
+			k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
 
-		// gcloud_module();
+			bool sd_msg_response = false;
 
-		satellite_module();
+			k_msgq_get(&main_msg_q, &sd_msg_response, K_FOREVER);
+
+			if (sd_msg_response)
+			{
+				printk("Mission params found\n");
+				glider.event = EVT_IDLE;
+			}
+			else
+			{
+				printk("Mission params do not exist\n");
+				glider.event = EVT_NEWGLIDER;
+			}
+
+			break;
+		case EVT_NEWGLIDER:
+			// currently idles until button is pressed and local wifi is turned on
+			// functions in the same way as case EVT_WIFI
+			wifi_module();
+
+			break;
+		case EVT_IDLE:
+			LOG_INF("Idling");
+			k_sleep(K_SECONDS(5));
+
+			break;
+		case EVT_GPS:
+			gps_module();
+
+			break;
+		case EVT_SENSOR:
+			sensor_module();
+
+			break;
+		case EVT_MQTT:
+			gcloud_module();
+
+			break;
+		case EVT_WIFI:
+			wifi_module();
+
+			break;
+		case EVT_SATELLITE:
+			satellite_module();
+
+			break;
+		default:
+			LOG_ERR("Unknown event type");
+		}
 
 		// printk("\npress button 1 to start mqtt\n");
 		// printk("press button 2 to start wifi\n\n");
@@ -685,8 +775,14 @@ void main(void)
 
 - Save messages received from MQTT into array similar to data.
 
-*/
+- FIX FORMATTING OF DATA:
+	DONE:
+	WIP:
+		gps data
+		sensor data
+		formatting on sd card (should not be necessary and should only copy string directly)
 
+*/
 
 /* CURRENT FLOW FOR HOW MISSION SEQUENCE WILL OPERATE
 
@@ -697,28 +793,26 @@ void main(void)
 	-get gps fix
 	-search for 4G connection to upload mission params
 		--this is necessary whenever it gets parameters through wifi
-	-get to first waypoint (signifies start of mission)
-	-idle until start time
-		--might have to periodically get gps fix to see if time/position is synchronized
+	-start mission loop
+
 
 If local wifi is triggered:
 	-enable wifi module (send data, receive commands)
 	-get gps fix
 	-search for 4G connection to upload mission params
 		--this is necessary whenever it gets parameters through wifi
-	-get to first waypoint (signifies start of mission)
-	-idle until start time
-		--might have to periodically get gps fix to see if time/position is synchronized
+	-start mission loop
 
 
 If mission is sent through 4G:
 	-get gps fix
-	-get to first waypoint (signifies start of mission)
-	-idle until start time
-		--might have to periodically get gps fix to see if time/position is synchronized
+	-start mission loop
 
 
 Mission loop:
+	-get to first waypoint (signifies start of mission)
+	-idle until start time
+		--might have to periodically get gps fix to see if time/position is synchronized
 	-send dive command
 	-start sensor readings
 		--send timestamp to sensors for logging purposes
