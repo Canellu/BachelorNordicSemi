@@ -38285,11 +38285,7 @@ const char web[] PROGMEM = R"====(
  function init() {
  Socket = new WebSocket("ws://" + window.location.hostname + ":81/");
  Socket.onmessage = function (event) {
- if (event.data.includes(";")) {
- var eventSplit = event.data.split(";");
- espString += eventSplit[0];
  console.log(espString);
-
  // Populate files and update UI
  if (espString.includes("TXT")) {
  initFileTab(espString);
@@ -38302,11 +38298,6 @@ const char web[] PROGMEM = R"====(
  updateProgressBar();
  }
  espString = "";
- espString += eventSplit[1];
- } else {
- // Else append
- espString += event.data;
- }
  };
  }
  </script>
