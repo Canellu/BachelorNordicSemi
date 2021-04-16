@@ -1,5 +1,3 @@
-#include <SoftwareSerial.h>
-
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
@@ -18,7 +16,7 @@ const char *ssid = STASSID;
 const char *password = STAPSK;
 
 int arr_rx = 0;
-char uart_rx[128] = "";
+char uart_rx[256] = "";
 
 ESP8266WebServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(81);
@@ -122,14 +120,30 @@ void loop(void)
     if (Serial.available() > 0)
     {
       char b = Serial.read();
-      uart_rx[arr_rx++] = b;
-    }
-    else if (!Serial.available() && strlen(uart_rx) != 0)
-    {
-      webSocket.broadcastTXT(uart_rx, strlen(uart_rx));
+      if (b == ';')
+      {
+        Serial.print(uart_rx);
+        Serial.print(strcmp(uart_rx, "wifi_end"));
       
-      memset(uart_rx, 0, sizeof(uart_rx));
-      arr_rx = 0;
+        if (strcmp(uart_rx, "wifi_end") == 0)
+        {
+          Serial.print("ending wifi");
+          webSocket.close();
+          server.close();
+          on_wifi = false;
+        }
+        else
+        {
+          webSocket.broadcastTXT(uart_rx, strlen(uart_rx));
+        }
+        memset(uart_rx, 0, sizeof(uart_rx));
+        arr_rx = 0;
+      }
+      else
+      {   
+        uart_rx[arr_rx++] = b;
+      }
+
     }
   }
   
@@ -148,13 +162,14 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
   }
   if (type == WStype_TEXT)
   {
-    
+    char ws_text[256] = "";
     // print to terminal
     for (int i = 0; i < length; i++)
     {
       Serial.print((char)payload[i]);
+      ws_text[i] = (char)payload[i];
     }
-    Serial.println();
+    Serial.print(ws_text);
   }
   
 }

@@ -387,6 +387,10 @@ static int wifi_module()
 			printk("\nStarting SD file read2");
 			k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
 		}
+		else if (strcmp(wifi_response, "{wifi_end}") == 0)
+		{
+			uart_send(UART_2, "wifi_end", strlen("wifi_end"));
+		}
 		else
 		{
 			printk("\n\nSomething went wrong, press button 1 to continue");
