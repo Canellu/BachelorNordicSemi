@@ -35,14 +35,15 @@ enum glider_event_type
 	EVT_IDLE,
 	EVT_GPS,
 	EVT_SENSOR,
-	EVT_MQTT,
+	EVT_4G,
 	EVT_WIFI,
-	EVT_SATELLITE
+	EVT_SATELLITE,
+	EVT_CTRL_SYS
 };
 
 // Structs
 struct prog_param_t
-{
+{ // currently not in use
 	bool bttn_init;
 	bool leds_init;
 	bool uart_init;
@@ -70,7 +71,10 @@ struct glider_t
 	uint8_t uid[7];
 	struct mission_param_t mission_param;
 	struct prog_param_t prog_param;
-	enum glider_event_type event;
+
+	enum glider_event_type event_now;
+	enum glider_event_type event_prev;
+	bool mission_started;
 };
 
 /* VARIABLE DECLARATIONS */
@@ -84,7 +88,6 @@ static uint8_t main_msg[128];
 struct k_msgq button_msg_q;
 struct k_msgq button_msg_qr;
 static uint8_t button_msgq_buffer[3 * sizeof(int)];
-static int button_val; // value received from button, only used when button_config = 0
 
 // UART variables
 enum uart_device_type uart_dev1 = UART_1;
@@ -104,12 +107,6 @@ struct k_msgq gps_msg_q;
 static uint8_t gps_msgq_buffer[2 * sizeof(oasys_gps_data_t)];
 static oasys_gps_data_t gps_data;
 
-// MQTT variables
-struct k_msgq mqtt_msg_q;
-static uint8_t mqtt_msgq_buffer[3 * 128];
-static uint8_t mqtt_msg[128];
-
-static bool mqtt_init_complete = false;
 static bool data_available_to_send = false;
 
 // Gcloud variables
@@ -241,7 +238,7 @@ static int message_queue_init()
 	k_msgq_init(&gps_msg_q, gps_msgq_buffer, sizeof(gps_data), 2);
 
 	// MQTT
-	k_msgq_init(&mqtt_msg_q, mqtt_msgq_buffer, sizeof(mqtt_msg), 3);
+	// k_msgq_init(&mqtt_msg_q, mqtt_msgq_buffer, sizeof(mqtt_msg), 3);
 
 	// GCloud
 	k_msgq_init(&gcloud_msg_q, gcloud_msgq_buffer, sizeof(gcloud_msg), 3);
@@ -277,7 +274,7 @@ static int message_queue_reset()
 	k_msgq_purge(&button_msg_q);
 	k_msgq_purge(&uart_msg_q);
 	k_msgq_purge(&gps_msg_q);
-	k_msgq_purge(&mqtt_msg_q);
+	// k_msgq_purge(&mqtt_msg_q);
 	k_msgq_purge(&gcloud_msg_q);
 	return 0;
 }
@@ -441,7 +438,364 @@ static int gps_module()
 	return 0;
 }
 
+static int gcloud_module()
+{
+	printk("\n\npress button 1 to start gcloud test\n\n");
+	button_wait();
+	printk("gcloud test start\n");
+
+	int err;
+
+	// mqtt init
+	if (!gcloud_init_complete)
+	{
+		err = app_gcloud_init_and_connect();
+		if (err != 0)
+		{
+			return err;
+		}
+		gcloud_init_complete = true;
+	}
+	// reconnect
+	else
+	{
+		err = app_gcloud_reconnect();
+		if (err != 0)
+		{
+			return err;
+		}
+	}
+
+	/* Gcloud loop */
+	while (1)
+	{
+		// gcloud function
+		err = app_gcloud();
+
+		k_msgq_get(&gcloud_msg_q, &gcloud_msg, K_NO_WAIT);
+		printk("\nMain: %s", gcloud_msg);
+
+		// if (strcmp(gcloud_msg, "test") == 0)
+		// {
+		// 	strcpy(gcloud_msg, "");
+		// 	break;
+		// }
+	}
+	/* Gcloud loop end */
+
+	err = app_gcloud_disconnect();
+	if (err != 0)
+	{
+		printk("\nDisconnect unsuccessful: %d", err);
+		printk("\n\nClosing program, check for errors in code lol");
+		return err;
+	}
+	return 0;
+}
+
+static int satellite_module()
+{
+
+	printk("\n\npress button 1 to start satellite test\n\n");
+	button_wait();
+
+	uart_start(uart_dev1);
+
+	uart_send(uart_dev1, "AT\r", strlen("AT\r"));
+
+	k_sleep(K_MSEC(2000));
+	uart_send(uart_dev1, "AT+CGSN\r", strlen("AT+CGSN\r"));
+
+	k_sleep(K_MSEC(2000));
+	uart_exit(uart_dev1);
+
+	return 0;
+}
+
+static int glider_init(struct glider_t *glider)
+{
+
+	/* Fetch serial number (uid) */
+	uint8_t imei[18];
+	uint8_t uid[18];
+	at_cmd_write("AT+CGSN", imei, sizeof(imei), NULL);
+	memcpy(uid, imei + 8, strlen(imei) - 8);
+	memcpy(glider->uid, uid, 6);
+	glider->uid[sizeof(glider->uid) - 1] = 0;
+
+	/* device inits and configurations */
+	device_inits();
+
+	// message queues
+	message_queue_init();
+
+	// sd card thread
+	sd_tid = k_thread_create(&sd_thread, sd_stack_area, K_THREAD_STACK_SIZEOF(sd_stack_area),
+							 (k_thread_entry_t)app_sd_thread, NULL, NULL, NULL,
+							 7, 0, K_NO_WAIT);
+
+	glider->mission_started = false;
+
+	printk("Init complete. Press button 1 to start\n\n");
+
+	button_wait();
+
+	return 0;
+}
+
+static bool check_new_glider(struct glider_t *glider)
+{
+	oasys_data_t sd_msg;
+	sd_msg.event = FIND_FILE;
+	static const char file_mission[] = "MISSIONPARAMS.TXT";
+	memcpy(sd_msg.filename, file_mission, sizeof(file_mission));
+
+	k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
+
+	bool sd_msg_response = false;
+
+	k_msgq_get(&main_msg_q, &sd_msg_response, K_FOREVER);
+
+	if (sd_msg_response)
+	{
+		printk("Mission params found\n");
+		return true;
+	}
+
+	printk("Mission params do not exist\n");
+	return false;
+}
+
+/* MAIN */
+
+void main(void)
+{
+	printk("\n\n**** NordicOasys v0.99 - Started ****\n\n");
+
+	struct glider_t glider;
+	glider.event_now = EVT_INIT;
+
+	while (1)
+	{
+		message_queue_reset();
+
+		switch (glider.event_now)
+		{
+		case EVT_INIT:
+			glider_init(&glider);
+
+			bool newglider = check_new_glider(&glider);
+
+			if (!newglider)
+			{
+				glider.event_prev = glider.event_now;
+				glider.event_now = EVT_IDLE;
+			}
+			else
+			{
+				glider.event_prev = glider.event_now;
+				glider.event_now = EVT_NEWGLIDER;
+			}
+
+			// IDEA: idle at wifi module no matter what
+			// Instead, in case of reboot, test if it was on a mission
+
+			break;
+		case EVT_NEWGLIDER:
+			// currently idles until button is pressed and local wifi is turned on
+			// functions in the same way as case EVT_WIFI
+			wifi_module();
+
+			glider.event_prev = glider.event_now;
+			glider.event_now = EVT_GPS;
+
+			break;
+		case EVT_IDLE:
+			LOG_INF("Idling");
+			k_sleep(K_SECONDS(5));
+
+			// logic for test start time, if true start mission
+
+			glider.event_prev = glider.event_now;
+			glider.event_now = EVT_GPS;
+
+			break;
+		case EVT_GPS:
+			gps_module();
+
+			// upload mission params to database after receiving params from local wifi
+			if (glider.event_prev == EVT_WIFI || glider.event_prev == EVT_NEWGLIDER)
+			{
+				glider.event_prev = glider.event_now;
+				glider.event_now = EVT_4G;
+			}
+
+			// was idle waiting for mission to start
+			else if (glider.event_prev == EVT_IDLE)
+			{
+				// test the start time vs gps time, if true, start mission
+
+				if (glider.mission_started)
+				{
+					glider.event_prev = glider.event_now;
+					glider.event_now = EVT_CTRL_SYS;
+				}
+
+				// otherwise, continue idle
+				else
+				{
+					glider.event_prev = glider.event_now;
+					glider.event_now = EVT_IDLE;
+				}
+			}
+
+			// mission ongoing, sensor readings performed
+			else if (glider.mission_started)
+			{
+				glider.event_prev = glider.event_now;
+				glider.event_now = EVT_4G;
+			}
+
+			break;
+		case EVT_SENSOR:
+			sensor_module();
+
+			glider.event_prev = glider.event_now;
+			glider.event_now = EVT_GPS;
+
+			break;
+		case EVT_4G:
+			gcloud_module();
+
+			// test if glider is on last waypoint, if true, mission ongoing false and go to idle
+
+			// test if connection was successful, otherwise enable satellite modem
+
+			// send command to control system, either continue dive or go to first waypoint
+			glider.event_prev = glider.event_now;
+			glider.event_now = EVT_CTRL_SYS;
+
+			break;
+		case EVT_WIFI:
+			wifi_module();
+
+			glider.event_prev = glider.event_now;
+			glider.event_now = EVT_GPS;
+
+			break;
+		case EVT_SATELLITE:
+			satellite_module();
+
+			// send command to control system, either continue dive or go to first waypoint
+			glider.event_prev = glider.event_now;
+			glider.event_now = EVT_CTRL_SYS;
+
+			break;
+		case EVT_CTRL_SYS:
+			// placeholder, send some parameters and commands to control system of glider
+
+			if (glider.mission_started)
+			{
+				glider.event_prev = glider.event_now;
+				glider.event_now = EVT_SENSOR;
+			}
+			else
+			{
+				glider.event_prev = glider.event_now;
+				glider.event_now = EVT_IDLE;
+			}
+
+			break;
+		default:
+			LOG_ERR("Unknown event type");
+		}
+
+		// printk("\npress button 1 to start mqtt\n");
+		// printk("press button 2 to start wifi\n\n");
+		// set_button_config(3);
+		// k_msgq_get(&button_msg_qr, &button_val, K_FOREVER);
+
+		// if (button_val == 1)
+		// {
+		// 	mqtt_module();
+		// }
+		// else if (button_val == 2)
+		// {
+		// 	wifi_module();
+		// }
+	}
+
+	printk("**** NordicOasys test end ****\n");
+}
+
+/* Function ideas and TODOs
+
+- Save messages received from MQTT into array similar to data.
+
+- FIX FORMATTING OF DATA:
+	DONE:
+	WIP:
+		gps data
+		sensor data
+		formatting on sd card (should not be necessary and should only copy string directly)
+
+*/
+
+/* CURRENT FLOW FOR HOW MISSION SEQUENCE WILL OPERATE
+
+1st time start (1 way to test is if .txt file for mission params exist):
+	-turn on UART peripherals, SD card module
+	-wait for local (wifi) connection trigger
+		--might have to be separate thread so that it can be interrupted whenever triggered
+	-get gps fix
+	-search for 4G connection to upload mission params
+		--this is necessary whenever it gets parameters through wifi
+	-start mission loop
+
+
+If local wifi is triggered:
+	-enable wifi module (send data, receive commands)
+	-get gps fix
+	-search for 4G connection to upload mission params
+		--this is necessary whenever it gets parameters through wifi
+	-start mission loop
+
+
+If mission is sent through 4G:
+	-get gps fix
+	-start mission loop
+
+
+Mission loop:
+	-get to first waypoint (signifies start of mission)
+	-idle until start time
+		--might have to periodically get gps fix to see if time/position is synchronized
+	-send dive command
+	-start sensor readings
+		--send timestamp to sensors for logging purposes
+	-save readings to sd card
+	-on resurface:
+		--get gps fix
+		--turn on 4G
+			---on success, send data, check for changes in commands (CHECK CLOUD FUNCTION LOGIC FOR SENDING CONFIGURATIONS INSTEAD OF ONE-TIME COMMANDS)
+			---else, turn on satellite modem and send gps location + health status
+	-continue dive
+	-repeat until last waypoint
+	-get gps fix
+	-turn on 4G
+		--check if any new missions
+		--else, idle
+			---periodically check 4G for any new missions, else enable satellite modem to send gps location + health status
+*/
+
 // currently not in use
+// MQTT variables
+struct k_msgq mqtt_msg_q;
+static uint8_t mqtt_msgq_buffer[3 * 128];
+static uint8_t mqtt_msg[128];
+
+static bool mqtt_init_complete = false;
+
 static int wifi_mqtt_module()
 {
 	set_button_config(1);
@@ -567,266 +921,3 @@ static int mqtt_module()
 
 	return 0;
 }
-
-static int gcloud_module()
-{
-	printk("\n\npress button 1 to start gcloud test\n\n");
-	button_wait();
-	printk("gcloud test start\n");
-
-	int err;
-
-	// mqtt init
-	if (!gcloud_init_complete)
-	{
-		err = app_gcloud_init_and_connect();
-		if (err != 0)
-		{
-			return err;
-		}
-		gcloud_init_complete = true;
-	}
-	// reconnect
-	else
-	{
-		err = app_gcloud_reconnect();
-		if (err != 0)
-		{
-			return err;
-		}
-	}
-
-	/* Gcloud loop */
-	while (1)
-	{
-		// gcloud function
-		err = app_gcloud();
-
-		k_msgq_get(&gcloud_msg_q, &gcloud_msg, K_NO_WAIT);
-		printk("\nMain: %s", gcloud_msg);
-
-		// if (strcmp(gcloud_msg, "test") == 0)
-		// {
-		// 	strcpy(gcloud_msg, "");
-		// 	break;
-		// }
-	}
-	/* Gcloud loop end */
-
-	err = app_gcloud_disconnect();
-	if (err != 0)
-	{
-		printk("\nDisconnect unsuccessful: %d", err);
-		printk("\n\nClosing program, check for errors in code lol");
-		return err;
-	}
-	return 0;
-}
-
-static int satellite_module()
-{
-
-	printk("\n\npress button 1 to start satellite test\n\n");
-	button_wait();
-
-	uart_start(uart_dev1);
-
-	uart_send(uart_dev1, "AT\r", strlen("AT\r"));
-
-	k_sleep(K_MSEC(2000));
-	uart_send(uart_dev1, "AT+CGSN\r", strlen("AT+CGSN\r"));
-
-	k_sleep(K_MSEC(2000));
-	uart_exit(uart_dev1);
-
-	return 0;
-}
-
-static int glider_init(struct glider_t *glider)
-{
-
-	/* Fetch serial number (uid) */
-	uint8_t imei[18];
-	uint8_t uid[18];
-	at_cmd_write("AT+CGSN", imei, sizeof(imei), NULL);
-	memcpy(uid, imei + 8, strlen(imei) - 8);
-	memcpy(glider->uid, uid, 6);
-	glider->uid[sizeof(glider->uid) - 1] = 0;
-
-	/* device inits and configurations */
-	device_inits();
-
-	// message queues
-	message_queue_init();
-
-	// sd card thread
-	sd_tid = k_thread_create(&sd_thread, sd_stack_area, K_THREAD_STACK_SIZEOF(sd_stack_area),
-							 (k_thread_entry_t)app_sd_thread, NULL, NULL, NULL,
-							 7, 0, K_NO_WAIT);
-
-	printk("Init complete. Press button 1 to start\n\n");
-
-	button_wait();
-
-	return 0;
-}
-
-/* MAIN */
-
-void main(void)
-{
-	printk("\n\n**** NordicOasys v0.99 - Started ****\n\n");
-
-	struct glider_t glider;
-	glider.event = EVT_INIT;
-
-	while (1)
-	{
-		message_queue_reset();
-
-		switch (glider.event)
-		{
-		case EVT_INIT:
-			glider_init(&glider);
-
-			oasys_data_t sd_msg;
-			sd_msg.event = FIND_FILE;
-			static const char file[] = "MISSIONPARAMS.TXT";
-			memcpy(sd_msg.filename, file, sizeof(file));
-
-			k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
-
-			bool sd_msg_response = false;
-
-			k_msgq_get(&main_msg_q, &sd_msg_response, K_FOREVER);
-
-			if (sd_msg_response)
-			{
-				printk("Mission params found\n");
-				glider.event = EVT_IDLE;
-			}
-			else
-			{
-				printk("Mission params do not exist\n");
-				glider.event = EVT_NEWGLIDER;
-			}
-
-			break;
-		case EVT_NEWGLIDER:
-			// currently idles until button is pressed and local wifi is turned on
-			// functions in the same way as case EVT_WIFI
-			wifi_module();
-
-			break;
-		case EVT_IDLE:
-			LOG_INF("Idling");
-			k_sleep(K_SECONDS(5));
-
-			break;
-		case EVT_GPS:
-			gps_module();
-
-			break;
-		case EVT_SENSOR:
-			sensor_module();
-
-			break;
-		case EVT_MQTT:
-			gcloud_module();
-
-			break;
-		case EVT_WIFI:
-			wifi_module();
-
-			break;
-		case EVT_SATELLITE:
-			satellite_module();
-
-			break;
-		default:
-			LOG_ERR("Unknown event type");
-		}
-
-		// printk("\npress button 1 to start mqtt\n");
-		// printk("press button 2 to start wifi\n\n");
-		// set_button_config(3);
-		// k_msgq_get(&button_msg_qr, &button_val, K_FOREVER);
-
-		// if (button_val == 1)
-		// {
-		// 	mqtt_module();
-		// }
-		// else if (button_val == 2)
-		// {
-		// 	wifi_module();
-		// }
-	}
-
-	printk("**** NordicOasys test end ****\n");
-}
-
-/* Function ideas and TODOs
-
-- Allow option to choose between "main parts" 
-  e.g. using switch case to choose between UART and MQTT.
-
-- Fill up dev_param struct. Should contain parameters set by user.
-  Should be changeable through MQTT.
-
-- Save messages received from MQTT into array similar to data.
-
-- FIX FORMATTING OF DATA:
-	DONE:
-	WIP:
-		gps data
-		sensor data
-		formatting on sd card (should not be necessary and should only copy string directly)
-
-*/
-
-/* CURRENT FLOW FOR HOW MISSION SEQUENCE WILL OPERATE
-
-1st time start (1 way to test is if .txt file for mission params exist):
-	-turn on UART peripherals, SD card module
-	-wait for local (wifi) connection trigger
-		--might have to be separate thread so that it can be interrupted whenever triggered
-	-get gps fix
-	-search for 4G connection to upload mission params
-		--this is necessary whenever it gets parameters through wifi
-	-start mission loop
-
-
-If local wifi is triggered:
-	-enable wifi module (send data, receive commands)
-	-get gps fix
-	-search for 4G connection to upload mission params
-		--this is necessary whenever it gets parameters through wifi
-	-start mission loop
-
-
-If mission is sent through 4G:
-	-get gps fix
-	-start mission loop
-
-
-Mission loop:
-	-get to first waypoint (signifies start of mission)
-	-idle until start time
-		--might have to periodically get gps fix to see if time/position is synchronized
-	-send dive command
-	-start sensor readings
-		--send timestamp to sensors for logging purposes
-	-save readings to sd card
-	-on resurface:
-		--get gps fix
-		--turn on 4G
-			---on success, send data, check for changes in commands (CHECK CLOUD FUNCTION LOGIC FOR SENDING CONFIGURATIONS INSTEAD OF ONE-TIME COMMANDS)
-			---else, turn on satellite modem and send gps location + health status
-	-continue dive
-	-repeat until last waypoint
-	-get gps fix
-	-turn on 4G
-		--check if any new missions
-		--else, idle
-			---periodically check 4G for any new missions, else enable satellite modem to send gps location + health status
-*/
