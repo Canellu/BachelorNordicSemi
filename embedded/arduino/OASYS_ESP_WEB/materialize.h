@@ -1,8 +1,7 @@
 const char web[] PROGMEM = R"====(
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
+ <head>
  <meta charset="UTF-8" />
  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -2409,7 +2408,7 @@ const char web[] PROGMEM = R"====(
  list-style-type: none;
  }
 
- ul:not(.browser-default)>li {
+ ul:not(.browser-default) > li {
  list-style-type: none;
  }
 
@@ -2699,7 +2698,6 @@ const char web[] PROGMEM = R"====(
  }
 
  @media only screen and (max-width: 600px) {
-
  .hide-on-small-only,
  .hide-on-small-and-down {
  display: none !important;
@@ -2821,20 +2819,20 @@ const char web[] PROGMEM = R"====(
  border-bottom: none;
  }
 
- table.striped>tbody>tr:nth-child(odd) {
+ table.striped > tbody > tr:nth-child(odd) {
  background-color: rgba(242, 242, 242, 0.5);
  }
 
- table.striped>tbody>tr>td {
+ table.striped > tbody > tr > td {
  border-radius: 0;
  }
 
- table.highlight>tbody>tr {
+ table.highlight > tbody > tr {
  -webkit-transition: background-color 0.25s ease;
  transition: background-color 0.25s ease;
  }
 
- table.highlight>tbody>tr:hover {
+ table.highlight > tbody > tr:hover {
  background-color: rgba(242, 242, 242, 0.5);
  }
 
@@ -2950,8 +2948,8 @@ const char web[] PROGMEM = R"====(
  position: relative;
  }
 
- .collection .collection-item.avatar:not(.circle-clipper)>.circle,
- .collection .collection-item.avatar :not(.circle-clipper)>.circle {
+ .collection .collection-item.avatar:not(.circle-clipper) > .circle,
+ .collection .collection-item.avatar :not(.circle-clipper) > .circle {
  position: absolute;
  width: 42px;
  height: 42px;
@@ -3081,8 +3079,10 @@ const char web[] PROGMEM = R"====(
  left: 0;
  bottom: 0;
  will-change: left, right;
- -webkit-animation: indeterminate 2.1s cubic-bezier(0.65, 0.815, 0.735, 0.395) infinite;
- animation: indeterminate 2.1s cubic-bezier(0.65, 0.815, 0.735, 0.395) infinite;
+ -webkit-animation: indeterminate 2.1s
+ cubic-bezier(0.65, 0.815, 0.735, 0.395) infinite;
+ animation: indeterminate 2.1s cubic-bezier(0.65, 0.815, 0.735, 0.395)
+ infinite;
  }
 
  .progress .indeterminate:after {
@@ -3093,8 +3093,10 @@ const char web[] PROGMEM = R"====(
  left: 0;
  bottom: 0;
  will-change: left, right;
- -webkit-animation: indeterminate-short 2.1s cubic-bezier(0.165, 0.84, 0.44, 1) infinite;
- animation: indeterminate-short 2.1s cubic-bezier(0.165, 0.84, 0.44, 1) infinite;
+ -webkit-animation: indeterminate-short 2.1s
+ cubic-bezier(0.165, 0.84, 0.44, 1) infinite;
+ animation: indeterminate-short 2.1s cubic-bezier(0.165, 0.84, 0.44, 1)
+ infinite;
  -webkit-animation-delay: 1.15s;
  animation-delay: 1.15s;
  }
@@ -3194,7 +3196,7 @@ const char web[] PROGMEM = R"====(
 
  .no-select,
  input[type="range"],
- input[type="range"]+.thumb {
+ input[type="range"] + .thumb {
  -webkit-user-select: none;
  -moz-user-select: none;
  -ms-user-select: none;
@@ -3249,7 +3251,7 @@ const char web[] PROGMEM = R"====(
  }
 
  span.badge[data-badge-caption]::after {
- content: " "attr(data-badge-caption);
+ content: " " attr(data-badge-caption);
  }
 
  nav ul a span.badge {
@@ -4422,12 +4424,12 @@ const char web[] PROGMEM = R"====(
  margin-right: 15px;
  }
 
- nav ul a.btn>.material-icons,
- nav ul a.btn-large>.material-icons,
- nav ul a.btn-small>.material-icons,
- nav ul a.btn-large>.material-icons,
- nav ul a.btn-flat>.material-icons,
- nav ul a.btn-floating>.material-icons {
+ nav ul a.btn > .material-icons,
+ nav ul a.btn-large > .material-icons,
+ nav ul a.btn-small > .material-icons,
+ nav ul a.btn-large > .material-icons,
+ nav ul a.btn-flat > .material-icons,
+ nav ul a.btn-floating > .material-icons {
  height: inherit;
  line-height: inherit;
  }
@@ -4748,7 +4750,8 @@ const char web[] PROGMEM = R"====(
  }
 
  .scale-transition {
- -webkit-transition: -webkit-transform 0.3s cubic-bezier(0.53, 0.01, 0.36, 1.63) !important;
+ -webkit-transition: -webkit-transform 0.3s
+ cubic-bezier(0.53, 0.01, 0.36, 1.63) !important;
  transition: -webkit-transform 0.3s cubic-bezier(0.53, 0.01, 0.36, 1.63) !important;
  transition: transform 0.3s cubic-bezier(0.53, 0.01, 0.36, 1.63) !important;
  transition: transform 0.3s cubic-bezier(0.53, 0.01, 0.36, 1.63),
@@ -4813,9 +4816,9 @@ const char web[] PROGMEM = R"====(
  overflow: hidden;
  }
 
- .card.small .card-image+.card-content,
- .card.medium .card-image+.card-content,
- .card.large .card-image+.card-content {
+ .card.small .card-image + .card-content,
+ .card.medium .card-image + .card-content,
+ .card.large .card-image + .card-content {
  max-height: 40%;
  }
 
@@ -4965,7 +4968,9 @@ const char web[] PROGMEM = R"====(
  border-radius: 0 0 2px 2px;
  }
 
- .card .card-action a:not(.btn):not(.btn-large):not(.btn-small):not(.btn-large):not(.btn-floating) {
+ .card
+ .card-action
+ a:not(.btn):not(.btn-large):not(.btn-small):not(.btn-large):not(.btn-floating) {
  color: #ffab40;
  margin-right: 24px;
  -webkit-transition: color 0.3s ease;
@@ -4973,7 +4978,9 @@ const char web[] PROGMEM = R"====(
  text-transform: uppercase;
  }
 
- .card .card-action a:not(.btn):not(.btn-large):not(.btn-small):not(.btn-large):not(.btn-floating):hover {
+ .card
+ .card-action
+ a:not(.btn):not(.btn-large):not(.btn-small):not(.btn-large):not(.btn-floating):hover {
  color: #ffd8a6;
  }
 
@@ -5494,7 +5501,7 @@ const char web[] PROGMEM = R"====(
  height: 56px;
  }
 
- .fixed-action-btn.toolbar.active>a i {
+ .fixed-action-btn.toolbar.active > a i {
  opacity: 0;
  }
 
@@ -5664,8 +5671,8 @@ const char web[] PROGMEM = R"====(
  height: 1px;
  }
 
- .dropdown-content li>a,
- .dropdown-content li>span {
+ .dropdown-content li > a,
+ .dropdown-content li > span {
  font-size: 16px;
  color: #26a69a;
  display: block;
@@ -5673,13 +5680,13 @@ const char web[] PROGMEM = R"====(
  padding: 14px 16px;
  }
 
- .dropdown-content li>span>label {
+ .dropdown-content li > span > label {
  top: 1px;
  left: 0;
  height: 18px;
  }
 
- .dropdown-content li>a>i {
+ .dropdown-content li > a > i {
  height: inherit;
  line-height: inherit;
  float: left;
@@ -5691,7 +5698,7 @@ const char web[] PROGMEM = R"====(
  background-color: #dadada;
  }
 
- .input-field.col .dropdown-content [type="checkbox"]+label {
+ .input-field.col .dropdown-content [type="checkbox"] + label {
  top: 1px;
  left: 0;
  height: 18px;
@@ -5790,9 +5797,11 @@ const char web[] PROGMEM = R"====(
  .waves-circle {
  -webkit-transform: translateZ(0);
  transform: translateZ(0);
- -webkit-mask-image: -webkit-radial-gradient(circle,
+ -webkit-mask-image: -webkit-radial-gradient(
+ circle,
  white 100%,
- black 100%);
+ black 100%
+ );
  }
 
  .waves-input-wrapper {
@@ -6015,7 +6024,7 @@ const char web[] PROGMEM = R"====(
  box-shadow: none;
  }
 
- .collapsible.popout>li {
+ .collapsible.popout > li {
  -webkit-box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16),
  0 2px 10px 0 rgba(0, 0, 0, 0.12);
  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16),
@@ -6025,7 +6034,7 @@ const char web[] PROGMEM = R"====(
  transition: margin 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
  }
 
- .collapsible.popout>li.active {
+ .collapsible.popout > li.active {
  -webkit-box-shadow: 0 5px 11px 0 rgba(0, 0, 0, 0.18),
  0 4px 15px 0 rgba(0, 0, 0, 0.15);
  box-shadow: 0 5px 11px 0 rgba(0, 0, 0, 0.18),
@@ -6053,7 +6062,7 @@ const char web[] PROGMEM = R"====(
  color: #fff;
  }
 
- .chip>img {
+ .chip > img {
  float: left;
  margin: 0 8px 0 -12px;
  height: 32px;
@@ -6116,13 +6125,13 @@ const char web[] PROGMEM = R"====(
  margin-bottom: 0;
  }
 
- .prefix~.chips {
+ .prefix ~ .chips {
  margin-left: 3rem;
  width: 92%;
  width: calc(100% - 3rem);
  }
 
- .chips:empty~label {
+ .chips:empty ~ label {
  font-size: 0.8rem;
  -webkit-transform: translateY(-140%);
  transform: translateY(-140%);
@@ -6270,32 +6279,33 @@ const char web[] PROGMEM = R"====(
  border-bottom: 1px dotted rgba(0, 0, 0, 0.42);
  }
 
- input:not([type]):disabled+label,
- input:not([type])[readonly="readonly"]+label,
- input[type="text"]:not(.browser-default):disabled+label,
- input[type="text"]:not(.browser-default)[readonly="readonly"]+label,
- input[type="password"]:not(.browser-default):disabled+label,
- input[type="password"]:not(.browser-default)[readonly="readonly"]+label,
- input[type="email"]:not(.browser-default):disabled+label,
- input[type="email"]:not(.browser-default)[readonly="readonly"]+label,
- input[type="url"]:not(.browser-default):disabled+label,
- input[type="url"]:not(.browser-default)[readonly="readonly"]+label,
- input[type="time"]:not(.browser-default):disabled+label,
- input[type="time"]:not(.browser-default)[readonly="readonly"]+label,
- input[type="date"]:not(.browser-default):disabled+label,
- input[type="date"]:not(.browser-default)[readonly="readonly"]+label,
- input[type="datetime"]:not(.browser-default):disabled+label,
- input[type="datetime"]:not(.browser-default)[readonly="readonly"]+label,
- input[type="datetime-local"]:not(.browser-default):disabled+label,
- input[type="datetime-local"]:not(.browser-default)[readonly="readonly"]+label,
- input[type="tel"]:not(.browser-default):disabled+label,
- input[type="tel"]:not(.browser-default)[readonly="readonly"]+label,
- input[type="number"]:not(.browser-default):disabled+label,
- input[type="number"]:not(.browser-default)[readonly="readonly"]+label,
- input[type="search"]:not(.browser-default):disabled+label,
- input[type="search"]:not(.browser-default)[readonly="readonly"]+label,
- textarea.materialize-textarea:disabled+label,
- textarea.materialize-textarea[readonly="readonly"]+label {
+ input:not([type]):disabled + label,
+ input:not([type])[readonly="readonly"] + label,
+ input[type="text"]:not(.browser-default):disabled + label,
+ input[type="text"]:not(.browser-default)[readonly="readonly"] + label,
+ input[type="password"]:not(.browser-default):disabled + label,
+ input[type="password"]:not(.browser-default)[readonly="readonly"] + label,
+ input[type="email"]:not(.browser-default):disabled + label,
+ input[type="email"]:not(.browser-default)[readonly="readonly"] + label,
+ input[type="url"]:not(.browser-default):disabled + label,
+ input[type="url"]:not(.browser-default)[readonly="readonly"] + label,
+ input[type="time"]:not(.browser-default):disabled + label,
+ input[type="time"]:not(.browser-default)[readonly="readonly"] + label,
+ input[type="date"]:not(.browser-default):disabled + label,
+ input[type="date"]:not(.browser-default)[readonly="readonly"] + label,
+ input[type="datetime"]:not(.browser-default):disabled + label,
+ input[type="datetime"]:not(.browser-default)[readonly="readonly"] + label,
+ input[type="datetime-local"]:not(.browser-default):disabled + label,
+ input[type="datetime-local"]:not(.browser-default)[readonly="readonly"]
+ + label,
+ input[type="tel"]:not(.browser-default):disabled + label,
+ input[type="tel"]:not(.browser-default)[readonly="readonly"] + label,
+ input[type="number"]:not(.browser-default):disabled + label,
+ input[type="number"]:not(.browser-default)[readonly="readonly"] + label,
+ input[type="search"]:not(.browser-default):disabled + label,
+ input[type="search"]:not(.browser-default)[readonly="readonly"] + label,
+ textarea.materialize-textarea:disabled + label,
+ textarea.materialize-textarea[readonly="readonly"] + label {
  color: rgba(0, 0, 0, 0.42);
  }
 
@@ -6317,67 +6327,70 @@ const char web[] PROGMEM = R"====(
  box-shadow: 0 1px 0 0 #26a69a;
  }
 
- input:not([type]):focus:not([readonly])+label,
- input[type="text"]:not(.browser-default):focus:not([readonly])+label,
- input[type="password"]:not(.browser-default):focus:not([readonly])+label,
- input[type="email"]:not(.browser-default):focus:not([readonly])+label,
- input[type="url"]:not(.browser-default):focus:not([readonly])+label,
- input[type="time"]:not(.browser-default):focus:not([readonly])+label,
- input[type="date"]:not(.browser-default):focus:not([readonly])+label,
- input[type="datetime"]:not(.browser-default):focus:not([readonly])+label,
- input[type="datetime-local"]:not(.browser-default):focus:not([readonly])+label,
- input[type="tel"]:not(.browser-default):focus:not([readonly])+label,
- input[type="number"]:not(.browser-default):focus:not([readonly])+label,
- input[type="search"]:not(.browser-default):focus:not([readonly])+label,
- textarea.materialize-textarea:focus:not([readonly])+label {
+ input:not([type]):focus:not([readonly]) + label,
+ input[type="text"]:not(.browser-default):focus:not([readonly]) + label,
+ input[type="password"]:not(.browser-default):focus:not([readonly])
+ + label,
+ input[type="email"]:not(.browser-default):focus:not([readonly]) + label,
+ input[type="url"]:not(.browser-default):focus:not([readonly]) + label,
+ input[type="time"]:not(.browser-default):focus:not([readonly]) + label,
+ input[type="date"]:not(.browser-default):focus:not([readonly]) + label,
+ input[type="datetime"]:not(.browser-default):focus:not([readonly])
+ + label,
+ input[type="datetime-local"]:not(.browser-default):focus:not([readonly])
+ + label,
+ input[type="tel"]:not(.browser-default):focus:not([readonly]) + label,
+ input[type="number"]:not(.browser-default):focus:not([readonly]) + label,
+ input[type="search"]:not(.browser-default):focus:not([readonly]) + label,
+ textarea.materialize-textarea:focus:not([readonly]) + label {
  color: #26a69a;
  }
 
- input:not([type]):focus.valid~label,
- input[type="text"]:not(.browser-default):focus.valid~label,
- input[type="password"]:not(.browser-default):focus.valid~label,
- input[type="email"]:not(.browser-default):focus.valid~label,
- input[type="url"]:not(.browser-default):focus.valid~label,
- input[type="time"]:not(.browser-default):focus.valid~label,
- input[type="date"]:not(.browser-default):focus.valid~label,
- input[type="datetime"]:not(.browser-default):focus.valid~label,
- input[type="datetime-local"]:not(.browser-default):focus.valid~label,
- input[type="tel"]:not(.browser-default):focus.valid~label,
- input[type="number"]:not(.browser-default):focus.valid~label,
- input[type="search"]:not(.browser-default):focus.valid~label,
- textarea.materialize-textarea:focus.valid~label {
+ input:not([type]):focus.valid ~ label,
+ input[type="text"]:not(.browser-default):focus.valid ~ label,
+ input[type="password"]:not(.browser-default):focus.valid ~ label,
+ input[type="email"]:not(.browser-default):focus.valid ~ label,
+ input[type="url"]:not(.browser-default):focus.valid ~ label,
+ input[type="time"]:not(.browser-default):focus.valid ~ label,
+ input[type="date"]:not(.browser-default):focus.valid ~ label,
+ input[type="datetime"]:not(.browser-default):focus.valid ~ label,
+ input[type="datetime-local"]:not(.browser-default):focus.valid ~ label,
+ input[type="tel"]:not(.browser-default):focus.valid ~ label,
+ input[type="number"]:not(.browser-default):focus.valid ~ label,
+ input[type="search"]:not(.browser-default):focus.valid ~ label,
+ textarea.materialize-textarea:focus.valid ~ label {
  color: #4caf50;
  }
 
- input:not([type]):focus.invalid~label,
- input[type="text"]:not(.browser-default):focus.invalid~label,
- input[type="password"]:not(.browser-default):focus.invalid~label,
- input[type="email"]:not(.browser-default):focus.invalid~label,
- input[type="url"]:not(.browser-default):focus.invalid~label,
- input[type="time"]:not(.browser-default):focus.invalid~label,
- input[type="date"]:not(.browser-default):focus.invalid~label,
- input[type="datetime"]:not(.browser-default):focus.invalid~label,
- input[type="datetime-local"]:not(.browser-default):focus.invalid~label,
- input[type="tel"]:not(.browser-default):focus.invalid~label,
- input[type="number"]:not(.browser-default):focus.invalid~label,
- input[type="search"]:not(.browser-default):focus.invalid~label,
- textarea.materialize-textarea:focus.invalid~label {
+ input:not([type]):focus.invalid ~ label,
+ input[type="text"]:not(.browser-default):focus.invalid ~ label,
+ input[type="password"]:not(.browser-default):focus.invalid ~ label,
+ input[type="email"]:not(.browser-default):focus.invalid ~ label,
+ input[type="url"]:not(.browser-default):focus.invalid ~ label,
+ input[type="time"]:not(.browser-default):focus.invalid ~ label,
+ input[type="date"]:not(.browser-default):focus.invalid ~ label,
+ input[type="datetime"]:not(.browser-default):focus.invalid ~ label,
+ input[type="datetime-local"]:not(.browser-default):focus.invalid ~ label,
+ input[type="tel"]:not(.browser-default):focus.invalid ~ label,
+ input[type="number"]:not(.browser-default):focus.invalid ~ label,
+ input[type="search"]:not(.browser-default):focus.invalid ~ label,
+ textarea.materialize-textarea:focus.invalid ~ label {
  color: #f44336;
  }
 
- input:not([type]).validate+label,
- input[type="text"]:not(.browser-default).validate+label,
- input[type="password"]:not(.browser-default).validate+label,
- input[type="email"]:not(.browser-default).validate+label,
- input[type="url"]:not(.browser-default).validate+label,
- input[type="time"]:not(.browser-default).validate+label,
- input[type="date"]:not(.browser-default).validate+label,
- input[type="datetime"]:not(.browser-default).validate+label,
- input[type="datetime-local"]:not(.browser-default).validate+label,
- input[type="tel"]:not(.browser-default).validate+label,
- input[type="number"]:not(.browser-default).validate+label,
- input[type="search"]:not(.browser-default).validate+label,
- textarea.materialize-textarea.validate+label {
+ input:not([type]).validate + label,
+ input[type="text"]:not(.browser-default).validate + label,
+ input[type="password"]:not(.browser-default).validate + label,
+ input[type="email"]:not(.browser-default).validate + label,
+ input[type="url"]:not(.browser-default).validate + label,
+ input[type="time"]:not(.browser-default).validate + label,
+ input[type="date"]:not(.browser-default).validate + label,
+ input[type="datetime"]:not(.browser-default).validate + label,
+ input[type="datetime-local"]:not(.browser-default).validate + label,
+ input[type="tel"]:not(.browser-default).validate + label,
+ input[type="number"]:not(.browser-default).validate + label,
+ input[type="search"]:not(.browser-default).validate + label,
+ textarea.materialize-textarea.validate + label {
  width: 100%;
  }
 
@@ -6407,7 +6420,7 @@ const char web[] PROGMEM = R"====(
  input.valid[type="search"]:not(.browser-default):focus,
  textarea.materialize-textarea.valid,
  textarea.materialize-textarea.valid:focus,
- .select-wrapper.valid>input.select-dropdown {
+ .select-wrapper.valid > input.select-dropdown {
  border-bottom: 1px solid #4caf50;
  -webkit-box-shadow: 0 1px 0 0 #4caf50;
  box-shadow: 0 1px 0 0 #4caf50;
@@ -6439,67 +6452,111 @@ const char web[] PROGMEM = R"====(
  input.invalid[type="search"]:not(.browser-default):focus,
  textarea.materialize-textarea.invalid,
  textarea.materialize-textarea.invalid:focus,
- .select-wrapper.invalid>input.select-dropdown,
- .select-wrapper.invalid>input.select-dropdown:focus {
+ .select-wrapper.invalid > input.select-dropdown,
+ .select-wrapper.invalid > input.select-dropdown:focus {
  border-bottom: 1px solid #f44336;
  -webkit-box-shadow: 0 1px 0 0 #f44336;
  box-shadow: 0 1px 0 0 #f44336;
  }
 
- input:not([type]).valid~.helper-text[data-success],
- input:not([type]):focus.valid~.helper-text[data-success],
- input:not([type]).invalid~.helper-text[data-error],
- input:not([type]):focus.invalid~.helper-text[data-error],
- input[type="text"]:not(.browser-default).valid~.helper-text[data-success],
- input[type="text"]:not(.browser-default):focus.valid~.helper-text[data-success],
- input[type="text"]:not(.browser-default).invalid~.helper-text[data-error],
- input[type="text"]:not(.browser-default):focus.invalid~.helper-text[data-error],
- input[type="password"]:not(.browser-default).valid~.helper-text[data-success],
- input[type="password"]:not(.browser-default):focus.valid~.helper-text[data-success],
- input[type="password"]:not(.browser-default).invalid~.helper-text[data-error],
- input[type="password"]:not(.browser-default):focus.invalid~.helper-text[data-error],
- input[type="email"]:not(.browser-default).valid~.helper-text[data-success],
- input[type="email"]:not(.browser-default):focus.valid~.helper-text[data-success],
- input[type="email"]:not(.browser-default).invalid~.helper-text[data-error],
- input[type="email"]:not(.browser-default):focus.invalid~.helper-text[data-error],
- input[type="url"]:not(.browser-default).valid~.helper-text[data-success],
- input[type="url"]:not(.browser-default):focus.valid~.helper-text[data-success],
- input[type="url"]:not(.browser-default).invalid~.helper-text[data-error],
- input[type="url"]:not(.browser-default):focus.invalid~.helper-text[data-error],
- input[type="time"]:not(.browser-default).valid~.helper-text[data-success],
- input[type="time"]:not(.browser-default):focus.valid~.helper-text[data-success],
- input[type="time"]:not(.browser-default).invalid~.helper-text[data-error],
- input[type="time"]:not(.browser-default):focus.invalid~.helper-text[data-error],
- input[type="date"]:not(.browser-default).valid~.helper-text[data-success],
- input[type="date"]:not(.browser-default):focus.valid~.helper-text[data-success],
- input[type="date"]:not(.browser-default).invalid~.helper-text[data-error],
- input[type="date"]:not(.browser-default):focus.invalid~.helper-text[data-error],
- input[type="datetime"]:not(.browser-default).valid~.helper-text[data-success],
- input[type="datetime"]:not(.browser-default):focus.valid~.helper-text[data-success],
- input[type="datetime"]:not(.browser-default).invalid~.helper-text[data-error],
- input[type="datetime"]:not(.browser-default):focus.invalid~.helper-text[data-error],
- input[type="datetime-local"]:not(.browser-default).valid~.helper-text[data-success],
- input[type="datetime-local"]:not(.browser-default):focus.valid~.helper-text[data-success],
- input[type="datetime-local"]:not(.browser-default).invalid~.helper-text[data-error],
- input[type="datetime-local"]:not(.browser-default):focus.invalid~.helper-text[data-error],
- input[type="tel"]:not(.browser-default).valid~.helper-text[data-success],
- input[type="tel"]:not(.browser-default):focus.valid~.helper-text[data-success],
- input[type="tel"]:not(.browser-default).invalid~.helper-text[data-error],
- input[type="tel"]:not(.browser-default):focus.invalid~.helper-text[data-error],
- input[type="number"]:not(.browser-default).valid~.helper-text[data-success],
- input[type="number"]:not(.browser-default):focus.valid~.helper-text[data-success],
- input[type="number"]:not(.browser-default).invalid~.helper-text[data-error],
- input[type="number"]:not(.browser-default):focus.invalid~.helper-text[data-error],
- input[type="search"]:not(.browser-default).valid~.helper-text[data-success],
- input[type="search"]:not(.browser-default):focus.valid~.helper-text[data-success],
- input[type="search"]:not(.browser-default).invalid~.helper-text[data-error],
- input[type="search"]:not(.browser-default):focus.invalid~.helper-text[data-error],
- textarea.materialize-textarea.valid~.helper-text[data-success],
- textarea.materialize-textarea:focus.valid~.helper-text[data-success],
- textarea.materialize-textarea.invalid~.helper-text[data-error],
- textarea.materialize-textarea:focus.invalid~.helper-text[data-error],
+ input:not([type]).valid ~ .helper-text[data-success],
+ input:not([type]):focus.valid ~ .helper-text[data-success],
+ input:not([type]).invalid ~ .helper-text[data-error],
+ input:not([type]):focus.invalid ~ .helper-text[data-error],
+ input[type="text"]:not(.browser-default).valid
+ ~ .helper-text[data-success],
+ input[type="text"]:not(.browser-default):focus.valid
+ ~ .helper-text[data-success],
+ input[type="text"]:not(.browser-default).invalid
+ ~ .helper-text[data-error],
+ input[type="text"]:not(.browser-default):focus.invalid
+ ~ .helper-text[data-error],
+ input[type="password"]:not(.browser-default).valid
+ ~ .helper-text[data-success],
+ input[type="password"]:not(.browser-default):focus.valid
+ ~ .helper-text[data-success],
+ input[type="password"]:not(.browser-default).invalid
+ ~ .helper-text[data-error],
+ input[type="password"]:not(.browser-default):focus.invalid
+ ~ .helper-text[data-error],
+ input[type="email"]:not(.browser-default).valid
+ ~ .helper-text[data-success],
+ input[type="email"]:not(.browser-default):focus.valid
+ ~ .helper-text[data-success],
+ input[type="email"]:not(.browser-default).invalid
+ ~ .helper-text[data-error],
+ input[type="email"]:not(.browser-default):focus.invalid
+ ~ .helper-text[data-error],
+ input[type="url"]:not(.browser-default).valid
+ ~ .helper-text[data-success],
+ input[type="url"]:not(.browser-default):focus.valid
+ ~ .helper-text[data-success],
+ input[type="url"]:not(.browser-default).invalid
+ ~ .helper-text[data-error],
+ input[type="url"]:not(.browser-default):focus.invalid
+ ~ .helper-text[data-error],
+ input[type="time"]:not(.browser-default).valid
+ ~ .helper-text[data-success],
+ input[type="time"]:not(.browser-default):focus.valid
+ ~ .helper-text[data-success],
+ input[type="time"]:not(.browser-default).invalid
+ ~ .helper-text[data-error],
+ input[type="time"]:not(.browser-default):focus.invalid
+ ~ .helper-text[data-error],
+ input[type="date"]:not(.browser-default).valid
+ ~ .helper-text[data-success],
+ input[type="date"]:not(.browser-default):focus.valid
+ ~ .helper-text[data-success],
+ input[type="date"]:not(.browser-default).invalid
+ ~ .helper-text[data-error],
+ input[type="date"]:not(.browser-default):focus.invalid
+ ~ .helper-text[data-error],
+ input[type="datetime"]:not(.browser-default).valid
+ ~ .helper-text[data-success],
+ input[type="datetime"]:not(.browser-default):focus.valid
+ ~ .helper-text[data-success],
+ input[type="datetime"]:not(.browser-default).invalid
+ ~ .helper-text[data-error],
+ input[type="datetime"]:not(.browser-default):focus.invalid
+ ~ .helper-text[data-error],
+ input[type="datetime-local"]:not(.browser-default).valid
+ ~ .helper-text[data-success],
+ input[type="datetime-local"]:not(.browser-default):focus.valid
+ ~ .helper-text[data-success],
+ input[type="datetime-local"]:not(.browser-default).invalid
+ ~ .helper-text[data-error],
+ input[type="datetime-local"]:not(.browser-default):focus.invalid
+ ~ .helper-text[data-error],
+ input[type="tel"]:not(.browser-default).valid
+ ~ .helper-text[data-success],
+ input[type="tel"]:not(.browser-default):focus.valid
+ ~ .helper-text[data-success],
+ input[type="tel"]:not(.browser-default).invalid
+ ~ .helper-text[data-error],
+ input[type="tel"]:not(.browser-default):focus.invalid
+ ~ .helper-text[data-error],
+ input[type="number"]:not(.browser-default).valid
+ ~ .helper-text[data-success],
+ input[type="number"]:not(.browser-default):focus.valid
+ ~ .helper-text[data-success],
+ input[type="number"]:not(.browser-default).invalid
+ ~ .helper-text[data-error],
+ input[type="number"]:not(.browser-default):focus.invalid
+ ~ .helper-text[data-error],
+ input[type="search"]:not(.browser-default).valid
+ ~ .helper-text[data-success],
+ input[type="search"]:not(.browser-default):focus.valid
+ ~ .helper-text[data-success],
+ input[type="search"]:not(.browser-default).invalid
+ ~ .helper-text[data-error],
+ input[type="search"]:not(.browser-default):focus.invalid
+ ~ .helper-text[data-error],
+ textarea.materialize-textarea.valid ~ .helper-text[data-success],
+ textarea.materialize-textarea:focus.valid ~ .helper-text[data-success],
+ textarea.materialize-textarea.invalid ~ .helper-text[data-error],
+ textarea.materialize-textarea:focus.invalid ~ .helper-text[data-error],
  .select-wrapper.valid .helper-text[data-success],
- .select-wrapper.invalid~.helper-text[data-error] {
+ .select-wrapper.invalid ~ .helper-text[data-error] {
  color: transparent;
  -webkit-user-select: none;
  -moz-user-select: none;
@@ -6508,82 +6565,101 @@ const char web[] PROGMEM = R"====(
  pointer-events: none;
  }
 
- input:not([type]).valid~.helper-text:after,
- input:not([type]):focus.valid~.helper-text:after,
- input[type="text"]:not(.browser-default).valid~.helper-text:after,
- input[type="text"]:not(.browser-default):focus.valid~.helper-text:after,
- input[type="password"]:not(.browser-default).valid~.helper-text:after,
- input[type="password"]:not(.browser-default):focus.valid~.helper-text:after,
- input[type="email"]:not(.browser-default).valid~.helper-text:after,
- input[type="email"]:not(.browser-default):focus.valid~.helper-text:after,
- input[type="url"]:not(.browser-default).valid~.helper-text:after,
- input[type="url"]:not(.browser-default):focus.valid~.helper-text:after,
- input[type="time"]:not(.browser-default).valid~.helper-text:after,
- input[type="time"]:not(.browser-default):focus.valid~.helper-text:after,
- input[type="date"]:not(.browser-default).valid~.helper-text:after,
- input[type="date"]:not(.browser-default):focus.valid~.helper-text:after,
- input[type="datetime"]:not(.browser-default).valid~.helper-text:after,
- input[type="datetime"]:not(.browser-default):focus.valid~.helper-text:after,
- input[type="datetime-local"]:not(.browser-default).valid~.helper-text:after,
- input[type="datetime-local"]:not(.browser-default):focus.valid~.helper-text:after,
- input[type="tel"]:not(.browser-default).valid~.helper-text:after,
- input[type="tel"]:not(.browser-default):focus.valid~.helper-text:after,
- input[type="number"]:not(.browser-default).valid~.helper-text:after,
- input[type="number"]:not(.browser-default):focus.valid~.helper-text:after,
- input[type="search"]:not(.browser-default).valid~.helper-text:after,
- input[type="search"]:not(.browser-default):focus.valid~.helper-text:after,
- textarea.materialize-textarea.valid~.helper-text:after,
- textarea.materialize-textarea:focus.valid~.helper-text:after,
- .select-wrapper.valid~.helper-text:after {
+ input:not([type]).valid ~ .helper-text:after,
+ input:not([type]):focus.valid ~ .helper-text:after,
+ input[type="text"]:not(.browser-default).valid ~ .helper-text:after,
+ input[type="text"]:not(.browser-default):focus.valid ~ .helper-text:after,
+ input[type="password"]:not(.browser-default).valid ~ .helper-text:after,
+ input[type="password"]:not(.browser-default):focus.valid
+ ~ .helper-text:after,
+ input[type="email"]:not(.browser-default).valid ~ .helper-text:after,
+ input[type="email"]:not(.browser-default):focus.valid
+ ~ .helper-text:after,
+ input[type="url"]:not(.browser-default).valid ~ .helper-text:after,
+ input[type="url"]:not(.browser-default):focus.valid ~ .helper-text:after,
+ input[type="time"]:not(.browser-default).valid ~ .helper-text:after,
+ input[type="time"]:not(.browser-default):focus.valid ~ .helper-text:after,
+ input[type="date"]:not(.browser-default).valid ~ .helper-text:after,
+ input[type="date"]:not(.browser-default):focus.valid ~ .helper-text:after,
+ input[type="datetime"]:not(.browser-default).valid ~ .helper-text:after,
+ input[type="datetime"]:not(.browser-default):focus.valid
+ ~ .helper-text:after,
+ input[type="datetime-local"]:not(.browser-default).valid
+ ~ .helper-text:after,
+ input[type="datetime-local"]:not(.browser-default):focus.valid
+ ~ .helper-text:after,
+ input[type="tel"]:not(.browser-default).valid ~ .helper-text:after,
+ input[type="tel"]:not(.browser-default):focus.valid ~ .helper-text:after,
+ input[type="number"]:not(.browser-default).valid ~ .helper-text:after,
+ input[type="number"]:not(.browser-default):focus.valid
+ ~ .helper-text:after,
+ input[type="search"]:not(.browser-default).valid ~ .helper-text:after,
+ input[type="search"]:not(.browser-default):focus.valid
+ ~ .helper-text:after,
+ textarea.materialize-textarea.valid ~ .helper-text:after,
+ textarea.materialize-textarea:focus.valid ~ .helper-text:after,
+ .select-wrapper.valid ~ .helper-text:after {
  content: attr(data-success);
  color: #4caf50;
  }
 
- input:not([type]).invalid~.helper-text:after,
- input:not([type]):focus.invalid~.helper-text:after,
- input[type="text"]:not(.browser-default).invalid~.helper-text:after,
- input[type="text"]:not(.browser-default):focus.invalid~.helper-text:after,
- input[type="password"]:not(.browser-default).invalid~.helper-text:after,
- input[type="password"]:not(.browser-default):focus.invalid~.helper-text:after,
- input[type="email"]:not(.browser-default).invalid~.helper-text:after,
- input[type="email"]:not(.browser-default):focus.invalid~.helper-text:after,
- input[type="url"]:not(.browser-default).invalid~.helper-text:after,
- input[type="url"]:not(.browser-default):focus.invalid~.helper-text:after,
- input[type="time"]:not(.browser-default).invalid~.helper-text:after,
- input[type="time"]:not(.browser-default):focus.invalid~.helper-text:after,
- input[type="date"]:not(.browser-default).invalid~.helper-text:after,
- input[type="date"]:not(.browser-default):focus.invalid~.helper-text:after,
- input[type="datetime"]:not(.browser-default).invalid~.helper-text:after,
- input[type="datetime"]:not(.browser-default):focus.invalid~.helper-text:after,
- input[type="datetime-local"]:not(.browser-default).invalid~.helper-text:after,
- input[type="datetime-local"]:not(.browser-default):focus.invalid~.helper-text:after,
- input[type="tel"]:not(.browser-default).invalid~.helper-text:after,
- input[type="tel"]:not(.browser-default):focus.invalid~.helper-text:after,
- input[type="number"]:not(.browser-default).invalid~.helper-text:after,
- input[type="number"]:not(.browser-default):focus.invalid~.helper-text:after,
- input[type="search"]:not(.browser-default).invalid~.helper-text:after,
- input[type="search"]:not(.browser-default):focus.invalid~.helper-text:after,
- textarea.materialize-textarea.invalid~.helper-text:after,
- textarea.materialize-textarea:focus.invalid~.helper-text:after,
- .select-wrapper.invalid~.helper-text:after {
+ input:not([type]).invalid ~ .helper-text:after,
+ input:not([type]):focus.invalid ~ .helper-text:after,
+ input[type="text"]:not(.browser-default).invalid ~ .helper-text:after,
+ input[type="text"]:not(.browser-default):focus.invalid
+ ~ .helper-text:after,
+ input[type="password"]:not(.browser-default).invalid ~ .helper-text:after,
+ input[type="password"]:not(.browser-default):focus.invalid
+ ~ .helper-text:after,
+ input[type="email"]:not(.browser-default).invalid ~ .helper-text:after,
+ input[type="email"]:not(.browser-default):focus.invalid
+ ~ .helper-text:after,
+ input[type="url"]:not(.browser-default).invalid ~ .helper-text:after,
+ input[type="url"]:not(.browser-default):focus.invalid
+ ~ .helper-text:after,
+ input[type="time"]:not(.browser-default).invalid ~ .helper-text:after,
+ input[type="time"]:not(.browser-default):focus.invalid
+ ~ .helper-text:after,
+ input[type="date"]:not(.browser-default).invalid ~ .helper-text:after,
+ input[type="date"]:not(.browser-default):focus.invalid
+ ~ .helper-text:after,
+ input[type="datetime"]:not(.browser-default).invalid ~ .helper-text:after,
+ input[type="datetime"]:not(.browser-default):focus.invalid
+ ~ .helper-text:after,
+ input[type="datetime-local"]:not(.browser-default).invalid
+ ~ .helper-text:after,
+ input[type="datetime-local"]:not(.browser-default):focus.invalid
+ ~ .helper-text:after,
+ input[type="tel"]:not(.browser-default).invalid ~ .helper-text:after,
+ input[type="tel"]:not(.browser-default):focus.invalid
+ ~ .helper-text:after,
+ input[type="number"]:not(.browser-default).invalid ~ .helper-text:after,
+ input[type="number"]:not(.browser-default):focus.invalid
+ ~ .helper-text:after,
+ input[type="search"]:not(.browser-default).invalid ~ .helper-text:after,
+ input[type="search"]:not(.browser-default):focus.invalid
+ ~ .helper-text:after,
+ textarea.materialize-textarea.invalid ~ .helper-text:after,
+ textarea.materialize-textarea:focus.invalid ~ .helper-text:after,
+ .select-wrapper.invalid ~ .helper-text:after {
  content: attr(data-error);
  color: #f44336;
  }
 
- input:not([type])+label:after,
- input[type="text"]:not(.browser-default)+label:after,
- input[type="password"]:not(.browser-default)+label:after,
- input[type="email"]:not(.browser-default)+label:after,
- input[type="url"]:not(.browser-default)+label:after,
- input[type="time"]:not(.browser-default)+label:after,
- input[type="date"]:not(.browser-default)+label:after,
- input[type="datetime"]:not(.browser-default)+label:after,
- input[type="datetime-local"]:not(.browser-default)+label:after,
- input[type="tel"]:not(.browser-default)+label:after,
- input[type="number"]:not(.browser-default)+label:after,
- input[type="search"]:not(.browser-default)+label:after,
- textarea.materialize-textarea+label:after,
- .select-wrapper+label:after {
+ input:not([type]) + label:after,
+ input[type="text"]:not(.browser-default) + label:after,
+ input[type="password"]:not(.browser-default) + label:after,
+ input[type="email"]:not(.browser-default) + label:after,
+ input[type="url"]:not(.browser-default) + label:after,
+ input[type="time"]:not(.browser-default) + label:after,
+ input[type="date"]:not(.browser-default) + label:after,
+ input[type="datetime"]:not(.browser-default) + label:after,
+ input[type="datetime-local"]:not(.browser-default) + label:after,
+ input[type="tel"]:not(.browser-default) + label:after,
+ input[type="number"]:not(.browser-default) + label:after,
+ input[type="search"]:not(.browser-default) + label:after,
+ textarea.materialize-textarea + label:after,
+ .select-wrapper + label:after {
  display: block;
  content: "";
  position: absolute;
@@ -6615,12 +6691,12 @@ const char web[] PROGMEM = R"====(
  left: 0.75rem;
  }
 
- .input-field.col .prefix~label,
- .input-field.col .prefix~.validate~label {
+ .input-field.col .prefix ~ label,
+ .input-field.col .prefix ~ .validate ~ label {
  width: calc(100% - 3rem - 1.5rem);
  }
 
- .input-field>label {
+ .input-field > label {
  color: #9e9e9e;
  position: absolute;
  top: 0;
@@ -6639,16 +6715,18 @@ const char web[] PROGMEM = R"====(
  transform: translateY(12px);
  }
 
- .input-field>label:not(.label-icon).active {
+ .input-field > label:not(.label-icon).active {
  -webkit-transform: translateY(-14px) scale(0.8);
  transform: translateY(-14px) scale(0.8);
  -webkit-transform-origin: 0 0;
  transform-origin: 0 0;
  }
 
- .input-field>input[type]:-webkit-autofill:not(.browser-default):not([type="search"])+label,
- .input-field>input[type="date"]:not(.browser-default)+label,
- .input-field>input[type="time"]:not(.browser-default)+label {
+ .input-field
+ > input[type]:-webkit-autofill:not(.browser-default):not([type="search"])
+ + label,
+ .input-field > input[type="date"]:not(.browser-default) + label,
+ .input-field > input[type="time"]:not(.browser-default) + label {
  -webkit-transform: translateY(-14px) scale(0.8);
  transform: translateY(-14px) scale(0.8);
  -webkit-transform-origin: 0 0;
@@ -6683,30 +6761,30 @@ const char web[] PROGMEM = R"====(
  color: #26a69a;
  }
 
- .input-field .prefix~input,
- .input-field .prefix~textarea,
- .input-field .prefix~label,
- .input-field .prefix~.validate~label,
- .input-field .prefix~.helper-text,
- .input-field .prefix~.autocomplete-content {
+ .input-field .prefix ~ input,
+ .input-field .prefix ~ textarea,
+ .input-field .prefix ~ label,
+ .input-field .prefix ~ .validate ~ label,
+ .input-field .prefix ~ .helper-text,
+ .input-field .prefix ~ .autocomplete-content {
  margin-left: 3rem;
  width: 92%;
  width: calc(100% - 3rem);
  }
 
- .input-field .prefix~label {
+ .input-field .prefix ~ label {
  margin-left: 3rem;
  }
 
  @media only screen and (max-width: 992px) {
- .input-field .prefix~input {
+ .input-field .prefix ~ input {
  width: 86%;
  width: calc(100% - 3rem);
  }
  }
 
  @media only screen and (max-width: 600px) {
- .input-field .prefix~input {
+ .input-field .prefix ~ input {
  width: 80%;
  width: calc(100% - 3rem);
  }
@@ -6736,20 +6814,24 @@ const char web[] PROGMEM = R"====(
  color: #444;
  }
 
- .input-field input[type="search"]:focus:not(.browser-default)+label i,
- .input-field input[type="search"]:focus:not(.browser-default)~.mdi-navigation-close,
- .input-field input[type="search"]:focus:not(.browser-default)~.material-icons {
+ .input-field input[type="search"]:focus:not(.browser-default) + label i,
+ .input-field
+ input[type="search"]:focus:not(.browser-default)
+ ~ .mdi-navigation-close,
+ .input-field
+ input[type="search"]:focus:not(.browser-default)
+ ~ .material-icons {
  color: #444;
  }
 
- .input-field input[type="search"]+.label-icon {
+ .input-field input[type="search"] + .label-icon {
  -webkit-transform: none;
  transform: none;
  left: 1rem;
  }
 
- .input-field input[type="search"]~.mdi-navigation-close,
- .input-field input[type="search"]~.material-icons {
+ .input-field input[type="search"] ~ .mdi-navigation-close,
+ .input-field input[type="search"] ~ .material-icons {
  position: absolute;
  top: 0;
  right: 1rem;
@@ -6808,8 +6890,8 @@ const char web[] PROGMEM = R"====(
  pointer-events: none;
  }
 
- [type="radio"]:not(:checked)+span,
- [type="radio"]:checked+span {
+ [type="radio"]:not(:checked) + span,
+ [type="radio"]:checked + span {
  position: relative;
  padding-left: 35px;
  cursor: pointer;
@@ -6825,8 +6907,8 @@ const char web[] PROGMEM = R"====(
  user-select: none;
  }
 
- [type="radio"]+span:before,
- [type="radio"]+span:after {
+ [type="radio"] + span:before,
+ [type="radio"] + span:after {
  content: "";
  position: absolute;
  left: 0;
@@ -6839,79 +6921,79 @@ const char web[] PROGMEM = R"====(
  transition: 0.28s ease;
  }
 
- [type="radio"]:not(:checked)+span:before,
- [type="radio"]:not(:checked)+span:after,
- [type="radio"]:checked+span:before,
- [type="radio"]:checked+span:after,
- [type="radio"].with-gap:checked+span:before,
- [type="radio"].with-gap:checked+span:after {
+ [type="radio"]:not(:checked) + span:before,
+ [type="radio"]:not(:checked) + span:after,
+ [type="radio"]:checked + span:before,
+ [type="radio"]:checked + span:after,
+ [type="radio"].with-gap:checked + span:before,
+ [type="radio"].with-gap:checked + span:after {
  border-radius: 50%;
  }
 
- [type="radio"]:not(:checked)+span:before,
- [type="radio"]:not(:checked)+span:after {
+ [type="radio"]:not(:checked) + span:before,
+ [type="radio"]:not(:checked) + span:after {
  border: 2px solid #5a5a5a;
  }
 
- [type="radio"]:not(:checked)+span:after {
+ [type="radio"]:not(:checked) + span:after {
  -webkit-transform: scale(0);
  transform: scale(0);
  }
 
- [type="radio"]:checked+span:before {
+ [type="radio"]:checked + span:before {
  border: 2px solid transparent;
  }
 
- [type="radio"]:checked+span:after,
- [type="radio"].with-gap:checked+span:before,
- [type="radio"].with-gap:checked+span:after {
+ [type="radio"]:checked + span:after,
+ [type="radio"].with-gap:checked + span:before,
+ [type="radio"].with-gap:checked + span:after {
  border: 2px solid #26a69a;
  }
 
- [type="radio"]:checked+span:after,
- [type="radio"].with-gap:checked+span:after {
+ [type="radio"]:checked + span:after,
+ [type="radio"].with-gap:checked + span:after {
  background-color: #26a69a;
  }
 
- [type="radio"]:checked+span:after {
+ [type="radio"]:checked + span:after {
  -webkit-transform: scale(1.02);
  transform: scale(1.02);
  }
 
- [type="radio"].with-gap:checked+span:after {
+ [type="radio"].with-gap:checked + span:after {
  -webkit-transform: scale(0.5);
  transform: scale(0.5);
  }
 
- [type="radio"].tabbed:focus+span:before {
+ [type="radio"].tabbed:focus + span:before {
  -webkit-box-shadow: 0 0 0 10px rgba(0, 0, 0, 0.1);
  box-shadow: 0 0 0 10px rgba(0, 0, 0, 0.1);
  }
 
- [type="radio"].with-gap:disabled:checked+span:before {
+ [type="radio"].with-gap:disabled:checked + span:before {
  border: 2px solid rgba(0, 0, 0, 0.42);
  }
 
- [type="radio"].with-gap:disabled:checked+span:after {
+ [type="radio"].with-gap:disabled:checked + span:after {
  border: none;
  background-color: rgba(0, 0, 0, 0.42);
  }
 
- [type="radio"]:disabled:not(:checked)+span:before,
- [type="radio"]:disabled:checked+span:before {
+ [type="radio"]:disabled:not(:checked) + span:before,
+ [type="radio"]:disabled:checked + span:before {
  background-color: transparent;
  border-color: rgba(0, 0, 0, 0.42);
  }
 
- [type="radio"]:disabled+span {
+ [type="radio"]:disabled + span {
  color: rgba(0, 0, 0, 0.42);
  }
 
- [type="radio"]:disabled:not(:checked)+span:before {
+ [type="radio"]:disabled:not(:checked) + span:before {
  border-color: rgba(0, 0, 0, 0.42);
  }
 
- [type="radio"]:disabled:checked+span:after {
+ [type="radio"]:disabled:checked + span:after {
  background-color: rgba(0, 0, 0, 0.42);
  border-color: #949494;
  }
@@ -6923,7 +7005,7 @@ const char web[] PROGMEM = R"====(
  pointer-events: none;
  }
 
- [type="checkbox"]+span:not(.lever) {
+ [type="checkbox"] + span:not(.lever) {
  position: relative;
  padding-left: 35px;
  cursor: pointer;
@@ -6937,8 +7019,8 @@ const char web[] PROGMEM = R"====(
  user-select: none;
  }
 
- [type="checkbox"]+span:not(.lever):before,
- [type="checkbox"]:not(.filled-in)+span:not(.lever):after {
+ [type="checkbox"] + span:not(.lever):before,
+ [type="checkbox"]:not(.filled-in) + span:not(.lever):after {
  content: "";
  position: absolute;
  top: 0;
@@ -6953,18 +7035,18 @@ const char web[] PROGMEM = R"====(
  transition: 0.2s;
  }
 
- [type="checkbox"]:not(.filled-in)+span:not(.lever):after {
+ [type="checkbox"]:not(.filled-in) + span:not(.lever):after {
  border: 0;
  -webkit-transform: scale(0);
  transform: scale(0);
  }
 
- [type="checkbox"]:not(:checked):disabled+span:not(.lever):before {
+ [type="checkbox"]:not(:checked):disabled + span:not(.lever):before {
  border: none;
  background-color: rgba(0, 0, 0, 0.42);
  }
 
- [type="checkbox"].tabbed:focus+span:not(.lever):after {
+ [type="checkbox"].tabbed:focus + span:not(.lever):after {
  -webkit-transform: scale(1);
  transform: scale(1);
  border: 0;
@@ -6974,7 +7056,7 @@ const char web[] PROGMEM = R"====(
  background-color: rgba(0, 0, 0, 0.1);
  }
 
- [type="checkbox"]:checked+span:not(.lever):before {
+ [type="checkbox"]:checked + span:not(.lever):before {
  top: -4px;
  left: -5px;
  width: 12px;
@@ -6991,12 +7073,12 @@ const char web[] PROGMEM = R"====(
  transform-origin: 100% 100%;
  }
 
- [type="checkbox"]:checked:disabled+span:before {
+ [type="checkbox"]:checked:disabled + span:before {
  border-right: 2px solid rgba(0, 0, 0, 0.42);
  border-bottom: 2px solid rgba(0, 0, 0, 0.42);
  }
 
- [type="checkbox"]:indeterminate+span:not(.lever):before {
+ [type="checkbox"]:indeterminate + span:not(.lever):before {
  top: -11px;
  left: -12px;
  width: 10px;
@@ -7013,17 +7095,17 @@ const char web[] PROGMEM = R"====(
  transform-origin: 100% 100%;
  }
 
- [type="checkbox"]:indeterminate:disabled+span:not(.lever):before {
+ [type="checkbox"]:indeterminate:disabled + span:not(.lever):before {
  border-right: 2px solid rgba(0, 0, 0, 0.42);
  background-color: transparent;
  }
 
- [type="checkbox"].filled-in+span:not(.lever):after {
+ [type="checkbox"].filled-in + span:not(.lever):after {
  border-radius: 2px;
  }
 
- [type="checkbox"].filled-in+span:not(.lever):before,
- [type="checkbox"].filled-in+span:not(.lever):after {
+ [type="checkbox"].filled-in + span:not(.lever):before,
+ [type="checkbox"].filled-in + span:not(.lever):after {
  content: "";
  left: 0;
  position: absolute;
@@ -7034,7 +7116,7 @@ const char web[] PROGMEM = R"====(
  z-index: 1;
  }
 
- [type="checkbox"].filled-in:not(:checked)+span:not(.lever):before {
+ [type="checkbox"].filled-in:not(:checked) + span:not(.lever):before {
  width: 0;
  height: 0;
  border: 3px solid transparent;
@@ -7046,7 +7128,7 @@ const char web[] PROGMEM = R"====(
  transform-origin: 100% 100%;
  }
 
- [type="checkbox"].filled-in:not(:checked)+span:not(.lever):after {
+ [type="checkbox"].filled-in:not(:checked) + span:not(.lever):after {
  height: 20px;
  width: 20px;
  background-color: transparent;
@@ -7055,7 +7137,7 @@ const char web[] PROGMEM = R"====(
  z-index: 0;
  }
 
- [type="checkbox"].filled-in:checked+span:not(.lever):before {
+ [type="checkbox"].filled-in:checked + span:not(.lever):before {
  top: 0;
  left: 1px;
  width: 8px;
@@ -7070,7 +7152,7 @@ const char web[] PROGMEM = R"====(
  transform-origin: 100% 100%;
  }
 
- [type="checkbox"].filled-in:checked+span:not(.lever):after {
+ [type="checkbox"].filled-in:checked + span:not(.lever):after {
  top: 0;
  width: 20px;
  height: 20px;
@@ -7079,33 +7161,36 @@ const char web[] PROGMEM = R"====(
  z-index: 0;
  }
 
- [type="checkbox"].filled-in.tabbed:focus+span:not(.lever):after {
+ [type="checkbox"].filled-in.tabbed:focus + span:not(.lever):after {
  border-radius: 2px;
  border-color: #5a5a5a;
  background-color: rgba(0, 0, 0, 0.1);
  }
 
- [type="checkbox"].filled-in.tabbed:checked:focus+span:not(.lever):after {
+ [type="checkbox"].filled-in.tabbed:checked:focus
+ + span:not(.lever):after {
  border-radius: 2px;
  background-color: #26a69a;
  border-color: #26a69a;
  }
 
- [type="checkbox"].filled-in:disabled:not(:checked)+span:not(.lever):before {
+ [type="checkbox"].filled-in:disabled:not(:checked)
+ + span:not(.lever):before {
  background-color: transparent;
  border: 2px solid transparent;
  }
 
- [type="checkbox"].filled-in:disabled:not(:checked)+span:not(.lever):after {
+ [type="checkbox"].filled-in:disabled:not(:checked)
+ + span:not(.lever):after {
  border-color: transparent;
  background-color: #949494;
  }
 
- [type="checkbox"].filled-in:disabled:checked+span:not(.lever):before {
+ [type="checkbox"].filled-in:disabled:checked + span:not(.lever):before {
  background-color: transparent;
  }
 
- [type="checkbox"].filled-in:disabled:checked+span:not(.lever):after {
+ [type="checkbox"].filled-in:disabled:checked + span:not(.lever):after {
  background-color: #949494;
  border-color: #949494;
  }
@@ -7129,16 +7214,16 @@ const char web[] PROGMEM = R"====(
  height: 0;
  }
 
- .switch label input[type="checkbox"]:checked+.lever {
+ .switch label input[type="checkbox"]:checked + .lever {
  background-color: #84c7c1;
  }
 
- .switch label input[type="checkbox"]:checked+.lever:before,
- .switch label input[type="checkbox"]:checked+.lever:after {
+ .switch label input[type="checkbox"]:checked + .lever:before,
+ .switch label input[type="checkbox"]:checked + .lever:after {
  left: 18px;
  }
 
- .switch label input[type="checkbox"]:checked+.lever:after {
+ .switch label input[type="checkbox"]:checked + .lever:after {
  background-color: #26a69a;
  }
 
@@ -7190,27 +7275,28 @@ const char web[] PROGMEM = R"====(
  0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12);
  }
 
- input[type="checkbox"]:checked:not(:disabled)~.lever:active::before,
- input[type="checkbox"]:checked:not(:disabled).tabbed:focus~.lever::before {
+ input[type="checkbox"]:checked:not(:disabled) ~ .lever:active::before,
+ input[type="checkbox"]:checked:not(:disabled).tabbed:focus
+ ~ .lever::before {
  -webkit-transform: scale(2.4);
  transform: scale(2.4);
  background-color: rgba(38, 166, 154, 0.15);
  }
 
- input[type="checkbox"]:not(:disabled)~.lever:active:before,
- input[type="checkbox"]:not(:disabled).tabbed:focus~.lever::before {
+ input[type="checkbox"]:not(:disabled) ~ .lever:active:before,
+ input[type="checkbox"]:not(:disabled).tabbed:focus ~ .lever::before {
  -webkit-transform: scale(2.4);
  transform: scale(2.4);
  background-color: rgba(0, 0, 0, 0.08);
  }
 
- .switch input[type="checkbox"][disabled]+.lever {
+ .switch input[type="checkbox"][disabled] + .lever {
  cursor: default;
  background-color: rgba(0, 0, 0, 0.12);
  }
 
- .switch label input[type="checkbox"][disabled]+.lever:after,
- .switch label input[type="checkbox"][disabled]:checked+.lever:after {
+ .switch label input[type="checkbox"][disabled] + .lever:after,
+ .switch label input[type="checkbox"][disabled]:checked + .lever:after {
  background-color: #949494;
  }
 
@@ -7239,8 +7325,8 @@ const char web[] PROGMEM = R"====(
  position: relative;
  }
 
- .select-wrapper.valid+label,
- .select-wrapper.invalid+label {
+ .select-wrapper.valid + label,
+ .select-wrapper.invalid + label {
  width: 100%;
  pointer-events: none;
  }
@@ -7280,7 +7366,7 @@ const char web[] PROGMEM = R"====(
  fill: rgba(0, 0, 0, 0.87);
  }
 
- .select-wrapper+label {
+ .select-wrapper + label {
  position: absolute;
  top: -26px;
  font-size: 0.8rem;
@@ -7290,7 +7376,7 @@ const char web[] PROGMEM = R"====(
  color: rgba(0, 0, 0, 0.42);
  }
 
- .select-wrapper.disabled+label {
+ .select-wrapper.disabled + label {
  color: rgba(0, 0, 0, 0.42);
  }
 
@@ -7312,7 +7398,7 @@ const char web[] PROGMEM = R"====(
  }
 
  .select-dropdown li.disabled,
- .select-dropdown li.disabled>span,
+ .select-dropdown li.disabled > span,
  .select-dropdown li.optgroup {
  color: rgba(0, 0, 0, 0.3);
  background-color: transparent;
@@ -7330,13 +7416,13 @@ const char web[] PROGMEM = R"====(
  background-color: rgba(0, 0, 0, 0.03);
  }
 
- .prefix~.select-wrapper {
+ .prefix ~ .select-wrapper {
  margin-left: 3rem;
  width: 92%;
  width: calc(100% - 3rem);
  }
 
- .prefix~label {
+ .prefix ~ label {
  margin-left: 3rem;
  }
 
@@ -7351,15 +7437,15 @@ const char web[] PROGMEM = R"====(
  border-top: 1px solid #eee;
  }
 
- .select-dropdown li.optgroup.selected>span {
+ .select-dropdown li.optgroup.selected > span {
  color: rgba(0, 0, 0, 0.7);
  }
 
- .select-dropdown li.optgroup>span {
+ .select-dropdown li.optgroup > span {
  color: rgba(0, 0, 0, 0.4);
  }
 
- .select-dropdown li.optgroup~li.optgroup-option {
+ .select-dropdown li.optgroup ~ li.optgroup-option {
  padding-left: 1rem;
  }
 
@@ -7412,7 +7498,7 @@ const char web[] PROGMEM = R"====(
  }
 
  input[type="range"],
- input[type="range"]+.thumb {
+ input[type="range"] + .thumb {
  cursor: pointer;
  }
 
@@ -7430,7 +7516,7 @@ const char web[] PROGMEM = R"====(
  outline: none;
  }
 
- input[type="range"]+.thumb {
+ input[type="range"] + .thumb {
  position: absolute;
  top: 10px;
  left: 0;
@@ -7446,7 +7532,7 @@ const char web[] PROGMEM = R"====(
  transform: rotate(-45deg);
  }
 
- input[type="range"]+.thumb .value {
+ input[type="range"] + .thumb .value {
  display: block;
  width: 30px;
  text-align: center;
@@ -7456,11 +7542,11 @@ const char web[] PROGMEM = R"====(
  transform: rotate(45deg);
  }
 
- input[type="range"]+.thumb.active {
+ input[type="range"] + .thumb.active {
  border-radius: 50% 50% 50% 0;
  }
 
- input[type="range"]+.thumb.active .value {
+ input[type="range"] + .thumb.active .value {
  color: #fff;
  margin-left: -1px;
  margin-top: 8px;
@@ -7494,7 +7580,8 @@ const char web[] PROGMEM = R"====(
  margin: -5px 0 0 0;
  }
 
- .keyboard-focused input[type="range"]:focus:not(.active)::-webkit-slider-thumb {
+ .keyboard-focused
+ input[type="range"]:focus:not(.active)::-webkit-slider-thumb {
  -webkit-box-shadow: 0 0 0 10px rgba(38, 166, 154, 0.26);
  box-shadow: 0 0 0 10px rgba(38, 166, 154, 0.26);
  }
@@ -7531,7 +7618,8 @@ const char web[] PROGMEM = R"====(
  outline-offset: -1px;
  }
 
- .keyboard-focused input[type="range"]:focus:not(.active)::-moz-range-thumb {
+ .keyboard-focused
+ input[type="range"]:focus:not(.active)::-moz-range-thumb {
  box-shadow: 0 0 0 10px rgba(38, 166, 154, 0.26);
  }
 
@@ -7642,7 +7730,7 @@ const char web[] PROGMEM = R"====(
  background-color: rgba(0, 0, 0, 0.05);
  }
 
- .sidenav li>a {
+ .sidenav li > a {
  color: rgba(0, 0, 0, 0.87);
  display: block;
  font-size: 14px;
@@ -7652,46 +7740,46 @@ const char web[] PROGMEM = R"====(
  padding: 0 32px;
  }
 
- .sidenav li>a:hover {
+ .sidenav li > a:hover {
  background-color: rgba(0, 0, 0, 0.05);
  }
 
- .sidenav li>a.btn,
- .sidenav li>a.btn-large,
- .sidenav li>a.btn-small,
- .sidenav li>a.btn-large,
- .sidenav li>a.btn-flat,
- .sidenav li>a.btn-floating {
+ .sidenav li > a.btn,
+ .sidenav li > a.btn-large,
+ .sidenav li > a.btn-small,
+ .sidenav li > a.btn-large,
+ .sidenav li > a.btn-flat,
+ .sidenav li > a.btn-floating {
  margin: 10px 15px;
  }
 
- .sidenav li>a.btn,
- .sidenav li>a.btn-large,
- .sidenav li>a.btn-small,
- .sidenav li>a.btn-large,
- .sidenav li>a.btn-floating {
+ .sidenav li > a.btn,
+ .sidenav li > a.btn-large,
+ .sidenav li > a.btn-small,
+ .sidenav li > a.btn-large,
+ .sidenav li > a.btn-floating {
  color: #fff;
  }
 
- .sidenav li>a.btn-flat {
+ .sidenav li > a.btn-flat {
  color: #343434;
  }
 
- .sidenav li>a.btn:hover,
- .sidenav li>a.btn-large:hover,
- .sidenav li>a.btn-small:hover,
- .sidenav li>a.btn-large:hover {
+ .sidenav li > a.btn:hover,
+ .sidenav li > a.btn-large:hover,
+ .sidenav li > a.btn-small:hover,
+ .sidenav li > a.btn-large:hover {
  background-color: #2bbbad;
  }
 
- .sidenav li>a.btn-floating:hover {
+ .sidenav li > a.btn-floating:hover {
  background-color: #26a69a;
  }
 
- .sidenav li>a>i,
- .sidenav li>a>[class^="mdi-"],
- .sidenav li>a li>a>[class*="mdi-"],
- .sidenav li>a>i.material-icons {
+ .sidenav li > a > i,
+ .sidenav li > a > [class^="mdi-"],
+ .sidenav li > a li > a > [class*="mdi-"],
+ .sidenav li > a > i.material-icons {
  float: left;
  height: 48px;
  line-height: 48px;
@@ -7723,12 +7811,12 @@ const char web[] PROGMEM = R"====(
  margin-bottom: 8px;
  }
 
- .sidenav .user-view>a {
+ .sidenav .user-view > a {
  height: auto;
  padding: 0;
  }
 
- .sidenav .user-view>a:hover {
+ .sidenav .user-view > a:hover {
  background-color: transparent;
  }
 
@@ -7804,7 +7892,7 @@ const char web[] PROGMEM = R"====(
  transform: translateX(105%);
  }
 
- .sidenav>a {
+ .sidenav > a {
  padding: 0 16px;
  }
 
@@ -7813,13 +7901,20 @@ const char web[] PROGMEM = R"====(
  }
  }
 
- .sidenav .collapsible-body>ul:not(.collapsible)>li.active,
- .sidenav.sidenav-fixed .collapsible-body>ul:not(.collapsible)>li.active {
+ .sidenav .collapsible-body > ul:not(.collapsible) > li.active,
+ .sidenav.sidenav-fixed
+ .collapsible-body
+ > ul:not(.collapsible)
+ > li.active {
  background-color: #ee6e73;
  }
 
- .sidenav .collapsible-body>ul:not(.collapsible)>li.active a,
- .sidenav.sidenav-fixed .collapsible-body>ul:not(.collapsible)>li.active a {
+ .sidenav .collapsible-body > ul:not(.collapsible) > li.active a,
+ .sidenav.sidenav-fixed
+ .collapsible-body
+ > ul:not(.collapsible)
+ > li.active
+ a {
  color: #fff;
  }
 
@@ -7903,30 +7998,38 @@ const char web[] PROGMEM = R"====(
  }
 
  .active .spinner-layer.spinner-blue {
- -webkit-animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0, 0.2, 1) infinite both,
+ -webkit-animation: fill-unfill-rotate 5332ms
+ cubic-bezier(0.4, 0, 0.2, 1) infinite both,
  blue-fade-in-out 5332ms cubic-bezier(0.4, 0, 0.2, 1) infinite both;
- animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0, 0.2, 1) infinite both,
+ animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0, 0.2, 1)
+ infinite both,
  blue-fade-in-out 5332ms cubic-bezier(0.4, 0, 0.2, 1) infinite both;
  }
 
  .active .spinner-layer.spinner-red {
- -webkit-animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0, 0.2, 1) infinite both,
+ -webkit-animation: fill-unfill-rotate 5332ms
+ cubic-bezier(0.4, 0, 0.2, 1) infinite both,
  red-fade-in-out 5332ms cubic-bezier(0.4, 0, 0.2, 1) infinite both;
- animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0, 0.2, 1) infinite both,
+ animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0, 0.2, 1)
+ infinite both,
  red-fade-in-out 5332ms cubic-bezier(0.4, 0, 0.2, 1) infinite both;
  }
 
  .active .spinner-layer.spinner-yellow {
- -webkit-animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0, 0.2, 1) infinite both,
+ -webkit-animation: fill-unfill-rotate 5332ms
+ cubic-bezier(0.4, 0, 0.2, 1) infinite both,
  yellow-fade-in-out 5332ms cubic-bezier(0.4, 0, 0.2, 1) infinite both;
- animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0, 0.2, 1) infinite both,
+ animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0, 0.2, 1)
+ infinite both,
  yellow-fade-in-out 5332ms cubic-bezier(0.4, 0, 0.2, 1) infinite both;
  }
 
  .active .spinner-layer.spinner-green {
- -webkit-animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0, 0.2, 1) infinite both,
+ -webkit-animation: fill-unfill-rotate 5332ms
+ cubic-bezier(0.4, 0, 0.2, 1) infinite both,
  green-fade-in-out 5332ms cubic-bezier(0.4, 0, 0.2, 1) infinite both;
- animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0, 0.2, 1) infinite both,
+ animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0, 0.2, 1)
+ infinite both,
  green-fade-in-out 5332ms cubic-bezier(0.4, 0, 0.2, 1) infinite both;
  }
 
@@ -7936,8 +8039,10 @@ const char web[] PROGMEM = R"====(
  .active .spinner-layer.spinner-yellow-only,
  .active .spinner-layer.spinner-green-only {
  opacity: 1;
- -webkit-animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0, 0.2, 1) infinite both;
- animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0, 0.2, 1) infinite both;
+ -webkit-animation: fill-unfill-rotate 5332ms
+ cubic-bezier(0.4, 0, 0.2, 1) infinite both;
+ animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0, 0.2, 1)
+ infinite both;
  }
 
  @-webkit-keyframes fill-unfill-rotate {
@@ -8255,12 +8360,14 @@ const char web[] PROGMEM = R"====(
  }
 
  .active .circle-clipper.left .circle {
- -webkit-animation: left-spin 1333ms cubic-bezier(0.4, 0, 0.2, 1) infinite both;
+ -webkit-animation: left-spin 1333ms cubic-bezier(0.4, 0, 0.2, 1)
+ infinite both;
  animation: left-spin 1333ms cubic-bezier(0.4, 0, 0.2, 1) infinite both;
  }
 
  .active .circle-clipper.right .circle {
- -webkit-animation: right-spin 1333ms cubic-bezier(0.4, 0, 0.2, 1) infinite both;
+ -webkit-animation: right-spin 1333ms cubic-bezier(0.4, 0, 0.2, 1)
+ infinite both;
  animation: right-spin 1333ms cubic-bezier(0.4, 0, 0.2, 1) infinite both;
  }
 
@@ -8503,7 +8610,7 @@ const char web[] PROGMEM = R"====(
  left: 0;
  }
 
- .carousel .carousel-item>img {
+ .carousel .carousel-item > img {
  width: 100%;
  }
 
@@ -8576,7 +8683,8 @@ const char web[] PROGMEM = R"====(
 
  .tap-target-wrapper.open .tap-target-wave::after {
  visibility: visible;
- -webkit-animation: pulse-animation 1s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+ -webkit-animation: pulse-animation 1s cubic-bezier(0.24, 0, 0.38, 1)
+ infinite;
  animation: pulse-animation 1s cubic-bezier(0.24, 0, 0.38, 1) infinite;
  -webkit-transition: opacity 0.3s, visibility 0s 1s,
  -webkit-transform 0.3s;
@@ -8669,7 +8777,6 @@ const char web[] PROGMEM = R"====(
  }
 
  @media only screen and (max-width: 600px) {
-
  .tap-target,
  .tap-target-wrapper {
  width: 600px;
@@ -8696,7 +8803,8 @@ const char web[] PROGMEM = R"====(
  transition: opacity 0.3s, -webkit-transform 0.3s;
  transition: opacity 0.3s, transform 0.3s;
  transition: opacity 0.3s, transform 0.3s, -webkit-transform 0.3s;
- -webkit-animation: pulse-animation 1s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+ -webkit-animation: pulse-animation 1s cubic-bezier(0.24, 0, 0.38, 1)
+ infinite;
  animation: pulse-animation 1s cubic-bezier(0.24, 0, 0.38, 1) infinite;
  z-index: -1;
  }
@@ -9181,6 +9289,12 @@ const char web[] PROGMEM = R"====(
 
  <!-- CUSTOM STYLES -->
  <style>
+ #endConnectionBtn {
+ position: fixed;
+ top: 10px;
+ right: 10px;
+ }
+
  .penIcon {
  display: flex;
  height: 100%;
@@ -9199,7 +9313,8 @@ const char web[] PROGMEM = R"====(
  align-items: center;
  }
 
- .btn {
+ .btn,
+ .btn-flat {
  margin-top: 30px;
  }
 
@@ -9283,7 +9398,7 @@ const char web[] PROGMEM = R"====(
  overflow: auto;
  }
 
- .input-field input[type="text"]:focus+label {
+ .input-field input[type="text"]:focus + label {
  color: #ffd600 !important;
  }
 
@@ -9353,7 +9468,7 @@ const char web[] PROGMEM = R"====(
  margin: 0;
  }
 
- input[type="range"]+.thumb.active .value {
+ input[type="range"] + .thumb.active .value {
  font-size: 1rem;
  margin-top: 4px;
  margin-left: 0px;
@@ -9391,14 +9506,21 @@ const char web[] PROGMEM = R"====(
  <!-- CUSTOM STYLES -->
 
  <title>OASYS</title>
-</head>
+ </head>
 
-<body class="grey lighten-5">
+ <body class="grey lighten-5">
  <nav>
  <div class="nav-wrapper yellow accent-4">
  <div class="container">
  <a href="#!" class="center brand-logo grey-text text-darken-3">
  Oasys
+ </a>
+ <a
+ id="endConnectionBtn"
+ onclick="endConnection()"
+ class="waves-effect waves-light btn-flat red lighten-2"
+ >
+ End Connection
  </a>
  </div>
  </div>
@@ -9410,10 +9532,17 @@ const char web[] PROGMEM = R"====(
  <li class="tab valign-wrapper">
  <a href="#info" class="">
  <p class="icon">
- <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor"
- class="bi bi-info-circle-fill" viewBox="0 0 16 16">
+ <svg
+ xmlns="http://www.w3.org/2000/svg"
+ width="22"
+ height="22"
+ fill="currentColor"
+ class="bi bi-info-circle-fill"
+ viewBox="0 0 16 16"
+ >
  <path
- d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412l-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
+ d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412l-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"
+ />
  </svg>
  </p>
  </a>
@@ -9421,10 +9550,17 @@ const char web[] PROGMEM = R"====(
  <li class="tab valign-wrapper">
  <a href="#terminal">
  <p class="icon">
- <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor"
- class="bi bi-terminal-fill" viewBox="0 0 16 16">
+ <svg
+ xmlns="http://www.w3.org/2000/svg"
+ width="22"
+ height="22"
+ fill="currentColor"
+ class="bi bi-terminal-fill"
+ viewBox="0 0 16 16"
+ >
  <path
- d="M0 3a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3zm9.5 5.5h-3a.5.5 0 0 0 0 1h3a.5.5 0 0 0 0-1zm-6.354-.354a.5.5 0 1 0 .708.708l2-2a.5.5 0 0 0 0-.708l-2-2a.5.5 0 1 0-.708.708L4.793 6.5 3.146 8.146z" />
+ d="M0 3a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3zm9.5 5.5h-3a.5.5 0 0 0 0 1h3a.5.5 0 0 0 0-1zm-6.354-.354a.5.5 0 1 0 .708.708l2-2a.5.5 0 0 0 0-.708l-2-2a.5.5 0 1 0-.708.708L4.793 6.5 3.146 8.146z"
+ />
  </svg>
  </p>
  </a>
@@ -9432,10 +9568,17 @@ const char web[] PROGMEM = R"====(
  <li class="tab valign-wrapper">
  <a class="active" href="#files">
  <p class="icon">
- <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor"
- class="bi bi-folder-fill" viewBox="0 0 16 16">
+ <svg
+ xmlns="http://www.w3.org/2000/svg"
+ width="22"
+ height="22"
+ fill="currentColor"
+ class="bi bi-folder-fill"
+ viewBox="0 0 16 16"
+ >
  <path
- d="M9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31L.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3zm-8.322.12C1.72 3.042 1.95 3 2.19 3h5.396l-.707-.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981l.006.139z" />
+ d="M9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31L.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3zm-8.322.12C1.72 3.042 1.95 3 2.19 3h5.396l-.707-.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981l.006.139z"
+ />
  </svg>
  </p>
  </a>
@@ -9443,10 +9586,17 @@ const char web[] PROGMEM = R"====(
  <li class="tab valign-wrapper">
  <a href="#config">
  <p class="icon">
- <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-gear-fill"
- viewBox="0 0 16 16">
+ <svg
+ xmlns="http://www.w3.org/2000/svg"
+ width="22"
+ height="22"
+ fill="currentColor"
+ class="bi bi-gear-fill"
+ viewBox="0 0 16 16"
+ >
  <path
- d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z" />
+ d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"
+ />
  </svg>
  </p>
  </a>
@@ -9462,7 +9612,8 @@ const char web[] PROGMEM = R"====(
  <div class="card-image glider">
  <img
  src="data:image/png;base64,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"
- alt="" />
+ alt=""
+ />
  </div>
  <div class="card-content black-text">
  <span class="card-title black-text">G2</span>
@@ -9479,11 +9630,18 @@ const char web[] PROGMEM = R"====(
  <div class="card-content white-text">
  <p class="card-title">
  &nbsp Battery
- <svg class="left" width="15" height="30" viewBox="0 0 8 15" fill="none"
- xmlns="http://www.w3.org/2000/svg">
+ <svg
+ class="left"
+ width="15"
+ height="30"
+ viewBox="0 0 8 15"
+ fill="none"
+ xmlns="http://www.w3.org/2000/svg"
+ >
  <path
  d="M6.7525 2H5.5V0.5H2.5V2H1.2475C0.7 2 0.25 2.45 0.25 2.9975V14.495C0.25 15.05 0.7 15.5 1.2475 15.5H6.745C7.3 15.5 7.75 15.05 7.75 14.5025V2.9975C7.75 2.45 7.3 2 6.7525 2Z"
- fill="#424242" />
+ fill="#424242"
+ />
  </svg>
  </p>
  </div>
@@ -9535,16 +9693,27 @@ const char web[] PROGMEM = R"====(
  <form autocomplete="off">
  <div class="input-field">
  <i class="prefix penIcon">
- <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-pen-fill"
- viewBox="0 0 16 16">
+ <svg
+ xmlns="http://www.w3.org/2000/svg"
+ width="22"
+ height="22"
+ fill="currentColor"
+ class="bi bi-pen-fill"
+ viewBox="0 0 16 16"
+ >
  <path
- d="M13.498.795l.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001z" />
+ d="M13.498.795l.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001z"
+ />
  </svg>
  </i>
  <input id="commands" type="text" />
 
  <label for="commands">Insert command</label>
- <span class="helper-text" data-error="Invalid command" data-success="Command sent">
+ <span
+ class="helper-text"
+ data-error="Invalid command"
+ data-success="Command sent"
+ >
  command format is a key value pair separated by space
  </span>
  </div>
@@ -9552,10 +9721,17 @@ const char web[] PROGMEM = R"====(
  </div>
  <div class="col s2 m1">
  <a class="modal-trigger right" data-target="commandModal">
- <svg class="infoCircle" width="31" height="31" viewBox="0 0 31 31" fill="none">
+ <svg
+ class="infoCircle"
+ width="31"
+ height="31"
+ viewBox="0 0 31 31"
+ fill="none"
+ >
  <path
  d="M15.3334 0.333252C7.05337 0.333252 0.333374 7.05325 0.333374 15.3333C0.333374 23.6133 7.05337 30.3333 15.3334 30.3333C23.6134 30.3333 30.3334 23.6133 30.3334 15.3333C30.3334 7.05325 23.6134 0.333252 15.3334 0.333252ZM16.8334 22.8333H13.8334V13.8333H16.8334V22.8333ZM16.8334 10.8333H13.8334V7.83325H16.8334V10.8333Z"
- fill="#26A69A" />
+ fill="#26A69A"
+ />
  </svg>
  </a>
  </div>
@@ -9649,10 +9825,17 @@ const char web[] PROGMEM = R"====(
  <a class="download-btn waves-effect waves-light btn">
  generate & download
  <i class="left">
- <svg width="14" height="17" viewBox="0 0 14 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+ <svg
+ width="14"
+ height="17"
+ viewBox="0 0 14 17"
+ fill="none"
+ xmlns="http://www.w3.org/2000/svg"
+ >
  <path
  d="M0.583374 16.3333H13.4167V14.5H0.583374V16.3333ZM13.4167 6.25H9.75004V0.75H4.25004V6.25H0.583374L7.00004 12.6667L13.4167 6.25Z"
- fill="white" />
+ fill="white"
+ />
  </svg>
  </i>
  </a>
@@ -9664,8 +9847,12 @@ const char web[] PROGMEM = R"====(
  </div>
  </div>
  <div class="col s2 m1">
- <span class="new badge progressLabel" data-badge-caption=""
- style="font-size: 1.1rem; font-weight: 600">0%</span>
+ <span
+ class="new badge progressLabel"
+ data-badge-caption=""
+ style="font-size: 1.1rem; font-weight: 600"
+ >0%</span
+ >
  </div>
  </div>
  </div>
@@ -9674,7 +9861,10 @@ const char web[] PROGMEM = R"====(
  <div class="container mtop" id="config">
  <!-- Sliders -->
  <div class="row">
- <div class="col s12 center amber accent-3" style="margin-bottom: 20px; padding-bottom: 10px">
+ <div
+ class="col s12 center amber accent-3"
+ style="margin-bottom: 20px; padding-bottom: 10px"
+ >
  <h5>Configure parameters</h5>
  </div>
  <div class="col s12">
@@ -9729,11 +9919,20 @@ const char web[] PROGMEM = R"====(
 
  <!-- Configure button -->
  <div class="center">
- <a class="download-btn waves-effect waves-light btn">
+ <a class="waves-effect waves-light btn">
  configure
  <i class="left">
- <svg width="22" height="22" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
- <path d="M3.75 15H14.25V13.5H3.75V15ZM3.75 7.5H6.75V12H11.25V7.5H14.25L9 2.25L3.75 7.5Z" fill="white" />
+ <svg
+ width="22"
+ height="22"
+ viewBox="0 0 18 18"
+ fill="none"
+ xmlns="http://www.w3.org/2000/svg"
+ >
+ <path
+ d="M3.75 15H14.25V13.5H3.75V15ZM3.75 7.5H6.75V12H11.25V7.5H14.25L9 2.25L3.75 7.5Z"
+ fill="white"
+ />
  </svg>
  </i>
  </a>
@@ -9806,7 +10005,7 @@ const char web[] PROGMEM = R"====(
  r = t.slice,
  n = t.filter,
  s = t.push,
- e = function () { },
+ e = function () {},
  h = function (t) {
  return typeof t == typeof e && t.call;
  },
@@ -10280,7 +10479,7 @@ const char web[] PROGMEM = R"====(
  : (i &&
  ((n = r),
  (r = function (t) {
- for (var e = t.target; !b(e, i);) {
+ for (var e = t.target; !b(e, i); ) {
  if (e === this || null === e) return (e = !1);
  e = e.parentNode;
  }
@@ -10531,7 +10730,7 @@ const char web[] PROGMEM = R"====(
  n = [];
  return (
  this.each(function (t) {
- for (i = t; i && i.parentNode && i !== o.body.parentNode;)
+ for (i = t; i && i.parentNode && i !== o.body.parentNode; )
  (i = i.parentNode), (!e || (e && b(i, e))) && n.push(i);
  }),
  C(n)
@@ -10858,7 +11057,7 @@ const char web[] PROGMEM = R"====(
  ($jscomp.global = $jscomp.getGlobal(this)),
  ($jscomp.SYMBOL_PREFIX = "jscomp_symbol_"),
  ($jscomp.initSymbol = function () {
- ($jscomp.initSymbol = function () { }),
+ ($jscomp.initSymbol = function () {}),
  $jscomp.global.Symbol || ($jscomp.global.Symbol = $jscomp.Symbol);
  }),
  ($jscomp.symbolCounter_ = 0),
@@ -10880,7 +11079,7 @@ const char web[] PROGMEM = R"====(
  return $jscomp.arrayIterator(this);
  },
  }),
- ($jscomp.initSymbolIterator = function () { });
+ ($jscomp.initSymbolIterator = function () {});
  }),
  ($jscomp.arrayIterator = function (t) {
  var e = 0;
@@ -10962,7 +11161,7 @@ const char web[] PROGMEM = R"====(
  if (!B.col(t))
  try {
  return document.querySelectorAll(t);
- } catch (t) { }
+ } catch (t) {}
  }
  function b(t, e) {
  for (
@@ -11371,7 +11570,7 @@ const char web[] PROGMEM = R"====(
  return k.reversed ? k.duration - t : t;
  }
  function c(e) {
- for (var t = 0, i = {}, n = k.animations, s = n.length; t < s;) {
+ for (var t = 0, i = {}, n = k.animations, s = n.length; t < s; ) {
  var o = n[t],
  a = o.animatable,
  r = o.tweens,
@@ -11439,7 +11638,7 @@ const char web[] PROGMEM = R"====(
  var r = k.children,
  l = r.length;
  if (a >= k.currentTime) for (var h = 0; h < l; h++) r[h].seek(a);
- else for (; l--;) r[l].seek(a);
+ else for (; l--; ) r[l].seek(a);
  }
  (n <= a || !e) &&
  (k.began || ((k.began = !0), p("begin")), p("run")),
@@ -11719,7 +11918,7 @@ const char web[] PROGMEM = R"====(
  function t(t) {
  var e = A.length;
  if (e) {
- for (var i = 0; i < e;) A[i] && A[i].tick(t), i++;
+ for (var i = 0; i < e; ) A[i] && A[i].tick(t), i++;
  n();
  } else cancelAnimationFrame(R), (R = 0);
  }
@@ -11731,8 +11930,8 @@ const char web[] PROGMEM = R"====(
  (O.running = A),
  (O.remove = function (t) {
  t = y(t);
- for (var e = A.length; e--;)
- for (var i = A[e], n = i.animations, s = n.length; s--;)
+ for (var e = A.length; e--; )
+ for (var i = A[e], n = i.animations, s = n.length; s--; )
  a(t, n[s].animatable.target) &&
  (n.splice(s, 1), n.length || i.pause());
  }),
@@ -18034,7 +18233,7 @@ const char web[] PROGMEM = R"====(
  {
  key: "renderDayName",
  value: function (t, e, i) {
- for (e += t.firstDay; 7 <= e;) e -= 7;
+ for (e += t.firstDay; 7 <= e; ) e -= 7;
  return i
  ? t.i18n.weekdaysAbbrev[e]
  : t.i18n.weekdays[e];
@@ -20736,7 +20935,7 @@ const char web[] PROGMEM = R"====(
  b.open("HEAD", a, !1);
  try {
  b.send();
- } catch (a) { }
+ } catch (a) {}
  return 200 <= b.status && 299 >= b.status;
  }
  function e(a) {
@@ -20779,7 +20978,7 @@ const char web[] PROGMEM = R"====(
  g =
  f.saveAs ||
  ("object" != typeof window || window !== f
- ? function () { }
+ ? function () {}
  : "download" in HTMLAnchorElement.prototype && !a
  ? function (b, g, h) {
  var i = f.URL || f.webkitURL,
@@ -22635,7 +22834,7 @@ const char web[] PROGMEM = R"====(
  ].error(
  e
  );
- } catch (e) { }
+ } catch (e) {}
  return !0;
  }),
  (n.prototype.lock = function () {
@@ -24125,7 +24324,7 @@ const char web[] PROGMEM = R"====(
  },
  byteAt: function (
  e
- ) { },
+ ) {},
  readInt: function (
  e
  ) {
@@ -24168,13 +24367,13 @@ const char web[] PROGMEM = R"====(
  },
  readData: function (
  e
- ) { },
+ ) {},
  lastIndexOfSignature: function (
  e
- ) { },
+ ) {},
  readAndCheckSignature: function (
  e
- ) { },
+ ) {},
  readDate: function () {
  var e = this.readInt(
  4
@@ -25053,7 +25252,7 @@ const char web[] PROGMEM = R"====(
  !e
  );
  },
- flush: function () { },
+ flush: function () {},
  processChunk: function (
  e
  ) {
@@ -25151,7 +25350,7 @@ const char web[] PROGMEM = R"====(
  o = e(
  "../nodejs/NodejsStreamOutputAdapter"
  );
- } catch (e) { }
+ } catch (e) {}
  function u(
  e,
  t,
@@ -26564,7 +26763,7 @@ const char web[] PROGMEM = R"====(
  e,
  t
  ) {
- function r() { }
+ function r() {}
  (r.prototype =
  t.prototype),
  (e.prototype = new r());
@@ -27910,7 +28109,7 @@ const char web[] PROGMEM = R"====(
  var i = e(
  "immediate"
  );
- function h() { }
+ function h() {}
  var f = {},
  s = [
  "REJECTED",
@@ -30190,7 +30389,7 @@ const char web[] PROGMEM = R"====(
  ) {
  (s += 2),
  r++;
- do { } while (
+ do {} while (
  h[
  ++s
  ] ===
@@ -32113,7 +32312,7 @@ const char web[] PROGMEM = R"====(
  s =
  e.strstart +
  w;
- do { } while (
+ do {} while (
  n ===
  a[
  ++i
@@ -32676,7 +32875,7 @@ const char web[] PROGMEM = R"====(
  c &
  g
  ]);
- t: for (; ;) {
+ t: for (;;) {
  if (
  ((c >>>= w =
  b >>>
@@ -32766,7 +32965,7 @@ const char web[] PROGMEM = R"====(
  c &
  v
  ]);
- r: for (; ;) {
+ r: for (;;) {
  if (
  ((c >>>= w =
  b >>>
@@ -33528,7 +33727,7 @@ const char web[] PROGMEM = R"====(
  (l = o),
  (d = u),
  (x = N);
- e: for (; ;)
+ e: for (;;)
  switch (
  r.mode
  ) {
@@ -35657,7 +35856,7 @@ const char web[] PROGMEM = R"====(
  E))
  )
  return 1;
- for (; ;) {
+ for (;;) {
  for (
  p =
  v -
@@ -37876,8 +38075,11 @@ const char web[] PROGMEM = R"====(
 
  // Add row to file table
  function addFileRow(fileName, fileSize) {
- var row = `<tr><td colspan="2">${fileName}</td><td colspan="2">${(fileSize / 1000).toFixed(2)
- }</td><td><label><input type="checkbox" class="filled-in" /><span></span></label></td></tr>`;
+ var row = `<tr><td colspan="2">${fileName}</td><td colspan="2">${(
+ fileSize / 1000
+ ).toFixed(
+ 2
+ )}</td><td><label><input type="checkbox" class="filled-in" /><span></span></label></td></tr>`;
  fileListBody.innerHTML = row + fileListBody.innerHTML;
  }
 
@@ -37928,7 +38130,8 @@ const char web[] PROGMEM = R"====(
  function createModalContent(commandObj) {
  let count = 0;
  for (var key in commandObj) {
- var row = `<tr><td>${key}</td><td>${commandObj[key]}</td><td>${descriptions[count++]
+ var row = `<tr><td>${key}</td><td>${commandObj[key]}</td><td>${
+ descriptions[count++]
  }</td></tr>`;
  modalList.innerHTML += row;
  }
@@ -38042,11 +38245,11 @@ const char web[] PROGMEM = R"====(
 
  // CHECK IF WORK
  sizeCard.innerText =
- (files.reduce((currentTotalSize, file) => {
+ (
+ files.reduce((currentTotalSize, file) => {
  return file.size + currentTotalSize;
- }, 0) /
- 1000000).toFixed(2) +
- " MB";
+ }, 0) / 1000000
+ ).toFixed(2) + " MB";
  // let totalSize = 0;
  // files.forEach((file) => {
  // totalSize += file.size;
@@ -38074,15 +38277,15 @@ const char web[] PROGMEM = R"====(
  progressLabel.innerText = `${percentage}%`;
  }
 
+ function endConnection() {
+ Socket.send("{wifi_end}");
+ }
+
  init();
  function init() {
  Socket = new WebSocket("ws://" + window.location.hostname + ":81/");
  Socket.onmessage = function (event) {
- if (event.data.includes(";")) {
- var eventSplit = event.data.split(";");
- espString += eventSplit[0];
  console.log(espString);
-
  // Populate files and update UI
  if (espString.includes("TXT")) {
  initFileTab(espString);
@@ -38095,16 +38298,10 @@ const char web[] PROGMEM = R"====(
  updateProgressBar();
  }
  espString = "";
- espString += eventSplit[1];
- } else {
- // Else append
- espString += event.data;
- }
  };
  }
  </script>
-</body>
-
+ </body>
 </html>
 
 )====";

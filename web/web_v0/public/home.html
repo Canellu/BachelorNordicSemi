@@ -39,6 +39,7 @@
 
     <!--  CUSTOM CSS -->
     <link rel="stylesheet" href="styles.css" />
+    <link rel="shortcut icon" href="#" />
     <title>Oasys</title>
   </head>
   <body class="bg-gray-100 font-montserrat pt-16 flex flex-col">
@@ -70,7 +71,7 @@
       <!-- UPLOAD MODAL -->
       <div
         id="uploadModal"
-        class="w-screen h-screen fixed top-0 left-0 z-10 bg-opacity-60 bg-gray-800"
+        class="w-screen h-screen fixed top-0 left-0 z-10 bg-opacity-60 bg-gray-800 hidden"
       >
         <div
           id="uploadModalContent"
@@ -127,7 +128,7 @@
             <button
               id="confirmBtn"
               onclick="uploadToFirebase()"
-              class="activeBtnStyle rounded-shadow w-20 px-2 flex justify-center items-center font-medium cursor-pointer duration-200 bg-light border-gray-100 hover:border-gray-400 text-sm mr-3"
+              class="activeBtnStyle rounded-shadow w-20 px-2 flex justify-center items-center font-medium cursor-pointer duration-200 bg-light border-gray-100 hover:border-gray-400 text-sm mr-3 disableBtn"
             >
               Confirm
             </button>
@@ -139,6 +140,13 @@
               Cancel
             </button>
           </div>
+        </div>
+
+        <div
+          id="uploadSuccess"
+          class="h-14 w-56 bg-green-400 flex justify-center items-center rounded-shadow border-green-800 fixed right-10 bottom-20 font-medium z-10 pointer-events-none opacity-0 uploadSuccess"
+        >
+          Upload successful
         </div>
       </div>
 

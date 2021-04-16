@@ -274,6 +274,7 @@ body {
 
 .uploadSuccess {
   animation: slideIn 5s ease-in-out forwards;
+  animation-play-state: paused;
 }
 
 @keyframes slideIn {

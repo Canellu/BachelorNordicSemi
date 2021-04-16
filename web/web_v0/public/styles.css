@@ -32176,6 +32176,8 @@ body {
 .uploadSuccess {
   -webkit-animation: slideIn 5s ease-in-out forwards;
           animation: slideIn 5s ease-in-out forwards;
+  -webkit-animation-play-state: paused;
+          animation-play-state: paused;
 }
 
 @-webkit-keyframes slideIn {

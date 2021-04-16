@@ -80,6 +80,8 @@ function showModal() {
 
 function hideModal() {
   modal.classList.add("hidden");
+  let element = document.querySelector("#uploadSuccess");
+  element.style.webkitAnimationPlayState = "paused";
 }
 
 // REMOVE MAYBE? CUZ OF DOUBLE CLICK ISSUE ON FILE SELECT
@@ -114,10 +116,6 @@ async function getFilesFromZip(zipFile) {
     fileObjectList.push(fileObject);
   });
 }
-
-// function strBetween(text, str1, str2){
-
-// }
 
 function uploadToFirebase() {
   fileObjectList.forEach((fileObject) => {
@@ -161,27 +159,15 @@ function uploadToFirebase() {
     //   .doc(date)
     //   .set(dateValue, { merge: true });
   });
-  let uploadSuccessDiv = document.querySelector("#uploadSuccess");
   generatePopup();
 }
 
-let popUpCount = 0;
 function generatePopup() {
-  let popUpHTML = `
-    <div
-      id="uploadSuccess${popUpCount}"
-      class="uploadSuccess h-14 w-56 bg-green-400 flex justify-center items-center rounded-shadow border-green-800 fixed right-10 bottom-20 font-medium z-10 pointer-events-none"
-    >
-      Upload successful
-    </div>`;
-  modal.innerHTML += popUpHTML;
-  setTimeout(() => {
-    let div = document.querySelector(`#uploadSuccess${popUpCount}`);
-    console.log(div);
-    div.remove();
-    console.log("Removing");
-  }, 3000);
-  popUpCount++;
+  console.log("Generating!");
+  let element = document.querySelector("#uploadSuccess");
+  var cloned = element.cloneNode(true);
+  cloned.style.webkitAnimationPlayState = "running";
+  element.parentNode.replaceChild(cloned, element);
 }
 
 function uploadData() {
