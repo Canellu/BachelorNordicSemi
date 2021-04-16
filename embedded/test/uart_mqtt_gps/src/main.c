@@ -389,7 +389,8 @@ static int wifi_module()
 		}
 		else if (strcmp(wifi_response, "{wifi_end}") == 0)
 		{
-			uart_send(UART_2, "wifi_end", strlen("wifi_end"));
+			printk("Received wifi end command\n");
+			uart_send(UART_2, "wifi_end;", strlen("wifi_end;"));
 		}
 		else
 		{
@@ -590,16 +591,18 @@ void main(void)
 
 			bool newglider = check_new_glider(&glider);
 
-			if (!newglider)
-			{
-				glider.event_prev = glider.event_now;
-				glider.event_now = EVT_IDLE;
-			}
-			else
-			{
-				glider.event_prev = glider.event_now;
-				glider.event_now = EVT_NEWGLIDER;
-			}
+			// if (!newglider)
+			// {
+			// 	glider.event_prev = glider.event_now;
+			// 	glider.event_now = EVT_IDLE;
+			// }
+			// else
+			// {
+			// 	glider.event_prev = glider.event_now;
+			// 	glider.event_now = EVT_NEWGLIDER;
+			// }
+
+			glider.event_now = EVT_NEWGLIDER;
 
 			// IDEA: idle at wifi module no matter what
 			// Instead, in case of reboot, test if it was on a mission

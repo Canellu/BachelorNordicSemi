@@ -1,4 +1,3 @@
-#include <WiFiClient.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
 #include <WebSocketsServer.h>
@@ -121,16 +120,15 @@ void loop(void)
     {
       char b = Serial.read();
       if (b == ';')
-      {
-        Serial.print(uart_rx);
-        Serial.print(strcmp(uart_rx, "wifi_end"));
-      
+      {    
         if (strcmp(uart_rx, "wifi_end") == 0)
         {
-          Serial.print("ending wifi");
+          // Serial.print("ending wifi");
           webSocket.close();
           server.close();
+          WiFi.mode(WIFI_OFF);
           on_wifi = false;
+          flush_serial();
         }
         else
         {
