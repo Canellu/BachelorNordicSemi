@@ -31,9 +31,8 @@ class MyApp extends StatelessWidget {
 class HomeRun extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    print(DatabaseService().somesht());
     return StreamProvider<List<Device>>.value(
-      value: DatabaseService().glider,
+      value: DatabaseService("").glider,
       child: MaterialApp(
         //Remove the debug banner at the right top
         debugShowCheckedModeBanner: false,
@@ -42,3 +41,4 @@ class HomeRun extends StatelessWidget {
     );
   }
 }
+

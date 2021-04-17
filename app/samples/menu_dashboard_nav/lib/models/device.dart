@@ -2,17 +2,8 @@ class Device {
   final String added;
   final String alias;
   final String lastSync;
+  final String deviceId;
 
-  Device({this.added, this.alias, this.lastSync});
+  Device({this.added, this.alias, this.lastSync, this.deviceId});
+
 }
-
-// class DeviceData {
-// final String time;
-//   final String temperature;
-//   final String condcuctivity;
-//   final String pressure;
-//   final String lat;
-//   final String lng;
-
-//    Device({this.added, this.alias, this.lastSync});
-// }

@@ -1,3 +1,4 @@
+import 'package:bachelor_app/UI/pages/device_page.dart';
 import 'package:bachelor_app/models/device.dart';
 import 'package:flutter/material.dart';
 
@@ -25,8 +26,16 @@ class DeviceTile extends StatelessWidget {
           subtitle: Text('Last sync: ' + oneDevice.lastSync + "\n" +
               'Added: ' + oneDevice.added),
           isThreeLine: true,
+          onTap: (){
+            Navigator.push(
+              context, MaterialPageRoute(builder: (context) => DevicePage(gliderId:oneDevice.deviceId),
+              ),
+            );
+          },
         ),
       ),
     );
   }
+
+
 }

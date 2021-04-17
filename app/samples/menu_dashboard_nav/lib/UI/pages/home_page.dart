@@ -3,7 +3,6 @@ import 'package:bachelor_app/models/device.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../deviceList.dart';
 import '../deviceTile.dart';
 import 'map_screen.dart';
 
@@ -12,14 +11,18 @@ class HomePage extends StatelessWidget with NavigationStates {
 
   const HomePage({Key key, this.onMenuTap}) : super(key: key);
 
+
   @override
   Widget build(BuildContext context) {
+
     final device = Provider.of<List<Device>>(context);
+    /*
     device.forEach((device) {
-      // print(device.added);
-      // print(device.alias);
-      // print(device.lastSync);
-    });
+      print(device.added);
+      print(device.alias);
+      print(device.lastSync);
+      print(device.deviceId);
+    });*/
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.all(Radius.circular(40)),
@@ -54,7 +57,9 @@ class HomePage extends StatelessWidget with NavigationStates {
                   scrollDirection: Axis.horizontal,
                   pageSnapping: true,
                   children: <Widget>[
-                    Container(child: MapScreen()),
+                    Container(
+                        child: MapScreen()
+                    ),
                   ],
                 ),
               ),
@@ -69,15 +74,16 @@ class HomePage extends StatelessWidget with NavigationStates {
                 shrinkWrap: true,
                 physics: ClampingScrollPhysics(),
                 itemCount: device.length,
-                itemBuilder: (context, index) {
+                itemBuilder: (context,index){
                   return DeviceTile(oneDevice: device[index]);
                 },
               ),
-              /*SizedBox(height: 20), //Place holder for the device widgets*/
+             /*SizedBox(height: 20), //Place holder for the device widgets*/
             ],
           ),
         ),
       ),
+
     );
     /*
     return ListView.builder(
@@ -88,3 +94,5 @@ class HomePage extends StatelessWidget with NavigationStates {
     );*/
   }
 }
+
+
