@@ -45,14 +45,14 @@
   <body class="bg-gray-100 font-montserrat pt-16 flex flex-col">
     <script src="js/header.js"></script>
 
-    <main class="h-full py-8 min-h-screen space-y-6">
-      <!--  MAP -->
-      <div class="container px-20 m-auto map overflow-hidden">
-        <img src="assets/img/genshin_map.png" class="map rounded-shadow" />
+    <main class="min-h-screen space-y-4 py-12">
+      <!-- Map-->
+      <div class="container m-auto rounded-shadow p-4 bg-light">
+        <div id="homeMap" class="map h-full"></div>
       </div>
 
       <!-- UPLOAD AND CREATE DEVICE bUTTONS -->
-      <div class="container px-20 m-auto flex space-x-4">
+      <div class="container m-auto flex space-x-4">
         <button
           class="activeBtnStyle rounded-shadow w-48 px-2 h-10 flex justify-center items-center font-medium tracking-wide cursor-pointer duration-200 border bg-light hover:border-gray-400"
         >
@@ -141,26 +141,19 @@
             </button>
           </div>
         </div>
-
-        <div
-          id="uploadSuccess"
-          class="h-14 w-56 bg-green-400 flex justify-center items-center rounded-shadow border-green-800 fixed right-10 bottom-20 font-medium z-10 pointer-events-none opacity-0 uploadSuccess"
-        >
-          Upload successful
-        </div>
       </div>
 
-      <!-- <div
+      <div
         id="uploadSuccess"
-        class="h-14 w-56 bg-green-400 flex justify-center items-center rounded-shadow border-green-800 fixed right-10 bottom-20 font-medium z-10 pointer-events-none"
+        class="h-14 w-56 bg-green-400 flex justify-center items-center rounded-shadow border-green-400 fixed right-10 bottom-20 font-medium z-10 pointer-events-none opacity-0 uploadSuccess"
       >
         Upload successful
-      </div> -->
+      </div>
 
       <!--  GRID -->
       <div
         id="deviceGrid"
-        class="container px-20 m-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md: auto-cols-max gap-12"
+        class="container m-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md: auto-cols-max gap-12"
       >
         <!-- CARD -->
         <!-- <a href="devices/device.html?gliderUID=1234">
@@ -190,12 +183,6 @@
           </div>
         </a> -->
       </div>
-
-      <div class="h-96"></div>
-      <div class="h-96"></div>
-      <div class="h-96"></div>
-      <div class="h-96"></div>
-      <div class="h-96"></div>
     </main>
 
     <script src="js/footer.js"></script>
@@ -203,5 +190,12 @@
     <script src="js/auth.js"></script>
     <script src="js/firestore.js"></script>
     <script src="js/home.js"></script>
+
+    <!-- MAPS API with KEY -->
+    <script src="js/map.js"></script>
+    <script
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDZzRUT3kmnRoWV-slmYqcUkPn8hS9BQUw&callback=&libraries=&v=weekly"
+      async
+    ></script>
   </body>
 </html>

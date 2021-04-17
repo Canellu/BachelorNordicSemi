@@ -1,13 +1,23 @@
 let dataMap;
 let missionMap;
+let homeMap;
 let missionWaypoints;
 let markers = [];
 let gliderPath;
 let dataMapDiv = document.getElementById("dataMap");
 let missionMapDiv = document.getElementById("missionMap");
+let homeMapDiv = document.getElementById("homeMap");
 var flightPlanCoordinates;
 
 var defaultLocation = { lat: 59.921, lng: 10.734, zoom: 6 };
+function initHomeMap() {
+  homeMap = new google.maps.Map(homeMapDiv, {
+    center: { lat: defaultLocation.lat, lng: defaultLocation.lng },
+    zoom: defaultLocation.zoom,
+  });
+  console.log("HomeMap Made");
+}
+
 function initDataMap() {
   dataMap = new google.maps.Map(dataMapDiv, {
     center: { lat: defaultLocation.lat, lng: defaultLocation.lng },
@@ -23,6 +33,26 @@ function addMarker(location, icon, index, map) {
     title: `${index + 1}: ${location.t}`,
   });
   markers.push(marker);
+}
+
+function addHomeMarkers(location, alias) {
+  var markerIcon = {
+    url: "assets/svg/Glider.svg",
+    labelOrigin: new google.maps.Point(40, 10),
+  };
+
+  new google.maps.Marker({
+    position: { lat: location.lat, lng: location.lng },
+    map: homeMap,
+    label: {
+      text: alias,
+      color: "#CA4955",
+      fontSize: "20px",
+      fontWeight: "bold",
+    },
+    icon: markerIcon,
+    title: location.t,
+  });
 }
 
 function addDataMarkers(coordinates, map) {
