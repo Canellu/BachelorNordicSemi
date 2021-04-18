@@ -29,19 +29,19 @@ class DevicePage extends StatelessWidget {
           );
         }
     );*/
-    return FutureBuilder<DocumentSnapshot>(
+    return FutureBuilder<QuerySnapshot>(
       future: DatabaseService(gliderId).datas,
         builder: (context,snapshot) {
 
           if(!snapshot.hasData) return const Text("Loading....");
           //print(data.data());
-          print("---------------------- datas ");
+          //print("---------------------- datas ");
           //data.data().forEach((key, value) => {print(key)});
           return Container(
             child: FloatingActionButton(
               onPressed: (){
                 print(gliderId);
-                print(snapshot.data.data());
+                print(snapshot.data.docs);
                 //snapshot.data.data().forEach((key, value) => {print(key)});
               },
             ),
