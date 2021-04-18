@@ -55,20 +55,9 @@ class DatabaseService {
       });
     });
 
+    //Loop through to find each data type
     var dataTypeFound = [];
     dataset.forEach((key, value) {
-      /*
-      if(value.contains("C")) {
-        const start = 'C":';
-        const end = ",";
-
-        final startIndex = value.indexOf(start);
-        final endIndex = value.indexOf(end, startIndex + start.length);
-        print(value.substring(startIndex + start.length, endIndex));
-      }else{
-        print("no C");
-      }*/
-
       var split = value.split(",");
       for(var i = 0; i < split.length -1; i++) {
         //print(split[i]);
@@ -85,11 +74,58 @@ class DatabaseService {
         }
       }
       //print(key + "  "+ value);
-
     });
 
-    //print("FIRST PRINT-------------------------------");
-    //print(dataset);
+    final Map<String, Map> dataObj = new Map();
+    final Map<String, Map> dataCoodinatesRaw = new Map();
+    dataTypeFound.forEach((type) {
+
+      final Map<String, String> typeDataset = {};
+
+      dataset.forEach((key, value) {
+        //print(key + "  "+ value);
+        if(value.contains(type)) {
+          var start = '$type":';
+          const end = ",";
+
+          final startIndex = value.indexOf(start);
+          final endIndex = value.indexOf(end, startIndex + start.length);
+          var typeData = value.substring(startIndex + start.length, endIndex);
+          //print(typeData);
+          typeDataset[key] = typeData;
+        }
+      });
+
+
+      if(type == "lng" || type == "lat") {
+        dataCoodinatesRaw[type] = typeDataset;
+      }else {
+        dataObj[type] = typeDataset;
+      }
+    });
+
+
+    dataCoodinatesRaw.forEach((k, v) {
+      print("start");
+
+      //Not Fully finished part, very wrong
+      /*
+      var t = v.keys;
+      print(t);
+      /*
+      for(var i = 0; i < v.length; i++) {
+        var t = v.keys;
+
+        //var lat = int.parse(v.)
+      }*/
+      print("done");
+    });
+*/
+
+    /*
+    dataObj.forEach((key, value) {
+      print("$key $value");
+    });*/
     return missionData;
   }
 }
