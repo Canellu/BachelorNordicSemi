@@ -50,7 +50,6 @@ satelliteTabBtn.addEventListener("click", () => {
   controlTab.classList.add("hidden");
   dataTab.classList.add("hidden");
   satelliteTab.classList.remove("hidden");
-  sendSatelliteData();
 });
 
 dropDownBtn.addEventListener("click", () => {
