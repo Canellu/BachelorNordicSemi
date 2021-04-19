@@ -47,10 +47,7 @@ class DatabaseService {
     final Map<String,String> dataset = {};
 
     missionData.docs.forEach((doc) {
-      //print(doc.id);
-      //print(doc.data());
       doc.data().forEach((k, v) {
-        //var row = {'${doc.id}T$k':v};
         dataset['${doc.id}T$k'] = v;
       });
     });
@@ -60,7 +57,6 @@ class DatabaseService {
     dataset.forEach((key, value) {
       var split = value.split(",");
       for(var i = 0; i < split.length -1; i++) {
-        //print(split[i]);
         const start = '"';
         const end = '"';
 
@@ -73,17 +69,15 @@ class DatabaseService {
           dataTypeFound.add(dataType);
         }
       }
-      //print(key + "  "+ value);
     });
 
-    final Map<String, Map> dataObj = new Map();
+    final Map<String, dynamic> dataObj = new Map();
     final Map<String, Map> dataCoodinatesRaw = new Map();
     dataTypeFound.forEach((type) {
 
       final Map<String, String> typeDataset = {};
 
       dataset.forEach((key, value) {
-        //print(key + "  "+ value);
         if(value.contains(type)) {
           var start = '$type":';
           const end = ",";
@@ -91,7 +85,7 @@ class DatabaseService {
           final startIndex = value.indexOf(start);
           final endIndex = value.indexOf(end, startIndex + start.length);
           var typeData = value.substring(startIndex + start.length, endIndex);
-          //print(typeData);
+
           typeDataset[key] = typeData;
         }
       });
@@ -105,27 +99,20 @@ class DatabaseService {
     });
 
 
-    dataCoodinatesRaw.forEach((k, v) {
-      print("start");
+    var data = [];
+    //elementAt(0) == lng, elementAt(1) == lat
+    var dataCoodinatesValue = dataCoodinatesRaw.values;
 
-      //Not Fully finished part, very wrong
-      /*
-      var t = v.keys;
-      print(t);
-      /*
-      for(var i = 0; i < v.length; i++) {
-        var t = v.keys;
+    for(var i = 0; i<dataCoodinatesValue.elementAt(0).length; i++){
+      //lat and long have the same key(timestamp)
+      var t = dataCoodinatesValue.elementAt(0).keys.elementAt(i);
+      var lng = double.parse(dataCoodinatesValue.elementAt(0).values.elementAt(i));
+      var lat = double.parse(dataCoodinatesValue.elementAt(1).values.elementAt(i));
 
-        //var lat = int.parse(v.)
-      }*/
-      print("done");
-    });
-*/
+      data.add({'t':t, 'lng':lng, 'lat':lat});
+    }
+    dataObj["coodinates"] = data;
 
-    /*
-    dataObj.forEach((key, value) {
-      print("$key $value");
-    });*/
     return missionData;
   }
 }
