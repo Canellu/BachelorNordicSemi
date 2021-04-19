@@ -42,7 +42,7 @@
 
     <!-- Material Icon -->
     <link
-      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      href="https://fonts.googleapis.com/css?family=Material+Icons|Material+Icons+Outlined|Material+Icons+Two+Tone|Material+Icons+Round|Material+Icons+Sharp"
       rel="stylesheet"
     />
 
@@ -68,7 +68,7 @@
     <title>Device</title>
   </head>
 
-  <body class="bg-gray-100 font-montserrat pt-16 flex flex-col">
+  <body class="bg-gray-100 font-montserrat pt-16 flex flex-col min-h-screen">
     <script src="../js/header.js"></script>
 
     <main class="min-h-screen">
@@ -77,12 +77,13 @@
         <div class="flex h-9">
           <button id="data-tab-btn" class="tabBtn activeTabBtn">DATA</button>
           <button id="control-tab-btn" class="tabBtn">MISSION CONTROL</button>
+          <button id="satellite-tab-btn" class="tabBtn">SATELLITE</button>
         </div>
-        <div id="tabUnderline" class="w-1/2 bg-dark h-1 duration-300"></div>
+        <div id="tabUnderline" class="w-1/3 bg-dark h-1 duration-300"></div>
       </div>
 
       <!-- ********************* Data tab ********************* -->
-      <div id="data-tab" class="container m-auto py-12 space-y-4">
+      <div id="data-tab" class="hidden container m-auto py-12 space-y-4">
         <!-- Map-->
         <div class="rounded-shadow p-4 bg-light">
           <div id="dataMap" class="map h-full"></div>
@@ -153,7 +154,7 @@
           <div id="missionMap" class="map h-full"></div>
         </div>
 
-        <!-- Control Panel -->
+        <!-- Parameters & Waypoints -->
         <div class="container m-auto flex w-full space-x-4">
           <!-- Sliders -->
           <div
@@ -225,45 +226,71 @@
           </div>
         </div>
 
-        <!-- Datetime picker -->
-        <div
-          class="h-12 w-min rounded-shadow tracking-wider flex items-center space-x-3 px-3 bg-light"
-        >
-          <div class="w-32 font-medium">Start dive at</div>
-          <!-- Date Icon -->
-          <label for="datepickerControl" class="chartBtn cursor-pointer">
-            <span class="material-icons">calendar_today</span>
-          </label>
-          <!-- Date Field -->
-          <input
-            readonly
-            id="datepickerControl"
-            class="h-8 w-32 text-center border rounded-md outline-none focus:border-gray-400 text-gray-800 font-medium"
-          />
-
-          <!-- Time Icon -->
-          <label for="timepickerControl" class="chartBtn cursor-pointer">
-            <span class="material-icons">access_time</span>
-          </label>
-          <!-- Time Field -->
-          <div class="relative z-30">
+        <!-- Datetime & Max Messages -->
+        <div class="flex space-x-4">
+          <!-- Start datetime -->
+          <div
+            class="h-12 w-min rounded-shadow tracking-wider flex items-center space-x-3 px-3 bg-light"
+          >
+            <div class="w-32 font-medium">Start dive at</div>
+            <!-- Date Icon -->
+            <label for="datepickerControl" class="chartBtn cursor-pointer">
+              <span class="material-icons">calendar_today</span>
+            </label>
+            <!-- Date Field -->
             <input
               readonly
-              id="timepickerControl"
-              class="h-8 w-20 text-center border rounded-md outline-none focus:border-gray-400 text-dark font-medium"
+              id="datepickerControl"
+              class="h-8 w-32 text-center border rounded-md outline-none focus:border-gray-400 text-gray-800 font-medium"
             />
-            <div
-              id="timepickerContentControl"
-              class="w-36 h-44 bg-light rounded-shadow overflow-hidden absolute top-10 flex hidden text-dark"
-            >
+
+            <!-- Time Icon -->
+            <label for="timepickerControl" class="chartBtn cursor-pointer">
+              <span class="material-icons">access_time</span>
+            </label>
+            <!-- Time Field -->
+            <div class="relative z-30">
+              <input
+                readonly
+                id="timepickerControl"
+                class="h-8 w-20 text-center border rounded-md outline-none focus:border-gray-400 text-dark font-medium"
+              />
               <div
-                id="hours"
-                class="w-1/2 text-center overflow-auto hideScrollbar"
-              ></div>
+                id="timepickerContentControl"
+                class="w-36 h-44 bg-light rounded-shadow overflow-hidden absolute top-10 flex hidden text-dark"
+              >
+                <div
+                  id="hours"
+                  class="w-1/2 text-center overflow-auto hideScrollbar"
+                ></div>
+                <div
+                  id="minutes"
+                  class="w-1/2 text-center overflow-auto hideScrollbar"
+                ></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Messages selector -->
+          <div
+            class="h-12 w-full rounded-shadow tracking-wider flex items-center space-x-3 px-3 bg-light"
+          >
+            <div class="sliderBox w-full">
+              <h1 class="font-medium text-gray-800">4G Message Limit</h1>
               <div
-                id="minutes"
-                class="w-1/2 text-center overflow-auto hideScrollbar"
-              ></div>
+                id="slider4GData"
+                class="cursor-pointer flex-grow mx-6 relative"
+              >
+                <span class="absolute text-xs right-1">1000</span>
+              </div>
+
+              <input
+                type="number"
+                min="0"
+                step="1"
+                id="input4GData"
+                class="w-16 text-md font-medium text-dark border pl-1 rounded-sm focus:outline-none"
+              />
             </div>
           </div>
         </div>
@@ -295,7 +322,12 @@
               </div>
             </div>
 
-            <div id="previewParams" class="flex flex-col space-y-3"></div>
+            <div id="previewParams" class="flex flex-col space-y-3">
+              <div class="flex justify-between border-b">
+                <p>4G Limit:</p>
+                <p id="preview4GData">0</p>
+              </div>
+            </div>
 
             <div id="previewWaypoints" class="grid grid-cols-7 gap-y-1 pt-2">
               <h1 class="border-b col-span-7">Waypoints</h1>
@@ -342,7 +374,109 @@
           </div>
         </div>
       </div>
+
+      <!-- ***************Satellite Tab ***************** -->
+      <div id="satellite-tab" class="container m-auto py-12 space-y-4">
+        <div class="rounded-shadow p-4 bg-light space-y-4">
+          <textarea
+            id="consoleText"
+            class="rounded-md w-full h-96 bg-gray-300 px-8 py-4 overflow-auto"
+          >
+Lorem ipsum dolor sit amet consectetur adipisicing elit. Quidem maxime repudiandae sunt dolorum est perspiciatis ducimus nobis numquam velit modi voluptas libero sit incidunt id sapiente error excepturi, vel ea temporibus sequi quo iusto quisquam expedita consequuntur. Iusto rerum quis eaque asperiores ratione deleniti, velit illum provident unde maxime laborum placeat suscipit sit eius quia quidem blanditiis! Placeat fuga provident, sapiente odio dolorem tenetur aspernatur inventore doloremque incidunt non! Vitae aperiam doloremque facilis magni alias minus, quo tempore dolore unde? Ipsum facere repellendus delectus aperiam voluptatibus illum iure praesentium dignissimos adipisci hic vitae, eveniet quaerat beatae pariatur! Dolores voluptatum illum quos sequi doloremque consequatur reiciendis maxime officiis esse recusandae! Ipsam vel facere veniam, autem, nobis illo sapiente sit voluptatibus consequatur hic ex repellendus voluptas? Rerum nam repudiandae voluptatem! Tenetur ipsum incidunt voluptates sit ducimus? Similique aliquam quam odio, neque id repudiandae tempora voluptates eius repellendus! Iusto, pariatur odit quibusdam iure animi incidunt officia impedit in consectetur, cupiditate quae eius quaerat veritatis fugiat! At, blanditiis ea. Non fuga nulla, sapiente odit ea fugit corporis magni esse deserunt velit nihil eaque delectus repudiandae distinctio ullam tempore libero vitae quibusdam dicta? Delectus voluptate quidem ea. Tempore vel vitae, optio perferendis doloremque perspiciatis ullam officiis quaerat quibusdam, asperiores maiores dolores? A quis aliquam quia ipsa amet quo cum consequuntur eligendi dolore illo veritatis modi error doloribus, ut ullam labore reprehenderit, nihil aspernatur exercitationem possimus suscipit illum explicabo. Dolore perferendis veniam earum enim, odit repellendus. Quibusdam aut architecto ullam repellendus voluptas mollitia earum reprehenderit labore quas sed, perferendis cumque laboriosam modi dicta voluptates soluta hic? Aliquid obcaecati, alias fuga exercitationem magni cum fugiat. Culpa, expedita! Reiciendis accusantium soluta cum sit quam ad saepe voluptates totam pariatur cupiditate ab ipsam incidunt, vero officiis ipsa officia dignissimos debitis quidem assumenda magnam. Facere nesciunt ut libero nihil corporis excepturi soluta voluptate iusto dolorem, sequi fugit vero quam ab assumenda veniam accusamus hic. Maiores cum omnis animi iste numquam ea, quo, commodi ab eius libero provident ipsam dolor? Explicabo, dolores. Magnam temporibus ea dicta! Suscipit accusamus corporis debitis odit ut. Quam earum cupiditate illum reiciendis fugiat magni soluta unde non facere sequi, enim sed nisi! Placeat delectus dolor, mollitia ratione aspernatur tempora, nesciunt magni, nisi eum dolore veritatis. Earum in consectetur doloribus quae repudiandae possimus, minus, delectus similique, eum qui aliquid. Pariatur aperiam beatae, odit necessitatibus est ratione optio laudantium et, itaque ipsam voluptas hic animi explicabo nemo minima?
+</textarea
+          >
+          <div class="w-full h-10 flex space-x-2 items-center">
+            <span class="chartBtn" onclick="showSatelliteModal()">
+              <svg
+                width="36"
+                height="36"
+                fill="currentColor"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"
+                />
+              </svg>
+            </span>
+            <input
+              class="rounded-md w-full h-full bg-gray-300 px-3"
+              id="inputSatellite"
+              type="text"
+            />
+            <button
+              id="resetMissionParams"
+              class="activeBtn p-4 h-10 border rounded-shadow font-medium tracking-wider text-sm flex justify-center items-center bg-light"
+            >
+              Clear
+            </button>
+            <button
+              id="sendMissionParams"
+              class="activeBtn p-4 h-full rounded-shadow font-medium tracking-wider text-sm flex justify-center items-center bg-light transform transition duration-200"
+            >
+              Send
+            </button>
+          </div>
+
+          <div
+            id="satelliteModal"
+            class="hidden w-screen h-screen fixed top-0 left-0 z-50 bg-opacity-60 bg-gray-800"
+          >
+            <div
+              class="fixed top-40 w-1/2 left-1/2 transform -translate-x-1/2 text-left rounded-shadow bg-light overflow-hidden p-10"
+            >
+              <button
+                id="closeSatelliteModalBtn"
+                onclick="hideSatelliteModal()"
+                class="absolute right-2 top-2 flex rounded-full hover:bg-gray-300 duration-200 p-1"
+              >
+                <span class="material-icons-outlined"> close </span>
+              </button>
+              <table class="border bg-gray-100">
+                <thead>
+                  <th>Error code</th>
+                  <th>Description</th>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>10</td>
+                    <td>Invalid login credentials</td>
+                  </tr>
+                  <tr>
+                    <td>11</td>
+                    <td>No RockBLOCK with this IMEI found on your account</td>
+                  </tr>
+                  <tr>
+                    <td>12</td>
+                    <td>RockBLOCK has no line rental</td>
+                  </tr>
+                  <tr>
+                    <td>13</td>
+                    <td>Your account has insufficient credit</td>
+                  </tr>
+                  <tr>
+                    <td>14</td>
+                    <td>Could not decode hex data</td>
+                  </tr>
+                  <tr>
+                    <td>15</td>
+                    <td>Data too long</td>
+                  </tr>
+                  <tr>
+                    <td>16</td>
+                    <td>No data</td>
+                  </tr>
+                  <tr>
+                    <td>99</td>
+                    <td>System Error</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
     </main>
+
     <script>
       let gliderUID = new URLSearchParams(window.location.search).get(
         "gliderUID"
@@ -358,6 +492,7 @@
     <script src="../js/datepicker.js"></script>
     <script src="../js/wNumb.js"></script>
     <script src="../js/missionControlTab.js"></script>
+    <script src="../js/satellite.js"></script>
 
     <!-- MAPS API with KEY -->
     <script

@@ -2,7 +2,7 @@
 function createSliderHTML(title, min, max) {
   let type = title.replaceAll(" ", "");
 
-  let previewHTML = `<div class="flex justify-between width-full border-b"><p>${title}:  </p><p id="preview${type}"> 0 </p></div>`;
+  let previewHTML = `<div class="flex justify-between border-b"><p>${title}:  </p><p id="preview${type}"> 0 </p></div>`;
 
   document.querySelector("#previewParams").innerHTML += previewHTML;
 
@@ -76,6 +76,7 @@ sliderList.forEach((obj) => {
 sliderList.forEach((obj) => {
   createSlider(obj.title, obj.min, obj.max, obj.start);
 });
+createSlider("4GData", 0, 1000, 0);
 
 // *********************** WAYPOINTS ***********************************
 
@@ -232,10 +233,12 @@ let resetMissionParamsBtn = document.querySelector("#resetMissionParams");
 let sliderPreviews = document.querySelectorAll("#previewParams [id^=preview]");
 
 resetMissionParamsBtn.addEventListener("click", () => {
-  // Reset sliders to 0
+  // Reset sliders inside ParamsDiv to 0
   document.querySelectorAll("#sliders [id^=slider]").forEach((slider) => {
     slider.noUiSlider.set(0);
   });
+  // Reset 4G message limit slider
+  document.querySelector("#slider4GData").noUiSlider.set(0);
 
   // Reset sliderpreviews to 0
   sliderPreviews.forEach((preview) => {
@@ -260,11 +263,15 @@ yesMissionParamsBtn.addEventListener("click", async () => {
     start: `${date} ${time}`,
   };
 
+  // Add preview params into object for sending
   sliderPreviews.forEach((preview) => {
     let propertyName = preview.id.replace("preview", "");
     let propertyVal = preview.innerText;
     console.log({ propertyName, propertyVal });
     switch (propertyName) {
+      case "4GData":
+        propertyName = "limit4G";
+        break;
       case "Conductivity":
         propertyName = "C";
         break;

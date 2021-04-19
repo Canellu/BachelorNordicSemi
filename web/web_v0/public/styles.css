@@ -32224,6 +32224,55 @@ body {
   }
 }
 
+th, td{
+  border-right-width: 1px;
+  border-bottom-width: 1px;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+th {
+  font-weight: 500;
+}
+
+td {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+tbody tr:nth-child(odd) {
+  --tw-bg-opacity: 1;
+  background-color: rgba(249, 250, 251, var(--tw-bg-opacity));
+}
+
+.btn:hover{
+  --tw-border-opacity: 1;
+  border-color: rgba(31, 41, 55, var(--tw-border-opacity));
+}
+
+.btn{
+  cursor: pointer;
+  --tw-translate-x: 0;
+  --tw-translate-y: 0;
+  --tw-rotate: 0;
+  --tw-skew-x: 0;
+  --tw-skew-y: 0;
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  transform: translateX(var(--tw-translate-x)) translateY(var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
+.btn:hover{
+  --tw-scale-x: 1.05;
+  --tw-scale-y: 1.05;
+}
+
+.btn{
+  transition-duration: 200ms;
+}
+
 @media (min-width: 640px){
   .sm\:container{
     width: 100%;

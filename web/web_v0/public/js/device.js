@@ -1,7 +1,9 @@
 var dataTabBtn = document.querySelector("#data-tab-btn");
-var dataTab = document.querySelector("#data-tab");
 var controlTabBtn = document.querySelector("#control-tab-btn");
+var satelliteTabBtn = document.querySelector("#satellite-tab-btn");
+var dataTab = document.querySelector("#data-tab");
 var controlTab = document.querySelector("#control-tab");
+var satelliteTab = document.querySelector("#satellite-tab");
 var tabUnderline = document.querySelector("#tabUnderline");
 var dropDownBtn = document.querySelector(".dropDownBtn");
 var dropDownContent = document.querySelector(".dropDownContent");
@@ -9,26 +11,46 @@ var dropDownContent = document.querySelector(".dropDownContent");
 // DATA TAB BUTTON
 dataTabBtn.addEventListener("click", () => {
   tabUnderline.style.transform = "";
+  window.scrollTo(0, 0);
   dataTabBtn.classList.add("activeTabBtn");
   controlTabBtn.classList.remove("activeTabBtn");
+  satelliteTabBtn.classList.remove("activeTabBtn");
   dataTab.classList.remove("hidden");
   controlTab.classList.add("hidden");
+  satelliteTab.classList.add("hidden");
   listMissions();
 });
 
 // MISSION CONTROL TAB BUTTON
 controlTabBtn.addEventListener("click", () => {
   tabUnderline.style.transform = "translateX(100%)";
+  window.scrollTo(0, 0);
+
   dataTabBtn.classList.remove("activeTabBtn");
   controlTabBtn.classList.add("activeTabBtn");
+  satelliteTabBtn.classList.remove("activeTabBtn");
   controlTab.classList.remove("hidden");
   dataTab.classList.add("hidden");
+  satelliteTab.classList.add("hidden");
+
   if (typeof missionMap == "undefined") {
     //initMissionMap();
   }
 
   document.querySelector("#latestMissionNumber").innerText =
     "Mission " + (latestMission + 1);
+});
+
+satelliteTabBtn.addEventListener("click", () => {
+  tabUnderline.style.transform = "translateX(200%)";
+  window.scrollTo(0, 0);
+  dataTabBtn.classList.remove("activeTabBtn");
+  controlTabBtn.classList.remove("activeTabBtn");
+  satelliteTabBtn.classList.add("activeTabBtn");
+  controlTab.classList.add("hidden");
+  dataTab.classList.add("hidden");
+  satelliteTab.classList.remove("hidden");
+  sendSatelliteData();
 });
 
 dropDownBtn.addEventListener("click", () => {
