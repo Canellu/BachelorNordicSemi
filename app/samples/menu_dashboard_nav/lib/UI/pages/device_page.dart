@@ -12,23 +12,6 @@ class DevicePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     /*
-    return StreamBuilder<Future<Stream<QuerySnapshot>>>(
-        stream: DatabaseService("").datas,
-        builder: (context,snapshot) {
-          if(!snapshot.hasData) return const Text("Loading....");
-
-          return ListView.builder(
-            itemCount: snapshot.data.docs.length,
-            itemBuilder: (context, index) =>
-            FloatingActionButton(
-              //child: Text(index.),
-              onPressed: (){
-                print(snapshot.data.docs);
-              },
-            )
-          );
-        }
-    );*/
     return FutureBuilder<QuerySnapshot>(
       future: DatabaseService(gliderId).datas,
         builder: (context,snapshot) {
@@ -47,6 +30,20 @@ class DevicePage extends StatelessWidget {
             ),
           );
         }
+    );*/
+    return FutureBuilder<QuerySnapshot>(
+      future: DatabaseService(gliderId,"").mission,
+      builder: (context,snapshot) {
+        if(!snapshot.hasData) return const Text("Loading....");
+        return Container(
+          child: FloatingActionButton(
+            onPressed: (){
+              //snapshot.data.docs.forEach((element) => {print(element)});
+              snapshot.data.docs.forEach((element) {print(element.id);});
+            },
+          ),
+        );
+      },
     );
   }
 }

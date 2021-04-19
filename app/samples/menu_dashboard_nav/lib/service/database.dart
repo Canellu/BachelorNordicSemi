@@ -6,7 +6,8 @@ class DatabaseService {
   final CollectionReference connectCollection = FirebaseFirestore.instance.collection('Gliders');
 
   final String gid;
-  DatabaseService(this.gid);
+  final String mid;
+  DatabaseService(this.gid, this.mid);
 
 
   //divice list from snapshot
@@ -31,17 +32,19 @@ class DatabaseService {
   Stream<QuerySnapshot> get mission {
     //var oneData = await connectCollection.doc("").get();
     return connectCollection.doc("311910").collection("Missions").snapshots();
-  }
-
-
-  Future<QuerySnapshot> get datas async {
-    return await connectCollection.doc(gid).collection("Missions")
-        .doc("Mission 1").collection("Data").get();
-    //print(oneData.data());
   }*/
 
-  Future<QuerySnapshot> get datas async {
-    var missionData = await connectCollection.doc(gid).collection("Missions")
+
+  //get missions doc from database
+  Future<QuerySnapshot> get mission async {
+    var mission = await connectCollection.doc(gid).collection("Missions").get();
+
+    return mission;
+  }
+
+  //get data for selected mission, and preprocess it
+  Future<Map<String, dynamic>> get datas async {
+    var missionData = await connectCollection.doc(gid).collection(mid)
         .doc("Mission 1").collection("Data").get();
 
     final Map<String,String> dataset = {};
@@ -113,6 +116,6 @@ class DatabaseService {
     }
     dataObj["coodinates"] = data;
 
-    return missionData;
+    return dataObj;
   }
 }
