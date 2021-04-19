@@ -40,14 +40,14 @@ void loop(void)
     char c = Serial.read();
 
     // delimiter, test against known commands
-    if (c == ';')
+    if (c == '\r')
     {
       // Serial.print(uart_rx);
       
       // command turn on sensor
       if (strstr(uart_rx, "time:") != NULL && !on_sensor)
       {
-        Serial.print("Turning on sensor\n");
+        Serial.print("Turning on sensor\n\r");
 
         char *ptr = strstr(uart_rx, "time:");
         
@@ -62,7 +62,7 @@ void loop(void)
       // command turn off sensor
       else if (strcmp(uart_rx, "sensor_end") == 0 && on_sensor)
       {
-        Serial.print("Turning off sensor\n");
+        Serial.print("Turning off sensor\n\r");
         on_sensor = false;
 
         timeout_t = 1000;
@@ -80,7 +80,8 @@ void loop(void)
         timeout_t = strtoul(ptr + 5, &eptr, 10);
         
         Serial.print("timeoutT set to: ");
-        Serial.println(timeout_t);
+        Serial.print(timeout_t);
+        Serial.print("\r");
       }
       // parameter timeout pressure
       else if (strstr(uart_rx, "to_p:") != NULL && on_sensor)
@@ -90,7 +91,8 @@ void loop(void)
         timeout_p = strtoul(ptr + 5, &eptr, 10);
         
         Serial.print("timeoutP set to: ");
-        Serial.println(timeout_p);
+        Serial.print(timeout_p);
+        Serial.print("\r");
       }
       // parameter timeout conductivity
       else if (strstr(uart_rx, "to_c:") != NULL && on_sensor)
@@ -100,7 +102,8 @@ void loop(void)
         timeout_t = strtoul(ptr + 5, &eptr, 10);
         
         Serial.print("timeoutC set to: ");
-        Serial.println(timeout_c);
+        Serial.print(timeout_c);
+        Serial.println("\r");
       }
 
       memset(uart_rx, 0, sizeof(uart_rx));
@@ -172,12 +175,13 @@ void loop(void)
       char data_JSON[256] = "";
       char temp_str[32] = "";
       
-      sprintf(temp_str,"{\"%lu\": {", timestamp + current_time);
+      sprintf(temp_str,"{\"ts\":%lu,\"data\": {", timestamp + current_time);
       strcat(data_JSON, temp_str);
       strcat(data_JSON, value);
-      strcat(data_JSON, "}},");
+      data_JSON[strlen(data_JSON)-1] = '\0';
+      strcat(data_JSON, "}}\r");
 
-      Serial.println(data_JSON);
+      Serial.print(data_JSON);
     }
   }
 }

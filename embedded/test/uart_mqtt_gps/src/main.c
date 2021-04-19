@@ -13,6 +13,7 @@
 #include "app_gps.h"
 #include "app_sd.h"
 #include "gcloud.h"
+#include "cJSON.h"
 
 LOG_MODULE_REGISTER(main);
 
@@ -34,11 +35,11 @@ enum glider_event_type
 	EVT_NEWGLIDER,
 	EVT_IDLE,
 	EVT_GPS,
-	EVT_SENSOR,
+	EVT_SCIENTIFIC,
 	EVT_4G,
 	EVT_WIFI,
 	EVT_SATELLITE,
-	EVT_CTRL_SYS
+	EVT_NAVIGATION
 };
 
 // Structs
@@ -283,31 +284,79 @@ static int message_queue_reset()
 
 static int sensor_module()
 {
+	button_wait();
+
 	set_button_config(1);
 	uart_start(uart_dev1);
+	uart_send(uart_dev1, "time:36000000", strlen("time:36000000"));
 
 	printk("\nsensor test start\n");
+
 	printk("button 1: exit \nbutton 2: send uart signal\n\n");
 
 	/* UART loop */
 	for (int i = 0;; i++)
 	{
+
+		// memset(uart_msg, 0, sizeof(uart_msg));
 		k_msgq_get(&uart_msg_q, &uart_msg, K_FOREVER);
 
 		// TODO: create function to check uart msg similar to mqtt
 
-		if (strcmp(uart_msg, "{exit}") == 0)
+		if (strcmp(uart_msg, "surfaced") == 0)
 		{
+			uart_send(uart_dev1, "sensor_end", strlen("sensor_end"));
 			uart_exit(uart_dev1);
 			data_available_to_send = true;
 			break;
 		}
 		else
 		{
+			// printk("%s", uart_msg);
 
 			// TODO: test timestamp to check if new day
 
-			sd_save_data(uart_msg);
+			cJSON *sensor_JSON = cJSON_Parse(uart_msg);
+
+			int sensor_n = cJSON_GetArraySize(sensor_JSON);
+
+			if (sensor_n > 0)
+			{
+				// fetching timestamp (ms) to convert to hh:mm:ss format
+				cJSON *ts_raw = cJSON_GetObjectItem(sensor_JSON, "ts");
+				cJSON_DeleteItemFromObject(sensor_JSON, "ts");
+				uint32_t tmp_int = (ts_raw->valueint) / 1000;
+				cJSON_Delete(ts_raw);
+
+				int hour = tmp_int / 3600 % 24;
+				int min = (tmp_int / 60) % 60;
+				int sec = tmp_int % 60;
+
+				uint8_t ts_string[64] = "";
+				uint8_t temp_str[16];
+
+				snprintf(temp_str, sizeof(temp_str), "%02d:", hour);
+				strcat(ts_string, temp_str);
+				snprintf(temp_str, sizeof(temp_str), "%02d:", min);
+				strcat(ts_string, temp_str);
+				snprintf(temp_str, sizeof(temp_str), "%02d", sec);
+				strcat(ts_string, temp_str);
+
+				// adding back to JSON object
+				cJSON_AddStringToObject(sensor_JSON, "ts", ts_string);
+
+				// convert to string
+				uint8_t sensor_str[256];
+				strcpy(sensor_str, cJSON_Print(sensor_JSON));
+				cJSON_Minify(sensor_str);
+
+				// save to sd card
+				// sd_save_data(sensor_str);
+			}
+
+			cJSON_Delete(sensor_JSON);
+
+			// sd_save_data(uart_msg);
 
 			// printk("\nUART message: %s", uart_msg);
 			// add to data array
@@ -602,7 +651,7 @@ void main(void)
 			// 	glider.event_now = EVT_NEWGLIDER;
 			// }
 
-			glider.event_now = EVT_NEWGLIDER;
+			glider.event_now = EVT_SCIENTIFIC;
 
 			// IDEA: idle at wifi module no matter what
 			// Instead, in case of reboot, test if it was on a mission
@@ -645,7 +694,7 @@ void main(void)
 				if (glider.mission_started)
 				{
 					glider.event_prev = glider.event_now;
-					glider.event_now = EVT_CTRL_SYS;
+					glider.event_now = EVT_NAVIGATION;
 				}
 
 				// otherwise, continue idle
@@ -664,11 +713,11 @@ void main(void)
 			}
 
 			break;
-		case EVT_SENSOR:
+		case EVT_SCIENTIFIC:
 			sensor_module();
 
 			glider.event_prev = glider.event_now;
-			glider.event_now = EVT_GPS;
+			glider.event_now = EVT_SCIENTIFIC;
 
 			break;
 		case EVT_4G:
@@ -680,7 +729,7 @@ void main(void)
 
 			// send command to control system, either continue dive or go to first waypoint
 			glider.event_prev = glider.event_now;
-			glider.event_now = EVT_CTRL_SYS;
+			glider.event_now = EVT_NAVIGATION;
 
 			break;
 		case EVT_WIFI:
@@ -695,16 +744,16 @@ void main(void)
 
 			// send command to control system, either continue dive or go to first waypoint
 			glider.event_prev = glider.event_now;
-			glider.event_now = EVT_CTRL_SYS;
+			glider.event_now = EVT_NAVIGATION;
 
 			break;
-		case EVT_CTRL_SYS:
+		case EVT_NAVIGATION:
 			// placeholder, send some parameters and commands to control system of glider
 
 			if (glider.mission_started)
 			{
 				glider.event_prev = glider.event_now;
-				glider.event_now = EVT_SENSOR;
+				glider.event_now = EVT_SCIENTIFIC;
 			}
 			else
 			{

@@ -288,7 +288,7 @@ static int write_file(char *file_path, char *data, int size)
 	struct fs_file_t file;
 	fs_open(&file, file_path, (FS_O_WRITE | FS_O_APPEND | FS_O_CREATE));
 	fs_write(&file, data, size);
-	fs_write(&file, "\n", strlen("\n"));
+	fs_write(&file, "\r\n", strlen("\r\n"));
 	fs_close(&file);
 
 	return 0;
