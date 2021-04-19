@@ -22,16 +22,6 @@ WebSocketsServer webSocket = WebSocketsServer(81);
 
 boolean on_wifi = false;
 
-// convert single char to int
-int digit_to_int(char d)
-{
-  char str[2];
-
-  str[0] = d;
-  str[1] = '\0';
-  return (int)strtol(str, NULL, 10);
-}
-
 // load root site
 void handleRoot()
 {
@@ -69,24 +59,27 @@ void website_init()
   Serial.println("HTTP server started");
 }
 
-// read commands from nrf and perform respective operations
-void read_nrf_commands()
-{
+// await start command
+void await_start()
+{ 
   if (Serial.available() > 0)
   {
-    char nrf_command = Serial.read();
-
-    switch (nrf_command)
-    {
-    case '0':
-      on_wifi = true;
-      website_init();
-
-      break;
-    default:
-      break;
+    char c = Serial.read();
+    if (c == ';')
+    {    
+      if (strcmp(uart_rx, "wifi_start") == 0)
+      {
+        on_wifi = true;
+        website_init();
+        flush_serial();
+        memset(uart_rx, 0, sizeof(uart_rx));
+        arr_rx = 0;
+      }
     }
-  }
+    else
+    {   
+      uart_rx[arr_rx++] = c;
+    }
 }
 
 void flush_serial()
@@ -118,8 +111,8 @@ void loop(void)
     // read input from serial and send to webpage
     if (Serial.available() > 0)
     {
-      char b = Serial.read();
-      if (b == ';')
+      char c = Serial.read();
+      if (c == ';')
       {    
         if (strcmp(uart_rx, "wifi_end") == 0)
         {
@@ -139,7 +132,7 @@ void loop(void)
       }
       else
       {   
-        uart_rx[arr_rx++] = b;
+        uart_rx[arr_rx++] = c;
       }
 
     }
@@ -147,7 +140,7 @@ void loop(void)
   
   else
   {
-    read_nrf_commands();
+    await_start();
   }
 }
 
