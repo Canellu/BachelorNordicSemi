@@ -2,6 +2,7 @@
 #include <SPIFFS.h>            // For filesystem
 #include "ESPAsyncWebServer.h" // For webserver & websocket
 #include "WiFi.h"              // For Access Point
+#include "ESPmDNS.h"           // For domain Name e.g "www.oasys.local"
 
 // --------------------------------------------------
 // Definition of macros
@@ -187,6 +188,23 @@ void initAP()
   IPAddress IP = WiFi.softAPIP();
   Serial.print("AP IP address: ");
   Serial.println(IP);
+}
+
+// --------------------------------------------------
+// multicast Domain Name Server (mDNS)
+// --------------------------------------------------
+void initMDNS()
+{
+  if (!MDNS.begin("esp32"))
+  {
+    Serial.println("Error setting up MDNS responder!");
+    while (1)
+    {
+      delay(1000);
+    }
+  }
+  Serial.println("mDNS responder started");
+  MDNS.addService("http", "tcp", 80);
 }
 
 // --------------------------------------------------
