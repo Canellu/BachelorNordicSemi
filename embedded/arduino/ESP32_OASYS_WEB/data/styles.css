@@ -1,0 +1,76 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: monospace;
+  color: rgb(66, 66, 66);
+  user-select: none;
+}
+
+button:focus {
+  outline: none;
+}
+
+h1 {
+  font-size: 3rem;
+}
+
+button {
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid gray;
+  font-size: 1.2rem;
+  background-color: rgb(191, 241, 241);
+  border-color: rgb(188, 204, 204);
+  box-shadow: 1px 1px 4px rgb(190, 190, 190);
+  cursor: pointer;
+  font-weight: bold;
+}
+
+button:hover {
+  background-color: rgb(159, 197, 197);
+}
+
+button:active {
+  background-color: rgb(96, 114, 114);
+  color: white;
+}
+
+body {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+
+  justify-content: center;
+  align-items: center;
+  background: #f4f4f4;
+}
+
+body > * {
+  margin: 30px 0;
+}
+
+.textarea {
+  width: 200px;
+  height: 200px;
+  background: rgb(228, 157, 157);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 4rem;
+  border-radius: 20px;
+  border: 2px solid rgb(207, 207, 207);
+  margin-left: 20px;
+}
+
+#sendtarea {
+  font-size: 1.4rem;
+  width: 400px;
+  height: 200px;
+  overflow: auto;
+  border-radius: 20px;
+  border: 2px solid rgb(207, 207, 207);
+  padding: 10px;
+  background: rgb(217, 251, 193);
+}
