@@ -13,6 +13,7 @@
 #include "app_gps.h"
 #include "app_sd.h"
 #include "gcloud.h"
+#include "cJSON.h"
 
 LOG_MODULE_REGISTER(main);
 
@@ -34,11 +35,12 @@ enum glider_event_type
 	EVT_NEWGLIDER,
 	EVT_IDLE,
 	EVT_GPS,
-	EVT_SENSOR,
+	EVT_SCIENTIFIC,
 	EVT_4G,
 	EVT_WIFI,
 	EVT_SATELLITE,
-	EVT_CTRL_SYS
+	EVT_NAVIGATION,
+	EVT_TESTING // random stuff for the sake of testing
 };
 
 // Structs
@@ -104,8 +106,8 @@ int data_size = 0; // keeps track of no. of messages stored in data array.
 
 // GPS variables
 struct k_msgq gps_msg_q;
-static uint8_t gps_msgq_buffer[2 * sizeof(oasys_gps_data_t)];
-static oasys_gps_data_t gps_data;
+static uint8_t gps_msgq_buffer[2 * sizeof(glider_gps_data_t)];
+static glider_gps_data_t gps_data;
 
 static bool data_available_to_send = false;
 
@@ -118,12 +120,17 @@ static bool gcloud_init_complete = false;
 
 // SD Card variables
 struct k_msgq sd_msg_q;
-static uint8_t sd_msgq_buffer[5 * sizeof(oasys_data_t)];
+static uint8_t sd_msgq_buffer[5 * sizeof(sd_msg_t)];
 
 // Time variables
 static uint16_t current_year = -1;
 static uint8_t current_month = -1;
 static uint8_t current_day = -1;
+
+// TEMPORARY, FOR TESTING
+static uint16_t current_hour = -1;
+static uint8_t current_minute = -1;
+static uint8_t current_seconds = -1;
 
 /* FUNCTION DECLARATIONS */
 
@@ -195,24 +202,32 @@ static int button_wait()
 	return 0;
 }
 
-// fills out current date, sends string and event type
+// fills out current date as filename, sends string to sd module to write
 static int sd_save_data(void *data_string)
 {
-	oasys_data_t sd_msg;
+	sd_msg_t sd_msg;
 	sd_msg.event = WRITE_FILE;
 
+	// printk("saving to sd card\n");
+
 	// create filename, format: [yyyymmdd]
-	uint8_t temp_str[16];
+	uint8_t filename[32] = "";
+	uint8_t temp_str[16] = "";
 
 	snprintf(temp_str, sizeof(temp_str), "%02u", current_year);
-	strcat(sd_msg.filename, temp_str);
-	snprintf(temp_str, sizeof(temp_str), "%02u", current_month);
-	strcat(sd_msg.filename, temp_str);
-	snprintf(temp_str, sizeof(temp_str), "%02u.txt", current_day);
-	strcat(sd_msg.filename, temp_str);
+	strcat(filename, temp_str);
 
-	// fill string to be saved
-	memcpy(sd_msg.json_string, data_string, strlen(data_string));
+	snprintf(temp_str, sizeof(temp_str), "%02u", current_month);
+	strcat(filename, temp_str);
+	snprintf(temp_str, sizeof(temp_str), "%02u.txt", current_day);
+	strcat(filename, temp_str);
+
+	// copy string over to struct
+	strcpy(sd_msg.filename, filename);
+	//sd_msg.filename[strlen(filename)] = 0;
+	//printk("\n%s\n", sd_msg.filename);
+
+	strcpy(sd_msg.string, data_string);
 
 	// add to sd card message queue
 	k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
@@ -244,7 +259,7 @@ static int message_queue_init()
 	k_msgq_init(&gcloud_msg_q, gcloud_msgq_buffer, sizeof(gcloud_msg), 3);
 
 	// SD
-	k_msgq_init(&sd_msg_q, sd_msgq_buffer, sizeof(oasys_data_t), 5);
+	k_msgq_init(&sd_msg_q, sd_msgq_buffer, sizeof(sd_msg_t), 5);
 
 	return 0;
 }
@@ -283,31 +298,85 @@ static int message_queue_reset()
 
 static int sensor_module()
 {
+	button_wait();
+
 	set_button_config(1);
 	uart_start(uart_dev1);
 
+	// send time to sensors
+	uint8_t time_millis_str[16] = "";
+	uint32_t time_millis = ((current_hour * 60 * 60) + (current_minute * 60) + current_seconds) * 1000;
+	snprintf(time_millis_str, sizeof(time_millis_str), "time:%u", time_millis);
+
+	uart_send(uart_dev1, time_millis_str, sizeof(time_millis_str));
+
 	printk("\nsensor test start\n");
+
 	printk("button 1: exit \nbutton 2: send uart signal\n\n");
 
 	/* UART loop */
 	for (int i = 0;; i++)
 	{
+
+		// memset(uart_msg, 0, sizeof(uart_msg));
 		k_msgq_get(&uart_msg_q, &uart_msg, K_FOREVER);
 
-		// TODO: create function to check uart msg similar to mqtt
-
-		if (strcmp(uart_msg, "{exit}") == 0)
+		if (strcmp(uart_msg, "surfaced") == 0)
 		{
+			uart_send(uart_dev1, "sensor_end", strlen("sensor_end"));
 			uart_exit(uart_dev1);
 			data_available_to_send = true;
 			break;
 		}
 		else
 		{
+			// printk("%s", uart_msg);
 
 			// TODO: test timestamp to check if new day
 
-			sd_save_data(uart_msg);
+			cJSON *sensor_JSON = cJSON_Parse(uart_msg);
+
+			int sensor_n = cJSON_GetArraySize(sensor_JSON);
+
+			if (sensor_n > 0)
+			{
+				// fetching timestamp (ms) to convert to hh:mm:ss format
+				cJSON *ts_raw = cJSON_GetObjectItem(sensor_JSON, "ts");
+				cJSON_DeleteItemFromObject(sensor_JSON, "ts");
+				uint32_t tmp_int = (ts_raw->valueint) / 1000;
+				cJSON_Delete(ts_raw);
+
+				// converting
+				int hour = tmp_int / 3600 % 24;
+				int min = (tmp_int / 60) % 60;
+				int sec = tmp_int % 60;
+
+				// formatting
+				uint8_t ts_string[64] = "";
+				uint8_t temp_str[16] = "";
+
+				snprintf(temp_str, sizeof(temp_str), "%02d:", hour);
+				strcat(ts_string, temp_str);
+				snprintf(temp_str, sizeof(temp_str), "%02d:", min);
+				strcat(ts_string, temp_str);
+				snprintf(temp_str, sizeof(temp_str), "%02d", sec);
+				strcat(ts_string, temp_str);
+
+				// adding back to JSON object
+				cJSON_AddStringToObject(sensor_JSON, "ts", ts_string);
+
+				// convert to string
+				uint8_t sensor_str[256] = "";
+				strcpy(sensor_str, cJSON_Print(sensor_JSON));
+				cJSON_Minify(sensor_str);
+
+				// save to sd card
+				sd_save_data(sensor_str);
+			}
+
+			cJSON_Delete(sensor_JSON);
+
+			// sd_save_data(uart_msg);
 
 			// printk("\nUART message: %s", uart_msg);
 			// add to data array
@@ -363,7 +432,7 @@ static int wifi_module()
 
 		if (strcmp(wifi_response, "{connected}") == 0)
 		{
-			oasys_data_t sd_msg;
+			sd_msg_t sd_msg;
 			sd_msg.event = SEND_FILE_INFO;
 			k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
 
@@ -372,14 +441,14 @@ static int wifi_module()
 		}
 		else if (wifi_response[1] == 'D')
 		{
-			oasys_data_t sd_msg;
+			sd_msg_t sd_msg;
 
 			// fetch filename
 			// format yyyymmdd.txt
 			char *date = wifi_response + 3;
 			date[strlen(date) - 1] = 0;
 
-			memcpy(sd_msg.filename, date, 13);
+			strcpy(sd_msg.filename, date);
 			printk("\n%s", sd_msg.filename);
 
 			sd_msg.event = READ_FILE;
@@ -412,27 +481,20 @@ static int gps_module()
 
 	printk("gps test start\n");
 
-	app_gps(3000, 400);
+	app_gps(1000, 400);
 	k_msgq_get(&gps_msg_q, &gps_data, K_NO_WAIT);
-
-	// print to terminal
-	// {"lng":"23.771611","lat":"61.491275"}
-	printk("\n%s", gps_data.gps_string);
 
 	// update date CANDO: create function?
 	current_year = gps_data.year;
 	current_month = gps_data.month;
 	current_day = gps_data.day;
 
+	current_hour = gps_data.hour;
+	current_minute = gps_data.minute;
+	current_seconds = gps_data.seconds;
+
 	// save gps data on sd card
 	sd_save_data(gps_data.gps_string);
-
-	// send time to sensors
-	uint8_t time_millis_str[16];
-	uint32_t time_millis = ((gps_data.hour * 60 * 60) + (gps_data.minute * 60) + gps_data.seconds) * 1000;
-	snprintf(time_millis_str, sizeof(time_millis_str), "%02u", time_millis);
-
-	uart_send(uart_dev1, time_millis_str, sizeof(time_millis_str));
 
 	// add to data array
 	// strcpy(uart_data_array[data_size++], gps_data.gps_string);
@@ -521,12 +583,15 @@ static int glider_init(struct glider_t *glider)
 {
 
 	/* Fetch serial number (uid) */
-	uint8_t imei[18];
-	uint8_t uid[18];
+	uint8_t imei[18] = "";
+	uint8_t uid[18] = "";
 	at_cmd_write("AT+CGSN", imei, sizeof(imei), NULL);
-	memcpy(uid, imei + 8, strlen(imei) - 8);
-	memcpy(glider->uid, uid, 6);
-	glider->uid[sizeof(glider->uid) - 1] = 0;
+	memcpy(uid, imei + 8, 6);
+	strcpy(glider->uid, uid);
+	// glider->uid[sizeof(glider->uid) - 1] = 0;
+
+	printk("\n%s\n", uid);
+	printk("\n%s\n", glider->uid);
 
 	/* device inits and configurations */
 	device_inits();
@@ -548,12 +613,12 @@ static int glider_init(struct glider_t *glider)
 	return 0;
 }
 
-static bool check_new_glider(struct glider_t *glider)
+static bool check_new_glider()
 {
-	oasys_data_t sd_msg;
+	static sd_msg_t sd_msg;
 	sd_msg.event = FIND_FILE;
 	static const char file_mission[] = "MISSIONPARAMS.TXT";
-	memcpy(sd_msg.filename, file_mission, sizeof(file_mission));
+	strcpy(sd_msg.filename, file_mission);
 
 	k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
 
@@ -589,7 +654,7 @@ void main(void)
 		case EVT_INIT:
 			glider_init(&glider);
 
-			bool newglider = check_new_glider(&glider);
+			bool newglider = check_new_glider();
 
 			// if (!newglider)
 			// {
@@ -602,7 +667,7 @@ void main(void)
 			// 	glider.event_now = EVT_NEWGLIDER;
 			// }
 
-			glider.event_now = EVT_NEWGLIDER;
+			glider.event_now = EVT_GPS;
 
 			// IDEA: idle at wifi module no matter what
 			// Instead, in case of reboot, test if it was on a mission
@@ -645,7 +710,7 @@ void main(void)
 				if (glider.mission_started)
 				{
 					glider.event_prev = glider.event_now;
-					glider.event_now = EVT_CTRL_SYS;
+					glider.event_now = EVT_NAVIGATION;
 				}
 
 				// otherwise, continue idle
@@ -663,12 +728,17 @@ void main(void)
 				glider.event_now = EVT_4G;
 			}
 
+			else
+			{
+				glider.event_now = EVT_SCIENTIFIC;
+			}
+
 			break;
-		case EVT_SENSOR:
+		case EVT_SCIENTIFIC:
 			sensor_module();
 
 			glider.event_prev = glider.event_now;
-			glider.event_now = EVT_GPS;
+			glider.event_now = EVT_TESTING;
 
 			break;
 		case EVT_4G:
@@ -680,7 +750,7 @@ void main(void)
 
 			// send command to control system, either continue dive or go to first waypoint
 			glider.event_prev = glider.event_now;
-			glider.event_now = EVT_CTRL_SYS;
+			glider.event_now = EVT_NAVIGATION;
 
 			break;
 		case EVT_WIFI:
@@ -695,22 +765,36 @@ void main(void)
 
 			// send command to control system, either continue dive or go to first waypoint
 			glider.event_prev = glider.event_now;
-			glider.event_now = EVT_CTRL_SYS;
+			glider.event_now = EVT_NAVIGATION;
 
 			break;
-		case EVT_CTRL_SYS:
+		case EVT_NAVIGATION:
 			// placeholder, send some parameters and commands to control system of glider
 
 			if (glider.mission_started)
 			{
 				glider.event_prev = glider.event_now;
-				glider.event_now = EVT_SENSOR;
+				glider.event_now = EVT_SCIENTIFIC;
 			}
 			else
 			{
 				glider.event_prev = glider.event_now;
 				glider.event_now = EVT_IDLE;
 			}
+
+			break;
+		case EVT_TESTING:
+			printk("\nRunning test, press button 1 to start\n");
+			button_wait();
+
+			static sd_msg_t sd_msg;
+
+			sd_msg.event = READ_JSON;
+
+			strcpy(sd_msg.filename, "20210420.txt");
+			strcpy(sd_msg.string, "10");
+
+			k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
 
 			break;
 		default:

@@ -30,20 +30,22 @@ static void uart_cb(const struct device *dev_uart, void *context)
 	// adds to message queue when entire JSON is received
 	if (uart_irq_rx_ready(dev_uart))
 	{
-		uint8_t buf[10];
+		uint8_t buf[4] = "";
 		int len = uart_fifo_read(dev_uart, buf, sizeof(buf));
 		buf[len] = 0;
 
-		if (strcmp(buf, "{") == 0)
+		// handling overflow
+		if (strlen(rx_buf) >= sizeof(rx_buf) - 1)
 		{
-			strcpy(rx_buf, "");
-			strcat(rx_buf, buf);
+			printk("overflow, deleting str\n");
+			memset(rx_buf, 0, sizeof(rx_buf));
 		}
-		else if (strcmp(buf, "}") == 0)
+		// delimiter
+		else if (buf[0] == '\r')
 		{
-			strcat(rx_buf, buf);
-			printk("\nuart rcvd");
+			// printk("\nuart rcvd");
 			k_msgq_put(&uart_msg_q, &rx_buf, K_NO_WAIT);
+			memset(rx_buf, 0, sizeof(rx_buf));
 		}
 		else
 		{
@@ -112,7 +114,8 @@ void uart_exit(enum uart_device_type uart_dev_no)
 // send data to uart device
 void uart_send(enum uart_device_type uart_dev_no, void *msg, size_t len)
 {
-	memcpy(tx_buf, msg, len);
+	strcpy(tx_buf, msg);
+	strcat(tx_buf, "\r");
 
 	switch (uart_dev_no)
 	{

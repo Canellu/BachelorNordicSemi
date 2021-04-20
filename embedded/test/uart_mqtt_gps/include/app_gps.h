@@ -6,9 +6,6 @@ typedef struct
 {
 	uint8_t gps_string[128];
 
-	double longitude;
-	double latitude;
-
 	uint16_t year;
 	uint8_t month;
 	uint8_t day;
@@ -16,7 +13,7 @@ typedef struct
 	uint8_t hour;
 	uint8_t minute;
 	uint8_t seconds;
-} oasys_gps_data_t;
+} glider_gps_data_t;
 
 int app_gps(int64_t gps_timeout, int retry_interval);
 
