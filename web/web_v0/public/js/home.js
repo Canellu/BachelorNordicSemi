@@ -33,7 +33,22 @@ async function createAllCards() {
   const gliders = await db.collection("Gliders").get();
   gliders.forEach((glider) => {
     getGliderFields(glider.id);
+    populateHomeMap(glider);
   });
+}
+
+function populateHomeMap(glider) {
+  let location;
+  let latlng = glider.data()["Last seen"];
+
+  if (typeof latlng != "undefined") {
+    let datetime = glider.data()["Last sync"];
+    let alias = glider.data()["Alias"];
+    latlng = JSON.parse("{" + latlng + "}");
+    location = { t: datetime, lat: latlng.lat, lng: latlng.lng };
+
+    addHomeMarkers(location, alias);
+  }
 }
 
 const images = [
@@ -80,8 +95,11 @@ function showModal() {
 
 function hideModal() {
   modal.classList.add("hidden");
-  let element = document.querySelector("#uploadSuccess");
-  element.style.webkitAnimationPlayState = "paused";
+  fileObjectList = [];
+  uploadFileListDiv.innerHTML = "";
+  selectedBox.classList.add("hidden");
+  cloudBox.classList.remove("hidden");
+  confirmBtn.classList.add("disableBtn");
 }
 
 // REMOVE MAYBE? CUZ OF DOUBLE CLICK ISSUE ON FILE SELECT
@@ -160,6 +178,7 @@ function uploadToFirebase() {
     //   .set(dateValue, { merge: true });
   });
   generatePopup();
+  hideModal();
 }
 
 function generatePopup() {
