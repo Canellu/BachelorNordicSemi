@@ -191,7 +191,7 @@ void initAP()
 }
 
 // --------------------------------------------------
-// multicast Domain Name Server (mDNS)
+// multicast Domain Name Server (mDNS) CURRENTLY NOT WORKING (not for AP?)
 // --------------------------------------------------
 void initMDNS()
 {
@@ -220,10 +220,6 @@ void setup()
   initAP();
   initWebSocket();
   initWebServer();
-
-  delay(2000);
-  char msg[10] = "Hello";
-  sendToClients(msg);
 }
 
 // --------------------------------------------------
@@ -233,4 +229,8 @@ void setup()
 void loop()
 {
   webSocket.cleanupClients(); // Limiting number of clients, cleaning up and freeing resources, defaults to 8 connected clients
+
+  char msg[10] = "Hello";
+  sendToClients(msg);
+  delay(10000);
 }
