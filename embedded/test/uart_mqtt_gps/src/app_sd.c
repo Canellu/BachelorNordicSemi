@@ -13,6 +13,7 @@
 #include <ff.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "app_uart.h"
 #include "app_sd.h"
@@ -129,8 +130,8 @@ static int send_all_file_info(const char *path)
 	struct fs_dir_t dirp;
 	static struct fs_dirent entry;
 
-	uint8_t file_data[128];
-	uint8_t temp_str[16];
+	uint8_t file_data[128] = "";
+	uint8_t temp_str[16] = "";
 
 	res = fs_opendir(&dirp, path);
 	if (res)
@@ -173,8 +174,6 @@ static int send_all_file_info(const char *path)
 static void create_file_path(char *file_path, char *filename)
 {
 
-	// printk("\nCreating file path");
-
 	// empty file_path
 	strcpy(file_path, "");
 
@@ -184,7 +183,7 @@ static void create_file_path(char *file_path, char *filename)
 }
 
 // reads entire file
-static int read_file(char *file_path, char *data, int size)
+static int read_file(char *file_path)
 {
 
 	// For catching return values from fs_functions
@@ -197,26 +196,50 @@ static int read_file(char *file_path, char *data, int size)
 
 	if (ret == 0)
 	{
-		uint8_t buffer[32] = "";
+		uint8_t line[512] = "";
 		while (1)
 		{
-			ret = fs_read(&file, &buffer, 31);
+			uint8_t buf[2] = "";
+			ret = fs_read(&file, &buf, 1);
+
+			// test for EOF
 			if (ret == 0)
 				break;
+			// handling overflow
+			else if (strlen(line) >= sizeof(line) - 1)
+			{
+				printk("overflow, deleting str\n");
+				memset(line, 0, sizeof(line));
+			}
+			// delimiter
+			else if (buf[0] == '\r')
+			{
+				printk("line: %s %d\n", line, strlen(line));
+				memset(line, 0, sizeof(line));
+			}
+			// filter for unwanted characters
+			else if (buf[0] == '\n')
+			{
+			}
+			// add to string
+			else
+			{
+				strcat(line, buf);
+			}
 
-			//printk("%s", buffer);
-			//strcat(buffer, ";");
-			uart_send(UART_2, buffer, sizeof(buffer));
-			uart_send(UART_2, ";", sizeof(";"));
+			// //printk("%s", buffer);
+			// //strcat(buffer, ";");
+			// uart_send(UART_2, buffer, sizeof(buffer));
+			// uart_send(UART_2, "\r", sizeof("\r"));
 
-			memset(buffer, 0, sizeof(buffer));
-			k_sleep(K_MSEC(20));
+			// memset(buffer, 0, sizeof(buffer));
+			// k_sleep(K_MSEC(20));
 		}
 		k_sleep(K_MSEC(10));
-		uart_send(UART_2, "EOF", sizeof("EOF"));
-		uart_send(UART_2, ";", sizeof(";"));
+		// uart_send(UART_2, "EOF", sizeof("EOF"));
+		// uart_send(UART_2, "\r", sizeof("\r"));
 
-		printk("\n\nFinished reading file");
+		printk("\nFinished reading file");
 
 		fs_close(&file);
 	}
@@ -229,8 +252,17 @@ static int read_file(char *file_path, char *data, int size)
 }
 
 // reads per JSON
-static int read_JSON(char *file_path, char *data, int size, uint32_t *cursor)
+static int read_JSON(char *file_path, uint8_t *json_max_str)
 {
+	int counter = 0;
+
+	// max message for this send
+	int msg_max = strtol(json_max_str, NULL, 10);
+	int msg_current = 0;
+
+	// rough size of each json
+	// int json_size = 50;
+	int skip = 3;
 
 	// For catching return values from fs_functions
 	int ret = 1;
@@ -241,34 +273,48 @@ static int read_JSON(char *file_path, char *data, int size, uint32_t *cursor)
 
 	if (ret == 0)
 	{
-		// TODO: seek end to read cursor value
-
-		fs_seek(&file, *cursor, FS_SEEK_SET);
-
-		uint8_t buffer[8] = "";
-
+		uint8_t line[512] = "";
 		while (1)
 		{
-			ret = fs_read(&file, &buffer, 1);
+			uint8_t buf[2] = "";
+			ret = fs_read(&file, &buf, 1);
+
+			// test for EOF
 			if (ret == 0)
-			{
 				break;
-			}
-			else if (strcmp(buffer, "{") == 0)
+			// handling overflow
+			else if (strlen(line) >= sizeof(line) - 1)
 			{
-				strcpy(data, "");
-				strcat(data, buffer);
+				printk("overflow, deleting str\n");
+				memset(line, 0, sizeof(line));
 			}
-			else if (strcmp(buffer, "}") == 0)
+			// delimiter
+			else if (buf[0] == '\r')
 			{
-				strcat(data, buffer);
-				*cursor = fs_tell(&file);
-				// printk("\n%s %d", data, *cursor);
-				return 0;
+				if ((counter % skip) == 0)
+				{
+					printk("line: %s\n", line);
+					memset(line, 0, sizeof(line));
+					msg_current++;
+
+					if (msg_current == msg_max)
+					{
+						break;
+					}
+				}
+				counter++;
 			}
+			// filter for unwanted characters
+			else if (buf[0] == '\n')
+			{
+			}
+			// add to string
 			else
 			{
-				strcat(data, buffer);
+				if ((counter % skip) == 0)
+				{
+					strcat(line, buf);
+				}
 			}
 		}
 
@@ -350,12 +396,10 @@ static int mountSD()
 
 void app_sd_thread(void *unused1, void *unused2, void *unused3)
 {
-	oasys_data_t sd_msg;
+	sd_msg_t sd_msg;
 
 	char file_path[32] = "";
 
-	uint8_t file_text[1024] = "";
-	uint8_t json_text[128] = "";
 	uint32_t cursor = 0;
 
 	mountSD();
@@ -365,12 +409,14 @@ void app_sd_thread(void *unused1, void *unused2, void *unused3)
 		// get msg from main
 		k_msgq_get(&sd_msg_q, &sd_msg, K_FOREVER);
 
+		printk("\n%s\n", sd_msg.string);
+
 		switch (sd_msg.event)
 		{
 		case WRITE_FILE:
 			// create file path
 			create_file_path(file_path, sd_msg.filename);
-			write_file(file_path, sd_msg.json_string, strlen(sd_msg.json_string));
+			write_file(file_path, sd_msg.string, strlen(sd_msg.string));
 
 			break;
 		case FIND_FILE:
@@ -385,15 +431,14 @@ void app_sd_thread(void *unused1, void *unused2, void *unused3)
 		case READ_JSON:
 			// create file path
 			create_file_path(file_path, sd_msg.filename);
-			read_JSON(file_path, json_text, sizeof(json_text), &cursor);
-			printk("\nJSON: %s, cursor: %d", json_text, cursor);
+			read_JSON(file_path, sd_msg.string);
 
 			break;
 		case READ_FILE:
-			printk("\nReading file: %s", sd_msg.filename);
+			printk("\nReading file: %s\n", sd_msg.filename);
 			// create file path
 			create_file_path(file_path, sd_msg.filename);
-			read_file(file_path, file_text, sizeof(file_text));
+			read_file(file_path);
 			// printk("\nFile content:\n\n%s", file_text);
 
 			break;

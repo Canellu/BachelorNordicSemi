@@ -13,6 +13,7 @@
 #include <modem/at_notif.h>
 
 #include "app_gps.h"
+#include "cJSON.h"
 
 #ifdef CONFIG_SUPL_CLIENT_LIB
 #include <supl_os_client.h>
@@ -405,41 +406,33 @@ int inject_agps_type(void *agps,
 }
 #endif
 
-// Creates string version of desired gps data
-// CANDO: maybe create JSON directly
-static int gps_struct_to_string(void *gps_string, nrf_gnss_data_frame_t *pvt_data)
+// Creates JSON version of desired gps data, converts back to string in JSON format
+static int gps_struct_to_JSON(void *gps_str, nrf_gnss_data_frame_t *pvt_data)
 {
-	uint8_t temp_str[16];
+	cJSON *gps_JSON = cJSON_CreateObject();
+	cJSON *gps_data = cJSON_CreateObject();
 
-	strcpy(gps_string, "{");
-	strcat(gps_string, "\"lng\":");
-	snprintf(temp_str, sizeof(temp_str), "\"%f\"", pvt_data->pvt.longitude);
-	strcat(gps_string, temp_str);
+	cJSON_AddNumberToObject(gps_data, "lng", pvt_data->pvt.longitude);
+	cJSON_AddNumberToObject(gps_data, "lat", pvt_data->pvt.latitude);
 
-	strcat(gps_string, ",\"lat\":");
-	snprintf(temp_str, sizeof(temp_str), "\"%f\"", pvt_data->pvt.latitude);
-	strcat(gps_string, temp_str);
+	uint8_t ts_string[64] = "";
+	uint8_t temp_str[16] = "";
 
-	strcat(gps_string, ",\"d\":");
-	snprintf(temp_str, sizeof(temp_str), "\"%02u", pvt_data->pvt.datetime.year);
-	strcat(gps_string, temp_str);
-	strcat(gps_string, "-");
-	snprintf(temp_str, sizeof(temp_str), "%02u", pvt_data->pvt.datetime.month);
-	strcat(gps_string, temp_str);
-	strcat(gps_string, "-");
-	snprintf(temp_str, sizeof(temp_str), "%02u\"", pvt_data->pvt.datetime.day);
-	strcat(gps_string, temp_str);
+	snprintf(temp_str, sizeof(temp_str), "%02u:", pvt_data->pvt.datetime.hour);
+	strcat(ts_string, temp_str);
+	snprintf(temp_str, sizeof(temp_str), "%02u:", pvt_data->pvt.datetime.minute);
+	strcat(ts_string, temp_str);
+	snprintf(temp_str, sizeof(temp_str), "%02u", pvt_data->pvt.datetime.seconds);
+	strcat(ts_string, temp_str);
 
-	strcat(gps_string, ",\"t\":");
-	snprintf(temp_str, sizeof(temp_str), "\"%02u", pvt_data->pvt.datetime.hour);
-	strcat(gps_string, temp_str);
-	strcat(gps_string, ":");
-	snprintf(temp_str, sizeof(temp_str), "%02u", pvt_data->pvt.datetime.minute);
-	strcat(gps_string, temp_str);
-	strcat(gps_string, ":");
-	snprintf(temp_str, sizeof(temp_str), "%02u\"", pvt_data->pvt.datetime.seconds);
-	strcat(gps_string, temp_str);
-	strcat(gps_string, "}");
+	cJSON_AddItemToObject(gps_JSON, "data", gps_data);
+	cJSON_AddStringToObject(gps_JSON, "ts", ts_string);
+
+	strcpy(gps_str, cJSON_Print(gps_JSON));
+	cJSON_Minify(gps_str);
+
+	cJSON_Delete(gps_data);
+	cJSON_Delete(gps_JSON);
 
 	return 0;
 }
@@ -450,28 +443,26 @@ static int create_dummy_gps_data(nrf_gnss_data_frame_t *pvt_data)
 	got_fix = 1;
 
 	pvt_data->pvt.longitude = 23.771611;
-	pvt_data->pvt.latitude = 61.491275;
+	pvt_data->pvt.latitude = 61.491278;
 	pvt_data->pvt.altitude = 116.274658;
 	pvt_data->pvt.speed = 0.039595;
 	pvt_data->pvt.heading = 0.000000;
 
-	pvt_data->pvt.datetime.year = 2020;
-	pvt_data->pvt.datetime.month = 03;
-	pvt_data->pvt.datetime.day = 06;
-	pvt_data->pvt.datetime.hour = 05;
-	pvt_data->pvt.datetime.minute = 48;
-	pvt_data->pvt.datetime.seconds = 24;
+	pvt_data->pvt.datetime.year = 2021;
+	pvt_data->pvt.datetime.month = 04;
+	pvt_data->pvt.datetime.day = 20;
+	pvt_data->pvt.datetime.hour = 19;
+	pvt_data->pvt.datetime.minute = 07;
+	pvt_data->pvt.datetime.seconds = 34;
 
 	printk("\n\nCreated dummy gps data");
 
 	return 0;
 }
 
-static int oasys_gps_fill(oasys_gps_data_t *app_gps_data, nrf_gnss_data_frame_t *pvt_data, void *gps_string)
+static int glider_gps_fill(glider_gps_data_t *app_gps_data, nrf_gnss_data_frame_t *pvt_data, void *gps_string)
 {
 	strcpy(app_gps_data->gps_string, gps_string);
-	app_gps_data->longitude = pvt_data->pvt.longitude;
-	app_gps_data->latitude = pvt_data->pvt.latitude;
 
 	app_gps_data->year = pvt_data->pvt.datetime.year;
 	app_gps_data->month = pvt_data->pvt.datetime.month;
@@ -486,9 +477,9 @@ static int oasys_gps_fill(oasys_gps_data_t *app_gps_data, nrf_gnss_data_frame_t 
 int app_gps(int64_t gps_timeout, int retry_interval)
 {
 	nrf_gnss_data_frame_t gps_data;
-	oasys_gps_data_t app_gps_data;
+	glider_gps_data_t app_gps_data;
 
-	uint8_t gps_string[128] = {""};
+	uint8_t gps_string[128] = "";
 	int64_t current_time = 0;
 	int64_t start_time = k_uptime_get();
 
@@ -568,16 +559,16 @@ int app_gps(int64_t gps_timeout, int retry_interval)
 
 		// create dummy data, REMINDER: COMMENT WHEN RUNNING PROPER TESTS
 		create_dummy_gps_data(&last_pvt);
-		gps_struct_to_string(&gps_string, &last_pvt);
+		gps_struct_to_JSON(&gps_string, &last_pvt);
 	}
 	else
 	{
-		gps_struct_to_string(&gps_string, &last_pvt);
+		gps_struct_to_JSON(&gps_string, &last_pvt);
 		got_fix = 0;
 	}
 
 	// fill out struct to add to message queue
-	oasys_gps_fill(&app_gps_data, &last_pvt, &gps_string);
+	glider_gps_fill(&app_gps_data, &last_pvt, &gps_string);
 
 	k_msgq_put(&gps_msg_q, &app_gps_data, K_NO_WAIT);
 

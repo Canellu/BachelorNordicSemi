@@ -30,15 +30,17 @@ static void uart_cb(const struct device *dev_uart, void *context)
 	// adds to message queue when entire JSON is received
 	if (uart_irq_rx_ready(dev_uart))
 	{
-		uint8_t buf[10];
+		uint8_t buf[4] = "";
 		int len = uart_fifo_read(dev_uart, buf, sizeof(buf));
 		buf[len] = 0;
 
+		// handling overflow
 		if (strlen(rx_buf) >= sizeof(rx_buf) - 1)
 		{
 			printk("overflow, deleting str\n");
 			memset(rx_buf, 0, sizeof(rx_buf));
 		}
+		// delimiter
 		else if (buf[0] == '\r')
 		{
 			// printk("\nuart rcvd");
