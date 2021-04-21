@@ -123,14 +123,14 @@ struct k_msgq sd_msg_q;
 static uint8_t sd_msgq_buffer[5 * sizeof(sd_msg_t)];
 
 // Time variables
-static uint16_t current_year = -1;
-static uint8_t current_month = -1;
-static uint8_t current_day = -1;
+static int current_year = -1;
+static int current_month = -1;
+static int current_day = -1;
 
 // TEMPORARY, FOR TESTING
-static uint16_t current_hour = -1;
-static uint8_t current_minute = -1;
-static uint8_t current_seconds = -1;
+static int current_hour = -1;
+static int current_minute = -1;
+static int current_seconds = -1;
 
 /* FUNCTION DECLARATIONS */
 
@@ -294,6 +294,68 @@ static int message_queue_reset()
 	return 0;
 }
 
+static int publish_data_4G()
+{
+	printk("\nRunning test, press button 1 to start\n");
+	button_wait();
+
+	uint8_t msg_max = 10;
+	uint8_t msg_sent = 0;
+
+	uint8_t files[2][32] = {"20210420.TXT", "20210421.TXT"};
+	uint8_t file_cnt = 2;
+
+	sd_msg_t sd_msg;
+	uint8_t msg_param[128] = "";
+
+	uint8_t temp_str[16] = "";
+
+	snprintf(temp_str, sizeof(temp_str), "%d\r", msg_max);
+	strcat(msg_param, temp_str);
+
+	for (int i = 0; i < file_cnt; i++)
+	{
+		strcat(msg_param, files[i]);
+		strcat(msg_param, "\r");
+	}
+
+	sd_msg.event = READ_JSON;
+	strcpy(sd_msg.string, msg_param);
+
+	// printk("\n%s", sd_msg.string);
+	k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
+
+	uint8_t sd_msg_response[512] = "";
+	uint8_t files_parsed = 0;
+
+	printk("\n");
+
+	while (1)
+	{
+		k_msgq_get(&main_msg_q, &sd_msg_response, K_FOREVER);
+		// printk("\n%s", sd_msg_response);
+		if (strcmp(sd_msg_response, "OK") == 0)
+		{
+			files_parsed++;
+		}
+		else
+		{
+			printk("msg: %s\n", sd_msg_response);
+			msg_sent++;
+		}
+
+		if (msg_sent == msg_max || files_parsed == file_cnt)
+		{
+			break;
+		}
+	}
+
+	data_available_to_send = false;
+	printk("\nAll messages sent");
+
+	return 0;
+}
+
 /* MODULES */
 
 static int sensor_module()
@@ -336,9 +398,7 @@ static int sensor_module()
 
 			cJSON *sensor_JSON = cJSON_Parse(uart_msg);
 
-			int sensor_n = cJSON_GetArraySize(sensor_JSON);
-
-			if (sensor_n > 0)
+			if (cJSON_IsObject(sensor_JSON))
 			{
 				// fetching timestamp (ms) to convert to hh:mm:ss format
 				cJSON *ts_raw = cJSON_GetObjectItem(sensor_JSON, "ts");
@@ -372,34 +432,13 @@ static int sensor_module()
 
 				// save to sd card
 				sd_save_data(sensor_str);
+				data_available_to_send = true;
 			}
 
 			cJSON_Delete(sensor_JSON);
-
-			// sd_save_data(uart_msg);
-
-			// printk("\nUART message: %s", uart_msg);
-			// add to data array
-			// strcpy(uart_data_array[i], uart_msg);
 		}
 	}
 	/* UART loop end */
-
-	// print all uart data
-	if (strcmp(uart_data_array[0], "") != 0)
-	{
-		int i = 0;
-		while (strcmp(uart_data_array[i], "") != 0)
-		{
-			printk("\nArray %d: %s", i, uart_data_array[i]);
-			i++;
-			data_size++;
-		}
-	}
-	else
-	{
-		printk("no data saved\n");
-	}
 
 	printk("\nsensor test end\n\n");
 
@@ -495,10 +534,10 @@ static int gps_module()
 
 	// save gps data on sd card
 	sd_save_data(gps_data.gps_string);
+	data_available_to_send = true;
 
 	// add to data array
 	// strcpy(uart_data_array[data_size++], gps_data.gps_string);
-	// data_available_to_send = true;
 
 	printk("\ngps test end\n\n");
 
@@ -547,6 +586,11 @@ static int gcloud_module()
 		// 	strcpy(gcloud_msg, "");
 		// 	break;
 		// }
+
+		if (data_available_to_send)
+		{
+			publish_data_4G();
+		}
 	}
 	/* Gcloud loop end */
 
@@ -622,7 +666,7 @@ static bool check_new_glider()
 
 	k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
 
-	bool sd_msg_response = false;
+	int sd_msg_response = 0;
 
 	k_msgq_get(&main_msg_q, &sd_msg_response, K_FOREVER);
 
@@ -689,7 +733,7 @@ void main(void)
 			// logic for test start time, if true start mission
 
 			glider.event_prev = glider.event_now;
-			glider.event_now = EVT_GPS;
+			glider.event_now = EVT_IDLE;
 
 			break;
 		case EVT_GPS:
@@ -765,7 +809,7 @@ void main(void)
 
 			// send command to control system, either continue dive or go to first waypoint
 			glider.event_prev = glider.event_now;
-			glider.event_now = EVT_NAVIGATION;
+			glider.event_now = EVT_IDLE;
 
 			break;
 		case EVT_NAVIGATION:
@@ -784,17 +828,16 @@ void main(void)
 
 			break;
 		case EVT_TESTING:
-			printk("\nRunning test, press button 1 to start\n");
-			button_wait();
 
-			static sd_msg_t sd_msg;
+			if (data_available_to_send)
+			{
+				publish_data_4G();
+			}
 
-			sd_msg.event = READ_JSON;
+			printk("\nTest end");
 
-			strcpy(sd_msg.filename, "20210420.txt");
-			strcpy(sd_msg.string, "10");
-
-			k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
+			glider.event_prev = glider.event_now;
+			glider.event_now = EVT_IDLE;
 
 			break;
 		default:
