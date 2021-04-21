@@ -13,9 +13,7 @@ async function sendSatelliteData() {
   let gliderField = await db.collection("Gliders").doc(gliderUID).get();
   let satIMEI = gliderField.data()["Sat IMEI"];
 
-  //   fetch(`https://rockblock.rock7.com/rockblock/MT?${queryParams}`, options)
-  //   .then(response => console.log(response))
-  //   .catch(err => console.error(err));
+
   let queryParams = {
     imei: satIMEI,
     username: "nordicoasys@gmail.com",
@@ -30,6 +28,10 @@ async function sendSatelliteData() {
     queryString += key + "=" + value + "&";
   }
   console.log(queryString);
+
+    //   fetch(`https://rockblock.rock7.com/rockblock/MT?${queryString}`, options)
+  //   .then(response => console.log(response))
+  //   .catch(err => console.error(err));
 }
 
 function ascii_to_hexa(str) {
