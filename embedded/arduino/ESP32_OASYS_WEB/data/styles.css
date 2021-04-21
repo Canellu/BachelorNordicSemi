@@ -1,7 +1,6 @@
 #endConnectionBtn {
-  position: fixed;
-  top: 10px;
-  right: 10px;
+  font-weight: 600;
+  margin: auto;
 }
 
 .penIcon {
