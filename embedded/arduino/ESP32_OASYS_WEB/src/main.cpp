@@ -20,13 +20,24 @@
 // Definition of global variables
 // --------------------------------------------------
 
-// Access point name and password
+// WiFi
 const char *ssid = STASSID;
 const char *password = STAPSK;
+boolean on_wifi = false;
 
 // Webserver & Socket
 AsyncWebServer webServer(HTTP_PORT);
 AsyncWebSocket webSocket("/ws");
+
+// UART
+int arr_rx = 0;
+char uart_rx[256] = "";
+
+
+
+
+
+
 
 // --------------------------------------------------
 // ESP File system
@@ -66,57 +77,57 @@ void handleWebSocketMessage(AsyncWebSocket *server,
       data[len] = 0;
       Serial.printf("%s\n", (char *)data);
     }
-    else
-    {
-      for (size_t i = 0; i < info->len; i++)
-      {
-        Serial.printf("%02x ", data[i]);
-      }
-      Serial.printf("\n");
-    }
-    if (info->opcode == WS_TEXT)
-      client->text("I got your text message");
-    else
-      client->binary("I got your binary message");
+    // else
+    // {
+    //   for (size_t i = 0; i < info->len; i++)
+    //   {
+    //     Serial.printf("%02x ", data[i]);
+    //   }
+    //   Serial.printf("\n");
+    // }
+    // if (info->opcode == WS_TEXT)
+    //   client->text("I got your text message");
+    // else
+    //   client->binary("I got your binary message");
   }
-  else
-  {
-    //message is comprised of multiple frames or the frame is split into multiple packets
-    if (info->index == 0)
-    {
-      if (info->num == 0)
-        Serial.printf("ws[%s][%u] %s-message start\n\n", server->url(), client->id(), (info->message_opcode == WS_TEXT) ? "text" : "binary");
-      Serial.printf("ws[%s][%u] frame[%u] start[%llu]\n\n", server->url(), client->id(), info->num, info->len);
-    }
+  // else
+  // {
+  //   //message is comprised of multiple frames or the frame is split into multiple packets
+  //   if (info->index == 0)
+  //   {
+  //     if (info->num == 0)
+  //       Serial.printf("ws[%s][%u] %s-message start\n\n", server->url(), client->id(), (info->message_opcode == WS_TEXT) ? "text" : "binary");
+  //     Serial.printf("ws[%s][%u] frame[%u] start[%llu]\n\n", server->url(), client->id(), info->num, info->len);
+  //   }
 
-    Serial.printf("ws[%s][%u] frame[%u] %s[%llu - %llu]: ", server->url(), client->id(), info->num, (info->message_opcode == WS_TEXT) ? "text" : "binary", info->index, info->index + len);
-    if (info->message_opcode == WS_TEXT)
-    {
-      data[len] = 0;
-      Serial.printf("%s\n\n", (char *)data);
-    }
-    else
-    {
-      for (size_t i = 0; i < len; i++)
-      {
-        Serial.printf("%02x ", data[i]);
-      }
-      Serial.printf("\n\n");
-    }
+  //   Serial.printf("ws[%s][%u] frame[%u] %s[%llu - %llu]: ", server->url(), client->id(), info->num, (info->message_opcode == WS_TEXT) ? "text" : "binary", info->index, info->index + len);
+  //   if (info->message_opcode == WS_TEXT)
+  //   {
+  //     data[len] = 0;
+  //     Serial.printf("%s\n\n", (char *)data);
+  //   }
+  //   else
+  //   {
+  //     for (size_t i = 0; i < len; i++)
+  //     {
+  //       Serial.printf("%02x ", data[i]);
+  //     }
+  //     Serial.printf("\n\n");
+  //   }
 
-    if ((info->index + len) == info->len)
-    {
-      Serial.printf("ws[%s][%u] frame[%u] end[%llu]\n\n", server->url(), client->id(), info->num, info->len);
-      if (info->final)
-      {
-        Serial.printf("ws[%s][%u] %s-message end\n\n", server->url(), client->id(), (info->message_opcode == WS_TEXT) ? "text" : "binary");
-        if (info->message_opcode == WS_TEXT)
-          client->text("I got your text message");
-        else
-          client->binary("I got your binary message");
-      }
-    }
-  }
+  //   if ((info->index + len) == info->len)
+  //   {
+  //     Serial.printf("ws[%s][%u] frame[%u] end[%llu]\n\n", server->url(), client->id(), info->num, info->len);
+  //     if (info->final)
+  //     {
+  //       Serial.printf("ws[%s][%u] %s-message end\n\n", server->url(), client->id(), (info->message_opcode == WS_TEXT) ? "text" : "binary");
+  //       if (info->message_opcode == WS_TEXT)
+  //         client->text("I got your text message");
+  //       else
+  //         client->binary("I got your binary message");
+  //     }
+  //   }
+  // }
 }
 
 // Async Websocket Event Types (AwsEventTypes)
@@ -140,7 +151,9 @@ void onEvent(AsyncWebSocket *server,
   switch (type)
   {
   case WS_EVT_CONNECT:
-    Serial.printf("WebSocket client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
+    // Serial.printf("WebSocket client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
+    Serial.print("\n{connected}");
+    
     break;
   case WS_EVT_DISCONNECT:
     Serial.printf("WebSocket client #%u disconnected\n", client->id());
@@ -207,19 +220,82 @@ void initMDNS()
   MDNS.addService("http", "tcp", 80);
 }
 
+
+
+// --------------------------------------------------
+// UART Utilities
+// --------------------------------------------------
+void flushSerial()
+{
+  while(Serial.available() > 0)
+  {
+    Serial.read();
+  }
+}
+
+void emptyUartBuffer() {
+  memset(uart_rx, 0, sizeof(uart_rx));
+  arr_rx = 0;
+}
+
+
+
+
+// --------------------------------------------------
+// Start WiFi and initialize Server and Socket
+// --------------------------------------------------
+void wifiBegin() {
+  initAP();
+  initWebServer();
+  initWebSocket();
+  flushSerial();
+}
+
+
+void wifiEnd() {
+  webSocket.closeAll();
+  webServer.end(); 
+  WiFi.mode(WIFI_OFF);
+  on_wifi = false;
+  flushSerial();
+}
+// --------------------------------------------------
+// Waits for start command from nRF
+// --------------------------------------------------
+void awaitStart()
+{ 
+  if (Serial.available() > 0)
+  {
+    char c = Serial.read();
+    if (c == ';')
+    {    
+      if (strcmp(uart_rx, "wifi_start") == 0)
+      {
+        Serial.println("Starting wifi");
+        on_wifi = true;
+        wifiBegin();
+        emptyUartBuffer();
+      }
+    }
+    else
+    {   
+      uart_rx[arr_rx++] = c;
+    }
+  }
+}
+
+
+
+
+
 // --------------------------------------------------
 // SETUP
 // --------------------------------------------------
 void setup()
 {
-
   Serial.begin(115200);
   delay(500);
-
   initSPIFFS();
-  initAP();
-  initWebSocket();
-  initWebServer();
 }
 
 // --------------------------------------------------
@@ -228,9 +304,36 @@ void setup()
 
 void loop()
 {
-  webSocket.cleanupClients(); // Limiting number of clients, cleaning up and freeing resources, defaults to 8 connected clients
 
-  char msg[10] = "Hello";
-  sendToClients(msg);
-  delay(10000);
+  if (on_wifi)
+  { 
+    webSocket.cleanupClients(); // Limiting number of clients, cleaning up and freeing resources, defaults to 8 connected clients
+
+    // read input from serial and send to webpage
+    if (Serial.available() > 0)
+    {
+      char c = Serial.read();
+      if (c == ';')
+      {    
+        if (strcmp(uart_rx, "wifi_end") == 0)
+        {       
+          wifiEnd();
+        }
+        else
+        {
+          sendToClients(uart_rx);
+        }
+        memset(uart_rx, 0, sizeof(uart_rx));
+        arr_rx = 0;
+      }
+      else
+      {   
+        uart_rx[arr_rx++] = c;
+      }
+    }
+  }
+  else
+  {
+    awaitStart();
+  }
 }
