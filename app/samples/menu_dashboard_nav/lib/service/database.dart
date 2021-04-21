@@ -1,6 +1,8 @@
 import 'package:bachelor_app/models/device.dart';
+import 'package:bachelor_app/models/mission.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class DatabaseService {
   final CollectionReference connectCollection = FirebaseFirestore.instance.collection('Gliders');
@@ -17,9 +19,22 @@ class DatabaseService {
           added: doc.data()['Added'] ?? 'not found',
           alias: doc.data()['Alias'] ?? 'not found',
           lastSync: doc.data()['Last sync'] ?? 'not found',
-          deviceId: doc.id ?? "not found"
+          deviceId: doc.id ?? "not found",
+          lastSeen: doc.data()['Last seen'] ?? 'not found'
       );
     }).toList();
+  }
+
+  Future<void> newMission(Mission missionObject) async {
+    return await connectCollection.doc(gid).collection("Missions").doc(missionObject.missionId).set({
+      "freqC" : missionObject.freqC,
+      "freqP" : missionObject.freqP,
+      "freqT" : missionObject.freqT,
+      "maxD" : missionObject.maxD,
+      "minD" : missionObject.minD,
+      "start" : missionObject.startTime
+    }).then((value) => print("New Mission Added"))
+    .catchError((error) => print("Failed to add new mission : $error"));
   }
 
   //get stream
@@ -28,18 +43,9 @@ class DatabaseService {
         .map(_deviceListFromSnapshot);
   }
 
-  /*
-  Stream<QuerySnapshot> get mission {
-    //var oneData = await connectCollection.doc("").get();
-    return connectCollection.doc("311910").collection("Missions").snapshots();
-  }*/
-
-
   //get missions doc from database
-  Future<QuerySnapshot> get mission async {
-    var mission = await connectCollection.doc(gid).collection("Missions").get();
-
-    return mission;
+  Stream<QuerySnapshot> get mission {
+    return connectCollection.doc(gid).collection("Missions").snapshots();
   }
 
   //get data for selected mission, and preprocess it

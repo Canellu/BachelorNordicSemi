@@ -3,7 +3,7 @@ class Device {
   final String alias;
   final String lastSync;
   final String deviceId;
-
-  Device({this.added, this.alias, this.lastSync, this.deviceId});
+  final String lastSeen;
+  Device({this.added, this.alias, this.lastSync, this.deviceId, this.lastSeen});
 
 }
