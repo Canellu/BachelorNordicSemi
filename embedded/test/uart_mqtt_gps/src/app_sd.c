@@ -278,7 +278,6 @@ static int read_JSON(char *file_path, uint32_t *cursor, int interval,
 			// test for EOF
 			if (ret == 0)
 			{
-				(*cursor) = 0;
 				break;
 			}
 			// handling overflow
@@ -305,7 +304,7 @@ static int read_JSON(char *file_path, uint32_t *cursor, int interval,
 					if ((*current_msg_total) == msg_total)
 					{
 						(*current_msg_total) = 0;
-						(*cursor) += 0;
+						(*cursor) = 0;
 						break;
 					}
 				}
@@ -334,6 +333,92 @@ static int read_JSON(char *file_path, uint32_t *cursor, int interval,
 	{
 		printk("Error in reading file\n");
 	}
+
+	return 0;
+}
+
+// used for reading multiple files, runs read_JSON on each file
+static int read_JSON_more_files(uint8_t *param_str, uint32_t *cursor,
+								size_t *file_size_prev)
+{
+	char file_path[32] = "";
+
+	uint8_t filenames[8][16] = {""};
+	uint8_t tmp_str[16];
+
+	size_t file_size_total = 0;
+	size_t file_size = 0;
+	int msg_total = 0;
+	int current_msg_total = 0;
+	int interval = 1;
+
+	// counters
+	int param_str_arr = 0;
+	int tmp_str_arr = 0;
+	int filenames_arr = 0;
+	int i = 0;
+
+	// parse string into parameters and filenames
+	for (param_str_arr = 0; param_str_arr < strlen(param_str); param_str_arr++)
+	{
+		// msg total on delim
+		if (param_str[param_str_arr] == '\r' && i == 0)
+		{
+			tmp_str[tmp_str_arr] = 0;
+			// printk("\n%s", tmp_str);
+			msg_total = strtol(tmp_str, NULL, 10);
+
+			memset(tmp_str, 0, sizeof(tmp_str));
+			tmp_str_arr = 0;
+			i++;
+		}
+		// filenames on delim
+		else if (param_str[param_str_arr] == '\r' && i > 0)
+		{
+			tmp_str[tmp_str_arr] = 0;
+			// printk("\n%s", tmp_str);
+			strcpy(filenames[filenames_arr++], tmp_str);
+
+			memset(tmp_str, 0, sizeof(tmp_str));
+			tmp_str_arr = 0;
+			i++;
+		}
+		// appending character
+		else
+		{
+			tmp_str[tmp_str_arr++] = param_str[param_str_arr];
+		}
+	}
+
+	i = 0;
+	while (strcmp(filenames[i], "") != 0)
+	{
+		file_size = look_for_file(disk_mount_pt, filenames[i]);
+		if (file_size >= 0)
+		{
+			file_size_total += file_size;
+		}
+
+		i++;
+	}
+	// how many "jumps" between messages
+	interval = ((file_size_total - *file_size_prev) / json_size) / msg_total;
+
+	// guard in case interval is rounded to zero.
+	if (!interval)
+	{
+		interval = 1;
+	}
+	// printk("\n%d", interval);
+
+	i = 0;
+	while (strcmp(filenames[i], "") != 0)
+	{
+		create_file_path(file_path, filenames[i]);
+		read_JSON(file_path, cursor, interval, &current_msg_total, msg_total);
+		i++;
+	}
+	*file_size_prev = file_size;
 
 	return 0;
 }
@@ -423,21 +508,8 @@ void app_sd_thread(void *unused1, void *unused2, void *unused3)
 	char file_path[32] = "";
 
 	// helper variables for event read_JSON
-	size_t size_total_prev = 0;
-	size_t size_total = 0;
+	size_t file_size_prev = 0;
 	uint32_t cursor = 0;
-	int msg_total = 0;
-	int current_msg_total = 0;
-	int interval = 1;
-
-	uint8_t filenames[8][16] = {""};
-	uint8_t tmp_str[16];
-
-	// counters
-	int sd_msg_arr = 0;
-	int tmp_str_arr = 0;
-	int filenames_arr = 0;
-	int i = 0;
 
 	mountSD();
 
@@ -475,69 +547,7 @@ void app_sd_thread(void *unused1, void *unused2, void *unused3)
 
 			break;
 		case READ_JSON:
-			// reset params
-			size_total = 0;
-			sd_msg_arr = 0;
-			tmp_str_arr = 0;
-			filenames_arr = 0;
-			i = 0;
-
-			// parse string into parameters and filenames
-			for (sd_msg_arr = 0; sd_msg_arr < strlen(sd_msg.string); sd_msg_arr++)
-			{
-				// msg total on delim
-				if (sd_msg.string[sd_msg_arr] == '\r' && i == 0)
-				{
-					tmp_str[tmp_str_arr] = 0;
-					// printk("\n%s", tmp_str);
-					msg_total = strtol(tmp_str, NULL, 10);
-
-					memset(tmp_str, 0, sizeof(tmp_str));
-					tmp_str_arr = 0;
-					i++;
-				}
-				// filenames on delim
-				else if (sd_msg.string[sd_msg_arr] == '\r' && i > 0)
-				{
-					tmp_str[tmp_str_arr] = 0;
-					// printk("\n%s", tmp_str);
-					strcpy(filenames[filenames_arr++], tmp_str);
-
-					memset(tmp_str, 0, sizeof(tmp_str));
-					tmp_str_arr = 0;
-					i++;
-				}
-				// appending character
-				else
-				{
-					tmp_str[tmp_str_arr++] = sd_msg.string[sd_msg_arr];
-				}
-			}
-
-			i = 0;
-			while (strcmp(filenames[i], "") != 0)
-			{
-				size_total += look_for_file(disk_mount_pt, filenames[i]);
-				i++;
-			}
-			// how many "jumps" between messages
-			interval = ((size_total - size_total_prev) / json_size) / msg_total;
-			// guard in case interval is rounded to zero.
-			if (!interval)
-			{
-				interval = 1;
-			}
-			// printk("\n%d", interval);
-
-			i = 0;
-			while (strcmp(filenames[i], "") != 0)
-			{
-				create_file_path(file_path, filenames[i]);
-				printk("\n%s", file_path);
-				read_JSON(file_path, &cursor, interval, &current_msg_total, msg_total);
-				i++;
-			}
-			size_total_prev = size_total;
+			read_JSON_more_files(sd_msg.string, &cursor, &file_size_prev);
 
 			break;
 		case READ_FILE:

@@ -474,10 +474,10 @@ static int glider_gps_fill(glider_gps_data_t *app_gps_data, nrf_gnss_data_frame_
 	return 0;
 }
 
-int app_gps(int64_t gps_timeout, int retry_interval)
+int app_gps(glider_gps_data_t *app_gps_data, int64_t gps_timeout, int retry_interval)
 {
 	nrf_gnss_data_frame_t gps_data;
-	glider_gps_data_t app_gps_data;
+	got_fix = false;
 
 	uint8_t gps_string[128] = "";
 	int64_t current_time = 0;
@@ -568,9 +568,7 @@ int app_gps(int64_t gps_timeout, int retry_interval)
 	}
 
 	// fill out struct to add to message queue
-	glider_gps_fill(&app_gps_data, &last_pvt, &gps_string);
-
-	k_msgq_put(&gps_msg_q, &app_gps_data, K_NO_WAIT);
+	glider_gps_fill(app_gps_data, &last_pvt, &gps_string);
 
 	printk("\nStopping GPS module");
 

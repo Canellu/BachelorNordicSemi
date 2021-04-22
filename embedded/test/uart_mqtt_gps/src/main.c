@@ -32,15 +32,10 @@ k_tid_t sd_tid;
 enum glider_event_type
 {
 	EVT_INIT,
-	EVT_NEWGLIDER,
 	EVT_IDLE,
-	EVT_GPS,
-	EVT_SCIENTIFIC,
-	EVT_4G,
-	EVT_WIFI,
-	EVT_SATELLITE,
-	EVT_NAVIGATION,
-	EVT_TESTING // random stuff for the sake of testing
+	EVT_AWAIT_MISSION,
+	EVT_DIVE,
+	EVT_SURFACE
 };
 
 // Structs
@@ -104,18 +99,12 @@ static uint8_t uart_data_array[16][128] = {""};
 int data_size = 0; // keeps track of no. of messages stored in data array.
 				   // UPDATE THIS VALUE WHEN SAVING INTO DATA ARRAY
 
-// GPS variables
-struct k_msgq gps_msg_q;
-static uint8_t gps_msgq_buffer[2 * sizeof(glider_gps_data_t)];
-static glider_gps_data_t gps_data;
-
-static bool data_available_to_send = false;
-
 // Gcloud variables
 struct k_msgq gcloud_msg_q;
 static uint8_t gcloud_msgq_buffer[3 * 128];
 static uint8_t gcloud_msg[128];
 
+static bool data_available_to_send = false;
 static bool gcloud_init_complete = false;
 
 // SD Card variables
@@ -249,9 +238,6 @@ static int message_queue_init()
 	// UART
 	k_msgq_init(&uart_msg_q, uart_msgq_buffer, sizeof(uart_msg), 3);
 
-	// GPS
-	k_msgq_init(&gps_msg_q, gps_msgq_buffer, sizeof(gps_data), 2);
-
 	// MQTT
 	// k_msgq_init(&mqtt_msg_q, mqtt_msgq_buffer, sizeof(mqtt_msg), 3);
 
@@ -288,7 +274,6 @@ static int message_queue_reset()
 
 	k_msgq_purge(&button_msg_q);
 	k_msgq_purge(&uart_msg_q);
-	k_msgq_purge(&gps_msg_q);
 	// k_msgq_purge(&mqtt_msg_q);
 	k_msgq_purge(&gcloud_msg_q);
 	return 0;
@@ -296,8 +281,8 @@ static int message_queue_reset()
 
 static int publish_data_4G()
 {
-	printk("\nRunning test, press button 1 to start\n");
-	button_wait();
+	// printk("\nRunning test, press button 1 to start\n");
+	// button_wait();
 
 	uint8_t msg_max = 10;
 	uint8_t msg_sent = 0;
@@ -340,6 +325,9 @@ static int publish_data_4G()
 		}
 		else
 		{
+			// mqtt publish
+			gcloud_publish(sd_msg_response, strlen(sd_msg_response), MQTT_QOS_1_AT_LEAST_ONCE);
+
 			printk("msg: %s\n", sd_msg_response);
 			msg_sent++;
 		}
@@ -350,7 +338,6 @@ static int publish_data_4G()
 		}
 	}
 
-	data_available_to_send = false;
 	printk("\nAll messages sent");
 
 	return 0;
@@ -514,14 +501,15 @@ static int wifi_module()
 // Currently on hold until LTE and GPS can function at the same time
 static int gps_module()
 {
+	static glider_gps_data_t gps_data;
+
 	printk("\n\npress button 1 to start gps test\n\n");
 
 	button_wait();
 
-	printk("gps test start\n");
+	printk("\ngps test start");
 
-	app_gps(1000, 400);
-	k_msgq_get(&gps_msg_q, &gps_data, K_NO_WAIT);
+	app_gps(&gps_data, 1000, 400);
 
 	// update date CANDO: create function?
 	current_year = gps_data.year;
@@ -536,10 +524,7 @@ static int gps_module()
 	sd_save_data(gps_data.gps_string);
 	data_available_to_send = true;
 
-	// add to data array
-	// strcpy(uart_data_array[data_size++], gps_data.gps_string);
-
-	printk("\ngps test end\n\n");
+	printk("\ngps test end");
 
 	return 0;
 }
@@ -581,15 +566,16 @@ static int gcloud_module()
 		k_msgq_get(&gcloud_msg_q, &gcloud_msg, K_NO_WAIT);
 		printk("\nMain: %s", gcloud_msg);
 
-		// if (strcmp(gcloud_msg, "test") == 0)
-		// {
-		// 	strcpy(gcloud_msg, "");
-		// 	break;
-		// }
+		if (strcmp(gcloud_msg, "test") == 0)
+		{
+			strcpy(gcloud_msg, "");
+			break;
+		}
 
 		if (data_available_to_send)
 		{
 			publish_data_4G();
+			data_available_to_send = false;
 		}
 	}
 	/* Gcloud loop end */
@@ -697,144 +683,43 @@ void main(void)
 		{
 		case EVT_INIT:
 			glider_init(&glider);
-
 			bool newglider = check_new_glider();
-
-			// if (!newglider)
-			// {
-			// 	glider.event_prev = glider.event_now;
-			// 	glider.event_now = EVT_IDLE;
-			// }
-			// else
-			// {
-			// 	glider.event_prev = glider.event_now;
-			// 	glider.event_now = EVT_NEWGLIDER;
-			// }
-
-			glider.event_now = EVT_GPS;
-
-			// IDEA: idle at wifi module no matter what
-			// Instead, in case of reboot, test if it was on a mission
-
-			break;
-		case EVT_NEWGLIDER:
-			// currently idles until button is pressed and local wifi is turned on
-			// functions in the same way as case EVT_WIFI
-			wifi_module();
+			// gps_module();
 
 			glider.event_prev = glider.event_now;
-			glider.event_now = EVT_GPS;
+			glider.event_now = EVT_SURFACE;
+
+			break;
+		case EVT_AWAIT_MISSION:
+			wifi_module();
+
+			break;
+		case EVT_DIVE:
+			// function: send command to navigation
+
+			sensor_module();
+
+			glider.event_prev = glider.event_now;
+			glider.event_now = EVT_SURFACE;
+
+			break;
+		case EVT_SURFACE:
+			// gps_module();
+			data_available_to_send = true;
+			gcloud_module();
+
+			// if 4G failed, satellite
+			// satellite_module();
+
+			glider.event_prev = glider.event_now;
+			glider.event_now = EVT_IDLE;
 
 			break;
 		case EVT_IDLE:
 			LOG_INF("Idling");
-			k_sleep(K_SECONDS(5));
+			k_sleep(K_SECONDS(30));
 
 			// logic for test start time, if true start mission
-
-			glider.event_prev = glider.event_now;
-			glider.event_now = EVT_IDLE;
-
-			break;
-		case EVT_GPS:
-			gps_module();
-
-			// upload mission params to database after receiving params from local wifi
-			if (glider.event_prev == EVT_WIFI || glider.event_prev == EVT_NEWGLIDER)
-			{
-				glider.event_prev = glider.event_now;
-				glider.event_now = EVT_4G;
-			}
-
-			// was idle waiting for mission to start
-			else if (glider.event_prev == EVT_IDLE)
-			{
-				// test the start time vs gps time, if true, start mission
-
-				if (glider.mission_started)
-				{
-					glider.event_prev = glider.event_now;
-					glider.event_now = EVT_NAVIGATION;
-				}
-
-				// otherwise, continue idle
-				else
-				{
-					glider.event_prev = glider.event_now;
-					glider.event_now = EVT_IDLE;
-				}
-			}
-
-			// mission ongoing, sensor readings performed
-			else if (glider.mission_started)
-			{
-				glider.event_prev = glider.event_now;
-				glider.event_now = EVT_4G;
-			}
-
-			else
-			{
-				glider.event_now = EVT_SCIENTIFIC;
-			}
-
-			break;
-		case EVT_SCIENTIFIC:
-			sensor_module();
-
-			glider.event_prev = glider.event_now;
-			glider.event_now = EVT_TESTING;
-
-			break;
-		case EVT_4G:
-			gcloud_module();
-
-			// test if glider is on last waypoint, if true, mission ongoing false and go to idle
-
-			// test if connection was successful, otherwise enable satellite modem
-
-			// send command to control system, either continue dive or go to first waypoint
-			glider.event_prev = glider.event_now;
-			glider.event_now = EVT_NAVIGATION;
-
-			break;
-		case EVT_WIFI:
-			wifi_module();
-
-			glider.event_prev = glider.event_now;
-			glider.event_now = EVT_GPS;
-
-			break;
-		case EVT_SATELLITE:
-			satellite_module();
-
-			// send command to control system, either continue dive or go to first waypoint
-			glider.event_prev = glider.event_now;
-			glider.event_now = EVT_IDLE;
-
-			break;
-		case EVT_NAVIGATION:
-			// placeholder, send some parameters and commands to control system of glider
-
-			if (glider.mission_started)
-			{
-				glider.event_prev = glider.event_now;
-				glider.event_now = EVT_SCIENTIFIC;
-			}
-			else
-			{
-				glider.event_prev = glider.event_now;
-				glider.event_now = EVT_IDLE;
-			}
-
-			break;
-		case EVT_TESTING:
-
-			if (data_available_to_send)
-			{
-				publish_data_4G();
-			}
-
-			printk("\nTest end");
 
 			glider.event_prev = glider.event_now;
 			glider.event_now = EVT_IDLE;
@@ -843,20 +728,6 @@ void main(void)
 		default:
 			LOG_ERR("Unknown event type");
 		}
-
-		// printk("\npress button 1 to start mqtt\n");
-		// printk("press button 2 to start wifi\n\n");
-		// set_button_config(3);
-		// k_msgq_get(&button_msg_qr, &button_val, K_FOREVER);
-
-		// if (button_val == 1)
-		// {
-		// 	mqtt_module();
-		// }
-		// else if (button_val == 2)
-		// {
-		// 	wifi_module();
-		// }
 	}
 
 	printk("**** NordicOasys test end ****\n");
