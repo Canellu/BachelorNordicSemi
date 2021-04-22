@@ -381,15 +381,7 @@
           <div
             id="consoleText"
             class="rounded-md w-full h-96 bg-gray-200 px-12 py-4 overflow-auto font-medium"
-          >
-            <script>
-              for (let i = 0; i < 8; i++) {
-                document.querySelector("#consoleText").innerHTML += `<p>
-              >  Lorem ipsum dolor sit amet consectetur adipisicing elit. Nobis, consequatur dolores, incidunt pariatur omnis odio officia voluptate.
-            </p>`;
-              }
-            </script>
-          </div>
+          ></div>
           <div class="w-full h-10 flex space-x-2 items-center">
             <span class="chartBtn" onclick="showSatelliteModal()">
               <svg
@@ -407,7 +399,9 @@
               class="rounded-md w-full h-full bg-gray-200 px-3"
               id="inputSatellite"
               type="text"
+              maxlength="270"
             />
+
             <!-- <button
               id=""
               class="activeBtn p-4 h-10 border rounded-shadow font-medium tracking-wider text-sm flex justify-center items-center bg-light"
