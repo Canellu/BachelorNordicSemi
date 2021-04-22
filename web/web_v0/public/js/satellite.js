@@ -13,7 +13,6 @@ async function sendSatelliteData() {
   let gliderField = await db.collection("Gliders").doc(gliderUID).get();
   let satIMEI = gliderField.data()["Sat IMEI"];
 
-
   let queryParams = {
     imei: satIMEI,
     username: "nordicoasys@gmail.com",
@@ -29,7 +28,7 @@ async function sendSatelliteData() {
   }
   console.log(queryString);
 
-    //   fetch(`https://rockblock.rock7.com/rockblock/MT?${queryString}`, options)
+  //   fetch(`https://rockblock.rock7.com/rockblock/MT?${queryString}`, options)
   //   .then(response => console.log(response))
   //   .catch(err => console.error(err));
 }

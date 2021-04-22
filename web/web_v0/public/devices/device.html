@@ -378,13 +378,18 @@
       <!-- ***************Satellite Tab ***************** -->
       <div id="satellite-tab" class="container m-auto py-12 space-y-4">
         <div class="rounded-shadow p-4 bg-light space-y-4">
-          <textarea
+          <div
             id="consoleText"
-            class="rounded-md w-full h-96 bg-gray-300 px-8 py-4 overflow-auto"
+            class="rounded-md w-full h-96 bg-gray-200 px-12 py-4 overflow-auto font-medium"
           >
-Lorem ipsum dolor sit amet consectetur adipisicing elit. Quidem maxime repudiandae sunt dolorum est perspiciatis ducimus nobis numquam velit modi voluptas libero sit incidunt id sapiente error excepturi, vel ea temporibus sequi quo iusto quisquam expedita consequuntur. Iusto rerum quis eaque asperiores ratione deleniti, velit illum provident unde maxime laborum placeat suscipit sit eius quia quidem blanditiis! Placeat fuga provident, sapiente odio dolorem tenetur aspernatur inventore doloremque incidunt non! Vitae aperiam doloremque facilis magni alias minus, quo tempore dolore unde? Ipsum facere repellendus delectus aperiam voluptatibus illum iure praesentium dignissimos adipisci hic vitae, eveniet quaerat beatae pariatur! Dolores voluptatum illum quos sequi doloremque consequatur reiciendis maxime officiis esse recusandae! Ipsam vel facere veniam, autem, nobis illo sapiente sit voluptatibus consequatur hic ex repellendus voluptas? Rerum nam repudiandae voluptatem! Tenetur ipsum incidunt voluptates sit ducimus? Similique aliquam quam odio, neque id repudiandae tempora voluptates eius repellendus! Iusto, pariatur odit quibusdam iure animi incidunt officia impedit in consectetur, cupiditate quae eius quaerat veritatis fugiat! At, blanditiis ea. Non fuga nulla, sapiente odit ea fugit corporis magni esse deserunt velit nihil eaque delectus repudiandae distinctio ullam tempore libero vitae quibusdam dicta? Delectus voluptate quidem ea. Tempore vel vitae, optio perferendis doloremque perspiciatis ullam officiis quaerat quibusdam, asperiores maiores dolores? A quis aliquam quia ipsa amet quo cum consequuntur eligendi dolore illo veritatis modi error doloribus, ut ullam labore reprehenderit, nihil aspernatur exercitationem possimus suscipit illum explicabo. Dolore perferendis veniam earum enim, odit repellendus. Quibusdam aut architecto ullam repellendus voluptas mollitia earum reprehenderit labore quas sed, perferendis cumque laboriosam modi dicta voluptates soluta hic? Aliquid obcaecati, alias fuga exercitationem magni cum fugiat. Culpa, expedita! Reiciendis accusantium soluta cum sit quam ad saepe voluptates totam pariatur cupiditate ab ipsam incidunt, vero officiis ipsa officia dignissimos debitis quidem assumenda magnam. Facere nesciunt ut libero nihil corporis excepturi soluta voluptate iusto dolorem, sequi fugit vero quam ab assumenda veniam accusamus hic. Maiores cum omnis animi iste numquam ea, quo, commodi ab eius libero provident ipsam dolor? Explicabo, dolores. Magnam temporibus ea dicta! Suscipit accusamus corporis debitis odit ut. Quam earum cupiditate illum reiciendis fugiat magni soluta unde non facere sequi, enim sed nisi! Placeat delectus dolor, mollitia ratione aspernatur tempora, nesciunt magni, nisi eum dolore veritatis. Earum in consectetur doloribus quae repudiandae possimus, minus, delectus similique, eum qui aliquid. Pariatur aperiam beatae, odit necessitatibus est ratione optio laudantium et, itaque ipsam voluptas hic animi explicabo nemo minima?
-</textarea
-          >
+            <script>
+              for (let i = 0; i < 8; i++) {
+                document.querySelector("#consoleText").innerHTML += `<p>
+              >  Lorem ipsum dolor sit amet consectetur adipisicing elit. Nobis, consequatur dolores, incidunt pariatur omnis odio officia voluptate.
+            </p>`;
+              }
+            </script>
+          </div>
           <div class="w-full h-10 flex space-x-2 items-center">
             <span class="chartBtn" onclick="showSatelliteModal()">
               <svg
@@ -399,18 +404,18 @@ Lorem ipsum dolor sit amet consectetur adipisicing elit. Quidem maxime repudiand
               </svg>
             </span>
             <input
-              class="rounded-md w-full h-full bg-gray-300 px-3"
+              class="rounded-md w-full h-full bg-gray-200 px-3"
               id="inputSatellite"
               type="text"
             />
-            <button
-              id="resetMissionParams"
+            <!-- <button
+              id=""
               class="activeBtn p-4 h-10 border rounded-shadow font-medium tracking-wider text-sm flex justify-center items-center bg-light"
             >
-              Clear
-            </button>
+              <span class="material-icons-outlined text-xl"> backspace </span>
+            </button> -->
             <button
-              id="sendMissionParams"
+              id="satelliteSendBtn"
               onclick="sendSatelliteData()"
               class="activeBtn p-4 h-full rounded-shadow font-medium tracking-wider text-sm flex justify-center items-center bg-light transform transition duration-200"
             >
@@ -418,6 +423,7 @@ Lorem ipsum dolor sit amet consectetur adipisicing elit. Quidem maxime repudiand
             </button>
           </div>
 
+          <!-- Satellite Info Modal -->
           <div
             id="satelliteModal"
             class="hidden w-screen h-screen fixed top-0 left-0 z-50 bg-opacity-60 bg-gray-800"
