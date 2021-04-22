@@ -450,7 +450,7 @@ static int create_dummy_gps_data(nrf_gnss_data_frame_t *pvt_data)
 
 	pvt_data->pvt.datetime.year = 2021;
 	pvt_data->pvt.datetime.month = 04;
-	pvt_data->pvt.datetime.day = 20;
+	pvt_data->pvt.datetime.day = 22;
 	pvt_data->pvt.datetime.hour = 19;
 	pvt_data->pvt.datetime.minute = 07;
 	pvt_data->pvt.datetime.seconds = 34;

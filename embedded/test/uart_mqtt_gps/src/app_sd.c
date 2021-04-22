@@ -14,9 +14,11 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <cJSON.h>
 
 #include "app_uart.h"
 #include "app_sd.h"
+// #include "cJSON.h"
 
 extern struct k_msgq main_msg_q;
 extern struct k_msgq sd_msg_q;
@@ -33,6 +35,7 @@ static struct fs_mount_t mp = {
 *  in ffconf.h
 */
 static const char *disk_mount_pt = "/SD:";
+static const int json_size = 50; // rough length (bytes) of each json object
 
 static int lsdir(const char *path)
 {
@@ -83,8 +86,6 @@ static int look_for_file(const char *path, const char *filename)
 	struct fs_dir_t dirp;
 	static struct fs_dirent entry;
 
-	bool mission_params = false;
-
 	res = fs_opendir(&dirp, path);
 	if (res)
 	{
@@ -105,23 +106,20 @@ static int look_for_file(const char *path, const char *filename)
 
 		if (entry.type == FS_DIR_ENTRY_FILE)
 		{
-			printk("%s\n", entry.name);
+			// printk("%s\n", entry.name);
 
 			if (strcmp(entry.name, filename) == 0)
 			{
-				mission_params = true;
-
-				k_msgq_put(&main_msg_q, &mission_params, K_NO_WAIT);
-
-				return 0;
+				res = entry.size;
+				break;
 			}
 		}
 	}
 
-	printk("File not found\n");
-	k_msgq_put(&main_msg_q, &mission_params, K_NO_WAIT);
+	/* Verify fs_closedir() */
+	fs_closedir(&dirp);
 
-	return 0;
+	return res;
 }
 
 static int send_all_file_info(const char *path)
@@ -163,7 +161,7 @@ static int send_all_file_info(const char *path)
 			k_sleep(K_MSEC(10));
 
 			uart_send(UART_2, file_data, sizeof(file_data));
-			uart_send(UART_2, ";", sizeof(";"));
+			uart_send(UART_2, "\r", sizeof("\r"));
 		}
 	}
 
@@ -252,17 +250,14 @@ static int read_file(char *file_path)
 }
 
 // reads per JSON
-static int read_JSON(char *file_path, uint8_t *json_max_str)
+static int read_JSON(char *file_path, uint32_t *cursor, int interval,
+					 int *current_msg_total, int msg_total)
 {
 	int counter = 0;
 
-	// max message for this send
-	int msg_max = strtol(json_max_str, NULL, 10);
-	int msg_current = 0;
+	// interval = 30; // json_total_first / msg_max;
 
-	// rough size of each json
-	// int json_size = 50;
-	int skip = 3;
+	printk("\nCursor: %d\n", *cursor);
 
 	// For catching return values from fs_functions
 	int ret = 1;
@@ -270,6 +265,7 @@ static int read_JSON(char *file_path, uint8_t *json_max_str)
 	// Open file for reading, if file doesnt exist, create one.
 	struct fs_file_t file;
 	ret = fs_open(&file, file_path, FS_O_READ);
+	fs_seek(&file, *cursor, FS_SEEK_SET);
 
 	if (ret == 0)
 	{
@@ -281,7 +277,10 @@ static int read_JSON(char *file_path, uint8_t *json_max_str)
 
 			// test for EOF
 			if (ret == 0)
+			{
+				(*cursor) = 0;
 				break;
+			}
 			// handling overflow
 			else if (strlen(line) >= sizeof(line) - 1)
 			{
@@ -291,14 +290,22 @@ static int read_JSON(char *file_path, uint8_t *json_max_str)
 			// delimiter
 			else if (buf[0] == '\r')
 			{
-				if ((counter % skip) == 0)
+				if ((counter % interval) == 0)
 				{
-					printk("line: %s\n", line);
-					memset(line, 0, sizeof(line));
-					msg_current++;
-
-					if (msg_current == msg_max)
+					cJSON *line_JSON = cJSON_Parse(line);
+					if (cJSON_IsObject(line_JSON))
 					{
+						// printk("\n%s", line);
+						k_msgq_put(&main_msg_q, &line, K_NO_WAIT);
+						(*current_msg_total)++;
+					}
+					memset(line, 0, sizeof(line));
+					cJSON_Delete(line_JSON);
+
+					if ((*current_msg_total) == msg_total)
+					{
+						(*current_msg_total) = 0;
+						(*cursor) += 0;
 						break;
 					}
 				}
@@ -311,12 +318,15 @@ static int read_JSON(char *file_path, uint8_t *json_max_str)
 			// add to string
 			else
 			{
-				if ((counter % skip) == 0)
+				if ((counter % interval) == 0)
 				{
 					strcat(line, buf);
 				}
 			}
 		}
+
+		uint8_t sd_msg_response[] = "OK";
+		k_msgq_put(&main_msg_q, &sd_msg_response, K_NO_WAIT);
 
 		fs_close(&file);
 	}
@@ -394,13 +404,40 @@ static int mountSD()
 	return 0;
 }
 
+static int copy_sd_msg(sd_msg_t *sd_msg_dest, sd_msg_t *sd_msg_source)
+{
+	sd_msg_dest->event = sd_msg_source->event;
+	strcpy(sd_msg_dest->filename, sd_msg_source->filename);
+	strcpy(sd_msg_dest->string, sd_msg_source->string);
+
+	return 0;
+}
+
 void app_sd_thread(void *unused1, void *unused2, void *unused3)
 {
+	int ret = 0;
+
+	sd_msg_t sd_msg_prev;
 	sd_msg_t sd_msg;
 
 	char file_path[32] = "";
 
+	// helper variables for event read_JSON
+	size_t size_total_prev = 0;
+	size_t size_total = 0;
 	uint32_t cursor = 0;
+	int msg_total = 0;
+	int current_msg_total = 0;
+	int interval = 1;
+
+	uint8_t filenames[8][16] = {""};
+	uint8_t tmp_str[16];
+
+	// counters
+	int sd_msg_arr = 0;
+	int tmp_str_arr = 0;
+	int filenames_arr = 0;
+	int i = 0;
 
 	mountSD();
 
@@ -409,7 +446,7 @@ void app_sd_thread(void *unused1, void *unused2, void *unused3)
 		// get msg from main
 		k_msgq_get(&sd_msg_q, &sd_msg, K_FOREVER);
 
-		printk("\n%s\n", sd_msg.string);
+		// printk("\n%s %s\n", sd_msg.filename, sd_msg.string);
 
 		switch (sd_msg.event)
 		{
@@ -420,8 +457,17 @@ void app_sd_thread(void *unused1, void *unused2, void *unused3)
 
 			break;
 		case FIND_FILE:
+
 			// find specified file
-			look_for_file(disk_mount_pt, sd_msg.filename);
+			ret = look_for_file(disk_mount_pt, sd_msg.filename);
+			if (ret >= 0)
+			{
+				k_msgq_put(&main_msg_q, &ret, K_NO_WAIT);
+			}
+			else
+			{
+				printk("File not found\n");
+			}
 
 			break;
 		case SEND_FILE_INFO:
@@ -429,9 +475,69 @@ void app_sd_thread(void *unused1, void *unused2, void *unused3)
 
 			break;
 		case READ_JSON:
-			// create file path
-			create_file_path(file_path, sd_msg.filename);
-			read_JSON(file_path, sd_msg.string);
+			// reset params
+			size_total = 0;
+			sd_msg_arr = 0;
+			tmp_str_arr = 0;
+			filenames_arr = 0;
+			i = 0;
+
+			// parse string into parameters and filenames
+			for (sd_msg_arr = 0; sd_msg_arr < strlen(sd_msg.string); sd_msg_arr++)
+			{
+				// msg total on delim
+				if (sd_msg.string[sd_msg_arr] == '\r' && i == 0)
+				{
+					tmp_str[tmp_str_arr] = 0;
+					// printk("\n%s", tmp_str);
+					msg_total = strtol(tmp_str, NULL, 10);
+
+					memset(tmp_str, 0, sizeof(tmp_str));
+					tmp_str_arr = 0;
+					i++;
+				}
+				// filenames on delim
+				else if (sd_msg.string[sd_msg_arr] == '\r' && i > 0)
+				{
+					tmp_str[tmp_str_arr] = 0;
+					// printk("\n%s", tmp_str);
+					strcpy(filenames[filenames_arr++], tmp_str);
+
+					memset(tmp_str, 0, sizeof(tmp_str));
+					tmp_str_arr = 0;
+					i++;
+				}
+				// appending character
+				else
+				{
+					tmp_str[tmp_str_arr++] = sd_msg.string[sd_msg_arr];
+				}
+			}
+
+			i = 0;
+			while (strcmp(filenames[i], "") != 0)
+			{
+				size_total += look_for_file(disk_mount_pt, filenames[i]);
+				i++;
+			}
+			// how many "jumps" between messages
+			interval = ((size_total - size_total_prev) / json_size) / msg_total;
+			// guard in case interval is rounded to zero.
+			if (!interval)
+			{
+				interval = 1;
+			}
+			// printk("\n%d", interval);
+
+			i = 0;
+			while (strcmp(filenames[i], "") != 0)
+			{
+				create_file_path(file_path, filenames[i]);
+				printk("\n%s", file_path);
+				read_JSON(file_path, &cursor, interval, &current_msg_total, msg_total);
+				i++;
+			}
+			size_total_prev = size_total;
 
 			break;
 		case READ_FILE:
@@ -446,5 +552,6 @@ void app_sd_thread(void *unused1, void *unused2, void *unused3)
 			printk("\nUnknown SD event type");
 
 		} // switch case end
+		copy_sd_msg(&sd_msg_prev, &sd_msg);
 	}
 }
