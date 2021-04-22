@@ -9,7 +9,6 @@ function hideSatelliteModal() {
 }
 
 async function sendSatelliteData() {
-  const options = { method: "POST" };
   let gliderField = await db.collection("Gliders").doc(gliderUID).get();
   let satIMEI = gliderField.data()["Sat IMEI"];
 
@@ -18,7 +17,7 @@ async function sendSatelliteData() {
     username: "nordicoasys@gmail.com",
     password: "Bachelorgroup2021",
     data: ascii_to_hexa("hello"),
-    flush: "yes",
+    // flush: "yes", // Optional
   };
 
   let queryString = "";
@@ -28,7 +27,7 @@ async function sendSatelliteData() {
   }
   console.log(queryString);
 
-  //   fetch(`https://rockblock.rock7.com/rockblock/MT?${queryString}`, options)
+  //   fetch(`https://rockblock.rock7.com/rockblock/MT?${queryString}`, {method: "POST"})
   //   .then(response => console.log(response))
   //   .catch(err => console.error(err));
 }

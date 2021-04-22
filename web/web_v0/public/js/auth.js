@@ -1,13 +1,3 @@
-auth.onAuthStateChanged((user) => {
-  if (user) {
-    // location.replace("home.html");
-    console.log("Is logged in!");
-  } else {
-    // User is logged out
-    console.log("Is logged out!");
-  }
-});
-
 // Sign up method
 const signUpForm = document.querySelector("#signUpForm");
 if (signUpForm != null) {
@@ -47,6 +37,6 @@ const logout = document.querySelector("#logout");
 if (logout != null) {
   logout.addEventListener("click", async (e) => {
     await auth.signOut();
-    location.replace("index.html");
+    // location.replace("index.html");
   });
 }

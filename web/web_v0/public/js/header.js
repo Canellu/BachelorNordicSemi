@@ -12,7 +12,7 @@ document.write(`<header class="z-50 fixed top-0 bg-dark text-light h-16 w-full">
       <h4>About</h4>
     </a>
 
-    <a id="logout" href="#" class="headerBtn">
+    <a id="logout" href="#" class="headerBtn" onclick="logOut()">
       <h4>Logout</h4>
     </a>
   </div>
