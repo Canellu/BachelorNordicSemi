@@ -15,6 +15,6 @@ typedef struct
 	uint8_t seconds;
 } glider_gps_data_t;
 
-int app_gps(int64_t gps_timeout, int retry_interval);
+int app_gps(glider_gps_data_t *app_gps_data, int64_t gps_timeout, int retry_interval);
 
 #endif

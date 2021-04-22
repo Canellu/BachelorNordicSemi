@@ -539,6 +539,7 @@ static void mqtt_event_handler(struct mqtt_client *client,
 
         char *gcloud_msg = calloc(evt->param.publish.message.payload.len, sizeof(char) + 1);
         memcpy(gcloud_msg, payload_buf, evt->param.publish.message.payload.len);
+        memset(payload_buf, 0, sizeof(payload_buf));
 
         LOG_DBG("Adding to message queue");
         k_msgq_put(&gcloud_msg_q, gcloud_msg, K_NO_WAIT);
