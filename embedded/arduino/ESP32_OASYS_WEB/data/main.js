@@ -358,3 +358,37 @@ function endConnection() {
 //   addFileRow(20202020 + i, i + 100);
 // }
 // adjustCheckboxesPosition();
+
+
+if (!!window.EventSource) {
+  var source = new EventSource('/events');
+  console.log("Added event source");
+
+  source.addEventListener('open', function(e) {
+    console.log("Events Connected");
+  }, false);
+
+  source.addEventListener('error', function(e) {
+    if (e.target.readyState != EventSource.OPEN) {
+      console.log("Events Disconnected");
+    }
+  }, false);
+
+  source.addEventListener('message', function(event) {
+    console.log("nrf_msg", event.data);
+
+    espString = event.data;
+    // Populate files and update UI
+    if (espString.includes("TXT")) {
+      initFileTab(espString);
+      adjustCheckboxesPosition();
+    } else if (espString == "EOF") {
+      requestFile.complete = true;
+      sendFileRequest();
+    } else {
+      requestFile.data += espString;
+      updateProgressBar();
+    }
+    espString = "";
+  }, false);
+}

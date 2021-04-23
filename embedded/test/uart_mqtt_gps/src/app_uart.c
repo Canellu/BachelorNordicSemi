@@ -3,6 +3,9 @@
 #include <drivers/uart.h>
 #include <string.h>
 #include "app_uart.h"
+#include <logging/log.h>
+
+LOG_MODULE_REGISTER(uart_module);
 
 // VARIABLES FROM MAIN
 extern struct k_msgq uart_msg_q;
@@ -22,7 +25,9 @@ static void uart_cb(const struct device *dev_uart, void *context)
 	// send uart msg, runs when uart_irq_tx_enable is run
 	if (uart_irq_tx_ready(dev_uart))
 	{
+		LOG_INF("%s", log_strdup(tx_buf));
 		(void)uart_fifo_fill(dev_uart, tx_buf, strlen(tx_buf));
+		memset(tx_buf, 0, sizeof(tx_buf));
 		uart_irq_tx_disable(dev_uart);
 	}
 
@@ -120,6 +125,7 @@ void uart_send(enum uart_device_type uart_dev_no, void *msg, size_t len)
 {
 	strcpy(tx_buf, msg);
 	strcat(tx_buf, "\r");
+	strcat(tx_buf, "\0");
 
 	switch (uart_dev_no)
 	{

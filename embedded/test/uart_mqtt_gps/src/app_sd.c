@@ -157,13 +157,15 @@ static int send_all_file_info(const char *path)
 			snprintf(temp_str, sizeof(temp_str), ":%u", entry.size);
 			strcat(file_data, temp_str);
 
-			// printk("\n%s", file_data);
+			printk("\n%s", file_data);
 			k_sleep(K_MSEC(10));
 
 			uart_send(UART_2, file_data, sizeof(file_data));
-			uart_send(UART_2, "\r", sizeof("\r"));
 		}
 	}
+
+	/* Verify fs_closedir() */
+	fs_closedir(&dirp);
 
 	return 0;
 }
@@ -194,7 +196,7 @@ static int read_file(char *file_path)
 
 	if (ret == 0)
 	{
-		uint8_t line[512] = "";
+		uint8_t line[32] = "";
 		while (1)
 		{
 			uint8_t buf[2] = "";
@@ -203,21 +205,21 @@ static int read_file(char *file_path)
 			// test for EOF
 			if (ret == 0)
 				break;
-			// handling overflow
-			else if (strlen(line) >= sizeof(line) - 1)
-			{
-				printk("overflow, deleting str\n");
-				memset(line, 0, sizeof(line));
-			}
 			// delimiter
 			else if (buf[0] == '\r')
 			{
-				printk("line: %s %d\n", line, strlen(line));
+				// printk("line: %s %d\n", line, strlen(line));
+				uart_send(UART_2, line, strlen(line));
 				memset(line, 0, sizeof(line));
+				k_sleep(K_MSEC(2));
 			}
-			// filter for unwanted characters
-			else if (buf[0] == '\n')
+			// if buffer full, send
+			else if (strlen(line) >= sizeof(line) - 3)
 			{
+				strcat(line, buf);
+				uart_send(UART_2, line, strlen(line));
+				memset(line, 0, sizeof(line));
+				k_sleep(K_MSEC(2));
 			}
 			// add to string
 			else
@@ -228,14 +230,12 @@ static int read_file(char *file_path)
 			// //printk("%s", buffer);
 			// //strcat(buffer, ";");
 			// uart_send(UART_2, buffer, sizeof(buffer));
-			// uart_send(UART_2, "\r", sizeof("\r"));
 
 			// memset(buffer, 0, sizeof(buffer));
 			// k_sleep(K_MSEC(20));
 		}
 		k_sleep(K_MSEC(10));
-		// uart_send(UART_2, "EOF", sizeof("EOF"));
-		// uart_send(UART_2, "\r", sizeof("\r"));
+		uart_send(UART_2, "EOF", strlen("EOF"));
 
 		printk("\nFinished reading file");
 

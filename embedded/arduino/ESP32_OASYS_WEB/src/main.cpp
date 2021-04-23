@@ -28,16 +28,13 @@ boolean on_wifi = false;
 // Webserver & Socket
 AsyncWebServer webServer(HTTP_PORT);
 AsyncWebSocket webSocket("/ws");
+AsyncEventSource events("/events");
 
 // UART
+#define RXD2 13
+#define TXD2 12
 int arr_rx = 0;
-char uart_rx[256] = "";
-
-
-
-
-
-
+char uart_rx[512] = "";
 
 // --------------------------------------------------
 // ESP File system
@@ -76,6 +73,7 @@ void handleWebSocketMessage(AsyncWebSocket *server,
     {
       data[len] = 0;
       Serial.printf("%s\n", (char *)data);
+      Serial2.printf("%s", (char *)data);
     }
     // else
     // {
@@ -152,8 +150,8 @@ void onEvent(AsyncWebSocket *server,
   {
   case WS_EVT_CONNECT:
     // Serial.printf("WebSocket client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
-    Serial.print("\n{connected}\r");
-    
+    Serial2.println("connected");
+
     break;
   case WS_EVT_DISCONNECT:
     Serial.printf("WebSocket client #%u disconnected\n", client->id());
@@ -175,7 +173,7 @@ void initWebSocket()
 
 void sendToClients(char *msg)
 {
-  webSocket.textAll(msg);
+  webSocket.textAll(msg, strlen(msg));
 }
 
 // --------------------------------------------------
@@ -220,41 +218,46 @@ void initMDNS()
   MDNS.addService("http", "tcp", 80);
 }
 
-
-
 // --------------------------------------------------
 // UART Utilities
 // --------------------------------------------------
 void flushSerial()
 {
-  while(Serial.available() > 0)
+  while (Serial2.available() > 0)
   {
-    Serial.read();
+    Serial2.read();
   }
 }
 
-void emptyUartBuffer() {
+void emptyUartBuffer()
+{
   memset(uart_rx, 0, sizeof(uart_rx));
   arr_rx = 0;
 }
 
-
-
-
 // --------------------------------------------------
 // Start WiFi and initialize Server and Socket
 // --------------------------------------------------
-void wifiBegin() {
+void wifiBegin()
+{
   initAP();
   initWebServer();
   initWebSocket();
   flushSerial();
+
+  events.onConnect([](AsyncEventSourceClient *client) {
+    if (client->lastId())
+    {
+      Serial.printf("Client reconnected! Last message ID that it gat is: %u\n", client->lastId());
+    }
+  });
+  webServer.addHandler(&events);
 }
 
-
-void wifiEnd() {
+void wifiEnd()
+{
   webSocket.closeAll();
-  webServer.end(); 
+  webServer.end();
   WiFi.mode(WIFI_OFF);
   on_wifi = false;
   flushSerial();
@@ -263,12 +266,12 @@ void wifiEnd() {
 // Waits for start command from nRF
 // --------------------------------------------------
 void awaitStart()
-{ 
-  if (Serial.available() > 0)
+{
+  if (Serial2.available() > 0)
   {
-    char c = Serial.read();
+    char c = Serial2.read();
     if (c == '\r')
-    {    
+    {
       if (strcmp(uart_rx, "wifi_start") == 0)
       {
         Serial.println("Starting wifi");
@@ -278,15 +281,11 @@ void awaitStart()
       }
     }
     else
-    {   
+    {
       uart_rx[arr_rx++] = c;
     }
   }
 }
-
-
-
-
 
 // --------------------------------------------------
 // SETUP
@@ -294,6 +293,7 @@ void awaitStart()
 void setup()
 {
   Serial.begin(115200);
+  Serial2.begin(115200, SERIAL_8N1, RXD2, TXD2);
   delay(500);
   initSPIFFS();
 }
@@ -306,29 +306,31 @@ void loop()
 {
 
   if (on_wifi)
-  { 
+  {
     webSocket.cleanupClients(); // Limiting number of clients, cleaning up and freeing resources, defaults to 8 connected clients
 
     // read input from serial and send to webpage
-    if (Serial.available() > 0)
+    if (Serial2.available() > 0)
     {
-      char c = Serial.read();
+      char c = Serial2.read();
+      Serial.print(c);
       if (c == '\r')
-      {    
+      {
         if (strcmp(uart_rx, "wifi_end") == 0)
-        {   
-          Serial.println("Wifi ending...");    
+        {
+          Serial.println("Wifi ending...");
           wifiEnd();
         }
         else
         {
-          sendToClients(uart_rx);
+          // sendToClients(uart_rx);
+          events.send(uart_rx, NULL, millis());
         }
         memset(uart_rx, 0, sizeof(uart_rx));
         arr_rx = 0;
       }
       else
-      {   
+      {
         uart_rx[arr_rx++] = c;
       }
     }
