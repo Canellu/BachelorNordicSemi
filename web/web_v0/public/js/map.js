@@ -271,8 +271,8 @@ function createPreviewWaypoints() {
   <h1 class="col-span-3 text-right">Lng</h1>`;
 
   waypoints.forEach((waypoint, index) => {
-    let lat = waypoint.lat().toFixed(6);
-    let lng = waypoint.lng().toFixed(6);
+    let lat = waypoint.lat().toFixed(4);
+    let lng = waypoint.lng().toFixed(4);
     let waypointHTML = `
       <p class="col-span-1 text-center">${index + 1}</p>
       <p class="truncate col-span-3 text-right">${lat}</p>

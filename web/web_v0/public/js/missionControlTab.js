@@ -256,11 +256,15 @@ resetMissionParamsBtn.addEventListener("click", () => {
 });
 
 yesMissionParamsBtn.addEventListener("click", async () => {
-  let date = document.querySelector("#previewDate").innerText;
-  let time = document.querySelector("#previewTime").innerText;
+  let date = document
+    .querySelector("#previewDate")
+    .innerText.replaceAll("-", "");
+  let time = document
+    .querySelector("#previewTime")
+    .innerText.replaceAll(":", "");
 
   let missionParameters = {
-    start: `${date} ${time}`,
+    start: `${date}${time}`,
   };
 
   // Add preview params into object for sending
@@ -270,22 +274,33 @@ yesMissionParamsBtn.addEventListener("click", async () => {
     console.log({ propertyName, propertyVal });
     switch (propertyName) {
       case "4GData":
-        propertyName = "limit4G";
+        propertyName = "4G";
+        propertyVal = Number(propertyVal);
         break;
+
       case "Conductivity":
         propertyName = "C";
+        propertyVal = Number(propertyVal);
         break;
+
       case "Pressure":
         propertyName = "P";
+        propertyVal = Number(propertyVal);
         break;
+
       case "Temperature":
         propertyName = "T";
+        propertyVal = Number(propertyVal);
         break;
+
       case "MinDepth":
         propertyName = "minD";
+        propertyVal = Number(propertyVal);
         break;
+
       case "MaxDepth":
         propertyName = "maxD";
+        propertyVal = Number(propertyVal);
         break;
     }
     missionParameters[propertyName] = propertyVal;
@@ -295,10 +310,10 @@ yesMissionParamsBtn.addEventListener("click", async () => {
   let waypointsToSend = [];
 
   waypoints.forEach((waypoint) => {
-    let lat = waypoint.lat().toFixed(6);
-    let lng = waypoint.lng().toFixed(6);
+    let lat = waypoint.lat().toFixed(4);
+    let lng = waypoint.lng().toFixed(4);
     // console.log({ lat, lng });
-    waypointsToSend.push(`${lat}, ${lng}`);
+    waypointsToSend.push(`${lat}+${lng}`);
   });
 
   missionParameters["WP"] = waypointsToSend;

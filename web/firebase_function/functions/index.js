@@ -25,6 +25,7 @@ const formattedName = iotClient.devicePath(
   deviceId
 );
 
+// To Glider
 exports.fromFirestoreToNRF = functions
   .region("europe-west1")
   .firestore.document("Gliders/{gliderId}/Missions/{mission}")
@@ -41,34 +42,50 @@ exports.fromFirestoreToNRF = functions
       binaryData: binaryData,
     };
 
-    try {
-      const responses = await iotClient.sendCommandToDevice(request);
+    // try {
+    //   const commandResponse = await iotClient.sendCommandToDevice(request);
 
-      console.log("Sent command: ", responses[0]);
+    //   console.log("Sent command: ", commandResponse[0]);
+    // } catch (err) {
+    //   console.error("Could not send command:", err);
+    // }
+
+    try {
+      const configResponse = await iotClient.modifyCloudToDeviceConfig(request);
+
+      console.log("Sent config:", configResponse[0]);
     } catch (err) {
-      console.error("Could not send command:", err);
+      console.error("Could not send config:", err);
     }
   });
 
+// From Glider
 exports.fromNRFtoFirestore = functions
   .region("europe-west1")
   .pubsub.topic("data")
-  .onPublish(async (message) => {
+  .onPublish(async (message, context) => {
     // Decode the PubSub Message body.
     // const messageBody = message.data
     //   ? Buffer.from(message.data, "base64").toString()
     //   : null;
+    console.log("GLIDER UID: " + message.attributes.deviceId);
+
+    let utcDate = moment(context.timestamp);
+    let localTime = utcDate.tz("Europe/Oslo").format("YYYY-MM-DD HH:mm:ss");
+    console.log("utcDate: " + utcDate);
+    console.log("localTime: " + localTime);
 
     let dataJSON = null;
     try {
       dataJSON = message.json;
       console.log("JSON: ", dataJSON);
-      await db.collection("fromNRF").add(dataJSON);
+      // await db.collection("fromNRF").add(dataJSON);
     } catch (e) {
       console.error("PubSub message was not JSON", e);
     }
   });
 
+// From Rockblock Iridium Satellite
 exports.satellite = functions.https.onRequest(async (req, res) => {
   function hex_to_ascii(str1) {
     let hex = str1.toString();

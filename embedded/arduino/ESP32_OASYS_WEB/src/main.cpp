@@ -267,7 +267,7 @@ void awaitStart()
   if (Serial.available() > 0)
   {
     char c = Serial.read();
-    if (c == ';')
+    if (c == '\r')
     {    
       if (strcmp(uart_rx, "wifi_start") == 0)
       {
@@ -313,7 +313,7 @@ void loop()
     if (Serial.available() > 0)
     {
       char c = Serial.read();
-      if (c == ';')
+      if (c == '\r')
       {    
         if (strcmp(uart_rx, "wifi_end") == 0)
         {       
