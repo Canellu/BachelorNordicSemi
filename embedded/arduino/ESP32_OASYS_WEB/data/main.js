@@ -35,8 +35,6 @@ var espString = "";
 
 var checkValAll = true;
 
-
-
 // ----------------------------------------------------------------------------
 // Initialization
 // ----------------------------------------------------------------------------
@@ -267,7 +265,7 @@ downloadBtn.addEventListener("click", () => {
   // Request filedata from NRF
   requestFile = requestList.shift();
   if (typeof requestFile !== "undefined") {
-    websocket.send(`{D:${requestFile.name}}`);
+    websocket.send(`D:${requestFile.name}\r`);
   }
 
   M.toast({
@@ -336,7 +334,7 @@ function sendFileRequest() {
   requestFile = requestList.shift();
 
   if (typeof requestFile !== "undefined") {
-    websocket.send(`{D:${requestFile.name}}`);
+    websocket.send(`D:${requestFile.name}\r`);
   } else {
     createZip();
   }
@@ -351,7 +349,7 @@ function updateProgressBar() {
 }
 
 function endConnection() {
-  websocket.send("{wifi_end}");
+  websocket.send("wifi_end\r");
 }
 
 // DUMMY DATA
