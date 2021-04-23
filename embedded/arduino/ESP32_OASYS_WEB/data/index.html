@@ -74,7 +74,7 @@
             </a>
           </li>
           <li class="tab valign-wrapper">
-            <a class="active" href="#files">
+            <a class="" href="#files">
               <p class="icon">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -92,7 +92,7 @@
             </a>
           </li>
           <li class="tab valign-wrapper">
-            <a href="#config">
+            <a class="active" href="#config">
               <p class="icon">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -392,6 +392,35 @@
             <label for="temperatureSldier">Conductivity frequency</label>
             <input type="range" id="conductivitySlider" min="0" max="10" />
           </p>
+        </div>
+      </div>
+
+      <!-- Dropdown selects -->
+      <div class="row">
+        <h6>Sampling rates</h6>
+        <div class="input-field col s3 m3">
+          <select class="icons">
+            <option value="" disabled selected>Choose your option</option>
+            <option value="" data-icon="images/sample-1.jpg">example 1</option>
+            <option value="" data-icon="images/office.jpg">example 2</option>
+            <option value="" data-icon="images/yuna.jpg">example 3</option>
+          </select>
+          <label>Temperature sampling rate</label>
+        </div>
+        <div class="input-field col s3 m3">
+          <select class="icons">
+            <option value="" disabled selected>Log frequency</option>
+            <option value="" data-icon="images/sample-1.jpg" class="left">
+              Low
+            </option>
+            <option value="" data-icon="images/office.jpg" class="left">
+              Medium
+            </option>
+            <option value="" data-icon="images/yuna.jpg" class="left">
+              High
+            </option>
+          </select>
+          <label>Pressure sampling rate</label>
         </div>
       </div>
 
