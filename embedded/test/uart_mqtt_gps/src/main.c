@@ -445,7 +445,7 @@ static int wifi_module()
 
 	printk("wifi test start\n");
 
-	uart_send(UART_2, "0", strlen("0"));
+	uart_send(UART_2, "wifi_start\r", strlen("wifi_start\r"));
 	printk("\nsent command 0 to esp");
 
 	while (1)
@@ -456,7 +456,7 @@ static int wifi_module()
 
 		//strcpy(wifi_response, "{D:20202020.txt}");
 
-		if (strcmp(wifi_response, "{connected}") == 0)
+		if (strcmp(wifi_response, "connected") == 0)
 		{
 			sd_msg_t sd_msg;
 			sd_msg.event = SEND_FILE_INFO;
@@ -465,13 +465,13 @@ static int wifi_module()
 			printk("\n\nConnect successful, press button 1 to continue");
 			// strcpy(wifi_response, "read1");
 		}
-		else if (wifi_response[1] == 'D')
+		else if (wifi_response[0] == 'D')
 		{
 			sd_msg_t sd_msg;
 
 			// fetch filename
 			// format yyyymmdd.txt
-			char *date = wifi_response + 3;
+			char *date = wifi_response + 2;
 			date[strlen(date) - 1] = 0;
 
 			strcpy(sd_msg.filename, date);
@@ -482,10 +482,10 @@ static int wifi_module()
 			printk("\nStarting SD file read2");
 			k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
 		}
-		else if (strcmp(wifi_response, "{wifi_end}") == 0)
+		else if (strcmp(wifi_response, "wifi_end") == 0)
 		{
 			printk("Received wifi end command\n");
-			uart_send(UART_2, "wifi_end;", strlen("wifi_end;"));
+			// uart_send(UART_2, "wifi_end;", strlen("wifi_end;"));
 		}
 		else
 		{
@@ -687,7 +687,7 @@ void main(void)
 			// gps_module();
 
 			glider.event_prev = glider.event_now;
-			glider.event_now = EVT_SURFACE;
+			glider.event_now = EVT_AWAIT_MISSION;
 
 			break;
 		case EVT_AWAIT_MISSION:
