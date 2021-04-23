@@ -445,8 +445,8 @@ static int wifi_module()
 
 	printk("wifi test start\n");
 
-	uart_send(UART_2, "wifi_start\r", strlen("wifi_start\r"));
-	printk("\nsent command 0 to esp");
+	uart_send(UART_2, "wifi_start", strlen("wifi_start"));
+	printk("\nsent command wifi start to esp");
 
 	while (1)
 	{
@@ -472,7 +472,7 @@ static int wifi_module()
 			// fetch filename
 			// format yyyymmdd.txt
 			char *date = wifi_response + 2;
-			date[strlen(date) - 1] = 0;
+			date[strlen(date)] = 0;
 
 			strcpy(sd_msg.filename, date);
 			printk("\n%s", sd_msg.filename);
