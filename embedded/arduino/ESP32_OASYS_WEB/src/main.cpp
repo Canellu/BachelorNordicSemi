@@ -152,7 +152,7 @@ void onEvent(AsyncWebSocket *server,
   {
   case WS_EVT_CONNECT:
     // Serial.printf("WebSocket client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
-    Serial.print("\n{connected}");
+    Serial.print("\n{connected}\r");
     
     break;
   case WS_EVT_DISCONNECT:
@@ -316,7 +316,8 @@ void loop()
       if (c == '\r')
       {    
         if (strcmp(uart_rx, "wifi_end") == 0)
-        {       
+        {   
+          Serial.println("Wifi ending...");    
           wifiEnd();
         }
         else
