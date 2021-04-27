@@ -125,6 +125,7 @@ fileListBody.addEventListener("click", () => {
 document.addEventListener("DOMContentLoaded", function () {
   M.Tabs.init(document.querySelectorAll(".tabs"));
   M.Modal.init(document.querySelectorAll(".modal"));
+  M.FormSelect.init(document.querySelectorAll("select"));
 });
 
 // Prevent default submit action when Enter
