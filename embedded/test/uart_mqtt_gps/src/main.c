@@ -54,12 +54,25 @@ struct sens_param_t
 	int freq_c;
 };
 
+struct mission_start_t
+{
+	int year;
+	int month;
+	int day;
+
+	int hour;
+	int minute;
+};
+
 struct mission_param_t
 {
-	int wp_max;
-	int wp_cur;
 	int depth_max;
 	int depth_min;
+	int msg_max;
+	double wp_arr[10][2];
+	int wp_max;
+	int wp_cur;
+	struct mission_start_t mission_start;
 	struct sens_param_t sens_param;
 };
 
@@ -94,15 +107,10 @@ struct k_msgq uart_msg_q;
 static uint8_t uart_msgq_buffer[3 * 128];
 static uint8_t uart_msg[128];
 
-// TODO: change to general data_array instead of just uart data
-static uint8_t uart_data_array[16][128] = {""};
-int data_size = 0; // keeps track of no. of messages stored in data array.
-				   // UPDATE THIS VALUE WHEN SAVING INTO DATA ARRAY
-
 // Gcloud variables
 struct k_msgq gcloud_msg_q;
-static uint8_t gcloud_msgq_buffer[3 * 128];
-static uint8_t gcloud_msg[128];
+static uint8_t gcloud_msgq_buffer[256];
+static uint8_t gcloud_msg[256];
 
 static bool data_available_to_send = false;
 static bool gcloud_init_complete = false;
@@ -110,6 +118,11 @@ static bool gcloud_init_complete = false;
 // SD Card variables
 struct k_msgq sd_msg_q;
 static uint8_t sd_msgq_buffer[5 * sizeof(sd_msg_t)];
+
+// GPS data message queue
+struct k_msgq gps_msg_q;
+static uint8_t gps_msgq_buffer[3 * 256];
+static uint8_t gps_msg[256];
 
 // Time variables
 static int current_year = -1;
@@ -124,46 +137,6 @@ static int current_seconds = -1;
 /* FUNCTION DECLARATIONS */
 
 /* HELPER FUNCTIONS */
-
-// publish all data that is currently saved from uart
-// REMINDER: Double check after implementing SD card
-static int publish_uart_data()
-{
-	int i = 0;
-
-	while (strcmp(uart_data_array[i], "") != 0)
-	{
-		app_data_publish(uart_data_array[i], strlen(uart_data_array[i]) + 1);
-		k_sleep(K_MSEC(500));
-		i++;
-	}
-	data_available_to_send = false;
-
-	return 0;
-}
-
-// test messages received from mqtt
-static int check_mqtt_msg(void *data, size_t len)
-{
-	int ret_value = 0;
-
-	if (strcmp(data, "LED") == 0)
-	{
-		toggle_LED(1);
-	}
-
-	if (strcmp(data, "exit") == 0)
-	{
-		ret_value = 1;
-	}
-
-	else if (strcmp(data, "button 2") == 0)
-	{
-		ret_value = 2;
-	}
-
-	return ret_value;
-}
 
 // changes button configuration
 static int set_button_config(int local_button_config)
@@ -238,6 +211,9 @@ static int message_queue_init()
 	// UART
 	k_msgq_init(&uart_msg_q, uart_msgq_buffer, sizeof(uart_msg), 3);
 
+	// GPS
+	k_msgq_init(&gps_msg_q, gps_msgq_buffer, sizeof(gps_msg), 1);
+
 	// MQTT
 	// k_msgq_init(&mqtt_msg_q, mqtt_msgq_buffer, sizeof(mqtt_msg), 3);
 
@@ -264,13 +240,13 @@ static int device_inits()
 static int message_queue_reset()
 {
 	// NOTE: THIS IS ONLY HERE UNTIL SD CARD STORAGE IS OKAY
-	data_size = 0;
-	int i = 0;
-	while (strcmp(uart_data_array[i], "") != 0)
-	{
-		strcpy(uart_data_array[i], "");
-		i++;
-	}
+	// data_size = 0;
+	// int i = 0;
+	// while (strcmp(uart_data_array[i], "") != 0)
+	// {
+	// 	strcpy(uart_data_array[i], "");
+	// 	i++;
+	// }
 
 	k_msgq_purge(&button_msg_q);
 	k_msgq_purge(&uart_msg_q);
@@ -339,6 +315,77 @@ static int publish_data_4G()
 	}
 
 	printk("\nAll messages sent");
+
+	return 0;
+}
+
+static int parse_mission_params(struct glider_t *glider, void *gcloud_msg)
+{
+	cJSON *mqtt_JSON = cJSON_Parse(gcloud_msg);
+	if (cJSON_IsObject(mqtt_JSON))
+	{
+		// printk("\n%s", cJSON_Print(mqtt_JSON));
+
+		// waypoints - lat
+		if (cJSON_HasObjectItem(mqtt_JSON, "lat"))
+		{
+			cJSON *tmp_JSON = cJSON_GetObjectItem(mqtt_JSON, "lat");
+			for (int i = 0; i < cJSON_GetArraySize(tmp_JSON); i++)
+			{
+				cJSON *tmpsub_JSON = cJSON_GetArrayItem(tmp_JSON, i);
+				glider->mission_param.wp_arr[i][0] = tmpsub_JSON->valuedouble;
+				// printk("\nlat: %lf", glider->mission_param.wp_arr[i][0]);
+				cJSON_Delete(tmpsub_JSON);
+
+				glider->mission_param.wp_max = i;
+			}
+			cJSON_Delete(tmp_JSON);
+		}
+
+		// waypoints - lng
+		if (cJSON_HasObjectItem(mqtt_JSON, "lng"))
+		{
+			cJSON *tmp_JSON = cJSON_GetObjectItem(mqtt_JSON, "lng");
+			for (int i = 0; i < cJSON_GetArraySize(tmp_JSON); i++)
+			{
+				cJSON *tmpsub_JSON = cJSON_GetArrayItem(tmp_JSON, i);
+				glider->mission_param.wp_arr[i][1] = tmpsub_JSON->valuedouble;
+				// printk("\nlng: %lf", glider->mission_param.wp_arr[i][1]);
+				cJSON_Delete(tmpsub_JSON);
+			}
+			cJSON_Delete(tmp_JSON);
+		}
+
+		// parameter max mqtt message count
+		if (cJSON_HasObjectItem(mqtt_JSON, "4G"))
+		{
+			cJSON *tmp_JSON = cJSON_GetObjectItem(mqtt_JSON, "4G");
+			glider->mission_param.msg_max = tmp_JSON->valueint;
+			cJSON_Delete(tmp_JSON);
+		}
+
+		// parameter sensor frequencies
+		if (cJSON_HasObjectItem(mqtt_JSON, "C"))
+		{
+			cJSON *tmp_JSON = cJSON_GetObjectItem(mqtt_JSON, "C");
+			glider->mission_param.sens_param.freq_c = tmp_JSON->valueint;
+			cJSON_Delete(tmp_JSON);
+		}
+		if (cJSON_HasObjectItem(mqtt_JSON, "P"))
+		{
+			cJSON *tmp_JSON = cJSON_GetObjectItem(mqtt_JSON, "P");
+			glider->mission_param.sens_param.freq_p = tmp_JSON->valueint;
+			cJSON_Delete(tmp_JSON);
+		}
+		if (cJSON_HasObjectItem(mqtt_JSON, "T"))
+		{
+			cJSON *tmp_JSON = cJSON_GetObjectItem(mqtt_JSON, "T");
+			glider->mission_param.sens_param.freq_t = tmp_JSON->valueint;
+			cJSON_Delete(tmp_JSON);
+		}
+	}
+
+	cJSON_Delete(mqtt_JSON);
 
 	return 0;
 }
@@ -520,16 +567,22 @@ static int gps_module()
 	current_minute = gps_data.minute;
 	current_seconds = gps_data.seconds;
 
-	// save gps data on sd card
-	sd_save_data(gps_data.gps_string);
-	data_available_to_send = true;
+	if (strcmp(gps_data.gps_string, "no fix") != 0)
+	{
+		// save gps data on sd card
+		sd_save_data(gps_data.gps_string);
+		// add to gps message queue
+		k_msgq_put(&gps_msg_q, &gps_data.gps_string, K_NO_WAIT);
+
+		data_available_to_send = true;
+	}
 
 	printk("\ngps test end");
 
 	return 0;
 }
 
-static int gcloud_module()
+static int gcloud_module(struct glider_t *glider)
 {
 	printk("\n\npress button 1 to start gcloud test\n\n");
 	button_wait();
@@ -537,56 +590,62 @@ static int gcloud_module()
 
 	int err;
 
-	// mqtt init
-	if (!gcloud_init_complete)
-	{
-		err = app_gcloud_init_and_connect();
-		if (err != 0)
-		{
-			return err;
-		}
-		gcloud_init_complete = true;
-	}
-	// reconnect
-	else
-	{
-		err = app_gcloud_reconnect();
-		if (err != 0)
-		{
-			return err;
-		}
-	}
+	// // mqtt init
+	// if (!gcloud_init_complete)
+	// {
+	// 	err = app_gcloud_init_and_connect();
+	// 	if (err != 0)
+	// 	{
+	// 		return err;
+	// 	}
+	// 	gcloud_init_complete = true;
+	// }
+	// // reconnect
+	// else
+	// {
+	// 	err = app_gcloud_reconnect();
+	// 	if (err != 0)
+	// 	{
+	// 		return err;
+	// 	}
+	// }
+	strcpy(gcloud_msg, "{\"4G\":10,\"C\":0,\"P\":0,\"T\":0,\"lat\":[58.7558,51.7558,60.7558],\"lng\":[10.2726,19.2726,21.2726],\"maxD\":0,\"minD\":0,\"start\":\"202104210505\"}");
 
 	/* Gcloud loop */
 	while (1)
 	{
 		// gcloud function
-		err = app_gcloud();
+		// err = app_gcloud();
+		button_wait();
 
-		k_msgq_get(&gcloud_msg_q, &gcloud_msg, K_NO_WAIT);
-		printk("\nMain: %s", gcloud_msg);
+		// k_msgq_get(&gcloud_msg_q, &gcloud_msg, K_NO_WAIT);
+		// printk("\nMain: %s", gcloud_msg);
 
 		if (strcmp(gcloud_msg, "test") == 0)
 		{
 			strcpy(gcloud_msg, "");
 			break;
 		}
-
-		if (data_available_to_send)
+		else
 		{
-			publish_data_4G();
-			data_available_to_send = false;
+			parse_mission_params(glider, &gcloud_msg);
 		}
+
+		// if (data_available_to_send)
+		// {
+		// 	publish_data_4G();
+		// 	data_available_to_send = false;
+		// }
 	}
 	/* Gcloud loop end */
 
-	err = app_gcloud_disconnect();
-	if (err != 0)
-	{
-		printk("\nDisconnect unsuccessful: %d", err);
-		printk("\n\nClosing program, check for errors in code lol");
-		return err;
-	}
+	// err = app_gcloud_disconnect();
+	// if (err != 0)
+	// {
+	// 	printk("\nDisconnect unsuccessful: %d", err);
+	// 	printk("\n\nClosing program, check for errors in code lol");
+	// 	return err;
+	// }
 	return 0;
 }
 
@@ -596,15 +655,47 @@ static int satellite_module()
 	printk("\n\npress button 1 to start satellite test\n\n");
 	button_wait();
 
-	uart_start(uart_dev1);
+	// uart_start(uart_dev1);
 
-	uart_send(uart_dev1, "AT\r", strlen("AT\r"));
+	// uart_send(uart_dev1, "AT\r", strlen("AT\r"));
+	// uart_send(uart_dev1, "AT+CGSN\r", strlen("AT+CGSN\r"));
 
-	k_sleep(K_MSEC(2000));
-	uart_send(uart_dev1, "AT+CGSN\r", strlen("AT+CGSN\r"));
+	// uart_exit(uart_dev1);
 
-	k_sleep(K_MSEC(2000));
-	uart_exit(uart_dev1);
+	if (k_msgq_num_used_get(&gps_msg_q) != 0)
+	{
+		k_msgq_get(&gps_msg_q, &gps_msg, K_NO_WAIT);
+		// printk("\n%s", gps_msg);
+		cJSON *gps_JSON = cJSON_Parse(gps_msg);
+		if (cJSON_IsObject(gps_JSON))
+		{
+			cJSON *data_JSON = cJSON_GetObjectItem(gps_JSON, "data");
+			cJSON *lat_JSON = cJSON_GetObjectItem(data_JSON, "lat");
+			cJSON *lng_JSON = cJSON_GetObjectItem(data_JSON, "lng");
+
+			uint8_t sat_str[50] = "";
+			uint8_t tmp_str[16] = "";
+
+			snprintf(tmp_str, sizeof(tmp_str), "%.4f,", lat_JSON->valuedouble);
+			strcat(sat_str, tmp_str);
+			snprintf(tmp_str, sizeof(tmp_str), "%.4f", lng_JSON->valuedouble);
+			strcat(sat_str, tmp_str);
+
+			// send to satellite module
+			printk("\n%s", sat_str);
+
+			cJSON_Delete(lat_JSON);
+			cJSON_Delete(lng_JSON);
+			cJSON_Delete(data_JSON);
+		}
+		cJSON_Delete(gps_JSON);
+	}
+	else
+	{
+		printk("\nNo gps message");
+	}
+
+	// test if any messages were sent to satellite
 
 	return 0;
 }
@@ -630,9 +721,9 @@ static int glider_init(struct glider_t *glider)
 	message_queue_init();
 
 	// sd card thread
-	sd_tid = k_thread_create(&sd_thread, sd_stack_area, K_THREAD_STACK_SIZEOF(sd_stack_area),
-							 (k_thread_entry_t)app_sd_thread, NULL, NULL, NULL,
-							 7, 0, K_NO_WAIT);
+	// sd_tid = k_thread_create(&sd_thread, sd_stack_area, K_THREAD_STACK_SIZEOF(sd_stack_area),
+	// 						 (k_thread_entry_t)app_sd_thread, NULL, NULL, NULL,
+	// 						 7, 0, K_NO_WAIT);
 
 	glider->mission_started = false;
 
@@ -683,11 +774,11 @@ void main(void)
 		{
 		case EVT_INIT:
 			glider_init(&glider);
-			bool newglider = check_new_glider();
+			// bool newglider = check_new_glider();
 			// gps_module();
 
 			glider.event_prev = glider.event_now;
-			glider.event_now = EVT_AWAIT_MISSION;
+			glider.event_now = EVT_SURFACE;
 
 			break;
 		case EVT_AWAIT_MISSION:
@@ -704,12 +795,12 @@ void main(void)
 
 			break;
 		case EVT_SURFACE:
-			// gps_module();
-			data_available_to_send = true;
-			gcloud_module();
+			gps_module();
+			// data_available_to_send = true;
+			// gcloud_module(&glider);
 
 			// if 4G failed, satellite
-			// satellite_module();
+			satellite_module();
 
 			glider.event_prev = glider.event_now;
 			glider.event_now = EVT_IDLE;
@@ -739,10 +830,10 @@ void main(void)
 
 - FIX FORMATTING OF DATA:
 	DONE:
-	WIP:
 		gps data
 		sensor data
 		formatting on sd card (should not be necessary and should only copy string directly)
+	WIP:
 
 */
 
@@ -795,6 +886,52 @@ Mission loop:
 
 // currently not in use
 // MQTT variables
+
+// TODO: change to general data_array instead of just uart data
+static uint8_t uart_data_array[16][128] = {""};
+int data_size = 0; // keeps track of no. of messages stored in data array.
+				   // UPDATE THIS VALUE WHEN SAVING INTO DATA ARRAY
+
+// publish all data that is currently saved from uart
+// REMINDER: Double check after implementing SD card
+static int publish_uart_data()
+{
+	int i = 0;
+
+	while (strcmp(uart_data_array[i], "") != 0)
+	{
+		app_data_publish(uart_data_array[i], strlen(uart_data_array[i]) + 1);
+		k_sleep(K_MSEC(500));
+		i++;
+	}
+	data_available_to_send = false;
+
+	return 0;
+}
+
+// test messages received from mqtt
+static int check_mqtt_msg(void *data, size_t len)
+{
+	int ret_value = 0;
+
+	if (strcmp(data, "LED") == 0)
+	{
+		toggle_LED(1);
+	}
+
+	if (strcmp(data, "exit") == 0)
+	{
+		ret_value = 1;
+	}
+
+	else if (strcmp(data, "button 2") == 0)
+	{
+		ret_value = 2;
+	}
+
+	return ret_value;
+}
+
 struct k_msgq mqtt_msg_q;
 static uint8_t mqtt_msgq_buffer[3 * 128];
 static uint8_t mqtt_msg[128];

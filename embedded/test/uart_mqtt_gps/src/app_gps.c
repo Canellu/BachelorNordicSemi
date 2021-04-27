@@ -412,8 +412,8 @@ static int gps_struct_to_JSON(void *gps_str, nrf_gnss_data_frame_t *pvt_data)
 	cJSON *gps_JSON = cJSON_CreateObject();
 	cJSON *gps_data = cJSON_CreateObject();
 
-	cJSON_AddNumberToObject(gps_data, "lng", pvt_data->pvt.longitude);
 	cJSON_AddNumberToObject(gps_data, "lat", pvt_data->pvt.latitude);
+	cJSON_AddNumberToObject(gps_data, "lng", pvt_data->pvt.longitude);
 
 	uint8_t ts_string[64] = "";
 	uint8_t temp_str[16] = "";
@@ -555,7 +555,7 @@ int app_gps(glider_gps_data_t *app_gps_data, int64_t gps_timeout, int retry_inte
 
 	if (!got_fix)
 	{
-		strcpy(gps_string, "Unable to get GPS fix");
+		strcpy(gps_string, "no fix");
 
 		// create dummy data, REMINDER: COMMENT WHEN RUNNING PROPER TESTS
 		create_dummy_gps_data(&last_pvt);
