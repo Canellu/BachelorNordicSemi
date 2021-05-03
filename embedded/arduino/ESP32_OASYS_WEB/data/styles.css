@@ -2,6 +2,7 @@
   --dark: #1f2937;
   --light: #f9fafb;
   --bluegreen: #6bb7bf;
+  --bluegreenDark: #2bbbad;
 }
 
 /* * {
@@ -212,6 +213,44 @@ input[type="range"] + .thumb.active .value {
 
 label {
   font-size: 0.9rem;
+}
+
+.radioText {
+  color: var(--dark);
+}
+
+.radioTextActive {
+  color: var(--bluegreenDark);
+  font-size: 1.1rem !important;
+  font-weight: 600;
+}
+
+#inputMinDepth,
+#inputMaxDepth {
+  height: 100%;
+  padding: 4px 0;
+  margin: 0px;
+  background-color: white;
+}
+
+.noUi-handle {
+  cursor: pointer;
+  box-shadow: none;
+  width: 20px !important;
+}
+
+.noUi-connect {
+  background-color: var(--bluegreen) !important;
+}
+
+.noUi-handle:focus {
+  outline: none;
+  border-color: #8f8f8f;
+}
+
+.noUi-handle:active {
+  transform: scale(0.95);
+  cursor: grabbing;
 }
 
 @media screen and (max-width: 1200px) {

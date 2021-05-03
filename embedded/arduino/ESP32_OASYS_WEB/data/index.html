@@ -7,6 +7,7 @@
 
     <link rel="stylesheet" href="materialize.css" />
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="nouislider.min.css" />
     <link rel="icon" type="image/png" href="Glider.png" />
 
     <title>OASYS</title>
@@ -367,90 +368,127 @@
     <!-- END FILES TAB-->
     <!-- CONFIG TAB -->
     <div class="container mtop" id="config">
+      <!-- TAB HEADER -->
+      <div
+        class="col s12 center bg-light rounded-shadow"
+        style="margin-bottom: 20px; padding-bottom: 10px"
+      >
+        <h5>Configure parameters</h5>
+      </div>
+
       <!-- Sliders -->
-      <div class="row">
-        <div
-          class="col s12 center bg-light rounded-shadow"
-          style="margin-bottom: 20px; padding-bottom: 10px"
-        >
-          <h5>Configure parameters</h5>
-        </div>
+      <div class="row rounded-shadow bg-light" style="padding: 20px">
         <div class="col s12">
-          <p class="range-field">
-            <label for="temperatureSldier">Temperature frequency</label>
-            <input type="range" id="temperatureSlider" min="0" max="10" />
-          </p>
+          <!-- slider header -->
+          <div class="row">
+            <h6 class="col s6" style="font-size: 1.1rem; font-weight: 600">
+              Min depth
+            </h6>
+            <h6
+              class="col s6"
+              style="font-size: 1.1rem; font-weight: 600; text-align: end"
+            >
+              Max depth
+            </h6>
+          </div>
+
+          <!-- slider and input fields -->
+          <div class="row">
+            <input id="inputMinDepth" type="number" class="col s1" />
+            <div class="sliderBox col s10" style="padding: 6px 20px">
+              <div id="sliderDepth"></div>
+            </div>
+            <input id="inputMaxDepth" type="number" class="col s1" />
+          </div>
         </div>
+
         <div class="col s12">
-          <p class="range-field">
-            <label for="temperatureSldier">Pressure frequency</label>
-            <input type="range" id="pressureSlider" min="0" max="10" />
-          </p>
-        </div>
-        <div class="col s12">
-          <p class="range-field">
-            <label for="temperatureSldier">Conductivity frequency</label>
-            <input type="range" id="conductivitySlider" min="0" max="10" />
-          </p>
+          <div id="test-slider"></div>
         </div>
       </div>
 
-      <!-- Dropdown selects -->
-      <div class="row">
-        <h6>Sampling rates</h6>
-        <div class="input-field col s3 m3">
-          <select class="icons">
-            <option value="" disabled selected>Choose your option</option>
-            <option value="" data-icon="images/sample-1.jpg">example 1</option>
-            <option value="" data-icon="images/office.jpg">example 2</option>
-            <option value="" data-icon="images/yuna.jpg">example 3</option>
-          </select>
-          <label>Temperature sampling rate</label>
-        </div>
-        <div class="input-field col s3 m3">
-          <select class="icons">
-            <option value="" disabled selected>Log frequency</option>
-            <option value="" data-icon="images/sample-1.jpg" class="left">
-              Low
-            </option>
-            <option value="" data-icon="images/office.jpg" class="left">
-              Medium
-            </option>
-            <option value="" data-icon="images/yuna.jpg" class="left">
-              High
-            </option>
-          </select>
-          <label>Pressure sampling rate</label>
-        </div>
-      </div>
+      <!-- Frequency Selectors -->
+      <div class="row rounded-shadow bg-light" style="padding: 20px">
+        <h5>Logging frequencies</h5>
 
-      <!-- Checkboxes -->
-      <div class="row">
-        <div class="col s6">
-          <label>
-            <input type="checkbox" class="filled-in" checked="checked" />
-            <span>Something</span>
-          </label>
+        <div class="col s12 m4">
+          <h6 style="font-size: 1.1rem; font-weight: 600">Temperature</h6>
+          <p>
+            <label>
+              <input class="with-gap" name="temperatureGroup" type="radio" />
+              <span class="radioText">High</span>
+            </label>
+          </p>
+          <p>
+            <label>
+              <input
+                checked
+                class="with-gap"
+                name="temperatureGroup"
+                type="radio"
+              />
+              <span class="radioText radioTextActive">Medium</span>
+            </label>
+          </p>
+          <p>
+            <label>
+              <input class="with-gap" name="temperatureGroup" type="radio" />
+              <span class="radioText">Low</span>
+            </label>
+          </p>
         </div>
-        <div class="col s6">
-          <label>
-            <input type="checkbox" class="filled-in" checked="checked" />
-            <span>Something</span>
-          </label>
+
+        <div class="col s12 m4">
+          <h6 style="font-size: 1.1rem; font-weight: 600">Conductivity</h6>
+          <p>
+            <label>
+              <input class="with-gap" name="conductivityGroup" type="radio" />
+              <span class="radioText">High</span>
+            </label>
+          </p>
+          <p>
+            <label>
+              <input
+                checked
+                class="with-gap"
+                name="conductivityGroup"
+                type="radio"
+              />
+              <span class="radioText radioTextActive">Medium</span>
+            </label>
+          </p>
+          <p>
+            <label>
+              <input class="with-gap" name="conductivityGroup" type="radio" />
+              <span class="radioText">Low</span>
+            </label>
+          </p>
         </div>
-      </div>
-      <div class="row">
-        <div class="col s6">
-          <label>
-            <input type="checkbox" class="filled-in" checked="checked" />
-            <span>Something</span>
-          </label>
-        </div>
-        <div class="col s6">
-          <label>
-            <input type="checkbox" class="filled-in" checked="checked" />
-            <span>Something</span>
-          </label>
+        <div class="col s12 m4">
+          <h6 style="font-size: 1.1rem; font-weight: 600">Pressure</h6>
+          <p>
+            <label>
+              <input class="with-gap" name="pressureGroup" type="radio" />
+              <span class="radioText">High</span>
+            </label>
+          </p>
+          <p>
+            <label>
+              <input
+                checked
+                class="with-gap"
+                name="pressureGroup"
+                type="radio"
+              />
+              <span class="radioText radioTextActive">Medium</span>
+            </label>
+          </p>
+          <p>
+            <label>
+              <input class="with-gap" name="pressureGroup" type="radio" />
+              <span class="radioText">Low</span>
+            </label>
+          </p>
         </div>
       </div>
 
@@ -477,9 +515,12 @@
     </div>
     <!-- END CONFIG TAB -->
 
+    <script src="wNumb.min.js"></script>
+    <script src="nouislider.min.js"></script>
     <script src="jszip.js"></script>
     <script src="FileSaver.js"></script>
     <script src="materialize.js"></script>
     <script src="main.js"></script>
+    <script src="UI.js"></script>
   </body>
 </html>
