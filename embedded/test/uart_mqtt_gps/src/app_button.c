@@ -31,13 +31,13 @@ extern struct k_msgq uart_msg_q;
 extern struct k_msgq mqtt_msg_q;
 
 // LOCAL
-const struct device *dev_button;
+const struct device *dev_gpio;
 
 static void button_handler(uint32_t button_states, uint32_t has_changed)
 {
 	// printk("button states: %d, has changed: %d \n", button_states, has_changed);
-	// printk("button 1: %d\n", gpio_pin_get(dev_button, 6));
-	// printk("button 2: %d\n", gpio_pin_get(dev_button, 7));
+	// printk("button 1: %d\n", gpio_pin_get(dev_gpio, 6));
+	// printk("button 2: %d\n", gpio_pin_get(dev_gpio, 7));
 
 	int app_button_ret_val;
 
@@ -47,7 +47,7 @@ static void button_handler(uint32_t button_states, uint32_t has_changed)
 	switch (app_button_config)
 	{
 	case 0: // for waiting
-		if (has_changed == 1 && !gpio_pin_get(dev_button, 6))
+		if (has_changed == 1 && !gpio_pin_get(dev_gpio, 6))
 		{
 			app_button_ret_val = 1;
 			k_msgq_put(&button_msg_qr, &app_button_ret_val, K_NO_WAIT);
@@ -55,23 +55,23 @@ static void button_handler(uint32_t button_states, uint32_t has_changed)
 		break;
 
 	case 1: // UART
-		if (has_changed == 1 && !gpio_pin_get(dev_button, 6))
+		if (has_changed == 1 && !gpio_pin_get(dev_gpio, 6))
 		{
 			k_msgq_put(&uart_msg_q, "surfaced", K_NO_WAIT);
 		}
-		if (has_changed == 2 && !gpio_pin_get(dev_button, 7))
+		if (has_changed == 2 && !gpio_pin_get(dev_gpio, 7))
 		{
 			uart_send(uart_dev1, MSG_3, sizeof(MSG_3));
 		}
 		break;
 
 	case 2: // MQTT
-		if (has_changed == 1 && !gpio_pin_get(dev_button, 6))
+		if (has_changed == 1 && !gpio_pin_get(dev_gpio, 6))
 		{
 			k_msgq_put(&mqtt_msg_q, "exit", K_NO_WAIT);
 		}
 
-		else if (has_changed == 2 && !gpio_pin_get(dev_button, 7))
+		else if (has_changed == 2 && !gpio_pin_get(dev_gpio, 7))
 		{
 			app_data_publish(MSG_2, sizeof(MSG_2));
 		}
@@ -88,12 +88,12 @@ static void button_handler(uint32_t button_states, uint32_t has_changed)
 		break;
 
 	case 3: // Choice: wifi or mqtt
-		if (has_changed == 1 && !gpio_pin_get(dev_button, 6))
+		if (has_changed == 1 && !gpio_pin_get(dev_gpio, 6))
 		{
 			app_button_ret_val = 1;
 		}
 
-		else if (has_changed == 2 && !gpio_pin_get(dev_button, 7))
+		else if (has_changed == 2 && !gpio_pin_get(dev_gpio, 7))
 		{
 			app_button_ret_val = 2;
 		}
@@ -103,11 +103,11 @@ static void button_handler(uint32_t button_states, uint32_t has_changed)
 		break;
 
 		// case 999: // DO NOT USE, ONLY FOR TEMPLATE
-		// 	if(has_changed == 1 && !gpio_pin_get(dev_button, 6)) {
+		// 	if(has_changed == 1 && !gpio_pin_get(dev_gpio, 6)) {
 		// 		// empty
 		// 	}
 
-		// 	else if(has_changed == 2 && !gpio_pin_get(dev_button, 7)) {
+		// 	else if(has_changed == 2 && !gpio_pin_get(dev_gpio, 7)) {
 		// 		// empty
 		// 	}
 
@@ -129,11 +129,23 @@ static void button_handler(uint32_t button_states, uint32_t has_changed)
 // initialize buttons
 void button_dev_init(void)
 {
-	dev_button = device_get_binding("GPIO_0");
+	dev_gpio = device_get_binding("GPIO_0");
 	dk_buttons_init(button_handler);
 }
 
-// toggle specified led
+// external LEDS
+void ext_led_init()
+{
+	gpio_pin_configure(dev_gpio, 21, GPIO_OUTPUT_INACTIVE); // SD module
+	gpio_pin_configure(dev_gpio, 22, GPIO_OUTPUT_INACTIVE); // gps module
+	gpio_pin_configure(dev_gpio, 20, GPIO_OUTPUT_INACTIVE); // sensor module
+	gpio_pin_configure(dev_gpio, 30, GPIO_OUTPUT_INACTIVE); // wifi module
+	gpio_pin_configure(dev_gpio, 31, GPIO_OUTPUT_INACTIVE); // 4G module
+															// 30 & 31 satellite module
+}
+
+// toggle specified LED
+// NO LONGER IN USE
 int toggle_LED(int led_val)
 {
 	switch (led_val)
@@ -141,12 +153,40 @@ int toggle_LED(int led_val)
 	case 1:
 		led1_on = !led1_on;
 		dk_set_led(DK_LED1, led1_on);
-		break;
 
+		break;
+	case 20:
+		gpio_pin_toggle(dev_gpio, 20);
+
+		break;
+	case 21:
+		gpio_pin_toggle(dev_gpio, 21);
+
+		break;
+	case 22:
+		gpio_pin_toggle(dev_gpio, 22);
+
+		break;
+	case 30:
+		gpio_pin_toggle(dev_gpio, 30);
+
+		break;
+	case 31:
+		gpio_pin_toggle(dev_gpio, 31);
+
+		break;
 	default:
 		printk("\nunknown led value\n");
 		break;
 	}
+
+	return 0;
+}
+
+// set specified LED value
+int set_LED(int led_val, int val)
+{
+	gpio_pin_set(dev_gpio, led_val, val);
 
 	return 0;
 }

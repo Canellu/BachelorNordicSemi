@@ -66,6 +66,7 @@ struct mission_start_t
 
 struct mission_param_t
 {
+	int mission;
 	int depth_max;
 	int depth_min;
 	int msg_max;
@@ -231,6 +232,7 @@ static int device_inits()
 {
 	button_dev_init();
 	dk_leds_init();
+	ext_led_init();
 	uart_dev_init(uart_dev1);
 	uart_dev_init(uart_dev2);
 	return 0;
@@ -319,69 +321,105 @@ static int publish_data_4G()
 	return 0;
 }
 
-static int parse_mission_params(struct glider_t *glider, void *gcloud_msg)
+static int parse_mission_params(struct glider_t *glider, void *json_str)
 {
-	cJSON *mqtt_JSON = cJSON_Parse(gcloud_msg);
+	cJSON *mqtt_JSON = cJSON_Parse(json_str);
 	if (cJSON_IsObject(mqtt_JSON))
 	{
 		// printk("\n%s", cJSON_Print(mqtt_JSON));
 
-		// waypoints - lat
-		if (cJSON_HasObjectItem(mqtt_JSON, "lat"))
-		{
-			cJSON *tmp_JSON = cJSON_GetObjectItem(mqtt_JSON, "lat");
-			for (int i = 0; i < cJSON_GetArraySize(tmp_JSON); i++)
-			{
-				cJSON *tmpsub_JSON = cJSON_GetArrayItem(tmp_JSON, i);
-				glider->mission_param.wp_arr[i][0] = tmpsub_JSON->valuedouble;
-				// printk("\nlat: %lf", glider->mission_param.wp_arr[i][0]);
-				cJSON_Delete(tmpsub_JSON);
+		bool new_mission = false;
 
-				glider->mission_param.wp_max = i;
+		// parameter mission number
+		if (cJSON_HasObjectItem(mqtt_JSON, "M"))
+		{
+			cJSON *tmp_JSON = cJSON_GetObjectItem(mqtt_JSON, "M");
+
+			// test if mission received is new
+			if (glider->mission_param.mission != tmp_JSON->valueint)
+			{
+				printk("\nnew mission received");
+				glider->mission_param.mission = tmp_JSON->valueint;
+				new_mission = true;
+			}
+			else
+			{
+				printk("\nnot a new mission");
 			}
 			cJSON_Delete(tmp_JSON);
 		}
 
-		// waypoints - lng
-		if (cJSON_HasObjectItem(mqtt_JSON, "lng"))
+		// copy mission params if mission is new and save to SD card
+		if (new_mission)
 		{
-			cJSON *tmp_JSON = cJSON_GetObjectItem(mqtt_JSON, "lng");
-			for (int i = 0; i < cJSON_GetArraySize(tmp_JSON); i++)
+			// waypoints - lat
+			if (cJSON_HasObjectItem(mqtt_JSON, "lat"))
 			{
-				cJSON *tmpsub_JSON = cJSON_GetArrayItem(tmp_JSON, i);
-				glider->mission_param.wp_arr[i][1] = tmpsub_JSON->valuedouble;
-				// printk("\nlng: %lf", glider->mission_param.wp_arr[i][1]);
-				cJSON_Delete(tmpsub_JSON);
+				cJSON *tmp_JSON = cJSON_GetObjectItem(mqtt_JSON, "lat");
+				for (int i = 0; i < cJSON_GetArraySize(tmp_JSON); i++)
+				{
+					cJSON *tmpsub_JSON = cJSON_GetArrayItem(tmp_JSON, i);
+					glider->mission_param.wp_arr[i][0] = tmpsub_JSON->valuedouble;
+					// printk("\nlat: %lf", glider->mission_param.wp_arr[i][0]);
+					cJSON_Delete(tmpsub_JSON);
+
+					glider->mission_param.wp_max = i;
+				}
+				cJSON_Delete(tmp_JSON);
 			}
-			cJSON_Delete(tmp_JSON);
-		}
 
-		// parameter max mqtt message count
-		if (cJSON_HasObjectItem(mqtt_JSON, "4G"))
-		{
-			cJSON *tmp_JSON = cJSON_GetObjectItem(mqtt_JSON, "4G");
-			glider->mission_param.msg_max = tmp_JSON->valueint;
-			cJSON_Delete(tmp_JSON);
-		}
+			// waypoints - lng
+			if (cJSON_HasObjectItem(mqtt_JSON, "lng"))
+			{
+				cJSON *tmp_JSON = cJSON_GetObjectItem(mqtt_JSON, "lng");
+				for (int i = 0; i < cJSON_GetArraySize(tmp_JSON); i++)
+				{
+					cJSON *tmpsub_JSON = cJSON_GetArrayItem(tmp_JSON, i);
+					glider->mission_param.wp_arr[i][1] = tmpsub_JSON->valuedouble;
+					// printk("\nlng: %lf", glider->mission_param.wp_arr[i][1]);
+					cJSON_Delete(tmpsub_JSON);
+				}
+				cJSON_Delete(tmp_JSON);
+			}
 
-		// parameter sensor frequencies
-		if (cJSON_HasObjectItem(mqtt_JSON, "C"))
-		{
-			cJSON *tmp_JSON = cJSON_GetObjectItem(mqtt_JSON, "C");
-			glider->mission_param.sens_param.freq_c = tmp_JSON->valueint;
-			cJSON_Delete(tmp_JSON);
-		}
-		if (cJSON_HasObjectItem(mqtt_JSON, "P"))
-		{
-			cJSON *tmp_JSON = cJSON_GetObjectItem(mqtt_JSON, "P");
-			glider->mission_param.sens_param.freq_p = tmp_JSON->valueint;
-			cJSON_Delete(tmp_JSON);
-		}
-		if (cJSON_HasObjectItem(mqtt_JSON, "T"))
-		{
-			cJSON *tmp_JSON = cJSON_GetObjectItem(mqtt_JSON, "T");
-			glider->mission_param.sens_param.freq_t = tmp_JSON->valueint;
-			cJSON_Delete(tmp_JSON);
+			// parameter max mqtt message count
+			if (cJSON_HasObjectItem(mqtt_JSON, "4G"))
+			{
+				cJSON *tmp_JSON = cJSON_GetObjectItem(mqtt_JSON, "4G");
+				glider->mission_param.msg_max = tmp_JSON->valueint;
+				cJSON_Delete(tmp_JSON);
+			}
+
+			// parameter sensor frequencies
+			if (cJSON_HasObjectItem(mqtt_JSON, "C"))
+			{
+				cJSON *tmp_JSON = cJSON_GetObjectItem(mqtt_JSON, "C");
+				glider->mission_param.sens_param.freq_c = tmp_JSON->valueint;
+				cJSON_Delete(tmp_JSON);
+			}
+			if (cJSON_HasObjectItem(mqtt_JSON, "P"))
+			{
+				cJSON *tmp_JSON = cJSON_GetObjectItem(mqtt_JSON, "P");
+				glider->mission_param.sens_param.freq_p = tmp_JSON->valueint;
+				cJSON_Delete(tmp_JSON);
+			}
+			if (cJSON_HasObjectItem(mqtt_JSON, "T"))
+			{
+				cJSON *tmp_JSON = cJSON_GetObjectItem(mqtt_JSON, "T");
+				glider->mission_param.sens_param.freq_t = tmp_JSON->valueint;
+				cJSON_Delete(tmp_JSON);
+			}
+
+			sd_msg_t sd_msg;
+
+			strcpy(sd_msg.filename, "1111.txt");
+			printk("\n%s\n", sd_msg.filename);
+
+			sd_msg.event = OVERWRITE_FILE;
+
+			strcpy(sd_msg.string, json_str);
+
+			k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
 		}
 	}
 
@@ -394,6 +432,7 @@ static int parse_mission_params(struct glider_t *glider, void *gcloud_msg)
 
 static int sensor_module()
 {
+	printk("\n\npress button 1 to start sensor test\n\n");
 	button_wait();
 
 	set_button_config(1);
@@ -484,7 +523,6 @@ static int wifi_module()
 	int err = 0;
 
 	printk("\n\npress button 1 to start wifi test\n\n");
-
 	button_wait();
 
 	uint8_t wifi_response[128] = "";
@@ -551,9 +589,7 @@ static int gps_module()
 	static glider_gps_data_t gps_data;
 
 	printk("\n\npress button 1 to start gps test\n\n");
-
 	button_wait();
-
 	printk("\ngps test start");
 
 	app_gps(&gps_data, 1000, 400);
@@ -609,7 +645,7 @@ static int gcloud_module(struct glider_t *glider)
 	// 		return err;
 	// 	}
 	// }
-	strcpy(gcloud_msg, "{\"4G\":10,\"C\":0,\"P\":0,\"T\":0,\"lat\":[58.7558,51.7558,60.7558],\"lng\":[10.2726,19.2726,21.2726],\"maxD\":0,\"minD\":0,\"start\":\"202104210505\"}");
+	strcpy(gcloud_msg, "{\"M\":9,\"4G\":10,\"C\":0,\"P\":0,\"T\":0,\"lat\":[51.7558,60.7558],\"lng\":[19.2726,21.2726],\"maxD\":0,\"minD\":0,\"start\":\"202104210505\"}");
 
 	/* Gcloud loop */
 	while (1)
@@ -651,7 +687,6 @@ static int gcloud_module(struct glider_t *glider)
 
 static int satellite_module()
 {
-
 	printk("\n\npress button 1 to start satellite test\n\n");
 	button_wait();
 
@@ -711,8 +746,8 @@ static int glider_init(struct glider_t *glider)
 	strcpy(glider->uid, uid);
 	// glider->uid[sizeof(glider->uid) - 1] = 0;
 
-	printk("\n%s\n", uid);
-	printk("\n%s\n", glider->uid);
+	// printk("\n%s\n", uid);
+	// printk("\n%s\n", glider->uid);
 
 	/* device inits and configurations */
 	device_inits();
@@ -721,15 +756,13 @@ static int glider_init(struct glider_t *glider)
 	message_queue_init();
 
 	// sd card thread
-	// sd_tid = k_thread_create(&sd_thread, sd_stack_area, K_THREAD_STACK_SIZEOF(sd_stack_area),
-	// 						 (k_thread_entry_t)app_sd_thread, NULL, NULL, NULL,
-	// 						 7, 0, K_NO_WAIT);
+	sd_tid = k_thread_create(&sd_thread, sd_stack_area, K_THREAD_STACK_SIZEOF(sd_stack_area),
+							 (k_thread_entry_t)app_sd_thread, NULL, NULL, NULL,
+							 7, 0, K_NO_WAIT);
 
 	glider->mission_started = false;
 
 	printk("Init complete. Press button 1 to start\n\n");
-
-	button_wait();
 
 	return 0;
 }
@@ -738,7 +771,7 @@ static bool check_new_glider()
 {
 	static sd_msg_t sd_msg;
 	sd_msg.event = FIND_FILE;
-	static const char file_mission[] = "MISSIONPARAMS.TXT";
+	static const char file_mission[] = "1111.TXT";
 	strcpy(sd_msg.filename, file_mission);
 
 	k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
@@ -773,40 +806,67 @@ void main(void)
 		switch (glider.event_now)
 		{
 		case EVT_INIT:
+			// initialize glider
 			glider_init(&glider);
-			// bool newglider = check_new_glider();
+
+			bool newglider = check_new_glider();
+
+			// get gps fix
+			// set_LED(22, 1);
 			// gps_module();
+			// set_LED(22, 0);
 
 			glider.event_prev = glider.event_now;
 			glider.event_now = EVT_SURFACE;
 
 			break;
 		case EVT_AWAIT_MISSION:
+			// turn on wifi
+			set_LED(30, 1);
 			wifi_module();
+			set_LED(30, 0);
 
 			break;
 		case EVT_DIVE:
 			// function: send command to navigation
 
+			// read sensor data
+			set_LED(20, 1);
 			sensor_module();
+			set_LED(20, 0);
 
 			glider.event_prev = glider.event_now;
 			glider.event_now = EVT_SURFACE;
 
 			break;
 		case EVT_SURFACE:
+			// get gps fix
+			set_LED(22, 1);
 			gps_module();
+			set_LED(22, 0);
+
+			// turn on 4G
 			// data_available_to_send = true;
-			// gcloud_module(&glider);
+			set_LED(31, 1);
+			gcloud_module(&glider);
+			set_LED(31, 0);
 
 			// if 4G failed, satellite
+			set_LED(30, 1);
+			set_LED(31, 1);
 			satellite_module();
+			set_LED(30, 0);
+			set_LED(31, 0);
 
 			glider.event_prev = glider.event_now;
 			glider.event_now = EVT_IDLE;
 
 			break;
 		case EVT_IDLE:
+			set_LED(22, 1);
+			set_LED(20, 1);
+			set_LED(30, 1);
+			set_LED(31, 1);
 			LOG_INF("Idling");
 			k_sleep(K_SECONDS(30));
 

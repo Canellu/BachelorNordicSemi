@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <cJSON.h>
 
+#include "app_button.h"
 #include "app_uart.h"
 #include "app_sd.h"
 // #include "cJSON.h"
@@ -48,6 +49,7 @@ static int lsdir(const char *path)
 	if (res)
 	{
 		printk("Error opening dir %s [%d]\n", path, res);
+		set_LED(21, 0);
 		return res;
 	}
 
@@ -90,6 +92,7 @@ static int look_for_file(const char *path, const char *filename)
 	if (res)
 	{
 		printk("Error opening dir %s [%d]\n", path, res);
+		set_LED(21, 0);
 		return res;
 	}
 
@@ -135,6 +138,7 @@ static int send_all_file_info(const char *path)
 	if (res)
 	{
 		printk("Error opening dir %s [%d]\n", path, res);
+		set_LED(21, 0);
 		return res;
 	}
 
@@ -244,6 +248,7 @@ static int read_file(char *file_path)
 	else
 	{
 		printk("Error in reading file\n");
+		set_LED(21, 0);
 	}
 
 	return 0;
@@ -332,6 +337,7 @@ static int read_JSON(char *file_path, uint32_t *cursor, int interval,
 	else
 	{
 		printk("Error in reading file\n");
+		set_LED(21, 0);
 	}
 
 	return 0;
@@ -435,6 +441,30 @@ static int write_file(char *file_path, char *data, int size)
 	return 0;
 }
 
+static int overwrite_file(char *file_path, char *data, int size)
+{
+	struct fs_file_t file;
+	int ret = 1;
+
+	ret = fs_open(&file, file_path, 0);
+
+	// check if file exists
+	if (ret == 0)
+	{
+		printk("\nmission params exist");
+		fs_unlink(file_path);
+	}
+	fs_close(&file);
+
+	ret = fs_open(&file, file_path, (FS_O_WRITE | FS_O_CREATE));
+
+	fs_write(&file, data, size);
+	fs_write(&file, "\r\n", strlen("\r\n"));
+	fs_close(&file);
+
+	return 0;
+}
+
 static int mountSD()
 {
 
@@ -448,6 +478,7 @@ static int mountSD()
 		if (disk_access_init(disk_pdrv) != 0)
 		{
 			printk("Storage init ERROR!");
+			set_LED(21, 0);
 			break;
 		}
 
@@ -455,6 +486,7 @@ static int mountSD()
 							  DISK_IOCTL_GET_SECTOR_COUNT, &block_count))
 		{
 			printk("Unable to get sector count");
+			set_LED(21, 0);
 			break;
 		}
 		printk("Block count %u", block_count);
@@ -463,6 +495,7 @@ static int mountSD()
 							  DISK_IOCTL_GET_SECTOR_SIZE, &block_size))
 		{
 			printk("Unable to get sector size");
+			set_LED(21, 0);
 			break;
 		}
 		printk("Sector size %u\n", block_size);
@@ -482,6 +515,7 @@ static int mountSD()
 		else
 		{
 			printk("Error mounting disk.\n");
+			set_LED(21, 0);
 			return res;
 		}
 	} while (0);
@@ -511,6 +545,8 @@ void app_sd_thread(void *unused1, void *unused2, void *unused3)
 	size_t file_size_prev = 0;
 	uint32_t cursor = 0;
 
+	set_LED(21, 1);
+
 	mountSD();
 
 	while (1)
@@ -526,6 +562,13 @@ void app_sd_thread(void *unused1, void *unused2, void *unused3)
 			// create file path
 			create_file_path(file_path, sd_msg.filename);
 			write_file(file_path, sd_msg.string, strlen(sd_msg.string));
+
+			break;
+		case OVERWRITE_FILE:
+			printk("\nIn overwrite file");
+			// create file path
+			create_file_path(file_path, sd_msg.filename);
+			overwrite_file(file_path, sd_msg.string, strlen(sd_msg.string));
 
 			break;
 		case FIND_FILE:
