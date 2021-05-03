@@ -8,6 +8,7 @@ enum sd_event_type
     FIND_FILE,
     SEND_FILE_INFO,
     READ_FILE,
+    OVERWRITE_FILE,
     WRITE_FILE
 };
 
