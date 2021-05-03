@@ -18,10 +18,12 @@ class HomePage extends StatelessWidget with NavigationStates {
     final device = Provider.of<List<Device>>(context);
     /*
     device.forEach((device) {
+      /*
       print(device.added);
       print(device.alias);
-      print(device.lastSync);
+      print(device.lastSync);*/
       print(device.deviceId);
+      print(device.lastSeen);
     });*/
     return Container(
       decoration: BoxDecoration(

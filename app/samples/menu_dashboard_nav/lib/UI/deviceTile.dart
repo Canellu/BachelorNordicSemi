@@ -28,7 +28,8 @@ class DeviceTile extends StatelessWidget {
           isThreeLine: true,
           onTap: (){
             Navigator.push(
-              context, MaterialPageRoute(builder: (context) => DevicePage(gliderId:oneDevice.deviceId),
+              context, MaterialPageRoute(builder: (context) =>
+                DevicePageTab(selectedDevice:oneDevice),
               ),
             );
           },
