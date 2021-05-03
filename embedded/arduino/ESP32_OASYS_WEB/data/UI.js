@@ -1,3 +1,7 @@
+// --------------------------------------------------------------------
+// Logging frequencies
+// --------------------------------------------------------------------
+
 let tempGroupBtns = document.querySelectorAll("[name=temperatureGroup]");
 let tempText = document.querySelectorAll(
   "[name=temperatureGroup] + .radioText"
@@ -36,17 +40,30 @@ condGroupBtns.forEach((btn) => {
   });
 });
 
-var sliderDepth = document.querySelector("#sliderDepth");
-var inputMinDepth = document.querySelector("#inputMinDepth");
-var inputMaxDepth = document.querySelector("#inputMaxDepth");
+// --------------------------------------------------------------------
+// Dive Depth
+// --------------------------------------------------------------------
+
+let sliderDepth = document.querySelector("#sliderDepth");
+let inputMinDepth = document.querySelector("#inputMinDepth");
+let inputMaxDepth = document.querySelector("#inputMaxDepth");
+let sliderRange = {
+  min: [0, 10],
+  "20%": [100, 10],
+  "40%": [200, 10],
+  "60%": [300, 10],
+  "80%": [400, 10],
+  max: [500, 10],
+};
 noUiSlider.create(sliderDepth, {
   start: [100, 300],
   connect: true,
   step: 1,
   orientation: "horizontal", // 'horizontal' or 'vertical'
-  range: {
-    min: 0,
-    max: 500,
+  range: sliderRange,
+  pips: {
+    mode: "range",
+    density: 4,
   },
   format: wNumb({
     decimals: 0,
@@ -61,10 +78,49 @@ sliderDepth.noUiSlider.on("update", function (values, handle) {
 
 // Link input to slider
 inputMinDepth.addEventListener("change", function () {
-  console.log(this.value);
   sliderDepth.noUiSlider.set([this.value, null]);
 });
 
 inputMaxDepth.addEventListener("change", function () {
   sliderDepth.noUiSlider.set([null, this.value]);
+});
+
+// --------------------------------------------------------------------
+// 4G Message Limit
+// --------------------------------------------------------------------
+
+let slider4GLimit = document.querySelector("#slider4GLimit");
+let input4GLimit = document.querySelector("#input4GLimit");
+
+let sliderRange4G = {
+  min: [0, 10],
+  "20%": [100, 10],
+  "40%": [200, 10],
+  "60%": [300, 10],
+  "80%": [400, 10],
+  max: [500, 10],
+};
+noUiSlider.create(slider4GLimit, {
+  start: 50,
+  connect: [true, false],
+  step: 1,
+  orientation: "horizontal", // 'horizontal' or 'vertical'
+  range: sliderRange4G,
+  pips: {
+    mode: "range",
+    density: 4,
+  },
+  format: wNumb({
+    decimals: 0,
+  }),
+});
+
+// Link slider to input
+slider4GLimit.noUiSlider.on("update", function (values, handle) {
+  input4GLimit.value = values[handle];
+});
+
+// Link input to slider
+input4GLimit.addEventListener("change", function () {
+  slider4GLimit.noUiSlider.set([this.value]);
 });

@@ -227,20 +227,25 @@ label {
 
 #inputMinDepth,
 #inputMaxDepth {
+  box-sizing: border-box;
   height: 100%;
-  padding: 4px 0;
-  margin: 0px;
+  padding: 4px 2px;
   background-color: white;
 }
 
 .noUi-handle {
   cursor: pointer;
   box-shadow: none;
-  width: 20px !important;
+  /* width: 20px !important; */
 }
 
 .noUi-connect {
   background-color: var(--bluegreen) !important;
+}
+
+.noUi-handle:hover {
+  cursor: pointer;
+  border-color: #8f8f8f;
 }
 
 .noUi-handle:focus {
@@ -251,6 +256,18 @@ label {
 .noUi-handle:active {
   transform: scale(0.95);
   cursor: grabbing;
+}
+
+h5 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+h6 {
+  font-size: 1.1rem;
+  font-weight: 600;
 }
 
 @media screen and (max-width: 1200px) {
@@ -275,5 +292,9 @@ label {
 
   #files label span {
     padding-right: 18px !important;
+  }
+
+  .container {
+    width: 100%;
   }
 }

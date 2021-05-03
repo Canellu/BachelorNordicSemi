@@ -22,6 +22,10 @@
   }
 }
 
+iframe {
+  overflow: hidden;
+}
+
 #waypoints input::-webkit-outer-spin-button,
 #waypoints input::-webkit-inner-spin-button {
   -webkit-appearance: none;

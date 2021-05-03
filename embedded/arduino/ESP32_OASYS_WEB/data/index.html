@@ -376,43 +376,61 @@
         <h5>Configure parameters</h5>
       </div>
 
-      <!-- Sliders -->
+      <!-- Depth Selector -->
       <div class="row rounded-shadow bg-light" style="padding: 20px">
-        <div class="col s12">
-          <!-- slider header -->
-          <div class="row">
-            <h6 class="col s6" style="font-size: 1.1rem; font-weight: 600">
-              Min depth
-            </h6>
-            <h6
-              class="col s6"
-              style="font-size: 1.1rem; font-weight: 600; text-align: end"
-            >
-              Max depth
-            </h6>
-          </div>
+        <!-- slider header -->
 
-          <!-- slider and input fields -->
-          <div class="row">
-            <input id="inputMinDepth" type="number" class="col s1" />
-            <div class="sliderBox col s10" style="padding: 6px 20px">
-              <div id="sliderDepth"></div>
-            </div>
-            <input id="inputMaxDepth" type="number" class="col s1" />
-          </div>
+        <h5 class="col s12">Dive depth</h5>
+        <!-- slider and input fields -->
+
+        <input id="inputMinDepth" type="number" class="col s2 m1" />
+
+        <div class="sliderBox col s8 m10" style="padding: 6px 20px">
+          <div id="sliderDepth"></div>
         </div>
 
-        <div class="col s12">
-          <div id="test-slider"></div>
+        <input id="inputMaxDepth" type="number" class="col s2 m1" />
+        <div style="color: grey" class="col s6">min</div>
+        <div style="color: grey; text-align: end" class="col s6">max</div>
+      </div>
+
+      <!-- 4G Limit Selector -->
+      <div class="row rounded-shadow bg-light" style="padding: 20px">
+        <!-- slider header -->
+        <h5 class="col s12">4G Message limit</h5>
+        <!-- slider and input fields -->
+
+        <input id="input4GLimit" type="number" class="col s2 m1" />
+        <div class="sliderBox col s10 m11" style="padding: 6px 20px">
+          <div id="slider4GLimit"></div>
         </div>
+      </div>
+
+      <!-- Datetime Pickers -->
+      <div class="row rounded-shadow bg-light" style="padding: 20px">
+        <!-- slider header -->
+        <h5 class="col s12">Start date & time</h5>
+        <!-- Datepicker -->
+        <input
+          id="startDate"
+          type="text"
+          class="datepicker col s12 m5 offset-m1"
+          placeholder="Start date"
+        />
+
+        <input
+          type="text"
+          class="timepicker col s12 m5 offset-m1"
+          placeholder="Start time"
+        />
       </div>
 
       <!-- Frequency Selectors -->
       <div class="row rounded-shadow bg-light" style="padding: 20px">
         <h5>Logging frequencies</h5>
 
-        <div class="col s12 m4">
-          <h6 style="font-size: 1.1rem; font-weight: 600">Temperature</h6>
+        <div class="col s12 m3 offset-m2" style="align-items: center">
+          <h6>Temperature</h6>
           <p>
             <label>
               <input class="with-gap" name="temperatureGroup" type="radio" />
@@ -438,7 +456,7 @@
           </p>
         </div>
 
-        <div class="col s12 m4">
+        <div class="col s12 m3">
           <h6 style="font-size: 1.1rem; font-weight: 600">Conductivity</h6>
           <p>
             <label>
@@ -464,7 +482,8 @@
             </label>
           </p>
         </div>
-        <div class="col s12 m4">
+
+        <div class="col s12 m3">
           <h6 style="font-size: 1.1rem; font-weight: 600">Pressure</h6>
           <p>
             <label>
@@ -491,28 +510,30 @@
           </p>
         </div>
       </div>
-
-      <!-- Configure button -->
-      <div class="center">
-        <a class="waves-effect waves-light btn">
-          configure
-          <i class="left">
-            <svg
-              width="22"
-              height="22"
-              viewBox="0 0 18 18"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M3.75 15H14.25V13.5H3.75V15ZM3.75 7.5H6.75V12H11.25V7.5H14.25L9 2.25L3.75 7.5Z"
-                fill="white"
-              />
-            </svg>
-          </i>
-        </a>
-      </div>
     </div>
+
+    <!-- Configure button -->
+    <div class="center">
+      <a class="waves-effect waves-light btn">
+        configure
+        <i class="left">
+          <svg
+            style="margin-top: 7px"
+            width="22"
+            height="22"
+            viewBox="0 0 18 18"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M3.75 15H14.25V13.5H3.75V15ZM3.75 7.5H6.75V12H11.25V7.5H14.25L9 2.25L3.75 7.5Z"
+              fill="white"
+            />
+          </svg>
+        </i>
+      </a>
+    </div>
+
     <!-- END CONFIG TAB -->
 
     <script src="wNumb.min.js"></script>

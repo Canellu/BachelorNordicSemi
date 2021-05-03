@@ -67,17 +67,20 @@ window.addEventListener("click", (e) => {
 // @params div lock body scroll on
 // @params Scrollspeed in % of default
 function addScrollLock(div, scrollSpeed = 100) {
-  div.addEventListener("wheel", (e) => {
-    e.preventDefault();
-    let scrollTo = e.wheelDelta * -(scrollSpeed / 100);
-    div.scrollTop = scrollTo + div.scrollTop;
-  });
+  div.addEventListener(
+    "wheel",
+    (e) => {
+      e.preventDefault();
+      let scrollTo = e.wheelDelta * -(scrollSpeed / 100);
+      div.scrollTop = scrollTo + div.scrollTop;
+    },
+    { passive: false }
+  );
 }
 addScrollLock(dropDownContent, 50);
 addScrollLock(document.querySelector("#hours"), 50);
 addScrollLock(document.querySelector("#minutes"), 20);
 addScrollLock(document.querySelector("#previewBox"), 20);
-// addScrollLock(document.querySelector("#sliders"), 30);
 
 var charts = []; //Conductivity, Pressure, Temperature
 var activeMission = "";

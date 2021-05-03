@@ -126,7 +126,26 @@ document.addEventListener("DOMContentLoaded", function () {
   M.Tabs.init(document.querySelectorAll(".tabs"));
   M.Modal.init(document.querySelectorAll(".modal"));
   M.FormSelect.init(document.querySelectorAll("select"));
+
+  M.Datepicker.init(document.querySelectorAll(".datepicker"), {
+    // autoClose: true,
+    format: "yyyy-mm-dd",
+    firstDay: 1,
+    // showClearBtn: true,
+  });
+
+  M.Timepicker.init(document.querySelectorAll(".timepicker"), {
+    twelveHour: false,
+    onCloseEnd: () => {
+      let instance = M.Timepicker.getInstance(
+        document.querySelector(".timepicker")
+      );
+      console.log(instance.time);
+    },
+  });
 });
+
+function printTime() {}
 
 // Prevent default submit action when Enter
 form.addEventListener("submit", (e) => {
