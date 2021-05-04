@@ -369,11 +369,26 @@
     <!-- CONFIG TAB -->
     <div class="container mtop" id="config">
       <!-- TAB HEADER -->
+
       <div
-        class="col s12 center bg-light rounded-shadow"
+        class="center bg-light rounded-shadow"
         style="margin-bottom: 20px; padding-bottom: 10px"
       >
         <h5>Configure parameters</h5>
+      </div>
+
+      <div class="row center bg-light rounded-shadow" style="padding: 20px">
+        <h5>Mission</h5>
+        <input
+          class="col s2 offset-s5 center"
+          id="inputMissionNum"
+          type="number"
+          value="2"
+          style="font-size: 2rem; font-weight: 600"
+        />
+        <div class="col s12">
+          Previous logged mission number <span id="missionNumFromNrf">#</span>
+        </div>
       </div>
 
       <!-- Depth Selector -->
@@ -435,6 +450,12 @@
               <span class="radioText">Low</span>
             </label>
           </p>
+          <p>
+            <label>
+              <input class="with-gap" name="temperatureGroup" type="radio" />
+              <span class="radioText">None</span>
+            </label>
+          </p>
         </div>
 
         <div class="col s12 m3">
@@ -460,6 +481,12 @@
             <label>
               <input class="with-gap" name="conductivityGroup" type="radio" />
               <span class="radioText">Low</span>
+            </label>
+          </p>
+          <p>
+            <label>
+              <input class="with-gap" name="conductivityGroup" type="radio" />
+              <span class="radioText">None</span>
             </label>
           </p>
         </div>
@@ -489,6 +516,12 @@
               <span class="radioText">Low</span>
             </label>
           </p>
+          <p>
+            <label>
+              <input class="with-gap" name="pressureGroup" type="radio" />
+              <span class="radioText">None</span>
+            </label>
+          </p>
         </div>
       </div>
 
@@ -505,7 +538,12 @@
           autocomplete="off"
         />
 
-        <input type="text" class="timepicker col s3" placeholder="Start time" />
+        <input
+          id="startTime"
+          type="text"
+          class="timepicker col s3"
+          placeholder="Start time"
+        />
       </div>
 
       <!-- Waypoint Selector -->

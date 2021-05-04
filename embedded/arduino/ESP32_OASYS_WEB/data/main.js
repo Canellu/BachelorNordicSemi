@@ -136,12 +136,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   M.Timepicker.init(document.querySelectorAll(".timepicker"), {
     twelveHour: false,
-    onCloseEnd: () => {
-      let instance = M.Timepicker.getInstance(
-        document.querySelector(".timepicker")
-      );
-      console.log(instance.time);
-    },
   });
 });
 

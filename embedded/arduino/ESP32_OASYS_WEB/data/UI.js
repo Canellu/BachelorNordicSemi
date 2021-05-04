@@ -147,6 +147,9 @@ function addWaypoint() {
     tbodyWP.innerHTML += row;
     waypoints.push({ lat, lng });
   }
+
+  wpLatInput.value = "";
+  wpLngInput.value = "";
 }
 
 // --------------------------------------------------------------------
@@ -154,5 +157,66 @@ function addWaypoint() {
 // --------------------------------------------------------------------
 
 function sendMissionParams() {
-  //websocket.send(daString)
+  let currentMissionNum = document.querySelector("#inputMissionNum").value;
+  let maxDepth = document.querySelector("#inputMaxDepth").value;
+  let minDepth = document.querySelector("#inputMinDepth").value;
+  let msgLimit4G = document.querySelector("#input4GLimit").value;
+  let startDate = document
+    .querySelector("#startDate")
+    .value.replaceAll("-", "");
+  let startTime = document
+    .querySelector("#startTime")
+    .value.replaceAll(":", "");
+  let conductivityFreq;
+  let pressureFreq;
+  let temperatureFreq;
+  condGroupBtns.forEach((btn) => {
+    if (btn.checked) {
+      conductivityFreq = freqModeToNum(btn.nextElementSibling.innerText);
+    }
+  });
+  presGroupBtns.forEach((btn) => {
+    if (btn.checked) {
+      pressureFreq = freqModeToNum(btn.nextElementSibling.innerText);
+    }
+  });
+  tempGroupBtns.forEach((btn) => {
+    if (btn.checked) {
+      temperatureFreq = freqModeToNum(btn.nextElementSibling.innerText);
+    }
+  });
+
+  let latArr = waypoints.map((obj) => Number(Number(obj.lat).toFixed(4)));
+  let lngArr = waypoints.map((obj) => Number(Number(obj.lng).toFixed(4)));
+
+  let params = {
+    M: parseInt(currentMissionNum),
+    "4G": parseInt(msgLimit4G),
+    C: conductivityFreq,
+    P: pressureFreq,
+    T: temperatureFreq,
+    lat: latArr,
+    lng: lngArr,
+    maxD: parseInt(maxDepth),
+    minD: parseInt(minDepth),
+    start: parseInt(startDate + startTime),
+  };
+
+  websocket.send(params);
+}
+function freqModeToNum(mode) {
+  switch (mode) {
+    case "High":
+      return 3;
+      break;
+    case "Medium":
+      return 2;
+      break;
+    case "Low":
+      return 1;
+      break;
+    case "None":
+      return 0;
+      break;
+  }
 }
