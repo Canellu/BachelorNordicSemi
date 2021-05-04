@@ -584,8 +584,9 @@ static int wifi_module(struct glider_t *glider)
 		}
 		else if (strcmp(wifi_response, "wifi_end") == 0)
 		{
-			printk("Received wifi end command\n");
+			printk("\nReceived wifi end command\n");
 			// uart_send(UART_2, "wifi_end;", strlen("wifi_end;"));
+			break;
 		}
 		else
 		{
@@ -840,6 +841,9 @@ void main(void)
 			set_LED(30, 1);
 			wifi_module(&glider);
 			set_LED(30, 0);
+
+			glider.event_prev = glider.event_now;
+			glider.event_now = EVT_AWAIT_MISSION;
 
 			break;
 		case EVT_DIVE:

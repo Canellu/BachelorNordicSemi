@@ -279,7 +279,7 @@ downloadBtn.addEventListener("click", () => {
   // Request filedata from NRF
   requestFile = requestList.shift();
   if (typeof requestFile !== "undefined") {
-    websocket.send(`D:${requestFile.name}\r`);
+    websocket.send(`D:${requestFile.name}`);
   }
 
   M.toast({
