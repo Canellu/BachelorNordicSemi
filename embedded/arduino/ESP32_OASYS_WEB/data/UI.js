@@ -148,3 +148,11 @@ function addWaypoint() {
     waypoints.push({ lat, lng });
   }
 }
+
+// --------------------------------------------------------------------
+// CONFIGURE BUTTON
+// --------------------------------------------------------------------
+
+function sendMissionParams() {
+  //websocket.send(daString)
+}
