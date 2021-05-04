@@ -394,11 +394,17 @@ if (!!window.EventSource) {
     false
   );
 
+  let lastEventId;
+
   source.addEventListener(
     "message",
     function (event) {
-      console.log("nrf_msg", event.data);
+      // console.log(event.data, event.lastEventId);
 
+      if (event.lastEventId == lastEventId)
+        return;
+
+      lastEventId = event.lastEventId;
       espString = event.data;
       // Populate files and update UI
       if (espString.includes("TXT")) {

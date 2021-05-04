@@ -134,8 +134,8 @@ let wpLatInput = document.querySelector("#wpLat");
 let wpLngInput = document.querySelector("#wpLng");
 let waypoints = [];
 function addWaypoint() {
-  let lat = wpLatInput.value;
-  let lng = wpLngInput.value;
+  let lat = Number(Number(wpLatInput.value).toFixed(4));
+  let lng = Number(Number(wpLngInput.value).toFixed(4));
 
   if (!(lat == "" || lng == "")) {
     let row = `<tr>
@@ -186,8 +186,8 @@ function sendMissionParams() {
     }
   });
 
-  let latArr = waypoints.map((obj) => Number(Number(obj.lat).toFixed(4)));
-  let lngArr = waypoints.map((obj) => Number(Number(obj.lng).toFixed(4)));
+  let latArr = waypoints.map((obj) => obj.lat);
+  let lngArr = waypoints.map((obj) => obj.lng);
 
   let params = {
     M: parseInt(currentMissionNum),
@@ -202,7 +202,7 @@ function sendMissionParams() {
     start: parseInt(startDate + startTime),
   };
 
-  websocket.send(params);
+  websocket.send(JSON.stringify(params));
 }
 function freqModeToNum(mode) {
   switch (mode) {

@@ -272,7 +272,7 @@ void awaitStart()
     char c = Serial2.read();
     if (c == '\r')
     {
-      if (strcmp(uart_rx, "wifi_start") == 0)
+      if (strstr(uart_rx, "wifi_start") != NULL)
       {
         Serial.println("Starting wifi");
         on_wifi = true;

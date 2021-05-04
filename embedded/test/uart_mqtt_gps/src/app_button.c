@@ -61,7 +61,7 @@ static void button_handler(uint32_t button_states, uint32_t has_changed)
 		}
 		if (has_changed == 2 && !gpio_pin_get(dev_gpio, 7))
 		{
-			uart_send(uart_dev1, MSG_3, sizeof(MSG_3));
+			uart_send(uart_dev1, MSG_3, strlen(MSG_3));
 		}
 		break;
 

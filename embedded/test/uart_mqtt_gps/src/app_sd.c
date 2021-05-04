@@ -164,7 +164,7 @@ static int send_all_file_info(const char *path)
 			printk("\n%s", file_data);
 			k_sleep(K_MSEC(10));
 
-			uart_send(UART_2, file_data, sizeof(file_data));
+			uart_send(UART_2, file_data, strlen(file_data));
 		}
 	}
 
@@ -200,7 +200,7 @@ static int read_file(char *file_path)
 
 	if (ret == 0)
 	{
-		uint8_t line[32] = "";
+		uint8_t line[256] = "";
 		while (1)
 		{
 			uint8_t buf[2] = "";
@@ -208,14 +208,21 @@ static int read_file(char *file_path)
 
 			// test for EOF
 			if (ret == 0)
+			{
+				// if any remaining strings, send
+				if (strlen(line) != 0)
+				{
+					uart_send(UART_2, line, strlen(line));
+					memset(line, 0, sizeof(line));
+				}
 				break;
+			}
 			// delimiter
 			else if (buf[0] == '\r')
 			{
 				// printk("line: %s %d\n", line, strlen(line));
 				uart_send(UART_2, line, strlen(line));
 				memset(line, 0, sizeof(line));
-				k_sleep(K_MSEC(2));
 			}
 			// if buffer full, send
 			else if (strlen(line) >= sizeof(line) - 3)
@@ -223,7 +230,6 @@ static int read_file(char *file_path)
 				strcat(line, buf);
 				uart_send(UART_2, line, strlen(line));
 				memset(line, 0, sizeof(line));
-				k_sleep(K_MSEC(2));
 			}
 			// add to string
 			else
@@ -233,7 +239,7 @@ static int read_file(char *file_path)
 
 			// //printk("%s", buffer);
 			// //strcat(buffer, ";");
-			// uart_send(UART_2, buffer, sizeof(buffer));
+			// uart_send(UART_2, buffer, strlen(buffer));
 
 			// memset(buffer, 0, sizeof(buffer));
 			// k_sleep(K_MSEC(20));
@@ -254,9 +260,84 @@ static int read_file(char *file_path)
 	return 0;
 }
 
-// reads per JSON
-static int read_JSON(char *file_path, uint32_t *cursor, int interval,
-					 int *current_msg_total, int msg_total)
+static int read_JSON(char *file_path, int json_total)
+{
+	int counter = 0;
+
+	// For catching return values from fs_functions
+	int ret = 1;
+
+	// Open file for reading, if file doesnt exist, create one.
+	struct fs_file_t file;
+	ret = fs_open(&file, file_path, FS_O_READ);
+
+	if (ret == 0)
+	{
+		uint8_t line[512] = "";
+		while (1)
+		{
+			uint8_t buf[2] = "";
+			ret = fs_read(&file, &buf, 1);
+
+			// test for EOF
+			if (ret == 0)
+			{
+				break;
+			}
+			// handling overflow
+			else if (strlen(line) >= sizeof(line) - 1)
+			{
+				printk("overflow, deleting str\n");
+				memset(line, 0, sizeof(line));
+			}
+			// delimiter
+			else if (buf[0] == '\r')
+			{
+				if (counter < json_total)
+				{
+					cJSON *line_JSON = cJSON_Parse(line);
+					if (cJSON_IsObject(line_JSON))
+					{
+						// printk("\n%s", line);
+						k_msgq_put(&main_msg_q, &line, K_NO_WAIT);
+					}
+					memset(line, 0, sizeof(line));
+					cJSON_Delete(line_JSON);
+
+					counter++;
+				}
+				else
+				{
+					break;
+				}
+			}
+			// filter for unwanted characters
+			else if (buf[0] == '\n')
+			{
+			}
+			// add to string
+			else
+			{
+				strcat(line, buf);
+			}
+		}
+
+		fs_close(&file);
+	}
+	else
+	{
+		uint8_t sd_msg_response[] = "ERROR";
+		k_msgq_put(&main_msg_q, &sd_msg_response, K_NO_WAIT);
+		printk("Error in reading file\n");
+		set_LED(21, 0);
+	}
+
+	return 0;
+}
+
+// reads per JSON, used only for 4G
+static int read_JSON_4G(char *file_path, uint32_t *cursor, int interval,
+						int *current_msg_total, int msg_total)
 {
 	int counter = 0;
 
@@ -336,6 +417,8 @@ static int read_JSON(char *file_path, uint32_t *cursor, int interval,
 	}
 	else
 	{
+		uint8_t sd_msg_response[] = "ERROR";
+		k_msgq_put(&main_msg_q, &sd_msg_response, K_NO_WAIT);
 		printk("Error in reading file\n");
 		set_LED(21, 0);
 	}
@@ -421,7 +504,7 @@ static int read_JSON_more_files(uint8_t *param_str, uint32_t *cursor,
 	while (strcmp(filenames[i], "") != 0)
 	{
 		create_file_path(file_path, filenames[i]);
-		read_JSON(file_path, cursor, interval, &current_msg_total, msg_total);
+		read_JSON_4G(file_path, cursor, interval, &current_msg_total, msg_total);
 		i++;
 	}
 	*file_size_prev = file_size;
@@ -590,6 +673,11 @@ void app_sd_thread(void *unused1, void *unused2, void *unused3)
 
 			break;
 		case READ_JSON:
+			create_file_path(file_path, sd_msg.filename);
+			read_JSON(file_path, 1);
+
+			break;
+		case READ_JSON_4G:
 			read_JSON_more_files(sd_msg.string, &cursor, &file_size_prev);
 
 			break;
