@@ -406,25 +406,6 @@
         </div>
       </div>
 
-      <!-- Datetime Pickers -->
-      <div class="row rounded-shadow bg-light" style="padding: 20px">
-        <!-- slider header -->
-        <h5 class="col s12">Start date & time</h5>
-        <!-- Datepicker -->
-        <input
-          id="startDate"
-          type="text"
-          class="datepicker col s12 m5 offset-m1"
-          placeholder="Start date"
-        />
-
-        <input
-          type="text"
-          class="timepicker col s12 m5 offset-m1"
-          placeholder="Start time"
-        />
-      </div>
-
       <!-- Frequency Selectors -->
       <div class="row rounded-shadow bg-light" style="padding: 20px">
         <h5>Logging frequencies</h5>
@@ -508,6 +489,78 @@
               <span class="radioText">Low</span>
             </label>
           </p>
+        </div>
+      </div>
+
+      <!-- Datetime Selector -->
+      <div class="row rounded-shadow bg-light" style="padding: 20px">
+        <!-- slider header -->
+        <h5 class="col s12">Start date & time</h5>
+        <!-- Datepicker -->
+        <input
+          id="startDate"
+          type="text"
+          class="datepicker col s3 offset-s3"
+          placeholder="Start date"
+          autocomplete="off"
+        />
+
+        <input type="text" class="timepicker col s3" placeholder="Start time" />
+      </div>
+
+      <!-- Waypoint Selector -->
+      <div class="row rounded-shadow bg-light" style="padding: 20px">
+        <h5>Waypoints</h5>
+
+        <form class="col s12">
+          <div class="row">
+            <div class="input-field col s3 offset-s3">
+              <input id="wpLat" type="number" style="padding-left: 10px" />
+              <label for="wpLat">Latitude</label>
+            </div>
+            <div class="input-field col s3">
+              <input id="wpLng" type="number" style="padding-left: 10px" />
+              <label for="wpLng">Longitude</label>
+            </div>
+            <div class="col s1">
+              <a
+                class="btn-floating btn-small waves-effect waves-light"
+                style="margin-top: 22px"
+                onclick="addWaypoint()"
+                >+</a
+              >
+            </div>
+          </div>
+        </form>
+
+        <div class="col s6 offset-s3">
+          <table>
+            <thead>
+              <tr>
+                <th>Number</th>
+                <th>Latitude</th>
+                <th>Longitude</th>
+              </tr>
+            </thead>
+
+            <tbody id="tbodyWP">
+              <tr>
+                <td>Alvin</td>
+                <td>Eclair</td>
+                <td>$0.87</td>
+              </tr>
+              <tr>
+                <td>Alan</td>
+                <td>Jellybean</td>
+                <td>$3.76</td>
+              </tr>
+              <tr>
+                <td>Jonathan</td>
+                <td>Lollipop</td>
+                <td>$7.00</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

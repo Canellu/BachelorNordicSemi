@@ -124,3 +124,27 @@ slider4GLimit.noUiSlider.on("update", function (values, handle) {
 input4GLimit.addEventListener("change", function () {
   slider4GLimit.noUiSlider.set([this.value]);
 });
+
+// --------------------------------------------------------------------
+// Waypoints
+// --------------------------------------------------------------------
+
+let tbodyWP = document.querySelector("#tbodyWP");
+let wpLatInput = document.querySelector("#wpLat");
+let wpLngInput = document.querySelector("#wpLng");
+let waypoints = [];
+function addWaypoint() {
+  let lat = wpLatInput.value;
+  let lng = wpLngInput.value;
+
+  if (!(lat == "" || lng == "")) {
+    let row = `<tr>
+                <td>${waypoints.length + 1}</td>
+                <td>${lat}</td>
+                <td>${lng}</td>
+               </tr>`;
+
+    tbodyWP.innerHTML += row;
+    waypoints.push({ lat, lng });
+  }
+}
