@@ -335,26 +335,70 @@ static int read_JSON(char *file_path, int json_total)
 	return 0;
 }
 
-// reads per JSON, used only for 4G
-static int read_JSON_4G(char *file_path, uint32_t *cursor, int interval,
-						int *current_msg_total, int msg_total)
+// reads JSON with more parameters specifically for 4G use, DO NOT USE ELSEWHERE
+static int read_JSON_4G(char *file_path, uint8_t *param_str, size_t file_size)
 {
+	uint32_t cursor = 0;
 	int counter = 0;
+	int interval = 0;
+	size_t file_part = 0;
 
-	// interval = 30; // json_total_first / msg_max;
+	int msg_max = 0;
+	int msg_cur = 0;
+	int wp_cur = 0;
 
-	printk("\nCursor: %d\n", *cursor);
+	if (strstr(param_str, "max:") != NULL)
+	{
+		char *ptr = strstr(param_str, "max:");
+		static char *eptr;
+
+		msg_max = strtol(ptr + 4, &eptr, 10);
+		printk("\nmessage max: %d", msg_max);
+
+		if (msg_max <= 0)
+		{
+			msg_max = 1;
+		}
+	}
+
+	if (strstr(param_str, "wp_cur:") != NULL)
+	{
+		char *ptr = strstr(param_str, "wp_cur:");
+		static char *eptr;
+
+		wp_cur = strtol(ptr + 7, &eptr, 10);
+		printk("\nwaypoint: %d", wp_cur);
+
+		if (wp_cur <= 0)
+		{
+			wp_cur = 1;
+		}
+	}
+
+	file_part = file_size / wp_cur;
+
+	interval = (file_part / json_size) / msg_max;
+	if (interval <= 0)
+	{
+		interval = 1;
+	}
+
+	cursor = file_part - file_size;
+	if (cursor < 0)
+	{
+		cursor = 0;
+	}
 
 	// For catching return values from fs_functions
 	int ret = 1;
 
-	// Open file for reading, if file doesnt exist, create one.
+	// Open file for reading
 	struct fs_file_t file;
 	ret = fs_open(&file, file_path, FS_O_READ);
-	fs_seek(&file, *cursor, FS_SEEK_SET);
 
 	if (ret == 0)
 	{
+		fs_seek(&file, cursor, FS_SEEK_SET);
 		uint8_t line[512] = "";
 		while (1)
 		{
@@ -380,17 +424,15 @@ static int read_JSON_4G(char *file_path, uint32_t *cursor, int interval,
 					cJSON *line_JSON = cJSON_Parse(line);
 					if (cJSON_IsObject(line_JSON))
 					{
-						// printk("\n%s", line);
+						// printk("\nline: %s", line);
 						k_msgq_put(&main_msg_q, &line, K_NO_WAIT);
-						(*current_msg_total)++;
+						msg_cur++;
 					}
 					memset(line, 0, sizeof(line));
 					cJSON_Delete(line_JSON);
 
-					if ((*current_msg_total) == msg_total)
+					if (msg_cur == msg_max)
 					{
-						(*current_msg_total) = 0;
-						(*cursor) = 0;
 						break;
 					}
 				}
@@ -410,16 +452,16 @@ static int read_JSON_4G(char *file_path, uint32_t *cursor, int interval,
 			}
 		}
 
-		uint8_t sd_msg_response[] = "OK";
+		uint8_t sd_msg_response[] = "EOF";
 		k_msgq_put(&main_msg_q, &sd_msg_response, K_NO_WAIT);
 
 		fs_close(&file);
 	}
 	else
 	{
+		printk("Error in reading file\n");
 		uint8_t sd_msg_response[] = "ERROR";
 		k_msgq_put(&main_msg_q, &sd_msg_response, K_NO_WAIT);
-		printk("Error in reading file\n");
 		set_LED(21, 0);
 	}
 
@@ -504,7 +546,7 @@ static int read_JSON_more_files(uint8_t *param_str, uint32_t *cursor,
 	while (strcmp(filenames[i], "") != 0)
 	{
 		create_file_path(file_path, filenames[i]);
-		read_JSON_4G(file_path, cursor, interval, &current_msg_total, msg_total);
+		//read_JSON_4G(file_path, cursor, interval, &current_msg_total, msg_total);
 		i++;
 	}
 	*file_size_prev = file_size;
@@ -515,10 +557,21 @@ static int read_JSON_more_files(uint8_t *param_str, uint32_t *cursor,
 // write into file, creates new file if it doesn't exist
 static int write_file(char *file_path, char *data, int size)
 {
-	struct fs_file_t file;
-	fs_open(&file, file_path, (FS_O_WRITE | FS_O_APPEND | FS_O_CREATE));
-	fs_write(&file, data, size);
-	fs_write(&file, "\r\n", strlen("\r\n"));
+	int ret = 1;
+	static struct fs_file_t file;
+	ret = fs_open(&file, file_path, (FS_O_WRITE | FS_O_APPEND | FS_O_CREATE));
+
+	if (ret == 0)
+	{
+		fs_write(&file, data, size);
+		fs_write(&file, "\r\n", strlen("\r\n"));
+	}
+	else
+	{
+		printk("Error in writing to file");
+		return ret;
+	}
+
 	fs_close(&file);
 
 	return 0;
@@ -534,15 +587,25 @@ static int overwrite_file(char *file_path, char *data, int size)
 	// check if file exists
 	if (ret == 0)
 	{
+		fs_close(&file);
 		printk("\nmission params exist");
 		fs_unlink(file_path);
 	}
-	fs_close(&file);
 
+	printk("\nattempting write");
 	ret = fs_open(&file, file_path, (FS_O_WRITE | FS_O_CREATE));
 
-	fs_write(&file, data, size);
-	fs_write(&file, "\r\n", strlen("\r\n"));
+	if (ret == 0)
+	{
+		fs_write(&file, data, size);
+		fs_write(&file, "\r\n", strlen("\r\n"));
+		printk("\nattempting close");
+	}
+	else
+	{
+		printk("\nError writing new parameters");
+		return ret;
+	}
 	fs_close(&file);
 
 	return 0;
@@ -625,7 +688,7 @@ void app_sd_thread(void *unused1, void *unused2, void *unused3)
 	char file_path[32] = "";
 
 	// helper variables for event read_JSON
-	size_t file_size_prev = 0;
+	size_t file_size = 0;
 	uint32_t cursor = 0;
 
 	set_LED(21, 1);
@@ -664,7 +727,7 @@ void app_sd_thread(void *unused1, void *unused2, void *unused3)
 			}
 			else
 			{
-				printk("File not found\n");
+				printk("Error\n");
 			}
 
 			break;
@@ -678,15 +741,14 @@ void app_sd_thread(void *unused1, void *unused2, void *unused3)
 
 			break;
 		case READ_JSON_4G:
-			read_JSON_more_files(sd_msg.string, &cursor, &file_size_prev);
+			create_file_path(file_path, sd_msg.filename);
+			file_size = look_for_file(disk_mount_pt, sd_msg.filename);
+			read_JSON_4G(file_path, sd_msg.string, file_size);
 
 			break;
 		case READ_FILE:
-			printk("\nReading file: %s\n", sd_msg.filename);
-			// create file path
 			create_file_path(file_path, sd_msg.filename);
 			read_file(file_path);
-			// printk("\nFile content:\n\n%s", file_text);
 
 			break;
 		default:
