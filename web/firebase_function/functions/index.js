@@ -4,9 +4,7 @@ const moment = require("moment-timezone");
 
 // The Firebase Admin SDK to access Firestore.
 const admin = require("firebase-admin");
-
 admin.initializeApp();
-
 const db = admin.firestore();
 
 const deviceId = "einarnrf9160dk";
@@ -99,7 +97,9 @@ exports.fromNRFtoFirestore = functions
     }
   });
 
+// ------------------------------------------------------------
 // From Rockblock Iridium Satellite
+// ------------------------------------------------------------
 exports.satellite = functions.https.onRequest(async (req, res) => {
   function hex_to_ascii(str1) {
     let hex = str1.toString();
