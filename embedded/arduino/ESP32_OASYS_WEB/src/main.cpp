@@ -53,6 +53,32 @@ void initSPIFFS()
 }
 
 // --------------------------------------------------
+// UART Utilities
+// --------------------------------------------------
+void flushSerial()
+{
+  while (Serial2.available() > 0)
+  {
+    Serial2.read();
+  }
+}
+
+void emptyUartBuffer()
+{
+  memset(uart_rx, 0, sizeof(uart_rx));
+  arr_rx = 0;
+}
+
+void wifiEnd()
+{
+  webSocket.closeAll();
+  webServer.end();
+  WiFi.mode(WIFI_OFF);
+  on_wifi = false;
+  flushSerial();
+}
+
+// --------------------------------------------------
 // Websocket
 // --------------------------------------------------
 
@@ -71,9 +97,14 @@ void handleWebSocketMessage(AsyncWebSocket *server,
     Serial.printf("ws[%s][%u] %s-message[%llu]: ", server->url(), client->id(), (info->opcode == WS_TEXT) ? "text" : "binary", info->len);
     if (info->opcode == WS_TEXT)
     {
+      if (strstr((char *)data, "wifi_end") != NULL)
+      {
+        Serial.println("Wifi ending...");
+        wifiEnd();
+      }
       data[len] = 0;
       Serial.printf("%s\n", (char *)data);
-      Serial2.printf("%s", (char *)data);
+      Serial2.printf("%s\r", (char *)data);
     }
     // else
     // {
@@ -219,23 +250,6 @@ void initMDNS()
 }
 
 // --------------------------------------------------
-// UART Utilities
-// --------------------------------------------------
-void flushSerial()
-{
-  while (Serial2.available() > 0)
-  {
-    Serial2.read();
-  }
-}
-
-void emptyUartBuffer()
-{
-  memset(uart_rx, 0, sizeof(uart_rx));
-  arr_rx = 0;
-}
-
-// --------------------------------------------------
 // Start WiFi and initialize Server and Socket
 // --------------------------------------------------
 void wifiBegin()
@@ -254,14 +268,6 @@ void wifiBegin()
   webServer.addHandler(&events);
 }
 
-void wifiEnd()
-{
-  webSocket.closeAll();
-  webServer.end();
-  WiFi.mode(WIFI_OFF);
-  on_wifi = false;
-  flushSerial();
-}
 // --------------------------------------------------
 // Waits for start command from nRF
 // --------------------------------------------------
@@ -272,7 +278,7 @@ void awaitStart()
     char c = Serial2.read();
     if (c == '\r')
     {
-      if (strcmp(uart_rx, "wifi_start") == 0)
+      if (strstr(uart_rx, "wifi_start") != NULL)
       {
         Serial.println("Starting wifi");
         on_wifi = true;
@@ -316,16 +322,8 @@ void loop()
       Serial.print(c);
       if (c == '\r')
       {
-        if (strcmp(uart_rx, "wifi_end") == 0)
-        {
-          Serial.println("Wifi ending...");
-          wifiEnd();
-        }
-        else
-        {
-          // sendToClients(uart_rx);
-          events.send(uart_rx, NULL, millis());
-        }
+        // sendToClients(uart_rx);
+        events.send(uart_rx, NULL, millis());
         memset(uart_rx, 0, sizeof(uart_rx));
         arr_rx = 0;
       }

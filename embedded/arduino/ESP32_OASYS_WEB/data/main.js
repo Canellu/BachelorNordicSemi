@@ -279,7 +279,7 @@ downloadBtn.addEventListener("click", () => {
   // Request filedata from NRF
   requestFile = requestList.shift();
   if (typeof requestFile !== "undefined") {
-    websocket.send(`D:${requestFile.name}\r`);
+    websocket.send(`D:${requestFile.name}`);
   }
 
   M.toast({
@@ -394,11 +394,17 @@ if (!!window.EventSource) {
     false
   );
 
+  let lastEventId;
+
   source.addEventListener(
     "message",
     function (event) {
-      console.log("nrf_msg", event.data);
+      // console.log(event.data, event.lastEventId);
 
+      if (event.lastEventId == lastEventId)
+        return;
+
+      lastEventId = event.lastEventId;
       espString = event.data;
       // Populate files and update UI
       if (espString.includes("TXT")) {

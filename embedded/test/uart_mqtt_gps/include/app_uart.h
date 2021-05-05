@@ -11,6 +11,6 @@ enum uart_device_type
 void uart_dev_init(enum uart_device_type uart_dev_no);
 void uart_start(enum uart_device_type uart_dev_no);
 void uart_exit(enum uart_device_type uart_dev_no);
-void uart_send(enum uart_device_type uart_dev_no, void *msg, size_t len);
+void uart_send(enum uart_device_type uart_dev_no, char *msg, size_t len);
 
 #endif

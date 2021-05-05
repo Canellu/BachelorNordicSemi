@@ -5,6 +5,7 @@
 enum sd_event_type
 {
     READ_JSON,
+    READ_JSON_4G,
     FIND_FILE,
     SEND_FILE_INFO,
     READ_FILE,

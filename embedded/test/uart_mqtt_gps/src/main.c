@@ -282,7 +282,7 @@ static int publish_data_4G()
 		strcat(msg_param, "\r");
 	}
 
-	sd_msg.event = READ_JSON;
+	sd_msg.event = READ_JSON_4G;
 	strcpy(sd_msg.string, msg_param);
 
 	// printk("\n%s", sd_msg.string);
@@ -443,7 +443,7 @@ static int sensor_module()
 	uint32_t time_millis = ((current_hour * 60 * 60) + (current_minute * 60) + current_seconds) * 1000;
 	snprintf(time_millis_str, sizeof(time_millis_str), "time:%u", time_millis);
 
-	uart_send(uart_dev1, time_millis_str, sizeof(time_millis_str));
+	uart_send(uart_dev1, time_millis_str, strlen(time_millis_str));
 
 	printk("\nsensor test start\n");
 
@@ -518,7 +518,7 @@ static int sensor_module()
 	return 0;
 }
 
-static int wifi_module()
+static int wifi_module(struct glider_t *glider)
 {
 	int err = 0;
 
@@ -543,7 +543,22 @@ static int wifi_module()
 
 		if (strcmp(wifi_response, "connected") == 0)
 		{
+			uint8_t sd_msg_response[512] = "";
+
 			sd_msg_t sd_msg;
+			sd_msg.event = READ_JSON;
+			strcpy(sd_msg.filename, "1111.TXT");
+
+			k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
+
+			k_msgq_get(&main_msg_q, &sd_msg_response, K_FOREVER);
+
+			if (strcmp(sd_msg_response, "ERROR") != 0)
+			{
+				printk("\n%s", sd_msg_response);
+				// uart_send(UART_2, sd_msg_response, strlen(sd_msg_response));
+			}
+
 			sd_msg.event = SEND_FILE_INFO;
 			k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
 
@@ -569,8 +584,9 @@ static int wifi_module()
 		}
 		else if (strcmp(wifi_response, "wifi_end") == 0)
 		{
-			printk("Received wifi end command\n");
+			printk("\nReceived wifi end command\n");
 			// uart_send(UART_2, "wifi_end;", strlen("wifi_end;"));
+			break;
 		}
 		else
 		{
@@ -817,14 +833,17 @@ void main(void)
 			// set_LED(22, 0);
 
 			glider.event_prev = glider.event_now;
-			glider.event_now = EVT_SURFACE;
+			glider.event_now = EVT_AWAIT_MISSION;
 
 			break;
 		case EVT_AWAIT_MISSION:
 			// turn on wifi
 			set_LED(30, 1);
-			wifi_module();
+			wifi_module(&glider);
 			set_LED(30, 0);
+
+			glider.event_prev = glider.event_now;
+			glider.event_now = EVT_AWAIT_MISSION;
 
 			break;
 		case EVT_DIVE:

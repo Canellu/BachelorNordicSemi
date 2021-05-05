@@ -15,7 +15,7 @@ const struct device *dev_uart1;
 const struct device *dev_uart2;
 
 static uint8_t rx_buf[256];
-static uint8_t tx_buf[256];
+static uint8_t tx_buf[40];
 
 static void uart_cb(const struct device *dev_uart, void *context)
 {
@@ -26,9 +26,11 @@ static void uart_cb(const struct device *dev_uart, void *context)
 	if (uart_irq_tx_ready(dev_uart))
 	{
 		LOG_INF("%s", log_strdup(tx_buf));
+		unsigned int key = irq_lock();
 		(void)uart_fifo_fill(dev_uart, tx_buf, strlen(tx_buf));
-		memset(tx_buf, 0, sizeof(tx_buf));
 		uart_irq_tx_disable(dev_uart);
+		memset(tx_buf, 0, sizeof(tx_buf));
+		irq_unlock(key);
 	}
 
 	// read uart msg, only reads in JSON format
@@ -121,25 +123,56 @@ void uart_exit(enum uart_device_type uart_dev_no)
 }
 
 // send data to uart device
-void uart_send(enum uart_device_type uart_dev_no, void *msg, size_t len)
+void uart_send(enum uart_device_type uart_dev_no, char *msg, size_t len)
 {
-	strcpy(tx_buf, msg);
-	strcat(tx_buf, "\r");
-	strcat(tx_buf, "\0");
-
-	switch (uart_dev_no)
+	if (len > 254)
 	{
-	case UART_1:
-		uart_irq_tx_enable(dev_uart1);
-		break;
-
-	case UART_2:
-		uart_irq_tx_enable(dev_uart2);
-		break;
+		printk("\nmax UART string is 254 characters");
 	}
-	// printk("\n%s", tx_buf);
-}
+	else
+	{
+		int char_cnt = 0;
 
+		for (int i = 0; i < len; i++)
+		{
+			// add characters to uart buffer
+			tx_buf[char_cnt++] = msg[i];
+
+			// if uart buffer filled
+			if ((char_cnt == 32) || (i == (len - 1)))
+			{
+				char_cnt = 0;
+
+				switch (uart_dev_no)
+				{
+				case UART_1:
+					uart_irq_tx_enable(dev_uart1);
+					break;
+
+				case UART_2:
+					uart_irq_tx_enable(dev_uart2);
+					break;
+				}
+				k_sleep(K_MSEC(5));
+			}
+		}
+
+		strcat(tx_buf, "\r");
+		strcat(tx_buf, "\0");
+
+		switch (uart_dev_no)
+		{
+		case UART_1:
+			uart_irq_tx_enable(dev_uart1);
+			break;
+
+		case UART_2:
+			uart_irq_tx_enable(dev_uart2);
+			break;
+		}
+		k_sleep(K_MSEC(5));
+	}
+}
 /* Function ideas and TODOs
 
 - specify UART to use
