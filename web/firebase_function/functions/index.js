@@ -35,8 +35,8 @@ exports.fromFirestoreToNRF = functions
     let missionNum = Number(context.params.mission.split(" ")[1]);
     const { WP, ...rest } = data;
 
-    let latArr = WP.map((latlng) => Number(latlng.split(",")[0]));
-    let lngArr = WP.map((latlng) => Number(latlng.split(",")[1]));
+    let latArr = WP.map((latlng) => latlng.split(",")[0]);
+    let lngArr = WP.map((latlng) => latlng.split(",")[1]);
 
     let toSendData = {
       M: missionNum,
@@ -45,7 +45,7 @@ exports.fromFirestoreToNRF = functions
       ...rest,
     };
 
-    // console.log("-------- DATA OBJCET TO SEND: -------------- ", toSendData);
+    console.log("-------- DATA OBJCET TO SEND: -------------- ", toSendData);
 
     const stringData = JSON.stringify(toSendData);
     const binaryData = Buffer.from(stringData);
