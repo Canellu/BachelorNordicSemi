@@ -4,9 +4,7 @@ const moment = require("moment-timezone");
 
 // The Firebase Admin SDK to access Firestore.
 const admin = require("firebase-admin");
-
 admin.initializeApp();
-
 const db = admin.firestore();
 
 const deviceId = "einarnrf9160dk";
@@ -34,8 +32,22 @@ exports.fromFirestoreToNRF = functions
     // compare change.before with change.after
     const data = change.after.data();
 
-    console.log(data);
-    const stringData = JSON.stringify(data);
+    let missionNum = Number(context.params.mission.split(" ")[1]);
+    const { WP, ...rest } = data;
+
+    let latArr = WP.map((latlng) => latlng.split(",")[0]);
+    let lngArr = WP.map((latlng) => latlng.split(",")[1]);
+
+    let toSendData = {
+      M: missionNum,
+      lat: latArr,
+      lng: lngArr,
+      ...rest,
+    };
+
+    console.log("-------- DATA OBJCET TO SEND: -------------- ", toSendData);
+
+    const stringData = JSON.stringify(toSendData);
     const binaryData = Buffer.from(stringData);
     const request = {
       name: formattedName,
@@ -85,40 +97,44 @@ exports.fromNRFtoFirestore = functions
     }
   });
 
+// ------------------------------------------------------------
 // From Rockblock Iridium Satellite
-exports.satellite = functions.https.onRequest(async (req, res) => {
-  function hex_to_ascii(str1) {
-    let hex = str1.toString();
-    let str = "";
-    for (var n = 0; n < hex.length; n += 2) {
-      str += String.fromCharCode(parseInt(hex.substr(n, 2), 16));
+// ------------------------------------------------------------
+exports.satellite = functions
+  .region("europe-west1")
+  .https.onRequest(async (req, res) => {
+    function hex_to_ascii(str1) {
+      let hex = str1.toString();
+      let str = "";
+      for (var n = 0; n < hex.length; n += 2) {
+        str += String.fromCharCode(parseInt(hex.substr(n, 2), 16));
+      }
+      return str;
     }
-    return str;
-  }
 
-  let payload = JSON.parse(req.rawBody.toString());
-  let gliders = await db.collection("Gliders").get();
+    let payload = JSON.parse(req.rawBody.toString());
+    let gliders = await db.collection("Gliders").get();
 
-  gliders.forEach(async (glider) => {
-    let gliderFields = await db.collection("Gliders").doc(glider.id).get();
+    gliders.forEach(async (glider) => {
+      let gliderFields = await db.collection("Gliders").doc(glider.id).get();
 
-    if (gliderFields.data()["Sat IMEI"] == payload.imei) {
-      let utcDate = moment(
-        "20" + payload.transmit_time.replace(" ", "T") + "Z"
-      );
-      let localTime = utcDate.tz("Europe/Oslo").format("YYYY-MM-DD HH:mm:ss");
-
-      db.collection("Gliders")
-        .doc(glider.id)
-        .set(
-          {
-            "Last seen": hex_to_ascii(payload.data),
-            "Last sync": localTime,
-          },
-          { merge: true }
+      if (gliderFields.data()["Sat IMEI"] == payload.imei) {
+        let utcDate = moment(
+          "20" + payload.transmit_time.replace(" ", "T") + "Z"
         );
-    }
-  });
+        let localTime = utcDate.tz("Europe/Oslo").format("YYYY-MM-DD HH:mm:ss");
 
-  res.status(200).send();
-});
+        db.collection("Gliders")
+          .doc(glider.id)
+          .set(
+            {
+              "Last seen": hex_to_ascii(payload.data),
+              "Last sync": localTime,
+            },
+            { merge: true }
+          );
+      }
+    });
+
+    res.status(200).send();
+  });

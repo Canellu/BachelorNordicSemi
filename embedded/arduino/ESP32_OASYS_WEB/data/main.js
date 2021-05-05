@@ -32,6 +32,7 @@ var requestFile;
 var requestDataReceived = 0;
 var requestTotalSize = 0;
 var espString = "";
+let missionNumFromNrf = 0;
 
 var checkValAll = true;
 
@@ -366,6 +367,11 @@ function endConnection() {
   websocket.send("wifi_end\r");
 }
 
+function updateMissionNum() {
+  document.querySelector("#missionNumFromNrf").innerHTML = missionNumFromNrf;
+  document.querySelector("#inputMissionNum").value = missionNumFromNrf + 1;
+}
+
 // DUMMY DATA
 // for (let i = 0; i < 20; i++) {
 //   addFileRow(20202020 + i, i + 100);
@@ -401,8 +407,14 @@ if (!!window.EventSource) {
     function (event) {
       // console.log(event.data, event.lastEventId);
 
-      if (event.lastEventId == lastEventId)
-        return;
+      if (event.lastEventId == lastEventId) return;
+
+      // Updates mission number if NRF sent it.
+      if (event.data.includes('"M":')) {
+        let dataJSON = JSON.parse(event.data);
+        missionNumFromNrf = dataJSON.M;
+        updateMissionNum();
+      }
 
       lastEventId = event.lastEventId;
       espString = event.data;

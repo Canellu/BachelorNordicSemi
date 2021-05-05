@@ -1,12 +1,12 @@
-var dataTabBtn = document.querySelector("#data-tab-btn");
-var controlTabBtn = document.querySelector("#control-tab-btn");
-var satelliteTabBtn = document.querySelector("#satellite-tab-btn");
-var dataTab = document.querySelector("#data-tab");
-var controlTab = document.querySelector("#control-tab");
-var satelliteTab = document.querySelector("#satellite-tab");
-var tabUnderline = document.querySelector("#tabUnderline");
-var dropDownBtn = document.querySelector(".dropDownBtn");
-var dropDownContent = document.querySelector(".dropDownContent");
+let dataTabBtn = document.querySelector("#data-tab-btn");
+let controlTabBtn = document.querySelector("#control-tab-btn");
+let satelliteTabBtn = document.querySelector("#satellite-tab-btn");
+let dataTab = document.querySelector("#data-tab");
+let controlTab = document.querySelector("#control-tab");
+let satelliteTab = document.querySelector("#satellite-tab");
+let tabUnderline = document.querySelector("#tabUnderline");
+let dropDownBtn = document.querySelector(".dropDownBtn");
+let dropDownContent = document.querySelector(".dropDownContent");
 
 // DATA TAB BUTTON
 dataTabBtn.addEventListener("click", () => {
@@ -34,7 +34,7 @@ controlTabBtn.addEventListener("click", () => {
   satelliteTab.classList.add("hidden");
 
   if (typeof missionMap == "undefined") {
-    //initMissionMap();
+    initMissionMap();
   }
 
   document.querySelector("#latestMissionNumber").innerText =

@@ -55,9 +55,9 @@ function populateHomeMap(glider) {
   if (typeof latlng != "undefined") {
     let datetime = glider.data()["Last sync"];
     let alias = glider.data()["Alias"];
-    latlng = JSON.parse("{" + latlng + "}");
-    location = { t: datetime, lat: latlng.lat, lng: latlng.lng };
-
+    let lat = latlng.split(",")[0].replace(/^\D+/g, "");
+    let lng = latlng.split(",")[1].replace(/^\D+/g, "");
+    location = { t: datetime, lat: Number(lat), lng: Number(lng) };
     addHomeMarkers(location, alias);
   }
 }
