@@ -263,8 +263,9 @@ yesMissionParamsBtn.addEventListener("click", async () => {
     .querySelector("#previewTime")
     .innerText.replaceAll(":", "");
 
+  let datetime = Number(date + time);
   let missionParameters = {
-    start: `${date}${time}`,
+    start: datetime,
   };
 
   // Add preview params into object for sending
@@ -313,7 +314,7 @@ yesMissionParamsBtn.addEventListener("click", async () => {
     let lat = waypoint.lat().toFixed(4);
     let lng = waypoint.lng().toFixed(4);
     // console.log({ lat, lng });
-    waypointsToSend.push(`${lat}+${lng}`);
+    waypointsToSend.push(`${lat},${lng}`);
   });
 
   missionParameters["WP"] = waypointsToSend;
@@ -326,12 +327,12 @@ yesMissionParamsBtn.addEventListener("click", async () => {
     "Mission " + (latestMission + 1);
 
   // COMMENT TO ENABLE/DISABLE MISSION PARAM SEND!
-  // let missions = await db
-  //   .collection("Gliders")
-  //   .doc(gliderUID)
-  //   .collection("Missions")
-  //   .doc(latestMissionNumber)
-  //   .set(missionParameters);
+  let missions = await db
+    .collection("Gliders")
+    .doc(gliderUID)
+    .collection("Missions")
+    .doc(latestMissionNumber)
+    .set(missionParameters);
 
   confirmMissionParamsBtn.style.transform = "scale(0)";
   sendMissionParamsBtn.style.transform = "scale(1)";

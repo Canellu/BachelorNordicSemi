@@ -34,21 +34,22 @@ exports.fromFirestoreToNRF = functions
     // compare change.before with change.after
     const data = change.after.data();
 
-    console.log(data);
-    console.log(data.WP);
+    let missionNum = Number(context.params.mission.split(" ")[1]);
+    const { WP, ...rest } = data;
 
-    let newData;
+    let latArr = WP.map((latlng) => Number(latlng.split(",")[0]));
+    let lngArr = WP.map((latlng) => Number(latlng.split(",")[1]));
 
-    const { C, P, T, maxD, minD, start } = newData;
+    let toSendData = {
+      M: missionNum,
+      lat: latArr,
+      lng: lngArr,
+      ...rest,
+    };
 
-    console.log({ newData });
+    // console.log("-------- DATA OBJCET TO SEND: -------------- ", toSendData);
 
-    let latArr = data.WP.map((obj) => obj.split(",")[0]);
-    let lngArr = data.WP.map((obj) => obj.split(",")[1]);
-
-    console.log({ latArr, lngArr });
-
-    const stringData = JSON.stringify(data);
+    const stringData = JSON.stringify(toSendData);
     const binaryData = Buffer.from(stringData);
     const request = {
       name: formattedName,
