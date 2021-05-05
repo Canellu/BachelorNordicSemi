@@ -34,7 +34,7 @@ controlTabBtn.addEventListener("click", () => {
   satelliteTab.classList.add("hidden");
 
   if (typeof missionMap == "undefined") {
-    //initMissionMap();
+    initMissionMap();
   }
 
   document.querySelector("#latestMissionNumber").innerText =

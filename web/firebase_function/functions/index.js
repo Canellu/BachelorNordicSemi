@@ -35,6 +35,19 @@ exports.fromFirestoreToNRF = functions
     const data = change.after.data();
 
     console.log(data);
+    console.log(data.WP);
+
+    let newData;
+
+    const { C, P, T, maxD, minD, start } = newData;
+
+    console.log({ newData });
+
+    let latArr = data.WP.map((obj) => obj.split(",")[0]);
+    let lngArr = data.WP.map((obj) => obj.split(",")[1]);
+
+    console.log({ latArr, lngArr });
+
     const stringData = JSON.stringify(data);
     const binaryData = Buffer.from(stringData);
     const request = {

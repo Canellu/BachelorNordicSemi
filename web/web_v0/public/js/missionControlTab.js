@@ -325,6 +325,7 @@ yesMissionParamsBtn.addEventListener("click", async () => {
   document.querySelector("#latestMissionNumber").innerText =
     "Mission " + (latestMission + 1);
 
+  // COMMENT TO ENABLE/DISABLE MISSION PARAM SEND!
   // let missions = await db
   //   .collection("Gliders")
   //   .doc(gliderUID)
