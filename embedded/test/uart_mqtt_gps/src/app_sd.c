@@ -14,8 +14,8 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <cJSON.h>
 #include <logging/log.h>
+#include <cJSON.h>
 
 #include "app_button.h"
 #include "app_uart.h"
@@ -134,7 +134,7 @@ static int send_all_file_info(const char *path)
 	static struct fs_dirent entry;
 
 	uint8_t file_data[128] = "";
-	uint8_t temp_str[16] = "";
+	uint8_t tmp_str[16] = "";
 
 	res = fs_opendir(&dirp, path);
 	if (res)
@@ -160,8 +160,8 @@ static int send_all_file_info(const char *path)
 
 			memset(file_data, 0, sizeof(file_data));
 			strcat(file_data, entry.name);
-			snprintf(temp_str, sizeof(temp_str), ":%u", entry.size);
-			strcat(file_data, temp_str);
+			snprintf(tmp_str, sizeof(tmp_str), ":%u", entry.size);
+			strcat(file_data, tmp_str);
 
 			LOG_INF("%s", log_strdup(file_data));
 			k_sleep(K_MSEC(10)); // TODO
@@ -502,15 +502,10 @@ static int overwrite_file(char *file_path, char *data, int size)
 	int ret = 1;
 	struct fs_file_t file;
 
-	ret = fs_open(&file, file_path, 0);
+	// ret = fs_open(&file, file_path, 0);
 
-	// check if file exists
-	if (ret == 0)
-	{
-		fs_close(&file);
-		LOG_INF("Deleting existing mission parameters");
-		fs_unlink(file_path);
-	}
+	LOG_INF("Deleting existing mission parameters");
+	fs_unlink(file_path);
 
 	ret = fs_open(&file, file_path, (FS_O_WRITE | FS_O_CREATE));
 
@@ -540,7 +535,7 @@ static int mountSD()
 	{
 		if (disk_access_init(disk_pdrv) != 0)
 		{
-			printk("Storage init ERROR!");
+			LOG_ERR("Storage init ERROR!");
 			set_LED(21, 0);
 			break;
 		}
@@ -548,23 +543,23 @@ static int mountSD()
 		if (disk_access_ioctl(disk_pdrv,
 							  DISK_IOCTL_GET_SECTOR_COUNT, &block_count))
 		{
-			printk("Unable to get sector count");
+			LOG_ERR("Unable to get sector count");
 			set_LED(21, 0);
 			break;
 		}
-		printk("Block count %u", block_count);
+		LOG_INF("Block count %u", block_count);
 
 		if (disk_access_ioctl(disk_pdrv,
 							  DISK_IOCTL_GET_SECTOR_SIZE, &block_size))
 		{
-			printk("Unable to get sector size");
+			LOG_ERR("Unable to get sector size");
 			set_LED(21, 0);
 			break;
 		}
-		printk("Sector size %u\n", block_size);
+		LOG_INF("Sector size %u", block_size);
 
 		memory_size_mb = (uint64_t)block_count * block_size;
-		printk("Memory Size(MB) %u\n", (uint32_t)(memory_size_mb >> 20));
+		LOG_INF("Memory Size(MB) %u", (uint32_t)(memory_size_mb >> 20));
 
 		mp.mnt_point = disk_mount_pt;
 
@@ -572,12 +567,12 @@ static int mountSD()
 
 		if (res == FR_OK)
 		{
-			printk("Disk mounted.\n");
+			LOG_INF("Disk mounted.");
 			lsdir(disk_mount_pt);
 		}
 		else
 		{
-			printk("Error mounting disk.\n");
+			LOG_ERR("Error mounting disk.");
 			set_LED(21, 0);
 			return res;
 		}
@@ -615,7 +610,7 @@ void app_sd_thread(void *unused1, void *unused2, void *unused3)
 		// get msg from main
 		k_msgq_get(&sd_msg_q, &sd_msg, K_FOREVER);
 
-		// printk("\n%s %s\n", sd_msg.filename, sd_msg.string);
+		// LOG_INF("\n%s %s\n", log_strdup(sd_msg.filename), log_strdup(sd_msg.string));
 
 		switch (sd_msg.event)
 		{

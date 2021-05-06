@@ -11,9 +11,9 @@
 #include <string.h>
 #include <modem/at_cmd.h>
 #include <modem/at_notif.h>
+#include <cJSON.h>
 
 #include "app_gps.h"
-#include <cJSON.h>
 
 #ifdef CONFIG_SUPL_CLIENT_LIB
 #include <supl_os_client.h>
@@ -414,29 +414,29 @@ static int gps_struct_to_JSON(void *gps_str, nrf_gnss_data_frame_t *pvt_data)
 
 	uint8_t ts_string[64] = "";
 	uint8_t date_string[64] = "";
-	uint8_t temp_str[16] = "";
+	uint8_t tmp_str[16] = "";
 
-	snprintf(temp_str, sizeof(temp_str), "%.4f", pvt_data->pvt.latitude);
-	cJSON_AddStringToObject(gps_data, "lat", temp_str);
+	snprintf(tmp_str, sizeof(tmp_str), "%.4f", pvt_data->pvt.latitude);
+	cJSON_AddStringToObject(gps_data, "lat", tmp_str);
 
-	snprintf(temp_str, sizeof(temp_str), "%.4f", pvt_data->pvt.longitude);
-	cJSON_AddStringToObject(gps_data, "lng", temp_str);
+	snprintf(tmp_str, sizeof(tmp_str), "%.4f", pvt_data->pvt.longitude);
+	cJSON_AddStringToObject(gps_data, "lng", tmp_str);
 
 	// adding date to JSON
-	snprintf(temp_str, sizeof(temp_str), "%02u-", pvt_data->pvt.datetime.year);
-	strcat(date_string, temp_str);
-	snprintf(temp_str, sizeof(temp_str), "%02u-", pvt_data->pvt.datetime.month);
-	strcat(date_string, temp_str);
-	snprintf(temp_str, sizeof(temp_str), "%02u", pvt_data->pvt.datetime.day);
-	strcat(date_string, temp_str);
+	snprintf(tmp_str, sizeof(tmp_str), "%02u-", pvt_data->pvt.datetime.year);
+	strcat(date_string, tmp_str);
+	snprintf(tmp_str, sizeof(tmp_str), "%02u-", pvt_data->pvt.datetime.month);
+	strcat(date_string, tmp_str);
+	snprintf(tmp_str, sizeof(tmp_str), "%02u", pvt_data->pvt.datetime.day);
+	strcat(date_string, tmp_str);
 
 	// adding timestamp to JSON
-	snprintf(temp_str, sizeof(temp_str), "%02u:", pvt_data->pvt.datetime.hour);
-	strcat(ts_string, temp_str);
-	snprintf(temp_str, sizeof(temp_str), "%02u:", pvt_data->pvt.datetime.minute);
-	strcat(ts_string, temp_str);
-	snprintf(temp_str, sizeof(temp_str), "%02u", pvt_data->pvt.datetime.seconds);
-	strcat(ts_string, temp_str);
+	snprintf(tmp_str, sizeof(tmp_str), "%02u:", pvt_data->pvt.datetime.hour);
+	strcat(ts_string, tmp_str);
+	snprintf(tmp_str, sizeof(tmp_str), "%02u:", pvt_data->pvt.datetime.minute);
+	strcat(ts_string, tmp_str);
+	snprintf(tmp_str, sizeof(tmp_str), "%02u", pvt_data->pvt.datetime.seconds);
+	strcat(ts_string, tmp_str);
 
 	cJSON_AddItemToObject(gps_JSON, "data", gps_data);
 	cJSON_AddStringToObject(gps_JSON, "dt", date_string);
