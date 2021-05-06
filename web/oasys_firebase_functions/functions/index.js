@@ -151,6 +151,23 @@ exports.fromGliderToDatabase = functions
         .collection("Data")
         .doc(logDate)
         .set({ [logTime]: data }, { merge: true });
+
+      //TODO: check if data contains latlng, if yes
+      // change glider last seen in database.
+      if (data.includes("lat")) {
+        let lat = dataJSON.data.lat;
+        let lng = dataJSON.data.lng;
+
+        await db
+          .collection("Gliders")
+          .doc(gliderId)
+          .set(
+            {
+              "Last seen": `lat: ${lat}, lng:${lng}`,
+            },
+            { merge: true }
+          );
+      }
     }
   });
 
