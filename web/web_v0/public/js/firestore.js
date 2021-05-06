@@ -10,6 +10,21 @@ function randNum(min, max) {
   return Math.floor(Math.random() * max) + min;
 }
 
+function intToLogFrequency(num) {
+  switch (num) {
+    case 3:
+      return "High";
+    case 2:
+      return "Medium";
+    case 1:
+      return "Low";
+    case 0:
+      return "None";
+    default:
+      return "None";
+  }
+}
+
 // ------------  End Helpers  ---------------
 
 // Creates dummy Gliders with GX as name X = number 1 -> something
@@ -23,7 +38,7 @@ function createGliders() {
 
   today = yyyy + "-" + mm + "-" + dd;
 
-  for (let i = 1; i <= 3; i++) {
+  for (let i = 1; i <= 1; i++) {
     let gliderID = randNum(100000, 899999).toString();
     db.collection("Gliders")
       .doc(gliderID)
@@ -31,18 +46,21 @@ function createGliders() {
         Alias: `G${i}`,
         Added: today,
         "Last sync": today,
+        "Last seen": "",
+        "Sat IMEI": randNum(100000000000000, 899999999999999),
+        "Sat Payload": "",
       });
   }
 }
 
 let numDocs = 8;
-let day = 1;
+let day = 5;
 // Create documents with timestamp consisting of JSON data for each glider
 function createMission(gliderID, missionNum) {
   console.log("Creating doc for: ", gliderID);
   let year = 2021;
 
-  let month = 3;
+  let month = 4;
   let date = `${year}-${pad(month)}-${pad(day)}`;
   let hour = randNum(0, 23);
   let min = randNum(0, 59);
@@ -54,13 +72,14 @@ function createMission(gliderID, missionNum) {
     .collection("Missions")
     .doc("Mission " + missionNum)
     .set({
-      start: `${date} ${timestamp}`,
+      start: `${date.replaceAll("-", "")}${pad(hour)}${pad(min)}`,
       end: `${year}-${pad(month)}-${pad(day + 1 + numDocs)} ${timestamp}`,
-      freqP: randNum(1, 10),
-      freqT: randNum(1, 10),
-      freqC: randNum(1, 10),
+      P: intToLogFrequency(randNum(0, 3)),
+      T: intToLogFrequency(randNum(0, 3)),
+      C: intToLogFrequency(randNum(0, 3)),
       minD: randNum(1, 20),
       maxD: randNum(100, 200),
+      ["4G"]: randNum(0, 100),
     });
 
   // Date Doc
@@ -119,6 +138,5 @@ async function createGliderData() {
     createMission(glider.id, 2);
   });
 }
-
 // createGliders();
 // createGliderData();

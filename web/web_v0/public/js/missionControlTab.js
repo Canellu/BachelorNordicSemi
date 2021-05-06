@@ -63,9 +63,9 @@ function createSlider(title, min, max, start) {
 }
 
 let sliderList = [
-  { title: "Conductivity", min: 0, max: 20, start: 0 },
-  { title: "Pressure", min: 0, max: 20, start: 0 },
-  { title: "Temperature", min: 0, max: 20, start: 0 },
+  // { title: "Conductivity", min: 0, max: 20, start: 0 },
+  // { title: "Pressure", min: 0, max: 20, start: 0 },
+  // { title: "Temperature", min: 0, max: 20, start: 0 },
   { title: "Min Depth", min: 0, max: 300, start: 0 },
   { title: "Max Depth", min: 0, max: 300, start: 0 },
 ];
@@ -76,7 +76,37 @@ sliderList.forEach((obj) => {
 sliderList.forEach((obj) => {
   createSlider(obj.title, obj.min, obj.max, obj.start);
 });
-createSlider("4GData", 0, 1000, 0);
+let max4GMsg = 100;
+createSlider("4GData", 0, max4GMsg, 0);
+document.querySelector("#messageMaxLimit").innerText = max4GMsg;
+
+// *********************** RADIO BUTTONS *******************************
+let tempGroupBtns = document.querySelectorAll("input[name=temperatureGroup]");
+let condGroupBtns = document.querySelectorAll("input[name=conductivityGroup]");
+let presGroupBtns = document.querySelectorAll("input[name=pressureGroup]");
+
+function setPreviewRadioVal() {
+  tempGroupBtns.forEach((btn) => {
+    if (btn.checked) {
+      document.querySelector("#previewTemperature").innerText =
+        btn.nextElementSibling.innerText;
+    }
+  });
+
+  condGroupBtns.forEach((btn) => {
+    if (btn.checked) {
+      document.querySelector("#previewConductivity").innerText =
+        btn.nextElementSibling.innerText;
+    }
+  });
+
+  presGroupBtns.forEach((btn) => {
+    if (btn.checked) {
+      document.querySelector("#previewPressure").innerText =
+        btn.nextElementSibling.innerText;
+    }
+  });
+}
 
 // *********************** WAYPOINTS ***********************************
 
@@ -232,6 +262,7 @@ let noMissionParamsBtn = document.querySelector("#noMissionParams");
 let resetMissionParamsBtn = document.querySelector("#resetMissionParams");
 let sliderPreviews = document.querySelectorAll("#previewParams [id^=preview]");
 
+// --------- RESET BUTTON ---------------
 resetMissionParamsBtn.addEventListener("click", () => {
   // Reset sliders inside ParamsDiv to 0
   document.querySelectorAll("#sliders [id^=slider]").forEach((slider) => {
@@ -255,6 +286,7 @@ resetMissionParamsBtn.addEventListener("click", () => {
   missionWaypoints.getPath().clear();
 });
 
+// --------- YES BUTTON ---------------
 yesMissionParamsBtn.addEventListener("click", async () => {
   let date = document
     .querySelector("#previewDate")
@@ -263,7 +295,7 @@ yesMissionParamsBtn.addEventListener("click", async () => {
     .querySelector("#previewTime")
     .innerText.replaceAll(":", "");
 
-  let datetime = Number(date + time);
+  let datetime = date + time;
   let missionParameters = {
     start: datetime,
   };
@@ -281,17 +313,17 @@ yesMissionParamsBtn.addEventListener("click", async () => {
 
       case "Conductivity":
         propertyName = "C";
-        propertyVal = Number(propertyVal);
+        propertyVal = propertyVal;
         break;
 
       case "Pressure":
         propertyName = "P";
-        propertyVal = Number(propertyVal);
+        propertyVal = propertyVal;
         break;
 
       case "Temperature":
         propertyName = "T";
-        propertyVal = Number(propertyVal);
+        propertyVal = propertyVal;
         break;
 
       case "MinDepth":
@@ -345,6 +377,7 @@ yesMissionParamsBtn.addEventListener("click", async () => {
   console.log("clicked yes");
 });
 
+// --------- NO BUTTON ---------------
 noMissionParamsBtn.addEventListener("click", () => {
   confirmMissionParamsBtn.style.transform = "scale(0)";
   sendMissionParamsBtn.style.transform = "scale(1)";
@@ -355,6 +388,7 @@ noMissionParamsBtn.addEventListener("click", () => {
   }, 200);
 });
 
+// --------- SEND BUTTON ---------------
 sendMissionParamsBtn.addEventListener("click", () => {
   sendMissionParamsBtn.style.transform = "scale(0)";
   confirmMissionParamsBtn.style.transform = "scale(1)";

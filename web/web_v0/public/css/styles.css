@@ -80,6 +80,14 @@ body {
   user-select: none;
 }
 
+#radioButtonsBox label {
+  @apply text-sm cursor-pointer;
+}
+
+input[type="radio"] {
+  cursor: pointer;
+}
+
 .rounded-shadow {
   @apply rounded-md shadow-md border;
 }

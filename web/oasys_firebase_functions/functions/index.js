@@ -7,31 +7,18 @@ const admin = require("firebase-admin");
 admin.initializeApp();
 const db = admin.firestore();
 
-const deviceId = "einarnrf9160dk";
-const cloudRegion = "europe-west1";
-const registryId = "OasysFleet";
-const projectId = "nordicoasys";
-
 const iotClient = new iot.v1.DeviceManagerClient({
   // optional auth parameters.
 });
 
-const formattedName = iotClient.devicePath(
-  projectId,
-  cloudRegion,
-  registryId,
-  deviceId
-);
-
 // To Glider
-exports.fromFirestoreToNRF = functions
+exports.fromDatabaseToGlider = functions
   .region("europe-west2")
   .firestore.document("Gliders/{gliderId}/Missions/{mission}")
   .onWrite(async (change, context) => {
     // TODO: Check only for changes in commands, do not send all
     // compare change.before with change.after
     const data = change.after.data();
-
     // Helper function
     function logLevelToInt(logLevel) {
       switch (logLevel) {
@@ -47,6 +34,8 @@ exports.fromFirestoreToNRF = functions
     }
 
     let missionNum = Number(context.params.mission.split(" ")[1]);
+    let gliderId = "G" + context.params.gliderId;
+
     const { WP, C, P, T, ...rest } = data;
 
     let latArr = WP.map((latlng) => latlng.split(",")[0]);
@@ -62,7 +51,14 @@ exports.fromFirestoreToNRF = functions
       ...rest,
     };
 
-    console.log("-------- DATA OBJCET TO SEND: -------------- ", toSendData);
+    console.log("-------- DATA OBJECT TO SEND: -------------- ", toSendData);
+
+    const formattedName = iotClient.devicePath(
+      "oasys-2d5b2",
+      "europe-west1",
+      "oasys_gliders",
+      gliderId
+    );
 
     const stringData = JSON.stringify(toSendData);
     const binaryData = Buffer.from(stringData);
@@ -79,6 +75,8 @@ exports.fromFirestoreToNRF = functions
     //   console.error("Could not send command:", err);
     // }
 
+    console.log(context);
+
     try {
       const configResponse = await iotClient.modifyCloudToDeviceConfig(request);
 
@@ -89,7 +87,7 @@ exports.fromFirestoreToNRF = functions
   });
 
 // From Glider
-exports.fromNRFtoFirestore = functions
+exports.fromGliderToDatabase = functions
   .region("europe-west2")
   .pubsub.topic("data")
   .onPublish(async (message, context) => {
@@ -97,27 +95,69 @@ exports.fromNRFtoFirestore = functions
     // const messageBody = message.data
     //   ? Buffer.from(message.data, "base64").toString()
     //   : null;
-    console.log("GLIDER UID: " + message.attributes.deviceId);
 
+    // console.log("GLIDER UID: " + message.attributes.deviceId);
+
+    let gliderId = message.attributes.deviceId.substring(1);
     let utcDate = moment(context.timestamp);
     let localTime = utcDate.tz("Europe/Oslo").format("YYYY-MM-DD HH:mm:ss");
-    console.log("utcDate: " + utcDate);
-    console.log("localTime: " + localTime);
+
+    // console.log("utcDate: " + utcDate);
+    // console.log("localTime: " + localTime);
+
+    // Timestamp on when glider last communicated through 4G
+    await db.collection("Gliders").doc(gliderId).set(
+      {
+        "Last sync": localTime,
+      },
+      { merge: true }
+    );
 
     let dataJSON = null;
     try {
       dataJSON = message.json;
       console.log("JSON: ", dataJSON);
-      // await db.collection("fromNRF").add(dataJSON);
     } catch (e) {
       console.error("PubSub message was not JSON", e);
+    }
+
+    // If glider sent data properly
+    //add it to corresponding mission in database
+    if (dataJSON != null) {
+      let missionNum = dataJSON.M;
+      let logDate = dataJSON.ts.slice(0, 8);
+      let logTime = dataJSON.ts.slice(8);
+      let data = JSON.stringify(dataJSON.data).slice(1, -1);
+
+      logDate =
+        logDate.slice(0, 4) +
+        "-" +
+        logDate.slice(4, 6) +
+        "-" +
+        logDate.slice(6);
+
+      logTime =
+        logTime.slice(0, 2) +
+        ":" +
+        logTime.slice(2, 4) +
+        ":" +
+        logTime.slice(4);
+
+      await db
+        .collection("Gliders")
+        .doc(gliderId)
+        .collection("Missions")
+        .doc("Mission " + missionNum)
+        .collection("Data")
+        .doc(logDate)
+        .set({ [logTime]: data }, { merge: true });
     }
   });
 
 // ------------------------------------------------------------
 // From Rockblock Iridium Satellite
 // ------------------------------------------------------------
-exports.satellite = functions
+exports.fromGliderSatellite = functions
   .region("europe-west2")
   .https.onRequest(async (req, res) => {
     function hex_to_ascii(str1) {

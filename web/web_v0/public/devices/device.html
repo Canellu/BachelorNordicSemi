@@ -32,13 +32,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.js"></script>
 
     <!-- Firebase CORE -->
-    <script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.5.0/firebase-app.js"></script>
 
     <!-- Firebase Firestore -->
-    <script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.5.0/firebase-firestore.js"></script>
 
     <!-- Firebase Authentication -->
-    <script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.5.0/firebase-auth.js"></script>
 
     <!-- Material Icon -->
     <link
@@ -209,7 +209,9 @@
                 id="slider4GData"
                 class="cursor-pointer flex-grow mx-6 relative"
               >
-                <span class="absolute text-xs right-1">1000</span>
+                <span id="messageMaxLimit" class="absolute text-xs right-1"
+                  >Number</span
+                >
               </div>
 
               <input
@@ -225,13 +227,141 @@
 
         <!-- Parameters & Waypoints -->
         <div class="container m-auto flex w-full space-x-4">
-          <!-- Sliders -->
+          <!-- Sliders & Radios -->
           <div
             id="sliders"
             class="flex flex-col flex-grow space-y-6 rounded-shadow p-2 bg-light overflow-auto"
             style="max-height: 500px"
           >
-            <h1 class="text-lg text-center font-medium">Parameters</h1>
+            <h1 class="text-lg pl-6 pt-6 font-medium">Parameters</h1>
+            <h2 class="font-medium tracking-wide text-center">
+              Logging frequencies
+            </h2>
+
+            <div id="radioButtonsBox" class="flex justify-around">
+              <div class="flex flex-col space-y-3">
+                <h4 class="font-medium">Temperature</h4>
+                <div>
+                  <input
+                    type="radio"
+                    id="tempHigh"
+                    name="temperatureGroup"
+                    onclick="setPreviewRadioVal()"
+                  />
+                  <label for="tempHigh">High</label>
+                </div>
+                <div>
+                  <input
+                    type="radio"
+                    id="tempMed"
+                    name="temperatureGroup"
+                    onclick="setPreviewRadioVal()"
+                  />
+                  <label for="tempMed">Medium</label>
+                </div>
+                <div>
+                  <input
+                    type="radio"
+                    id="tempLow"
+                    name="temperatureGroup"
+                    onclick="setPreviewRadioVal()"
+                  />
+                  <label for="tempLow">Low</label>
+                </div>
+                <div>
+                  <input
+                    type="radio"
+                    id="tempNone"
+                    name="temperatureGroup"
+                    onclick="setPreviewRadioVal()"
+                    checked
+                  />
+                  <label for="tempNone">None</label>
+                </div>
+              </div>
+
+              <div class="flex flex-col space-y-3">
+                <h4 class="font-medium">Conductivity</h4>
+                <div>
+                  <input
+                    type="radio"
+                    id="condHigh"
+                    name="conductivityGroup"
+                    onclick="setPreviewRadioVal()"
+                  />
+                  <label for="condHigh">High</label>
+                </div>
+                <div>
+                  <input
+                    type="radio"
+                    id="condMed"
+                    name="conductivityGroup"
+                    onclick="setPreviewRadioVal()"
+                  />
+                  <label for="condMed">Medium</label>
+                </div>
+                <div>
+                  <input
+                    type="radio"
+                    id="condLow"
+                    name="conductivityGroup"
+                    onclick="setPreviewRadioVal()"
+                  />
+                  <label for="condLow">Low</label>
+                </div>
+                <div>
+                  <input
+                    type="radio"
+                    id="condNone"
+                    name="conductivityGroup"
+                    onclick="setPreviewRadioVal()"
+                    checked
+                  />
+                  <label for="condNone">None</label>
+                </div>
+              </div>
+
+              <div class="flex flex-col space-y-3">
+                <h4 class="font-medium">Pressure</h4>
+                <div>
+                  <input
+                    type="radio"
+                    id="presHigh"
+                    name="pressureGroup"
+                    onclick="setPreviewRadioVal()"
+                  />
+                  <label for="presHigh">High</label>
+                </div>
+                <div>
+                  <input
+                    type="radio"
+                    id="presMed"
+                    name="pressureGroup"
+                    onclick="setPreviewRadioVal()"
+                  />
+                  <label for="presMed">Medium</label>
+                </div>
+                <div>
+                  <input
+                    type="radio"
+                    id="presLow"
+                    name="pressureGroup"
+                    onclick="setPreviewRadioVal()"
+                  />
+                  <label for="presLow">Low</label>
+                </div>
+                <div>
+                  <input
+                    type="radio"
+                    id="presNone"
+                    name="pressureGroup"
+                    onclick="setPreviewRadioVal()"
+                    checked
+                  />
+                  <label for="presNone">None</label>
+                </div>
+              </div>
+            </div>
           </div>
 
           <!-- Waypoints-->
@@ -322,6 +452,18 @@
               </div>
 
               <div id="previewParams" class="flex flex-col space-y-3">
+                <div class="flex justify-between border-b">
+                  <p>Temperature:</p>
+                  <p id="previewTemperature">None</p>
+                </div>
+                <div class="flex justify-between border-b">
+                  <p>Conductivity:</p>
+                  <p id="previewConductivity">None</p>
+                </div>
+                <div class="flex justify-between border-b">
+                  <p>Pressure:</p>
+                  <p id="previewPressure">None</p>
+                </div>
                 <div class="flex justify-between border-b">
                   <p>4G Limit:</p>
                   <p id="preview4GData">0</p>
@@ -497,7 +639,7 @@
 
     <!-- MAPS API with KEY -->
     <script
-      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDZzRUT3kmnRoWV-slmYqcUkPn8hS9BQUw&callback=&libraries=&v=weekly"
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBZdOYcDNzgN42ME1STKLgJpyWucvOatYg&callback=initDataMap&libraries=&v=weekly"
       async
     ></script>
     <script src="../js/map.js"></script>
