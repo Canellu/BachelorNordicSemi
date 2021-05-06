@@ -15,11 +15,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <cJSON.h>
+#include <logging/log.h>
 
 #include "app_button.h"
 #include "app_uart.h"
 #include "app_sd.h"
-// #include "cJSON.h"
+
+LOG_MODULE_REGISTER(app_sd);
 
 extern struct k_msgq main_msg_q;
 extern struct k_msgq sd_msg_q;
@@ -36,7 +38,7 @@ static struct fs_mount_t mp = {
 *  in ffconf.h
 */
 static const char *disk_mount_pt = "/SD:";
-static const int json_size = 50; // rough length (bytes) of each json object
+static const int json_size = 70; // rough length (bytes) of each json object
 
 static int lsdir(const char *path)
 {
@@ -48,12 +50,12 @@ static int lsdir(const char *path)
 	res = fs_opendir(&dirp, path);
 	if (res)
 	{
-		printk("Error opening dir %s [%d]\n", path, res);
+		LOG_ERR("Error opening dir %s [%d]", path, res);
 		set_LED(21, 0);
 		return res;
 	}
 
-	printk("\nListing dir %s ...\n", path);
+	LOG_INF("Listing dir %s ...", log_strdup(path));
 	for (;;)
 	{
 		/* Verify fs_readdir() */
@@ -67,12 +69,12 @@ static int lsdir(const char *path)
 
 		if (entry.type == FS_DIR_ENTRY_DIR)
 		{
-			printk("[DIR ] %s\n", entry.name);
+			LOG_INF("[DIR ] %s", log_strdup(entry.name));
 		}
 		else
 		{
-			printk("[FILE] %s (size = %zu)\n",
-				   entry.name, entry.size);
+			LOG_INF("[FILE] %s (size = %zu)",
+					log_strdup(entry.name), entry.size);
 		}
 	}
 
@@ -91,7 +93,7 @@ static int look_for_file(const char *path, const char *filename)
 	res = fs_opendir(&dirp, path);
 	if (res)
 	{
-		printk("Error opening dir %s [%d]\n", path, res);
+		LOG_ERR("Error opening dir %s [%d]", log_strdup(path), res);
 		set_LED(21, 0);
 		return res;
 	}
@@ -109,7 +111,7 @@ static int look_for_file(const char *path, const char *filename)
 
 		if (entry.type == FS_DIR_ENTRY_FILE)
 		{
-			// printk("%s\n", entry.name);
+			// LOG_INF("%s", log_strdup(entry.name));
 
 			if (strcmp(entry.name, filename) == 0)
 			{
@@ -137,7 +139,7 @@ static int send_all_file_info(const char *path)
 	res = fs_opendir(&dirp, path);
 	if (res)
 	{
-		printk("Error opening dir %s [%d]\n", path, res);
+		LOG_ERR("Error opening dir %s [%d]", log_strdup(path), res);
 		set_LED(21, 0);
 		return res;
 	}
@@ -161,8 +163,8 @@ static int send_all_file_info(const char *path)
 			snprintf(temp_str, sizeof(temp_str), ":%u", entry.size);
 			strcat(file_data, temp_str);
 
-			printk("\n%s", file_data);
-			k_sleep(K_MSEC(10));
+			LOG_INF("%s", log_strdup(file_data));
+			k_sleep(K_MSEC(10)); // TODO
 
 			uart_send(UART_2, file_data, strlen(file_data));
 		}
@@ -177,19 +179,19 @@ static int send_all_file_info(const char *path)
 // Create absolute path for filename
 static void create_file_path(char *file_path, char *filename)
 {
-
 	// empty file_path
 	strcpy(file_path, "");
 
 	strcat(file_path, disk_mount_pt);
 	strcat(file_path, "/");
 	strcat(file_path, filename);
+
+	// LOG_INF("file path: %s", log_strdup(file_path));
 }
 
 // reads entire file
 static int read_file(char *file_path)
 {
-
 	// For catching return values from fs_functions
 	int ret = 1;
 
@@ -220,7 +222,7 @@ static int read_file(char *file_path)
 			// delimiter
 			else if (buf[0] == '\r')
 			{
-				// printk("line: %s %d\n", line, strlen(line));
+				// LOG_INF("line: %s %d", log_strdup(line), strlen(line));
 				uart_send(UART_2, line, strlen(line));
 				memset(line, 0, sizeof(line));
 			}
@@ -237,29 +239,30 @@ static int read_file(char *file_path)
 				strcat(line, buf);
 			}
 
-			// //printk("%s", buffer);
+			// //LOG_INF("%s", log_strdup(buffer));
 			// //strcat(buffer, ";");
 			// uart_send(UART_2, buffer, strlen(buffer));
 
 			// memset(buffer, 0, sizeof(buffer));
 			// k_sleep(K_MSEC(20));
 		}
-		k_sleep(K_MSEC(10));
+		k_sleep(K_MSEC(10)); // TODO
 		uart_send(UART_2, "EOF", strlen("EOF"));
 
-		printk("\nFinished reading file");
+		LOG_INF("Finished reading file");
 
 		fs_close(&file);
 	}
 	else
 	{
-		printk("Error in reading file\n");
+		LOG_ERR("Error in reading file");
 		set_LED(21, 0);
 	}
 
 	return 0;
 }
 
+// reads JSONs up to requested total
 static int read_JSON(char *file_path, int json_total)
 {
 	int counter = 0;
@@ -287,7 +290,7 @@ static int read_JSON(char *file_path, int json_total)
 			// handling overflow
 			else if (strlen(line) >= sizeof(line) - 1)
 			{
-				printk("overflow, deleting str\n");
+				LOG_INF("overflow, deleting str");
 				memset(line, 0, sizeof(line));
 			}
 			// delimiter
@@ -298,7 +301,7 @@ static int read_JSON(char *file_path, int json_total)
 					cJSON *line_JSON = cJSON_Parse(line);
 					if (cJSON_IsObject(line_JSON))
 					{
-						// printk("\n%s", line);
+						// LOG_INF("%s", log_strdup(line));
 						k_msgq_put(&main_msg_q, &line, K_NO_WAIT);
 					}
 					memset(line, 0, sizeof(line));
@@ -328,7 +331,7 @@ static int read_JSON(char *file_path, int json_total)
 	{
 		uint8_t sd_msg_response[] = "ERROR";
 		k_msgq_put(&main_msg_q, &sd_msg_response, K_NO_WAIT);
-		printk("Error in reading file\n");
+		LOG_ERR("Error in reading JSONs");
 		set_LED(21, 0);
 	}
 
@@ -353,7 +356,7 @@ static int read_JSON_4G(char *file_path, uint8_t *param_str, size_t file_size)
 		static char *eptr;
 
 		msg_max = strtol(ptr + 4, &eptr, 10);
-		printk("\nmessage max: %d", msg_max);
+		LOG_INF("message max: %d", msg_max);
 
 		if (msg_max <= 0)
 		{
@@ -367,7 +370,7 @@ static int read_JSON_4G(char *file_path, uint8_t *param_str, size_t file_size)
 		static char *eptr;
 
 		wp_cur = strtol(ptr + 7, &eptr, 10);
-		printk("\nwaypoint: %d", wp_cur);
+		LOG_INF("waypoint: %d", wp_cur);
 
 		if (wp_cur <= 0)
 		{
@@ -382,6 +385,7 @@ static int read_JSON_4G(char *file_path, uint8_t *param_str, size_t file_size)
 	{
 		interval = 1;
 	}
+	LOG_INF("interval: %d", interval);
 
 	cursor = file_part - file_size;
 	if (cursor < 0)
@@ -408,12 +412,13 @@ static int read_JSON_4G(char *file_path, uint8_t *param_str, size_t file_size)
 			// test for EOF
 			if (ret == 0)
 			{
+				LOG_INF("EOF");
 				break;
 			}
 			// handling overflow
 			else if (strlen(line) >= sizeof(line) - 1)
 			{
-				printk("overflow, deleting str\n");
+				LOG_INF("overflow, deleting str");
 				memset(line, 0, sizeof(line));
 			}
 			// delimiter
@@ -424,7 +429,7 @@ static int read_JSON_4G(char *file_path, uint8_t *param_str, size_t file_size)
 					cJSON *line_JSON = cJSON_Parse(line);
 					if (cJSON_IsObject(line_JSON))
 					{
-						// printk("\nline: %s", line);
+						// LOG_INF("line: %s", log_strdup(line));
 						k_msgq_put(&main_msg_q, &line, K_NO_WAIT);
 						msg_cur++;
 					}
@@ -452,104 +457,18 @@ static int read_JSON_4G(char *file_path, uint8_t *param_str, size_t file_size)
 			}
 		}
 
-		uint8_t sd_msg_response[] = "EOF";
+		uint8_t sd_msg_response[] = "EOM";
 		k_msgq_put(&main_msg_q, &sd_msg_response, K_NO_WAIT);
 
 		fs_close(&file);
 	}
 	else
 	{
-		printk("Error in reading file\n");
+		LOG_ERR("Error in reading JSON for 4G");
 		uint8_t sd_msg_response[] = "ERROR";
 		k_msgq_put(&main_msg_q, &sd_msg_response, K_NO_WAIT);
 		set_LED(21, 0);
 	}
-
-	return 0;
-}
-
-// used for reading multiple files, runs read_JSON on each file
-static int read_JSON_more_files(uint8_t *param_str, uint32_t *cursor,
-								size_t *file_size_prev)
-{
-	char file_path[32] = "";
-
-	uint8_t filenames[8][16] = {""};
-	uint8_t tmp_str[16];
-
-	size_t file_size_total = 0;
-	size_t file_size = 0;
-	int msg_total = 0;
-	int current_msg_total = 0;
-	int interval = 1;
-
-	// counters
-	int param_str_arr = 0;
-	int tmp_str_arr = 0;
-	int filenames_arr = 0;
-	int i = 0;
-
-	// parse string into parameters and filenames
-	for (param_str_arr = 0; param_str_arr < strlen(param_str); param_str_arr++)
-	{
-		// msg total on delim
-		if (param_str[param_str_arr] == '\r' && i == 0)
-		{
-			tmp_str[tmp_str_arr] = 0;
-			// printk("\n%s", tmp_str);
-			msg_total = strtol(tmp_str, NULL, 10);
-
-			memset(tmp_str, 0, sizeof(tmp_str));
-			tmp_str_arr = 0;
-			i++;
-		}
-		// filenames on delim
-		else if (param_str[param_str_arr] == '\r' && i > 0)
-		{
-			tmp_str[tmp_str_arr] = 0;
-			// printk("\n%s", tmp_str);
-			strcpy(filenames[filenames_arr++], tmp_str);
-
-			memset(tmp_str, 0, sizeof(tmp_str));
-			tmp_str_arr = 0;
-			i++;
-		}
-		// appending character
-		else
-		{
-			tmp_str[tmp_str_arr++] = param_str[param_str_arr];
-		}
-	}
-
-	i = 0;
-	while (strcmp(filenames[i], "") != 0)
-	{
-		file_size = look_for_file(disk_mount_pt, filenames[i]);
-		if (file_size >= 0)
-		{
-			file_size_total += file_size;
-		}
-
-		i++;
-	}
-	// how many "jumps" between messages
-	interval = ((file_size_total - *file_size_prev) / json_size) / msg_total;
-
-	// guard in case interval is rounded to zero.
-	if (!interval)
-	{
-		interval = 1;
-	}
-	// printk("\n%d", interval);
-
-	i = 0;
-	while (strcmp(filenames[i], "") != 0)
-	{
-		create_file_path(file_path, filenames[i]);
-		//read_JSON_4G(file_path, cursor, interval, &current_msg_total, msg_total);
-		i++;
-	}
-	*file_size_prev = file_size;
 
 	return 0;
 }
@@ -559,6 +478,7 @@ static int write_file(char *file_path, char *data, int size)
 {
 	int ret = 1;
 	static struct fs_file_t file;
+
 	ret = fs_open(&file, file_path, (FS_O_WRITE | FS_O_APPEND | FS_O_CREATE));
 
 	if (ret == 0)
@@ -568,7 +488,7 @@ static int write_file(char *file_path, char *data, int size)
 	}
 	else
 	{
-		printk("Error in writing to file");
+		LOG_ERR("Error in writing to file");
 		return ret;
 	}
 
@@ -579,8 +499,8 @@ static int write_file(char *file_path, char *data, int size)
 
 static int overwrite_file(char *file_path, char *data, int size)
 {
-	struct fs_file_t file;
 	int ret = 1;
+	struct fs_file_t file;
 
 	ret = fs_open(&file, file_path, 0);
 
@@ -588,22 +508,20 @@ static int overwrite_file(char *file_path, char *data, int size)
 	if (ret == 0)
 	{
 		fs_close(&file);
-		printk("\nmission params exist");
+		LOG_INF("Deleting existing mission parameters");
 		fs_unlink(file_path);
 	}
 
-	printk("\nattempting write");
 	ret = fs_open(&file, file_path, (FS_O_WRITE | FS_O_CREATE));
 
 	if (ret == 0)
 	{
 		fs_write(&file, data, size);
 		fs_write(&file, "\r\n", strlen("\r\n"));
-		printk("\nattempting close");
 	}
 	else
 	{
-		printk("\nError writing new parameters");
+		LOG_ERR("Error writing new parameters");
 		return ret;
 	}
 	fs_close(&file);
@@ -613,7 +531,6 @@ static int overwrite_file(char *file_path, char *data, int size)
 
 static int mountSD()
 {
-
 	static const char *disk_pdrv = "SD";
 	uint64_t memory_size_mb;
 	uint32_t block_count;
@@ -669,27 +586,25 @@ static int mountSD()
 	return 0;
 }
 
-static int copy_sd_msg(sd_msg_t *sd_msg_dest, sd_msg_t *sd_msg_source)
-{
-	sd_msg_dest->event = sd_msg_source->event;
-	strcpy(sd_msg_dest->filename, sd_msg_source->filename);
-	strcpy(sd_msg_dest->string, sd_msg_source->string);
+// static int copy_sd_msg(sd_msg_t *sd_msg_dest, sd_msg_t *sd_msg_source)
+// {
+// 	sd_msg_dest->event = sd_msg_source->event;
+// 	strcpy(sd_msg_dest->filename, sd_msg_source->filename);
+// 	strcpy(sd_msg_dest->string, sd_msg_source->string);
 
-	return 0;
-}
+// 	return 0;
+// }
 
 void app_sd_thread(void *unused1, void *unused2, void *unused3)
 {
 	int ret = 0;
 
-	sd_msg_t sd_msg_prev;
+	// sd_msg_t sd_msg_prev;
 	sd_msg_t sd_msg;
 
 	char file_path[32] = "";
-
-	// helper variables for event read_JSON
+	// helper variables for event READ_JSON_4G
 	size_t file_size = 0;
-	uint32_t cursor = 0;
 
 	set_LED(21, 1);
 
@@ -705,21 +620,16 @@ void app_sd_thread(void *unused1, void *unused2, void *unused3)
 		switch (sd_msg.event)
 		{
 		case WRITE_FILE:
-			// create file path
 			create_file_path(file_path, sd_msg.filename);
 			write_file(file_path, sd_msg.string, strlen(sd_msg.string));
 
 			break;
 		case OVERWRITE_FILE:
-			printk("\nIn overwrite file");
-			// create file path
 			create_file_path(file_path, sd_msg.filename);
 			overwrite_file(file_path, sd_msg.string, strlen(sd_msg.string));
 
 			break;
 		case FIND_FILE:
-
-			// find specified file
 			ret = look_for_file(disk_mount_pt, sd_msg.filename);
 			if (ret >= 0)
 			{
@@ -727,7 +637,7 @@ void app_sd_thread(void *unused1, void *unused2, void *unused3)
 			}
 			else
 			{
-				printk("Error\n");
+				LOG_ERR("Error locating file");
 			}
 
 			break;
@@ -752,9 +662,9 @@ void app_sd_thread(void *unused1, void *unused2, void *unused3)
 
 			break;
 		default:
-			printk("\nUnknown SD event type");
+			LOG_ERR("Unknown SD event type");
 
 		} // switch case end
-		copy_sd_msg(&sd_msg_prev, &sd_msg);
+		  // copy_sd_msg(&sd_msg_prev, &sd_msg);
 	}
 }

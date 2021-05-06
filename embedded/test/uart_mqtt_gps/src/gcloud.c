@@ -18,7 +18,7 @@
 #include <nrf_modem.h>
 
 #include "gcloud.h"
-#include "cJSON.h"
+#include <cJSON.h>
 
 #include "globalsign.inc"
 

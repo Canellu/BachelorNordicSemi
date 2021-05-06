@@ -15,7 +15,7 @@
 #include "app_gps.h"
 #include "app_sd.h"
 #include "gcloud.h"
-#include "cJSON.h"
+#include <cJSON.h>
 
 LOG_MODULE_REGISTER(main);
 
@@ -26,7 +26,9 @@ static K_THREAD_STACK_DEFINE(sd_stack_area, 4096);
 static struct k_thread sd_thread;
 k_tid_t sd_tid;
 
-/* STRUCTS AND ENUMS */
+// --------------------------------------------------
+// STRUCTS AND ENUMS
+// --------------------------------------------------
 
 // Enumerations
 
@@ -70,9 +72,10 @@ struct mission_param_t
 	int mission;
 	int depth_max;
 	int depth_min;
-	uint8_t unsent_data_files[10][32];
+	int msg_sent;
 	int msg_max;
-	double wp_arr[10][2];
+	uint8_t unsent_data_files[10][32]; // TODO: check if this is necessary
+	uint8_t wp_arr[10][2][16];
 	int wp_max;
 	int wp_cur;
 	struct mission_start_t mission_start;
@@ -88,7 +91,9 @@ struct glider_t
 	bool mission_started;
 };
 
-/* VARIABLE DECLARATIONS */
+// --------------------------------------------------
+// VARIABLE DECLARATIONS
+// --------------------------------------------------
 
 struct glider_t glider;
 static const char file_mission[] = "M_PARAM.TXT";
@@ -138,7 +143,9 @@ static int current_hour = -1;
 static int current_minute = -1;
 static int current_seconds = -1;
 
-/* FUNCTION DECLARATIONS */
+// --------------------------------------------------
+// FUNCTION DECLARATIONS
+// --------------------------------------------------
 
 /* HELPER FUNCTIONS */
 
@@ -174,7 +181,7 @@ static int sd_save_data(void *data_string)
 	sd_msg_t sd_msg;
 	sd_msg.event = WRITE_FILE;
 
-	// printk("saving to sd card\n");
+	// LOG_INF("saving to sd card");
 
 	// create filename, format (assuming mission 2): [M2.TXT]
 	uint8_t filename[16] = "";
@@ -189,7 +196,7 @@ static int sd_save_data(void *data_string)
 	// copy string over to struct
 	strcpy(sd_msg.filename, filename);
 	//sd_msg.filename[strlen(filename)] = 0;
-	//printk("\n%s\n", sd_msg.filename);
+	//LOG_INF("%s", log_strdup(sd_msg.filename));
 
 	strcpy(sd_msg.string, data_string);
 
@@ -259,46 +266,41 @@ static int message_queue_reset()
 	return 0;
 }
 
-// TODO: pass in filenames
 static int publish_data_4G()
 {
 	// printk("\nRunning test, press button 1 to start\n");
 	// button_wait();
 
-	// TODO: fetch parameters from mission params
-	uint8_t msg_max = 2;
-	uint8_t msg_sent = 0;
+	k_msgq_purge(&main_msg_q);
+
+	// separate from mission_param msg_sent, this only keeps track locally
+	int msg_sent = 0;
 
 	sd_msg_t sd_msg;
-
 	uint8_t temp_str[16] = "";
-
-	k_msgq_purge(&main_msg_q);
 
 	sd_msg.event = READ_JSON_4G;
 
 	snprintf(temp_str, sizeof(temp_str), "M%d.TXT", glider.mission_param.mission);
 	strcpy(sd_msg.filename, temp_str);
 
-	printk("\nname: %s", sd_msg.filename);
+	int msg_to_send = glider.mission_param.msg_max / glider.mission_param.wp_max;
 
-	snprintf(temp_str, sizeof(temp_str), "max:%d\r", msg_max);
+	snprintf(temp_str, sizeof(temp_str), "max:%d\r", msg_to_send);
 	strcat(sd_msg.string, temp_str);
 	snprintf(temp_str, sizeof(temp_str), "wp_cur:%d\r", glider.mission_param.wp_cur);
 	strcat(sd_msg.string, temp_str);
 
-	// printk("\n%s", sd_msg.string);
+	// LOG_INF("%s", log_strdup(sd_msg.string));
 	k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
 
 	uint8_t sd_msg_response[512] = "";
-
-	printk("\n");
 
 	while (1)
 	{
 		k_msgq_get(&main_msg_q, &sd_msg_response, K_FOREVER);
 
-		// printk("\nmsg: %s\n", sd_msg_response);
+		// LOG_INF("%s", log_strdup(sd_msg_response));
 		cJSON *payload_JSON = cJSON_Parse(sd_msg_response);
 
 		if (cJSON_IsObject(payload_JSON))
@@ -342,18 +344,19 @@ static int publish_data_4G()
 			cJSON_Minify(payload_4G);
 
 			// publish through 4G
-			// printk("\npayload: %s\n", payload_4G);
-			gcloud_publish(payload_4G, strlen(payload_4G), MQTT_QOS_1_AT_LEAST_ONCE);
+			LOG_INF("payload: %s", log_strdup(payload_4G));
+			// gcloud_publish(payload_4G, strlen(payload_4G), MQTT_QOS_1_AT_LEAST_ONCE);
 
 			msg_sent++;
+			glider.mission_param.msg_sent++;
 		}
 		else
 		{
-			printk("sd message is not valid JSON");
+			LOG_INF("sd message is not JSON");
 		}
 		cJSON_Delete(payload_JSON);
 
-		if (msg_sent == msg_max || strcmp(sd_msg_response, "EOF") == 0)
+		if (msg_sent == msg_to_send || strcmp(sd_msg_response, "EOM") == 0)
 		{
 			break;
 		}
@@ -377,18 +380,23 @@ static int parse_mission_params(void *json_str)
 		if (cJSON_HasObjectItem(mqtt_JSON, "M"))
 		{
 			tmp_JSON = cJSON_GetObjectItem(mqtt_JSON, "M");
-
-			// test if mission received is new
-			if (glider.mission_param.mission < tmp_JSON->valueint)
+			if (cJSON_IsNumber(tmp_JSON))
 			{
-				printk("\nnew mission received");
-				glider.mission_param.mission = tmp_JSON->valueint;
-				new_mission = true;
+				// test if mission received is new
+				if (glider.mission_param.mission < tmp_JSON->valueint)
+				{
+					glider.mission_param.mission = tmp_JSON->valueint;
+					new_mission = true;
+				}
+				else
+				{
+					LOG_INF("not a new mission");
+					return 1;
+				}
 			}
 			else
 			{
-				printk("\nnot a new mission");
-				return 1;
+				LOG_ERR("Mission needs to be number");
 			}
 		}
 
@@ -398,14 +406,29 @@ static int parse_mission_params(void *json_str)
 			// waypoints - lat
 			if (cJSON_HasObjectItem(mqtt_JSON, "lat"))
 			{
-				tmp_JSON = cJSON_GetObjectItem(mqtt_JSON, "lat");
-				for (int i = 0; i < cJSON_GetArraySize(tmp_JSON); i++)
-				{
-					tmpsub_JSON = cJSON_GetArrayItem(tmp_JSON, i);
-					glider.mission_param.wp_arr[i][0] = tmpsub_JSON->valuedouble;
-					// printk("\nlat: %lf", glider.mission_param.wp_arr[i][0]);
 
-					glider.mission_param.wp_max = i;
+				tmp_JSON = cJSON_GetObjectItem(mqtt_JSON, "lat");
+				if (cJSON_IsArray(tmp_JSON))
+				{
+					glider.mission_param.wp_max = cJSON_GetArraySize(tmp_JSON);
+
+					for (int i = 0; i < glider.mission_param.wp_max; i++)
+					{
+						tmpsub_JSON = cJSON_GetArrayItem(tmp_JSON, i);
+						if (cJSON_IsString(tmpsub_JSON))
+						{
+							strcpy(glider.mission_param.wp_arr[i][0], tmpsub_JSON->valuestring);
+							// LOG_INF("lng: %lf", glider.mission_param.wp_arr[i][1]);
+						}
+						else
+						{
+							LOG_ERR("lat value needs to be string");
+						}
+					}
+				}
+				else
+				{
+					LOG_ERR("lat needs to be array");
 				}
 			}
 
@@ -413,11 +436,25 @@ static int parse_mission_params(void *json_str)
 			if (cJSON_HasObjectItem(mqtt_JSON, "lng"))
 			{
 				tmp_JSON = cJSON_GetObjectItem(mqtt_JSON, "lng");
-				for (int i = 0; i < cJSON_GetArraySize(tmp_JSON); i++)
+				if (cJSON_IsArray(tmp_JSON))
 				{
-					tmpsub_JSON = cJSON_GetArrayItem(tmp_JSON, i);
-					glider.mission_param.wp_arr[i][1] = tmpsub_JSON->valuedouble;
-					// printk("\nlng: %lf", glider.mission_param.wp_arr[i][1]);
+					for (int i = 0; i < glider.mission_param.wp_max; i++)
+					{
+						tmpsub_JSON = cJSON_GetArrayItem(tmp_JSON, i);
+						if (cJSON_IsString(tmpsub_JSON))
+						{
+							strcpy(glider.mission_param.wp_arr[i][1], tmpsub_JSON->valuestring);
+							// LOG_INF("lng: %lf", glider.mission_param.wp_arr[i][1]);
+						}
+						else
+						{
+							LOG_ERR("lng value needs to be string");
+						}
+					}
+				}
+				else
+				{
+					LOG_ERR("lng needs to be array");
 				}
 			}
 
@@ -425,32 +462,119 @@ static int parse_mission_params(void *json_str)
 			if (cJSON_HasObjectItem(mqtt_JSON, "4G"))
 			{
 				tmp_JSON = cJSON_GetObjectItem(mqtt_JSON, "4G");
-				glider.mission_param.msg_max = tmp_JSON->valueint;
+				if (cJSON_IsNumber(tmp_JSON))
+				{
+					glider.mission_param.msg_max = tmp_JSON->valueint;
+				}
+				else
+				{
+					LOG_ERR("4G needs to be number");
+				}
+			}
+
+			// parameter start time TODO: start into string instead of numbers
+			if (cJSON_HasObjectItem(mqtt_JSON, "start"))
+			{
+				tmp_JSON = cJSON_GetObjectItem(mqtt_JSON, "start");
+				if (cJSON_IsString(tmp_JSON))
+				{
+					uint8_t tmp_str[16] = "";
+
+					memcpy(tmp_str, tmp_JSON->valuestring, 4);
+					LOG_INF("year: %s", log_strdup(tmp_str));
+					memset(tmp_str, 0, sizeof(tmp_str));
+
+					memcpy(tmp_str, tmp_JSON->valuestring + 4, 2);
+					LOG_INF("month: %s", log_strdup(tmp_str));
+					memset(tmp_str, 0, sizeof(tmp_str));
+
+					memcpy(tmp_str, tmp_JSON->valuestring + 6, 2);
+					LOG_INF("day: %s", log_strdup(tmp_str));
+					memset(tmp_str, 0, sizeof(tmp_str));
+
+					memcpy(tmp_str, tmp_JSON->valuestring + 8, 2);
+					LOG_INF("hour: %s", log_strdup(tmp_str));
+					memset(tmp_str, 0, sizeof(tmp_str));
+
+					memcpy(tmp_str, tmp_JSON->valuestring + 10, 2);
+					LOG_INF("minute: %s", log_strdup(tmp_str));
+					memset(tmp_str, 0, sizeof(tmp_str));
+				}
+				else
+				{
+					LOG_ERR("start needs to be string");
+				}
+			}
+
+			// parameter max depth
+			if (cJSON_HasObjectItem(mqtt_JSON, "maxD"))
+			{
+				tmp_JSON = cJSON_GetObjectItem(mqtt_JSON, "maxD");
+				if (cJSON_IsNumber(tmp_JSON))
+				{
+					glider.mission_param.depth_max = tmp_JSON->valueint;
+				}
+				else
+				{
+					LOG_ERR("maxD needs to be number");
+				}
+			}
+
+			// parameter min depth
+			if (cJSON_HasObjectItem(mqtt_JSON, "minD"))
+			{
+				tmp_JSON = cJSON_GetObjectItem(mqtt_JSON, "minD");
+				if (cJSON_IsNumber(tmp_JSON))
+				{
+					glider.mission_param.depth_min = tmp_JSON->valueint;
+				}
+				else
+				{
+					LOG_ERR("minD needs to be number");
+				}
 			}
 
 			// parameter sensor frequencies
 			if (cJSON_HasObjectItem(mqtt_JSON, "C"))
 			{
 				tmp_JSON = cJSON_GetObjectItem(mqtt_JSON, "C");
-				glider.mission_param.sens_param.freq_c = tmp_JSON->valueint;
+				if (cJSON_IsNumber(tmp_JSON))
+				{
+					glider.mission_param.sens_param.freq_c = tmp_JSON->valueint;
+				}
+				else
+				{
+					LOG_ERR("C needs to be number");
+				}
 			}
 			if (cJSON_HasObjectItem(mqtt_JSON, "P"))
 			{
 				tmp_JSON = cJSON_GetObjectItem(mqtt_JSON, "P");
-				glider.mission_param.sens_param.freq_p = tmp_JSON->valueint;
+				if (cJSON_IsNumber(tmp_JSON))
+				{
+					glider.mission_param.sens_param.freq_p = tmp_JSON->valueint;
+				}
+				else
+				{
+					LOG_ERR("P needs to be number");
+				}
 			}
 			if (cJSON_HasObjectItem(mqtt_JSON, "T"))
 			{
 				tmp_JSON = cJSON_GetObjectItem(mqtt_JSON, "T");
-				glider.mission_param.sens_param.freq_t = tmp_JSON->valueint;
+				if (cJSON_IsNumber(tmp_JSON))
+				{
+					glider.mission_param.sens_param.freq_t = tmp_JSON->valueint;
+				}
+				else
+				{
+					LOG_ERR("T needs to be number");
+				}
 			}
-
-			// TODO: parse start time
 
 			sd_msg_t sd_msg;
 
 			strcpy(sd_msg.filename, file_mission);
-			printk("\n%s\n", sd_msg.filename);
 
 			sd_msg.event = OVERWRITE_FILE;
 
@@ -464,7 +588,7 @@ static int parse_mission_params(void *json_str)
 	}
 	else
 	{
-		printk("\nnot JSON");
+		LOG_ERR("not a JSON, could not parse mission parameters");
 		cJSON_Delete(mqtt_JSON);
 
 		return -1;
@@ -473,7 +597,55 @@ static int parse_mission_params(void *json_str)
 	return 0;
 }
 
-/* MODULES */
+static bool check_mission()
+{
+	static sd_msg_t sd_msg;
+	sd_msg.event = FIND_FILE;
+	strcpy(sd_msg.filename, file_mission);
+
+	k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
+
+	int sd_msg_response = 0;
+
+	k_msgq_get(&main_msg_q, &sd_msg_response, K_FOREVER);
+
+	if (sd_msg_response)
+	{
+		LOG_INF("Mission params found");
+
+		uint8_t json_str[512] = "";
+		sd_msg.event = READ_JSON;
+		k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
+
+		k_msgq_get(&main_msg_q, &json_str, K_FOREVER);
+
+		if (strcmp(json_str, "ERROR") != 0)
+		{
+			parse_mission_params(&json_str);
+
+			LOG_INF("Current parameters:");
+			LOG_INF("Mission: %d", glider.mission_param.mission);
+			LOG_INF("Max depth: %d", glider.mission_param.depth_max);
+			LOG_INF("Min depth: %d", glider.mission_param.depth_min);
+			LOG_INF("Message max: %d", glider.mission_param.msg_max);
+			LOG_INF("Waypoints: %d", glider.mission_param.wp_max);
+
+			LOG_INF("Sensor parameters:");
+			LOG_INF("C: %d", glider.mission_param.sens_param.freq_c);
+			LOG_INF("P: %d", glider.mission_param.sens_param.freq_p);
+			LOG_INF("T: %d", glider.mission_param.sens_param.freq_t);
+		}
+
+		return true;
+	}
+
+	LOG_INF("Mission params do not exist");
+	return false;
+}
+
+// --------------------------------------------------
+// MODULES
+// --------------------------------------------------
 
 static int sensor_module()
 {
@@ -510,7 +682,7 @@ static int sensor_module()
 		}
 		else
 		{
-			// printk("%s", uart_msg);
+			// LOG_INF("%s", log_strdup(uart_msg));
 
 			// TODO: test timestamp to check if new day
 
@@ -586,12 +758,12 @@ static int wifi_module()
 	printk("wifi test start\n");
 
 	uart_send(UART_2, "wifi_start", strlen("wifi_start"));
-	printk("\nsent command wifi start to esp");
+	LOG_INF("sent command wifi start to esp");
 
 	while (1)
 	{
 		k_msgq_get(&uart_msg_q, wifi_response, K_FOREVER);
-		printk("\n%s", wifi_response);
+		LOG_INF("%s", log_strdup(wifi_response));
 		//button_wait();
 
 		//strcpy(wifi_response, "{D:20202020.txt}");
@@ -610,7 +782,7 @@ static int wifi_module()
 
 			if (strcmp(sd_msg_response, "ERROR") != 0)
 			{
-				printk("\n%s", sd_msg_response);
+				LOG_INF("%s", log_strdup(sd_msg_response));
 				// uart_send(UART_2, sd_msg_response, strlen(sd_msg_response));
 			}
 
@@ -630,7 +802,7 @@ static int wifi_module()
 			date[strlen(date)] = 0;
 
 			strcpy(sd_msg.filename, date);
-			printk("\n%s", sd_msg.filename);
+			LOG_INF("%s", log_strdup(sd_msg.filename));
 
 			sd_msg.event = READ_FILE;
 
@@ -653,8 +825,6 @@ static int wifi_module()
 	return err;
 }
 
-// TODO: Test on separate thread?
-// Currently on hold until LTE and GPS can function at the same time
 static int gps_module()
 {
 	static glider_gps_data_t gps_data;
@@ -700,38 +870,38 @@ static int gcloud_module()
 	int err;
 	int ret = -1;
 
-	// strcpy(gcloud_msg, "{\"M\":9,\"4G\":10,\"C\":0,\"P\":0,\"T\":0,\"lat\":[51.7558,60.7558],\"lng\":[19.2726,21.2726],\"maxD\":0,\"minD\":0,\"start\":\"202104210505\"}");
+	strcpy(gcloud_msg, "{\"M\":11,\"4G\":10,\"C\":0,\"P\":0,\"T\":0,\"lat\":[\"51.7558\",\"60.7558\"],\"lng\":[\"19.2726\",\"21.2726\"],\"maxD\":0,\"minD\":0,\"start\":\"202104280559\"}");
 
-	// mqtt init
-	if (!gcloud_init_complete)
-	{
-		err = app_gcloud_init_and_connect();
-		if (err != 0)
-		{
-			return err;
-		}
-		gcloud_init_complete = true;
-	}
-	// reconnect
-	else
-	{
-		err = app_gcloud_reconnect();
-		if (err != 0)
-		{
-			return err;
-		}
-	}
+	// // mqtt init
+	// if (!gcloud_init_complete)
+	// {
+	// 	err = app_gcloud_init_and_connect();
+	// 	if (err != 0)
+	// 	{
+	// 		return err;
+	// 	}
+	// 	gcloud_init_complete = true;
+	// }
+	// // reconnect
+	// else
+	// {
+	// 	err = app_gcloud_reconnect();
+	// 	if (err != 0)
+	// 	{
+	// 		return err;
+	// 	}
+	// }
 
 	// /* Gcloud loop */
 	while (1)
 	{
-		// button_wait();
+		button_wait();
 
 		// gcloud function
-		err = app_gcloud();
+		// err = app_gcloud();
 
-		k_msgq_get(&gcloud_msg_q, &gcloud_msg, K_NO_WAIT);
-		// printk("\nMain: %s", gcloud_msg);
+		// k_msgq_get(&gcloud_msg_q, &gcloud_msg, K_NO_WAIT);
+		LOG_INF("gcloud string: %s", log_strdup(gcloud_msg));
 
 		ret = parse_mission_params(&gcloud_msg);
 
@@ -748,13 +918,13 @@ static int gcloud_module()
 	}
 	/* Gcloud loop end */
 
-	err = app_gcloud_disconnect();
-	if (err != 0)
-	{
-		printk("\nDisconnect unsuccessful: %d", err);
-		printk("\n\nClosing program, check for errors in code lol");
-		return err;
-	}
+	// err = app_gcloud_disconnect();
+	// if (err != 0)
+	// {
+	// 	LOG_ERR("Disconnect unsuccessful: %d", err);
+	// 	LOG_ERR("Closing program, check for errors in code lol");
+	// 	return err;
+	// }
 	return 0;
 }
 
@@ -779,7 +949,7 @@ static int satellite_module()
 
 		k_msgq_get(&gps_msg_q, &gps_msg, K_NO_WAIT);
 
-		// printk("\n%s", gps_msg);
+		// LOG_INF("%s", log_strdup(gps_msg));
 		gps_JSON = cJSON_Parse(gps_msg);
 		if (cJSON_IsObject(gps_JSON))
 		{
@@ -788,21 +958,19 @@ static int satellite_module()
 			lng_JSON = cJSON_GetObjectItem(data_JSON, "lng");
 
 			uint8_t sat_str[50] = "";
-			uint8_t tmp_str[16] = "";
 
-			snprintf(tmp_str, sizeof(tmp_str), "%.4f,", lat_JSON->valuedouble);
-			strcat(sat_str, tmp_str);
-			snprintf(tmp_str, sizeof(tmp_str), "%.4f", lng_JSON->valuedouble);
-			strcat(sat_str, tmp_str);
+			strcat(sat_str, lat_JSON->valuestring);
+			strcat(sat_str, ",");
+			strcat(sat_str, lng_JSON->valuestring);
 
 			// send to satellite module
-			printk("\n%s", sat_str);
+			LOG_INF("%s", log_strdup(sat_str));
 		}
 		cJSON_Delete(gps_JSON);
 	}
 	else
 	{
-		printk("\nNo gps message");
+		LOG_INF("No gps message");
 	}
 
 	// test if any messages were sent to satellite
@@ -823,11 +991,12 @@ static int glider_init()
 
 	// initialize values for glider details, TODO: Initialize other parameters
 	glider.mission_param.mission = 0;
-	glider.mission_param.wp_cur = 1;
-	glider.mission_param.wp_max = 5;
+	glider.mission_param.wp_cur = 0;
+	glider.mission_param.wp_max = 1;
+	glider.mission_param.msg_sent = 0;
+	glider.mission_param.msg_max = 0;
 
-	// printk("\n%s\n", uid);
-	printk("\n%s\n", glider.uid);
+	LOG_INF("UID: %s", log_strdup(glider.uid));
 
 	/* device inits and configurations */
 	device_inits();
@@ -842,48 +1011,16 @@ static int glider_init()
 
 	glider.mission_started = false;
 
-	printk("Init complete. Press button 1 to start\n\n");
+	check_mission();
+
+	printk("\nInit complete. Press button 1 to start\n\n");
 
 	return 0;
 }
 
-static bool check_new_glider()
-{
-	static sd_msg_t sd_msg;
-	sd_msg.event = FIND_FILE;
-	strcpy(sd_msg.filename, file_mission);
-
-	k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
-
-	int sd_msg_response = 0;
-
-	k_msgq_get(&main_msg_q, &sd_msg_response, K_FOREVER);
-
-	if (sd_msg_response)
-	{
-		printk("Mission params found\n");
-
-		uint8_t json_str[512] = "";
-
-		sd_msg.event = READ_JSON;
-
-		k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
-
-		k_msgq_get(&main_msg_q, &json_str, K_FOREVER);
-		printk("\nparams: %s", json_str);
-		if (strcmp(json_str, "ERROR") != 0)
-		{
-			parse_mission_params(&json_str);
-		}
-
-		return true;
-	}
-
-	printk("Mission params do not exist\n");
-	return false;
-}
-
-/* MAIN */
+// --------------------------------------------------
+// MAIN
+// --------------------------------------------------
 
 void main(void)
 {
@@ -902,8 +1039,6 @@ void main(void)
 			// initialize glider
 			glider_init();
 
-			bool newglider = check_new_glider();
-
 			// get gps fix
 			// set_LED(22, 1);
 			// gps_module();
@@ -911,8 +1046,6 @@ void main(void)
 
 			event_prev = event_now;
 			event_now = EVT_DIVE;
-
-			printk("\nglider event current: %d", event_now);
 
 			break;
 		case EVT_AWAIT_MISSION:
@@ -1046,7 +1179,11 @@ Mission loop:
 			---periodically check 4G for any new missions, else enable satellite modem to send gps location + health status
 */
 
+// --------------------------------------------------
 // currently not in use
+// --------------------------------------------------
+
+/*
 // MQTT variables
 
 // TODO: change to general data_array instead of just uart data
@@ -1108,45 +1245,45 @@ static int wifi_mqtt_module()
 	printk("\nwifi test start\n");
 
 	// send wifi command to wifi controller
-	uart_send(uart_dev1, "{wifi}\n", strlen("{wifi}\n"));
+	uart_send(uart_dev1, "wifi", strlen("wifi"));
 
-	/* wifi loop */
-	for (int i = 0;; i++)
+	// wifi loop 
+for (int i = 0;; i++)
+{
+
+	// test messages from wifi controller
+	k_msgq_get(&uart_msg_q, &uart_msg, K_FOREVER);
+	LOG_INF("%s", log_strdup(uart_msg));
+
+	if (strcmp(uart_msg, "{exit}") == 0)
 	{
-
-		// test messages from wifi controller
-		k_msgq_get(&uart_msg_q, &uart_msg, K_FOREVER);
-		printk("\n%s", uart_msg);
-
-		if (strcmp(uart_msg, "{exit}") == 0)
-		{
-			uart_exit(uart_dev1);
-			break;
-		}
-		// wifi setup success, send further commands
-		else if (strcmp(uart_msg, "{wifi ok}") == 0)
-		{
-			printk("\nReceived wifi ok");
-			uart_send(uart_dev1, "{mqtt}\n", strlen("{mqtt}\n"));
-		}
-		// send data from uart_data_array
-		else if (strcmp(uart_msg, "{mqtt ok}") == 0)
-		{
-			printk("\nReceived mqtt ok");
-			publish_uart_data();
-		}
-		// else if (strcmp(uart_msg, "{keyword}") == 0)
-		// {
-		// 	//something
-		// }
-		// default print to terminal
-		else
-		{
-			printk("\n%s", uart_msg);
-		}
+		uart_exit(uart_dev1);
+		break;
 	}
-	/* wifi loop end */
-	return 0;
+	// wifi setup success, send further commands
+	else if (strcmp(uart_msg, "{wifi ok}") == 0)
+	{
+		LOG_INF("\nReceived wifi ok");
+		uart_send(uart_dev1, "{mqtt}\n", strlen("{mqtt}\n"));
+	}
+	// send data from uart_data_array
+	else if (strcmp(uart_msg, "{mqtt ok}") == 0)
+	{
+		LOG_INF("\nReceived mqtt ok");
+		publish_uart_data();
+	}
+	// else if (strcmp(uart_msg, "{keyword}") == 0)
+	// {
+	// 	//something
+	// }
+	// default print to terminal
+	else
+	{
+		LOG_INF("%s", log_strdup(uart_msg));
+	}
+}
+// wifi loop end
+return 0;
 }
 
 static int mqtt_module()
@@ -1185,7 +1322,7 @@ static int mqtt_module()
 	}
 
 	// TODO: store mqtt commands into an array
-	/* MQTT loop */
+	// MQTT loop
 	while (1)
 	{
 
@@ -1213,7 +1350,7 @@ static int mqtt_module()
 			publish_uart_data();
 		}
 	}
-	/* MQTT loop end */
+	// MQTT loop end
 
 	err = app_mqtt_disconnect();
 	if (err != 0)
@@ -1225,3 +1362,4 @@ static int mqtt_module()
 
 	return 0;
 }
+*/

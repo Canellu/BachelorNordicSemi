@@ -13,7 +13,7 @@
 #include <modem/at_notif.h>
 
 #include "app_gps.h"
-#include "cJSON.h"
+#include <cJSON.h>
 
 #ifdef CONFIG_SUPL_CLIENT_LIB
 #include <supl_os_client.h>
@@ -412,12 +412,15 @@ static int gps_struct_to_JSON(void *gps_str, nrf_gnss_data_frame_t *pvt_data)
 	cJSON *gps_JSON = cJSON_CreateObject();
 	cJSON *gps_data = cJSON_CreateObject();
 
-	cJSON_AddNumberToObject(gps_data, "lat", pvt_data->pvt.latitude);
-	cJSON_AddNumberToObject(gps_data, "lng", pvt_data->pvt.longitude);
-
 	uint8_t ts_string[64] = "";
 	uint8_t date_string[64] = "";
 	uint8_t temp_str[16] = "";
+
+	snprintf(temp_str, sizeof(temp_str), "%.4f", pvt_data->pvt.latitude);
+	cJSON_AddStringToObject(gps_data, "lat", temp_str);
+
+	snprintf(temp_str, sizeof(temp_str), "%.4f", pvt_data->pvt.longitude);
+	cJSON_AddStringToObject(gps_data, "lng", temp_str);
 
 	// adding date to JSON
 	snprintf(temp_str, sizeof(temp_str), "%02u-", pvt_data->pvt.datetime.year);
