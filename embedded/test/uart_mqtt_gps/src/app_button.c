@@ -52,8 +52,8 @@ static void button_handler(uint32_t button_states, uint32_t has_changed)
 			app_button_ret_val = 1;
 			k_msgq_put(&button_msg_qr, &app_button_ret_val, K_NO_WAIT);
 		}
-		break;
 
+		break;
 	case 1: // UART
 		if (has_changed == 1 && !gpio_pin_get(dev_gpio, 6))
 		{
@@ -63,30 +63,30 @@ static void button_handler(uint32_t button_states, uint32_t has_changed)
 		{
 			uart_send(uart_dev1, MSG_3, strlen(MSG_3));
 		}
+
 		break;
+	// case 2: // MQTT
+	// 	if (has_changed == 1 && !gpio_pin_get(dev_gpio, 6))
+	// 	{
+	// 		k_msgq_put(&mqtt_msg_q, "exit", K_NO_WAIT);
+	// 	}
 
-	case 2: // MQTT
-		if (has_changed == 1 && !gpio_pin_get(dev_gpio, 6))
-		{
-			k_msgq_put(&mqtt_msg_q, "exit", K_NO_WAIT);
-		}
+	// 	else if (has_changed == 2 && !gpio_pin_get(dev_gpio, 7))
+	// 	{
+	// 		app_data_publish(MSG_2, sizeof(MSG_2));
+	// 	}
 
-		else if (has_changed == 2 && !gpio_pin_get(dev_gpio, 7))
-		{
-			app_data_publish(MSG_2, sizeof(MSG_2));
-		}
+	// 	else if (has_changed == 4)
+	// 	{
+	// 		app_data_publish(MSG_3, sizeof(MSG_3));
+	// 	}
 
-		else if (has_changed == 4)
-		{
-			app_data_publish(MSG_3, sizeof(MSG_3));
-		}
+	// 	else if (has_changed == 8)
+	// 	{
+	// 		app_data_publish(MSG_4, sizeof(MSG_4));
+	// 	}
 
-		else if (has_changed == 8)
-		{
-			app_data_publish(MSG_4, sizeof(MSG_4));
-		}
-		break;
-
+	// 	break;
 	case 3: // Choice: wifi or mqtt
 		if (has_changed == 1 && !gpio_pin_get(dev_gpio, 6))
 		{
@@ -101,7 +101,6 @@ static void button_handler(uint32_t button_states, uint32_t has_changed)
 		k_msgq_put(&button_msg_qr, &app_button_ret_val, K_NO_WAIT);
 
 		break;
-
 		// case 999: // DO NOT USE, ONLY FOR TEMPLATE
 		// 	if(has_changed == 1 && !gpio_pin_get(dev_gpio, 6)) {
 		// 		// empty
@@ -146,6 +145,7 @@ void ext_led_init()
 
 // toggle specified LED
 // NO LONGER IN USE
+/*
 int toggle_LED(int led_val)
 {
 	switch (led_val)
@@ -182,6 +182,7 @@ int toggle_LED(int led_val)
 
 	return 0;
 }
+*/
 
 // set specified LED value
 int set_LED(int led_val, int val)
