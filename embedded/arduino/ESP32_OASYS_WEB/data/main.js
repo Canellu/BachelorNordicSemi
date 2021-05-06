@@ -57,6 +57,7 @@ function initWebSocket() {
 
 function onOpen(event) {
   console.log("Connection opened");
+  websocket.send("time:" + Date.now());
 }
 
 function onClose(event) {

@@ -199,11 +199,12 @@ function sendMissionParams() {
     lng: lngArr,
     maxD: parseInt(maxDepth),
     minD: parseInt(minDepth),
-    start: parseInt(startDate + startTime),
+    start: startDate + startTime,
   };
 
   websocket.send(JSON.stringify(params));
 }
+
 function freqModeToNum(mode) {
   switch (mode) {
     case "High":

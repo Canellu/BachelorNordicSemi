@@ -51,8 +51,9 @@ async function createAllCards() {
 function populateHomeMap(glider) {
   let location;
   let latlng = glider.data()["Last seen"];
-
-  if (typeof latlng != "undefined") {
+  console.log(typeof latlng);
+  console.log(latlng);
+  if (typeof latlng != "undefined" && latlng != "") {
     let datetime = glider.data()["Last sync"];
     let alias = glider.data()["Alias"];
     let lat = latlng.split(",")[0].replace(/^\D+/g, "");
