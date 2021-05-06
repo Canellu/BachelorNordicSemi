@@ -16,6 +16,19 @@ function initHomeMap() {
     zoom: defaultLocation.zoom,
   });
   console.log("HomeMap Made");
+
+  const imageBounds = {
+    north: 59.915502221623,
+    south: 59.6378021993291,
+    east: 10.7938958857909,
+    west: 10.4588770529082,
+  };
+
+  imageOverlay = new google.maps.GroundOverlay(
+    "https://firebasestorage.googleapis.com/v0/b/oasys-2d5b2.appspot.com/o/test.png?alt=media&token=3dab5a0d-79bd-4f5a-ae05-b7facf3873f5",
+    imageBounds
+  );
+  imageOverlay.setMap(homeMap);
 }
 
 function initDataMap() {
