@@ -9,6 +9,8 @@
 #include <modem/at_cmd.h>
 #include <logging/log.h>
 #include <cJSON.h>
+#include <time.h>
+#include <date_time.h>
 
 #include "app_button.h"
 #include "app_uart.h"
@@ -856,8 +858,8 @@ static int gps_module()
 {
 	static glider_gps_data_t gps_data;
 
-	printk("\n\npress button 1 to start gps test\n\n");
-	button_wait();
+	// printk("\n\npress button 1 to start gps test\n\n");
+	// button_wait();
 	printk("\ngps test start");
 
 	app_gps(&gps_data, 1000, 400);
@@ -957,54 +959,227 @@ static int gcloud_module()
 	return 0;
 }
 
+static int sat_check_signal()
+{
+	int signal = 0;
+
+	uint8_t sat_msg[64] = "";
+	uint8_t sat_response[64] = "";
+	uint8_t sat_response_test[64] = "";
+
+	// send message
+	strcpy(sat_msg, "AT+CSQ");
+	uart_send(uart_dev1, sat_msg, strlen(sat_msg));
+
+	// test response
+	while (1)
+	{
+		// fetch from uart
+		k_msgq_get(&uart_msg_q, &sat_response_test, K_FOREVER);
+
+		// break on OK
+		if (strcmp(sat_response_test, "OK") == 0)
+		{
+			break;
+		}
+		// end function on error
+		else if (strcmp(sat_response_test, "ERROR") == 0)
+		{
+			LOG_ERR("satellite serial error, check connection/serial msg sent");
+			return -1;
+		}
+		// copy response if valid
+		else if (strcmp(sat_response_test, sat_msg) != 0 && strlen(sat_response_test) != 0)
+		{
+			strcpy(sat_response, sat_response_test);
+		}
+	}
+	// clear response and any pending messages from satellite
+	memset(sat_response_test, 0, sizeof(sat_response_test));
+	k_msgq_purge(&uart_msg_q);
+
+	// LOG_DBG("sat msg: %s", log_strdup(sat_response));
+
+	static char *eptr;
+	signal = strtol(sat_response + 5, &eptr, 10);
+	LOG_INF("signal: %d", signal);
+
+	return signal;
+}
+
+static int sat_send_msg(uint8_t *sat_msg)
+{
+	int sat_sbd_response[6];
+	uint8_t sat_response[64] = "";
+	uint8_t sat_response_test[64] = "";
+
+	LOG_INF("sat msg: %s", log_strdup(sat_msg));
+
+	// send payload
+	uart_send(uart_dev1, sat_msg, strlen(sat_msg));
+
+	// test response
+	while (1)
+	{
+		// fetch from uart
+		k_msgq_get(&uart_msg_q, &sat_response_test, K_FOREVER);
+
+		// break on OK
+		if (strcmp(sat_response_test, "OK") == 0)
+		{
+			break;
+		}
+		// end function on error
+		else if (strcmp(sat_response_test, "ERROR") == 0)
+		{
+			LOG_ERR("satellite serial error, check connection/serial msg sent");
+			return -1;
+		}
+		// copy response if valid
+		else if (strcmp(sat_response_test, sat_msg) != 0 && strlen(sat_response_test) != 0)
+		{
+			strcpy(sat_response, sat_response_test);
+		}
+	}
+	// clear response and any pending messages from satellite
+	memset(sat_response_test, 0, sizeof(sat_response_test));
+	k_msgq_purge(&uart_msg_q);
+
+	// turn on SBD session (send/receive satellite messages)
+	uart_send(uart_dev1, "AT+SBDI", strlen("AT+SBDI"));
+
+	// test response
+	while (1)
+	{
+		// fetch from uart
+		k_msgq_get(&uart_msg_q, &sat_response_test, K_FOREVER);
+
+		// break on OK
+		if (strcmp(sat_response_test, "OK") == 0)
+		{
+			break;
+		}
+		// end function on error
+		else if (strcmp(sat_response_test, "ERROR") == 0)
+		{
+			LOG_ERR("satellite serial error, check connection/serial msg sent");
+			return -1;
+		}
+		// copy response if valid
+		else if (strcmp(sat_response_test, sat_msg) != 0 && strlen(sat_response_test) != 0)
+		{
+			strcpy(sat_response, sat_response_test);
+		}
+	}
+	// clear response and any pending messages from satellite
+	memset(sat_response_test, 0, sizeof(sat_response_test));
+	k_msgq_purge(&uart_msg_q);
+
+	LOG_INF("response: %s", log_strdup(sat_response));
+
+	return 0;
+}
+
 static int satellite_module()
 {
 	printk("\n\npress button 1 to start satellite test\n\n");
 	button_wait();
 
-	// uart_start(uart_dev1);
+	int ret = 0;
+	int cnt = 0;
+	int max_retries = 10;
+	bool fix = false;
+	bool msg_rdy = false;
+	bool msg_sent = false;
 
-	// uart_send(uart_dev1, "AT\r", strlen("AT\r"));
-	// uart_send(uart_dev1, "AT+CGSN\r", strlen("AT+CGSN\r"));
+	uint8_t sat_msg[64] = "";
+	uint8_t sat_response[64] = "";
+	uint8_t sat_response_test[64] = "";
 
-	// uart_exit(uart_dev1);
+	// start uart
+	uart_start(uart_dev1);
 
-	if (k_msgq_num_used_get(&gps_msg_q) != 0)
-	{
-		cJSON *gps_JSON;
-		cJSON *data_JSON;
-		cJSON *lat_JSON;
-		cJSON *lng_JSON;
+	cnt = 0;
+	while (!(cnt >= max_retries) && !msg_sent)
+	{ // finding signal
+		int signal = sat_check_signal();
 
-		k_msgq_get(&gps_msg_q, &gps_msg, K_NO_WAIT);
+		if (signal)
+		{ // if signal found
+			fix = true;
+			LOG_INF("got signal");
 
-		LOG_INF("%s", log_strdup(gps_msg));
-		gps_JSON = cJSON_Parse(gps_msg);
-		if (cJSON_IsObject(gps_JSON))
+			if (!msg_rdy)
+			{
+				// if no valid gps data, attempt to get fix
+				if (k_msgq_num_used_get(&gps_msg_q) == 0)
+				{
+					LOG_INF("No gps message, attempting to get gps fix");
+					gps_module();
+				}
+
+				cJSON *gps_JSON;
+				cJSON *data_JSON;
+				cJSON *lat_JSON;
+				cJSON *lng_JSON;
+
+				// fetch gps message to be sent
+				k_msgq_get(&gps_msg_q, &gps_msg, K_NO_WAIT);
+
+				// LOG_DBG("%s", log_strdup(gps_msg));
+				gps_JSON = cJSON_Parse(gps_msg);
+				if (cJSON_IsObject(gps_JSON))
+				{
+					data_JSON = cJSON_GetObjectItem(gps_JSON, "data");
+					lat_JSON = cJSON_GetObjectItem(data_JSON, "lat");
+					lng_JSON = cJSON_GetObjectItem(data_JSON, "lng");
+
+					memset(sat_msg, 0, sizeof(sat_msg));
+					strcpy(sat_msg, "AT+SBDWT=");
+					strcat(sat_msg, lat_JSON->valuestring);
+					strcat(sat_msg, ",");
+					strcat(sat_msg, lng_JSON->valuestring);
+					msg_rdy = true;
+				}
+				else
+				{
+					LOG_ERR("gps data not in JSON format");
+					return -1;
+				}
+				cJSON_Delete(gps_JSON);
+			}
+
+			LOG_INF("attempting send");
+			ret = sat_send_msg(sat_msg);
+			if (ret == 0)
+			{
+				LOG_INF("satellite msg sent");
+				msg_sent = true;
+			}
+			else if (ret < 0)
+			{
+				LOG_ERR("Error in sending satellite message");
+				return -1;
+			}
+
+		} // if signal found
+		else
 		{
-			data_JSON = cJSON_GetObjectItem(gps_JSON, "data");
-			lat_JSON = cJSON_GetObjectItem(data_JSON, "lat");
-			lng_JSON = cJSON_GetObjectItem(data_JSON, "lng");
-
-			uint8_t sat_str[50] = "";
-
-			strcat(sat_str, lat_JSON->valuestring);
-			strcat(sat_str, ",");
-			strcat(sat_str, lng_JSON->valuestring);
-
-			// send to satellite module
-			LOG_INF("%s", log_strdup(sat_str));
+			cnt++;
+			k_sleep(K_SECONDS(20));
 		}
-		cJSON_Delete(gps_JSON);
-	}
-	else
+	} // finding signal end
+	if (!fix)
 	{
-		LOG_INF("No gps message");
+		LOG_INF("Unable to get satellite fix");
+		ret = -1;
 	}
+
+	uart_exit(uart_dev1);
 
 	// test if any messages were sent to satellite
 
-	return 0;
+	return ret;
 }
 
 static int glider_init()
@@ -1060,6 +1235,15 @@ void main(void)
 
 	enum glider_event_type event = EVT_INIT;
 
+	// int64_t ntp;
+	// date_time_now(&ntp);
+	// int64_t unixtime = 1620378863;
+	// LOG_INF("Unix Timestamp: %llu\n", unixtime);
+
+	// struct tm *time_test = gmtime(&unixtime);
+
+	// LOG_INF("Time struct: %d", time_test->tm_year);
+
 	while (1)
 	{
 		message_queue_reset();
@@ -1113,9 +1297,9 @@ void main(void)
 			// function: send command to navigation
 
 			// read sensor data
-			set_LED(20, 1);
-			sensor_module();
-			set_LED(20, 0);
+			// set_LED(20, 1);
+			// sensor_module();
+			// set_LED(20, 0);
 
 			event = EVT_SURFACE;
 
@@ -1133,13 +1317,13 @@ void main(void)
 				event = EVT_DIVE;
 			}
 
-			set_LED(22, 1);
-			gps_module();
-			set_LED(22, 0);
+			// set_LED(22, 1);
+			// gps_module();
+			// set_LED(22, 0);
 
-			set_LED(31, 1);
-			gcloud_module();
-			set_LED(31, 0);
+			// set_LED(31, 1);
+			// gcloud_module();
+			// set_LED(31, 0);
 
 			set_LED(30, 1);
 			set_LED(31, 1);

@@ -504,7 +504,7 @@ static int overwrite_file(char *file_path, char *data, int size)
 
 	// ret = fs_open(&file, file_path, 0);
 
-	LOG_INF("Deleting existing mission parameters");
+	LOG_INF("Overwriting mission parameters");
 	fs_unlink(file_path);
 
 	ret = fs_open(&file, file_path, (FS_O_WRITE | FS_O_CREATE));
