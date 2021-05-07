@@ -1015,7 +1015,7 @@ static int sat_send_msg(uint8_t *sat_payload)
 	uint8_t sat_response_test[64] = "";
 
 	strcpy(sat_msg, "AT+SBDWT=");
-	strcpy(sat_msg, sat_payload);
+	strcat(sat_msg, sat_payload);
 
 	LOG_INF("sat msg: %s", log_strdup(sat_msg));
 
@@ -1050,36 +1050,36 @@ static int sat_send_msg(uint8_t *sat_payload)
 	k_msgq_purge(&uart_msg_q);
 
 	// turn on SBD session (send/receive satellite messages)
-	uart_send(uart_dev1, "AT+SBDI", strlen("AT+SBDI"));
+	// uart_send(uart_dev1, "AT+SBDI", strlen("AT+SBDI"));
 
-	// test response
-	while (1)
-	{
-		// fetch from uart
-		k_msgq_get(&uart_msg_q, &sat_response_test, K_FOREVER);
+	// // test response
+	// while (1)
+	// {
+	// 	// fetch from uart
+	// 	k_msgq_get(&uart_msg_q, &sat_response_test, K_FOREVER);
 
-		// break on OK
-		if (strcmp(sat_response_test, "OK") == 0)
-		{
-			break;
-		}
-		// end function on error
-		else if (strcmp(sat_response_test, "ERROR") == 0)
-		{
-			LOG_ERR("satellite serial error, check connection/serial msg sent");
-			return -1;
-		}
-		// copy response if valid
-		else if (strcmp(sat_response_test, sat_msg) != 0 && strlen(sat_response_test) != 0)
-		{
-			strcpy(sat_response, sat_response_test);
-		}
-	}
-	// clear response and any pending messages from satellite
-	memset(sat_response_test, 0, sizeof(sat_response_test));
-	k_msgq_purge(&uart_msg_q);
+	// 	// break on OK
+	// 	if (strcmp(sat_response_test, "OK") == 0)
+	// 	{
+	// 		break;
+	// 	}
+	// 	// end function on error
+	// 	else if (strcmp(sat_response_test, "ERROR") == 0)
+	// 	{
+	// 		LOG_ERR("satellite serial error, check connection/serial msg sent");
+	// 		return -1;
+	// 	}
+	// 	// copy response if valid
+	// 	else if (strcmp(sat_response_test, sat_msg) != 0 && strlen(sat_response_test) != 0)
+	// 	{
+	// 		strcpy(sat_response, sat_response_test);
+	// 	}
+	// }
+	// // clear response and any pending messages from satellite
+	// memset(sat_response_test, 0, sizeof(sat_response_test));
+	// k_msgq_purge(&uart_msg_q);
 
-	LOG_INF("response: %s", log_strdup(sat_response));
+	// LOG_INF("response: %s", log_strdup(sat_response));
 
 	return 0;
 }
