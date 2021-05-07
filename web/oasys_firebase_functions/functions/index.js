@@ -198,12 +198,18 @@ exports.fromGliderSatellite = functions
         );
         let localTime = utcDate.tz("Europe/Oslo").format("YYYY-MM-DD HH:mm:ss");
 
+        let split = hex_to_ascii(payload.data).split(",");
+        let lat = split[0];
+        let lng = split[1];
+        let data = split[2];
+
         db.collection("Gliders")
           .doc(glider.id)
           .set(
             {
-              "Last seen": hex_to_ascii(payload.data),
+              "Last seen": `lat: ${lat}, lng: ${lng}`,
               "Last sync": localTime,
+              "Sat payload": data !== undefined ? data : "",
             },
             { merge: true }
           );
