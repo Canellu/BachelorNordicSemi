@@ -44,6 +44,7 @@ function addMarker(location, icon, index, map) {
     position: { lat: location.lat, lng: location.lng },
     map: map,
     icon: icon,
+    animation: google.maps.Animation.DROP,
     title: `${index + 1}: ${location.t}`,
   });
   markers.push(marker);
@@ -58,6 +59,7 @@ function addHomeMarkers(location, alias) {
   new google.maps.Marker({
     position: { lat: location.lat, lng: location.lng },
     map: homeMap,
+    animation: google.maps.Animation.DROP,
     label: {
       text: alias,
       color: "#CA4955",
