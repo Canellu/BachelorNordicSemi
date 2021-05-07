@@ -9,7 +9,7 @@ let missionMapDiv = document.getElementById("missionMap");
 let homeMapDiv = document.getElementById("homeMap");
 var flightPlanCoordinates;
 
-var defaultLocation = { lat: 59.921, lng: 10.734, zoom: 6 };
+var defaultLocation = { lat: 59.769, lng: 10.654, zoom: 10 };
 function initHomeMap() {
   homeMap = new google.maps.Map(homeMapDiv, {
     center: { lat: defaultLocation.lat, lng: defaultLocation.lng },
@@ -17,18 +17,19 @@ function initHomeMap() {
   });
   console.log("HomeMap Made");
 
-  const imageBounds = {
-    north: 59.915502221623,
-    south: 59.6378021993291,
-    east: 10.7938958857909,
-    west: 10.4588770529082,
-  };
+  // const imageBounds = {
+  //   north: 59.915502221623,
+  //   south: 59.6378021993291,
+  //   east: 10.7938958857909,
+  //   west: 10.4588770529082,
+  // };
 
-  imageOverlay = new google.maps.GroundOverlay(
-    "https://firebasestorage.googleapis.com/v0/b/oasys-2d5b2.appspot.com/o/test.png?alt=media&token=3dab5a0d-79bd-4f5a-ae05-b7facf3873f5",
-    imageBounds
-  );
-  imageOverlay.setMap(homeMap);
+  // imageOverlay = new google.maps.GroundOverlay(
+  //   "https://firebasestorage.googleapis.com/v0/b/oasys-2d5b2.appspot.com/o/test.png?alt=media&token=3dab5a0d-79bd-4f5a-ae05-b7facf3873f5",
+  //   imageBounds,
+  //   { opacity: 0.5 }
+  // );
+  // imageOverlay.setMap(homeMap);
 }
 
 function initDataMap() {

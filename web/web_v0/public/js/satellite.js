@@ -28,7 +28,7 @@ async function sendSatelliteData() {
     username: "nordicoasys@gmail.com",
     password: "Bachelorgroup2021",
     data: ascii_to_hexa(satelliteInput.value),
-    flush: "yes", // Optional
+    //flush: "yes", // Optional
   };
 
   let queryString = "";
@@ -39,16 +39,10 @@ async function sendSatelliteData() {
   console.log(queryString);
   console.log(satelliteInput.value.length);
 
-  // fetch(`https://rockblock.rock7.com/rockblock/MT?${queryString}`, {
-  //   method: "POST",
-  // })
-  //   .then((response) => (satelliteConsole.innerHTML += `<p>${response}</p>`))
-  //   .catch((error) => (satelliteConsole.innerHTML += `<p>${error}</p>`));
-
-  // const options = { method: "POST", mode: "no-cors" };
+  const options = { method: "POST", mode: "no-cors" };
 
   // fetch(`https://rockblock.rock7.com/rockblock/MT?${queryString}`, options)
   //   .then((response) => console.log(response.body))
   //   .catch((err) => console.err(err));
-  satelliteInput.value = "";
+  // satelliteInput.value = "";
 }
