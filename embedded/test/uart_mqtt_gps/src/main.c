@@ -1007,11 +1007,15 @@ static int sat_check_signal()
 	return signal;
 }
 
-static int sat_send_msg(uint8_t *sat_msg)
+static int sat_send_msg(uint8_t *sat_payload)
 {
 	int sat_sbd_response[6];
+	uint8_t sat_msg[64] = "";
 	uint8_t sat_response[64] = "";
 	uint8_t sat_response_test[64] = "";
+
+	strcpy(sat_msg, "AT+SBDWT=");
+	strcpy(sat_msg, sat_payload);
 
 	LOG_INF("sat msg: %s", log_strdup(sat_msg));
 
@@ -1088,11 +1092,12 @@ static int satellite_module()
 	int ret = 0;
 	int cnt = 0;
 	int max_retries = 10;
+
 	bool fix = false;
 	bool msg_rdy = false;
 	bool msg_sent = false;
 
-	uint8_t sat_msg[64] = "";
+	uint8_t sat_payload[64] = "";
 	uint8_t sat_response[64] = "";
 	uint8_t sat_response_test[64] = "";
 
@@ -1134,11 +1139,9 @@ static int satellite_module()
 					lat_JSON = cJSON_GetObjectItem(data_JSON, "lat");
 					lng_JSON = cJSON_GetObjectItem(data_JSON, "lng");
 
-					memset(sat_msg, 0, sizeof(sat_msg));
-					strcpy(sat_msg, "AT+SBDWT=");
-					strcat(sat_msg, lat_JSON->valuestring);
-					strcat(sat_msg, ",");
-					strcat(sat_msg, lng_JSON->valuestring);
+					strcpy(sat_payload, lat_JSON->valuestring);
+					strcat(sat_payload, ",");
+					strcat(sat_payload, lng_JSON->valuestring);
 					msg_rdy = true;
 				}
 				else
@@ -1150,7 +1153,7 @@ static int satellite_module()
 			}
 
 			LOG_INF("attempting send");
-			ret = sat_send_msg(sat_msg);
+			ret = sat_send_msg(sat_payload);
 			if (ret == 0)
 			{
 				LOG_INF("satellite msg sent");
