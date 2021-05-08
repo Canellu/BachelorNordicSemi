@@ -188,8 +188,11 @@ async function getMissionData(missionName) {
       // Convert row value, to json-object
       let val;
       if (date.data()[timestamp].slice(-1) == ",") {
+        console.log(date.data()[timestamp]);
+
         val = JSON.parse("{" + date.data()[timestamp].slice(0, -1) + "}");
       } else {
+        console.log(date.data()[timestamp]);
         val = JSON.parse("{" + date.data()[timestamp] + "}");
       }
 
