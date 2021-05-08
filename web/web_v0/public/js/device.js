@@ -186,7 +186,12 @@ async function getMissionData(missionName) {
     // Loop through each row in document
     timestamps.forEach((timestamp) => {
       // Convert row value, to json-object
-      let val = JSON.parse("{" + date.data()[timestamp].slice(0, -1) + "}");
+      let val;
+      if (date.data()[timestamp].slice(-1) == ",") {
+        val = JSON.parse("{" + date.data()[timestamp].slice(0, -1) + "}");
+      } else {
+        val = JSON.parse("{" + date.data()[timestamp] + "}");
+      }
 
       // For each row, append to dataset
       // row -> { "2020-03-28T02:24:12" : "{"T": 22..."}

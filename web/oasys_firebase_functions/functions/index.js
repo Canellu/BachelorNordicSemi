@@ -124,10 +124,31 @@ exports.fromGliderToDatabase = functions
     // If glider sent data properly
     //add it to corresponding mission in database
     if (dataJSON != null) {
+      let data;
+      //TODO: check if data contains latlng, if yes
+      // change glider last seen in database.
+      if (data.includes("lat")) {
+        let lat = dataJSON.data.lat;
+        let lng = dataJSON.data.lng;
+
+        await db
+          .collection("Gliders")
+          .doc(gliderId)
+          .set(
+            {
+              "Last seen": `lat: ${lat}, lng:${lng}`,
+            },
+            { merge: true }
+          );
+
+        data = JSON.stringify({ lat, lng }).slice(1, -1);
+      } else {
+        data = JSON.stringify(dataJSON.data).slice(1, -1);
+      }
+
       let missionNum = dataJSON.M;
       let logDate = dataJSON.ts.slice(0, 8);
       let logTime = dataJSON.ts.slice(8);
-      let data = JSON.stringify(dataJSON.data).slice(1, -1);
 
       logDate =
         logDate.slice(0, 4) +
@@ -152,22 +173,7 @@ exports.fromGliderToDatabase = functions
         .doc(logDate)
         .set({ [logTime]: data }, { merge: true });
 
-      //TODO: check if data contains latlng, if yes
-      // change glider last seen in database.
-      if (data.includes("lat")) {
-        let lat = dataJSON.data.lat;
-        let lng = dataJSON.data.lng;
-
-        await db
-          .collection("Gliders")
-          .doc(gliderId)
-          .set(
-            {
-              "Last seen": `lat: ${lat}, lng:${lng}`,
-            },
-            { merge: true }
-          );
-      }
+      console.log({ data });
     }
   });
 
