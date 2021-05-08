@@ -101,8 +101,8 @@ input[type="radio"] {
   @apply h-full w-full flex justify-center items-center focus:outline-none font-semibold text-sm tracking-wider;
 }
 
-.map {
-  @apply object-cover w-full rounded-lg;
+.big-card {
+  @apply w-full rounded-lg;
   height: 650px;
   min-width: 244px;
 }
@@ -309,16 +309,27 @@ input[type="radio"] {
 }
 
 th,
-td {
-  @apply px-4 py-2 border-b border-r;
+td,
+table {
+  @apply px-4 py-2 border;
 }
 
 th {
-  font-weight: 500;
+  @apply font-medium;
 }
 
 td {
   @apply text-sm;
+}
+
+#satelliteMessageTable td:last-child,
+#satelliteMessageTable td:first-child,
+#satelliteMessageTable td:nth-child(2) {
+  text-align: center;
+}
+
+#satelliteErrorTable td:first-child {
+  text-align: center;
 }
 
 tbody tr:nth-child(odd) {

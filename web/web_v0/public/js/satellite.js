@@ -19,6 +19,11 @@ function ascii_to_hexa(str) {
   return arr.join("");
 }
 
+satelliteInput.addEventListener("input", () => {
+  document.querySelector("#byteCounter").innerText =
+    satelliteInput.value.length;
+});
+
 async function sendSatelliteData() {
   let gliderField = await db.collection("Gliders").doc(gliderUID).get();
   let satIMEI = gliderField.data()["Sat IMEI"];
@@ -45,4 +50,39 @@ async function sendSatelliteData() {
   //   .then((response) => console.log(response.body))
   //   .catch((err) => console.err(err));
   // satelliteInput.value = "";
+}
+
+async function populateSatelliteMessageTable() {
+  let satMessages = await db
+    .collection("Gliders")
+    .doc(gliderUID)
+    .collection("Satellite")
+    .get();
+
+  let tbody = document.querySelector("#satelliteMessageTable tbody");
+  tbody.innerHTML = "";
+
+  satMessages.docs.reverse().forEach((msg) => {
+    let date = msg.id.split(" ")[0];
+    let time = msg.id.split(" ")[1];
+    let payload = msg.data().Payload;
+    let direction = msg.data().Direction;
+    let color = direction == "MT" ? "#d0e9c6" : "#c4e3f3"; // blue : green
+    let icon = direction == "MT" ? "arrow_upward" : "arrow_downward";
+
+    let row = `
+    <tr>
+      <td>${date}</td>
+      <td>${time}</td>
+      <td>${payload}</td>
+      <td style="background-color: ${color}">
+        ${direction}
+        <span class="align-middle text-lg font-bold material-icons-outlined">
+          ${icon}
+        </span>
+      </td>
+    </tr>`;
+
+    tbody.innerHTML += row;
+  });
 }

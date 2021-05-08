@@ -31738,10 +31738,8 @@ input[type="radio"] {
   width: 100%;
 }
 
-.map {
+.big-card {
   border-radius: 0.5rem;
-  -o-object-fit: cover;
-     object-fit: cover;
   width: 100%;
   height: 650px;
   min-width: 244px;
@@ -32238,9 +32236,8 @@ input[type="radio"] {
   }
 }
 
-th, td{
-  border-right-width: 1px;
-  border-bottom-width: 1px;
+th, td, table{
+  border-width: 1px;
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
   padding-left: 1rem;
@@ -32254,6 +32251,16 @@ th {
 td {
   font-size: 0.875rem;
   line-height: 1.25rem;
+}
+
+#satelliteMessageTable td:last-child,
+#satelliteMessageTable td:first-child,
+#satelliteMessageTable td:nth-child(2) {
+  text-align: center;
+}
+
+#satelliteErrorTable td:first-child {
+  text-align: center;
 }
 
 tbody tr:nth-child(odd) {

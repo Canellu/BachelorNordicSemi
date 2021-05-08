@@ -85,16 +85,16 @@ function addDataMarkers(coordinates, map) {
   // Add new markers to marker-array
   let firstMarker;
   coordinates.forEach((loc, index) => {
-    let icon = "../assets/svg/triangleMarker.svg";
+    let icon = "assets/svg/triangleMarker.svg";
 
     // If start give icon, if end, give another
     switch (index) {
       case 0:
         firstMarker = { lat: loc.lat, lng: loc.lng };
-        icon = "../assets/svg/startMarkerWhite.svg";
+        icon = "assets/svg/startMarkerWhite.svg";
         break;
       case coordinates.length - 1:
-        icon = "../assets/svg/endMarkerWhite.svg";
+        icon = "assets/svg/endMarkerWhite.svg";
         break;
     }
 

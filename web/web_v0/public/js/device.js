@@ -61,6 +61,12 @@ satelliteTabBtn.addEventListener("click", () => {
   controlTab.classList.add("hidden");
   dataTab.classList.add("hidden");
   satelliteTab.classList.remove("hidden");
+
+  // Populate satellite message table as long as its not empty
+  if (document.querySelector("#satelliteMessageTable").rows.length <= 1) {
+    console.log(document.querySelector("#satelliteMessageTable").rows.length);
+    populateSatelliteMessageTable();
+  }
 });
 
 dropDownBtn.addEventListener("click", () => {
@@ -92,6 +98,7 @@ addScrollLock(dropDownContent, 50);
 addScrollLock(document.querySelector("#hours"), 50);
 addScrollLock(document.querySelector("#minutes"), 20);
 addScrollLock(document.querySelector("#previewBox"), 20);
+addScrollLock(document.querySelector("#satelliteMessageTableWrapper"), 16);
 
 var charts = []; //Conductivity, Pressure, Temperature
 var activeMission = "";

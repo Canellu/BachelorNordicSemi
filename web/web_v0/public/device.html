@@ -22,9 +22,6 @@
     <!-- FileSaver JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"></script>
 
-    <!-- XLSX JS -->
-    <script src="../js/xlsx.full.min.js"></script>
-
     <!-- Moment JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
 
@@ -83,10 +80,10 @@
       </div>
 
       <!-- ********************* Data tab ********************* -->
-      <div id="data-tab" class="container m-auto py-12 space-y-4">
+      <div id="data-tab" class="hidden container m-auto py-12 space-y-4">
         <!-- Map-->
         <div class="rounded-shadow p-4 bg-light">
-          <div id="dataMap" class="map h-full"></div>
+          <div id="dataMap" class="big-card h-full"></div>
         </div>
 
         <!-- Data selector -->
@@ -151,7 +148,7 @@
       >
         <!-- Map -->
         <div class="rounded-shadow p-4 bg-light">
-          <div id="missionMap" class="map h-full"></div>
+          <div id="missionMap" class="big-card h-full"></div>
         </div>
 
         <!-- Datetime & Max Messages -->
@@ -518,12 +515,51 @@
       </div>
 
       <!-- ***************Satellite Tab ***************** -->
-      <div id="satellite-tab" class="hidden container m-auto py-12 space-y-4">
-        <div class="rounded-shadow p-4 bg-light space-y-4">
+      <div id="satellite-tab" class="container m-auto py-12 space-y-4">
+        <div class="container m-auto rounded-shadow bg-light overflow-auto p-4">
           <div
-            id="consoleText"
-            class="rounded-md w-full h-96 bg-gray-200 px-12 py-4 overflow-auto font-medium"
-          ></div>
+            id="satelliteMessageTableWrapper"
+            class="overflow-auto"
+            style="max-height: 650px"
+          >
+            <table
+              id="satelliteMessageTable"
+              class="relative bg-gray-100 tracking-wider w-full table-fixed font-medium border"
+            >
+              <thead>
+                <tr>
+                  <th class="sticky -top-1 bg-gray-200 w-32">Date</th>
+                  <th class="sticky -top-1 bg-gray-200 w-24">Time</th>
+                  <th class="sticky -top-1 bg-gray-200">Payload</th>
+                  <th class="sticky -top-1 bg-gray-200 w-28">Direction</th>
+                </tr>
+              </thead>
+              <tbody id="testbody">
+                <!-- <script>
+                  for (let i = 0; i < 21; i++) {
+                    let color = i % 2 == 0 ? "#C4E3F3" : "#D0E9C6";
+                    document.querySelector("#testbody").innerHTML += `<tr>
+                  <td>2020-20-20</td>
+                  <td>20:20:${i + 10}</td>
+                  <td>Some rows</td>
+                  <td style="background-color: ${color}">
+                    MO
+                    <span
+                      class="align-middle text-lg font-bold material-icons-outlined"
+                    >
+                      arrow_upwards
+                    </span>
+                  </td>
+                </tr>
+                    `;
+                  }
+                </script> -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="rounded-shadow p-4 bg-light space-y-4">
           <div class="w-full h-10 flex space-x-2 items-center">
             <span class="chartBtn" onclick="showSatelliteModal()">
               <svg
@@ -537,19 +573,21 @@
                 />
               </svg>
             </span>
+
             <input
-              class="rounded-md w-full h-full bg-gray-200 px-3"
+              class="rounded-md border w-full h-full bg-gray-100 px-3 tracking-wide font-medium text-sm"
               id="inputSatellite"
               type="text"
               maxlength="270"
+              value="Lorem ipsum, dolor sit amet consectetur adipisicing elit. Eligendi, eveniet."
             />
-
-            <!-- <button
-              id=""
-              class="activeBtn p-4 h-10 border rounded-shadow font-medium tracking-wider text-sm flex justify-center items-center bg-light"
+            <span
+              class="flex items-center justify-center rounded-md border h-full bg-gray-100 px-3 text-xs font-medium align-middle tracking-widest"
             >
-              <span class="material-icons-outlined text-xl"> backspace </span>
-            </button> -->
+              <p id="byteCounter" class="">0</p>
+              <p class="w-8">/270</p>
+            </span>
+
             <button
               id="satelliteSendBtn"
               onclick="sendSatelliteData()"
@@ -574,7 +612,7 @@
               >
                 <span class="material-icons-outlined"> close </span>
               </button>
-              <table class="border bg-gray-100">
+              <table id="satelliteErrorTable" class="bg-gray-100 m-auto">
                 <thead>
                   <th>Error code</th>
                   <th>Description</th>
@@ -631,6 +669,7 @@
     <script src="js/chartjs-zoompan-plugin.js"></script>
     <script src="js/charts.js"></script>
     <script src="js/device.js"></script>
+    <script src="js/xlsx.full.min.js"></script>
     <script src="js/xlsx.js"></script>
     <script src="js/datepicker.js"></script>
     <script src="js/wNumb.js"></script>
