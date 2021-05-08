@@ -25,7 +25,7 @@ static void uart_cb(const struct device *dev_uart, void *context)
 	// send uart msg, runs when uart_irq_tx_enable is run
 	if (uart_irq_tx_ready(dev_uart))
 	{
-		LOG_INF("%s", log_strdup(tx_buf));
+		// LOG_DBG("tx: %s", log_strdup(tx_buf));
 		unsigned int key = irq_lock();
 		(void)uart_fifo_fill(dev_uart, tx_buf, strlen(tx_buf));
 		uart_irq_tx_disable(dev_uart);
@@ -50,8 +50,11 @@ static void uart_cb(const struct device *dev_uart, void *context)
 		// delimiter
 		else if (buf[0] == '\r')
 		{
-			// printk("\nuart rcvd");
-			k_msgq_put(&uart_msg_q, &rx_buf, K_NO_WAIT);
+			if (strlen(rx_buf) != 0)
+			{
+				LOG_DBG("rx: %s", log_strdup(rx_buf));
+				k_msgq_put(&uart_msg_q, &rx_buf, K_NO_WAIT);
+			}
 			memset(rx_buf, 0, sizeof(rx_buf));
 		}
 		// filter for unwanted characters
@@ -60,7 +63,6 @@ static void uart_cb(const struct device *dev_uart, void *context)
 		}
 		else
 		{
-			// printk("%s", buf);
 			strcat(rx_buf, buf);
 		}
 	}
@@ -127,7 +129,7 @@ void uart_send(enum uart_device_type uart_dev_no, char *msg, size_t len)
 {
 	if (len > 254)
 	{
-		printk("\nmax UART string is 254 characters");
+		LOG_INF("max UART string is 254 characters");
 	}
 	else
 	{
