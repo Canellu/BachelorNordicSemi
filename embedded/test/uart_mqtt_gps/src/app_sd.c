@@ -39,7 +39,7 @@ static struct fs_mount_t mp = {
 */
 static const char *disk_mount_pt = "/SD:";
 static const int json_size = 70; // rough length (bytes) of each json object
-
+								 // larger value -> lower interval
 static int lsdir(const char *path)
 {
 	int res;
@@ -177,16 +177,26 @@ static int send_all_file_info(const char *path)
 }
 
 // Create absolute path for filename
-static void create_file_path(char *file_path, char *filename)
+static int create_file_path(char *file_path, char *filename)
 {
-	// empty file_path
-	strcpy(file_path, "");
+	if (strlen(filename) != 0)
+	{
+		// empty file_path
+		strcpy(file_path, "");
 
-	strcat(file_path, disk_mount_pt);
-	strcat(file_path, "/");
-	strcat(file_path, filename);
+		strcat(file_path, disk_mount_pt);
+		strcat(file_path, "/");
+		strcat(file_path, filename);
 
-	// LOG_INF("file path: %s", log_strdup(file_path));
+		// LOG_INF("file path: %s", log_strdup(file_path));
+	}
+	else
+	{
+		LOG_ERR("filename empty, unable to create file path");
+		return -1;
+	}
+
+	return 0;
 }
 
 // reads entire file
@@ -303,11 +313,10 @@ static int read_JSON(char *file_path, int json_total)
 					{
 						// LOG_INF("%s", log_strdup(line));
 						k_msgq_put(&main_msg_q, &line, K_NO_WAIT);
+						counter++;
 					}
 					memset(line, 0, sizeof(line));
 					cJSON_Delete(line_JSON);
-
-					counter++;
 				}
 				else
 				{
@@ -606,13 +615,18 @@ void app_sd_thread(void *unused1, void *unused2, void *unused3)
 		switch (sd_msg.event)
 		{
 		case WRITE_FILE:
-			create_file_path(file_path, sd_msg.filename);
-			write_file(file_path, sd_msg.string, strlen(sd_msg.string));
-
+			ret = create_file_path(file_path, sd_msg.filename);
+			if (ret == 0)
+			{
+				write_file(file_path, sd_msg.string, strlen(sd_msg.string));
+			}
 			break;
 		case OVERWRITE_FILE:
-			create_file_path(file_path, sd_msg.filename);
-			overwrite_file(file_path, sd_msg.string, strlen(sd_msg.string));
+			ret = create_file_path(file_path, sd_msg.filename);
+			if (ret == 0)
+			{
+				overwrite_file(file_path, sd_msg.string, strlen(sd_msg.string));
+			}
 
 			break;
 		case FIND_FILE:
@@ -632,20 +646,26 @@ void app_sd_thread(void *unused1, void *unused2, void *unused3)
 
 			break;
 		case READ_JSON:
-			create_file_path(file_path, sd_msg.filename);
-			read_JSON(file_path, 1);
-
+			ret = create_file_path(file_path, sd_msg.filename);
+			if (ret == 0)
+			{
+				read_JSON(file_path, 1);
+			}
 			break;
 		case READ_JSON_4G:
-			create_file_path(file_path, sd_msg.filename);
-			file_size = look_for_file(disk_mount_pt, sd_msg.filename);
-			read_JSON_4G(file_path, sd_msg.string, file_size);
-
+			ret = create_file_path(file_path, sd_msg.filename);
+			if (ret == 0)
+			{
+				file_size = look_for_file(disk_mount_pt, sd_msg.filename);
+				read_JSON_4G(file_path, sd_msg.string, file_size);
+			}
 			break;
 		case READ_FILE:
-			create_file_path(file_path, sd_msg.filename);
-			read_file(file_path);
-
+			ret = create_file_path(file_path, sd_msg.filename);
+			if (ret == 0)
+			{
+				read_file(file_path);
+			}
 			break;
 		default:
 			LOG_ERR("Unknown SD event type");

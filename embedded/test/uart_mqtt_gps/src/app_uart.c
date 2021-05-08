@@ -50,8 +50,11 @@ static void uart_cb(const struct device *dev_uart, void *context)
 		// delimiter
 		else if (buf[0] == '\r')
 		{
-			LOG_DBG("rx: %s", log_strdup(rx_buf));
-			k_msgq_put(&uart_msg_q, &rx_buf, K_NO_WAIT);
+			if (strlen(rx_buf) != 0)
+			{
+				LOG_DBG("rx: %s", log_strdup(rx_buf));
+				k_msgq_put(&uart_msg_q, &rx_buf, K_NO_WAIT);
+			}
 			memset(rx_buf, 0, sizeof(rx_buf));
 		}
 		// filter for unwanted characters

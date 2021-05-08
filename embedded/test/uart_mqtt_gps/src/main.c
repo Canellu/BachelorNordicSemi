@@ -43,6 +43,13 @@ enum glider_event_type
 	EVT_IDLE
 };
 
+enum glider_mission_status
+{
+	MISSION_WAITING,
+	MISSION_ONGOING,
+	MISSION_FINISHED
+};
+
 // Structs
 struct prog_param_t
 { // currently not in use
@@ -266,15 +273,6 @@ static int device_inits()
 // purge leftover messages from message queue
 static int message_queue_reset()
 {
-	// NOTE: THIS IS ONLY HERE UNTIL SD CARD STORAGE IS OKAY
-	// data_size = 0;
-	// int i = 0;
-	// while (strcmp(uart_data_array[i], "") != 0)
-	// {
-	// 	strcpy(uart_data_array[i], "");
-	// 	i++;
-	// }
-
 	k_msgq_purge(&button_msg_q);
 	k_msgq_purge(&uart_msg_q);
 	// k_msgq_purge(&mqtt_msg_q);
@@ -419,6 +417,67 @@ static int publish_data_4G()
 	return 0;
 }
 
+// updates mission status for struct glider and saves to sd card
+static int update_mission_status(enum glider_mission_status mission_state)
+{
+	glider.mission_param.mission_state = mission_state;
+
+	static sd_msg_t sd_msg;
+	strcpy(sd_msg.filename, file_mission);
+
+	uint8_t json_str[512] = "";
+	sd_msg.event = READ_JSON;
+
+	k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
+	k_msgq_get(&main_msg_q, &json_str, K_FOREVER);
+
+	if (strcmp(json_str, "ERROR") != 0)
+	{
+		cJSON *m_JSON = cJSON_Parse(json_str);
+		if (cJSON_IsObject(m_JSON))
+		{
+			if (cJSON_HasObjectItem(m_JSON, "Ms"))
+			{
+				cJSON *tmp_JSON = cJSON_GetObjectItem(m_JSON, "Ms");
+				if (cJSON_IsNumber(tmp_JSON))
+				{
+					cJSON_SetIntValue(tmp_JSON, glider.mission_param.mission_state);
+				}
+				else
+				{
+					LOG_ERR("Mission state needs to be number");
+					return -1;
+				}
+			}
+			else
+			{
+				LOG_ERR("Mission state does not exist, attempting to write current state");
+				cJSON_AddNumberToObject(m_JSON, "Ms", glider.mission_param.mission_state);
+			}
+
+			// saving to sd card
+			sd_msg.event = OVERWRITE_FILE;
+
+			strcpy(sd_msg.string, cJSON_Print(m_JSON));
+			cJSON_Minify(sd_msg.string);
+
+			k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
+		}
+		else
+		{
+			LOG_ERR("not a JSON, could not parse mission parameters");
+			cJSON_Delete(m_JSON);
+
+			return -1;
+		}
+		cJSON_Delete(m_JSON);
+	}
+
+	LOG_INF("Mission state set to: %d", mission_state);
+
+	return 0;
+}
+
 // checks mission if it is new or not, saves parameters to glider struct and sd card
 static int parse_mission_params(void *json_str)
 {
@@ -466,11 +525,10 @@ static int parse_mission_params(void *json_str)
 				if (cJSON_IsNumber(tmp_JSON))
 				{
 					glider.mission_param.mission_state = tmp_JSON->valueint;
-					new_mission = true;
 				}
 				else
 				{
-					LOG_ERR("Mission needs to be number");
+					LOG_ERR("Mission state needs to be number");
 				}
 			}
 			else
@@ -492,7 +550,7 @@ static int parse_mission_params(void *json_str)
 				}
 			}
 
-			// parameter start time TODO: start into string instead of numbers
+			// parameter start time
 			if (cJSON_HasObjectItem(m_JSON, "start"))
 			{
 				tmp_JSON = cJSON_GetObjectItem(m_JSON, "start");
@@ -672,7 +730,8 @@ static int parse_mission_params(void *json_str)
 	return 0;
 }
 
-static bool check_mission()
+// reads mission params from sd card
+static int check_mission()
 {
 	static sd_msg_t sd_msg;
 	sd_msg.event = FIND_FILE;
@@ -714,11 +773,11 @@ static bool check_mission()
 			LOG_INF("T: %d", glider.mission_param.sens_param.freq_t);
 		}
 
-		return true;
+		return 0;
 	}
 
 	LOG_INF("Mission params do not exist");
-	return false;
+	return 1;
 }
 
 // checks signal, returns signal strength
@@ -752,7 +811,7 @@ static int sat_check_signal()
 			return -1;
 		}
 		// copy response if valid
-		else if (strcmp(sat_response_test, sat_msg) != 0 && strlen(sat_response_test) != 0)
+		else if (strcmp(sat_response_test, sat_msg) != 0)
 		{
 			strcpy(sat_response, sat_response_test);
 		}
@@ -814,7 +873,7 @@ static int sat_sbd_session()
 			return -1;
 		}
 		// copy response if valid
-		else if (strcmp(sat_response_test, sat_msg) != 0 && strlen(sat_response_test) != 0)
+		else if (strcmp(sat_response_test, sat_msg) != 0)
 		{
 			strcpy(sat_response, sat_response_test);
 		}
@@ -895,7 +954,7 @@ static int sat_rcv_msg()
 			return -1;
 		}
 		// copy response if valid
-		else if (strcmp(sat_response_test, sat_msg) != 0 && strlen(sat_response_test) != 0)
+		else if (strcmp(sat_response_test, sat_msg) != 0)
 		{
 			strcpy(sat_response, sat_response_test);
 		}
@@ -945,7 +1004,7 @@ static int sat_send_msg(uint8_t *sat_payload)
 			return -1;
 		}
 		// copy response if valid
-		else if (strcmp(sat_response_test, sat_msg) != 0 && strlen(sat_response_test) != 0)
+		else if (strcmp(sat_response_test, sat_msg) != 0)
 		{
 			strcpy(sat_response, sat_response_test);
 		}
@@ -1452,14 +1511,19 @@ void main(void)
 			// set_LED(22, 0);
 
 			// TODO: create check for finished missions
-			if (glider.mission_param.mission != 0)
+			if (glider.mission_param.mission_state == MISSION_ONGOING)
 			{
 				event = EVT_DIVE;
 			}
-			else
+			else if (glider.mission_param.mission_state == MISSION_FINISHED)
 			{
 				LOG_INF("No mission ongoing, on standby for new mission");
 				event = EVT_AWAIT_MISSION;
+			}
+			else
+			{
+				LOG_INF("Idling until mission start");
+				event = EVT_IDLE;
 			}
 
 			break;
@@ -1475,7 +1539,7 @@ void main(void)
 			// wifi_module();
 			// set_LED(30, 0);
 
-			if (glider.mission_param.mission != 0)
+			if (glider.mission_param.mission_state == MISSION_ONGOING)
 			{
 				event = EVT_DIVE;
 			}
@@ -1506,6 +1570,7 @@ void main(void)
 			}
 			else
 			{
+				glider.mission_param.mission_state = MISSION_FINISHED;
 				event = EVT_IDLE;
 			}
 
@@ -1556,7 +1621,7 @@ create function for mission updates, save to sd card
 	- mission end
 	CANDO: save updates to flash in case of reboot/ errors
 
-/* CURRENT FLOW FOR HOW MISSION SEQUENCE WILL OPERATE
+CURRENT FLOW FOR HOW MISSION SEQUENCE WILL OPERATE
 
 1st time start (1 way to test is if .txt file for mission params exist):
 	-turn on UART peripherals, SD card module
