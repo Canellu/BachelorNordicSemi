@@ -12,7 +12,7 @@ auth.onAuthStateChanged((user) => {
 // ****************** CARD-GRID SECTION ******************
 async function createCard(uid, alias, sync, img) {
   let html = ` 
-    <a href="devices/device.html?gliderUID=${uid}">
+    <a href="device.html?gliderUID=${uid}">
       <div class="card">
         <img
           class="object-cover center w-full h-44"

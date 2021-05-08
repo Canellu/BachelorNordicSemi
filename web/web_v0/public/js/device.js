@@ -1,3 +1,14 @@
+// Check if user is logged in and redirect them
+auth.onAuthStateChanged((user) => {
+  if (user) {
+    console.log("Is logged in!");
+  } else {
+    // User is logged out
+    console.log("Is logged out!");
+    location.replace("index.html");
+  }
+});
+
 let dataTabBtn = document.querySelector("#data-tab-btn");
 let controlTabBtn = document.querySelector("#control-tab-btn");
 let satelliteTabBtn = document.querySelector("#satellite-tab-btn");
@@ -255,14 +266,3 @@ function updateDataUI(data) {
 listMissions();
 
 createAllCharts();
-
-// Check if user is logged in and redirect them
-auth.onAuthStateChanged((user) => {
-  if (user) {
-    console.log("Is logged in!");
-  } else {
-    // User is logged out
-    console.log("Is logged out!");
-    location.replace("../index.html");
-  }
-});
