@@ -581,15 +581,6 @@ static int mountSD()
 	return 0;
 }
 
-// static int copy_sd_msg(sd_msg_t *sd_msg_dest, sd_msg_t *sd_msg_source)
-// {
-// 	sd_msg_dest->event = sd_msg_source->event;
-// 	strcpy(sd_msg_dest->filename, sd_msg_source->filename);
-// 	strcpy(sd_msg_dest->string, sd_msg_source->string);
-
-// 	return 0;
-// }
-
 void app_sd_thread(void *unused1, void *unused2, void *unused3)
 {
 	int ret = 0;
