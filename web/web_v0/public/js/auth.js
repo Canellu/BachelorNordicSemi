@@ -26,9 +26,15 @@ if (loginForm != null) {
     const password = loginForm["loginPassword"].value;
 
     // log in user
-    const credentials = await auth.signInWithEmailAndPassword(email, password);
-    loginForm.reset();
-    // Redirect to homepage
+    // const credentials = await auth.signInWithEmailAndPassword(email, password);
+    try {
+      const credentials = await auth.signInWithEmailAndPassword(
+        email,
+        password
+      );
+    } catch (error) {
+      validateLogIn(error.message);
+    }
   });
 }
 
