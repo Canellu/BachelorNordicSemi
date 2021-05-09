@@ -209,14 +209,28 @@ exports.fromGliderSatellite = functions
         let lng = split[1];
         let data = split[2];
 
+        // Updating glider fields in Firestore
+        if ("lat" in payload && "lng" in payload && "data" in payload) {
+          db.collection("Gliders")
+            .doc(glider.id)
+            .set(
+              {
+                "Last seen": `lat: ${lat}, lng: ${lng}`,
+                "Last sync": localTime,
+                Status: data !== undefined ? data : "",
+              },
+              { merge: true }
+            );
+        }
+
+        console.log(payload);
+        // Updating satellite msg log in Firestore
         db.collection("Gliders")
           .doc(glider.id)
+          .collection("Satellite")
+          .doc(localTime)
           .set(
-            {
-              "Last seen": `lat: ${lat}, lng: ${lng}`,
-              "Last sync": localTime,
-              "Sat payload": data !== undefined ? data : "",
-            },
+            { Direction: "MO", Payload: hex_to_ascii(payload.data) },
             { merge: true }
           );
       }

@@ -75,18 +75,21 @@ async function populateSatelliteMessageTable() {
     .doc(gliderUID)
     .collection("Satellite")
     .onSnapshot((snapshot) => {
-      snapshot.docChanges().forEach((change) => {
-        let msg = change.doc;
-        console.log(change.type);
-        if (change.type === "added") {
-          let date = msg.id.split(" ")[0];
-          let time = msg.id.split(" ")[1];
-          let payload = msg.data().Payload;
-          let direction = msg.data().Direction;
-          let color = direction == "MT" ? "#d0e9c6" : "#c4e3f3"; // blue : green
-          let icon = direction == "MT" ? "arrow_upward" : "arrow_downward";
+      snapshot
+        .docChanges()
+        .reverse()
+        .forEach((change) => {
+          let msg = change.doc;
+          console.log(change.type);
+          if (change.type === "added") {
+            let date = msg.id.split(" ")[0];
+            let time = msg.id.split(" ")[1];
+            let payload = msg.data().Payload;
+            let direction = msg.data().Direction;
+            let color = direction == "MT" ? "#d0e9c6" : "#c4e3f3"; // blue : green
+            let icon = direction == "MT" ? "arrow_upward" : "arrow_downward";
 
-          let row = `
+            let row = `
           <tr data-datetime="${msg.id}">
             <td>${date}</td>
             <td>${time}</td>
@@ -99,14 +102,14 @@ async function populateSatelliteMessageTable() {
             </td>
           </tr>`;
 
-          tbody.innerHTML += row;
-        }
+            tbody.innerHTML += row;
+          }
 
-        if (change.type === "removed") {
-          let row = document.querySelector(`[data-datetime='${msg.id}']`);
-          row.remove();
-        }
-      });
+          if (change.type === "removed") {
+            let row = document.querySelector(`[data-datetime='${msg.id}']`);
+            row.remove();
+          }
+        });
     });
 
   console.log("Getting snapshot listener...");
