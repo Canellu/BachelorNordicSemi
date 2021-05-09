@@ -14,6 +14,10 @@ function initHomeMap() {
   homeMap = new google.maps.Map(homeMapDiv, {
     center: { lat: defaultLocation.lat, lng: defaultLocation.lng },
     zoom: defaultLocation.zoom,
+    disableDefaultUI: true,
+    mapTypeControl: true,
+    zoomControl: true,
+    fullscreenControl: true,
   });
   console.log("HomeMap Made");
 
@@ -36,6 +40,10 @@ function initDataMap() {
   dataMap = new google.maps.Map(dataMapDiv, {
     center: { lat: defaultLocation.lat, lng: defaultLocation.lng },
     zoom: defaultLocation.zoom,
+    disableDefaultUI: true,
+    mapTypeControl: true,
+    zoomControl: true,
+    fullscreenControl: true,
   });
 }
 
@@ -135,6 +143,10 @@ function initMissionMap() {
   missionMap = new google.maps.Map(missionMapDiv, {
     center: { lat: defaultLocation.lat, lng: defaultLocation.lng },
     zoom: defaultLocation.zoom,
+    disableDefaultUI: true,
+    mapTypeControl: true,
+    zoomControl: true,
+    fullscreenControl: true,
   });
 
   missionWaypoints = new google.maps.Polyline({

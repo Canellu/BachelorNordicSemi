@@ -28,13 +28,14 @@ satelliteInput.addEventListener("input", () => {
 async function sendSatelliteData() {
   let gliderField = await db.collection("Gliders").doc(gliderUID).get();
   let satIMEI = gliderField.data()["Sat IMEI"];
-
+  let flush = document.querySelector("#flushBtn").dataset.checked;
+  let data = satelliteInput.value.trim();
   let queryParams = {
     imei: satIMEI,
     username: "nordicoasys@gmail.com12",
     password: "Bachelorgroup2021",
-    data: ascii_to_hexa(satelliteInput.value),
-    //flush: "yes", // Optional
+    data: ascii_to_hexa(data),
+    flush: flush == "true" ? "yes" : "", // Optional
   };
 
   let queryString = "";
@@ -62,7 +63,7 @@ async function sendSatelliteData() {
     .doc(gliderUID)
     .collection("Satellite")
     .doc(currentDateTime)
-    .set({ Direction: "MT", Payload: satelliteInput.value }, { merge: true });
+    .set({ Direction: "MT", Payload: data }, { merge: true });
 
   satelliteInput.value = "";
 }
@@ -112,4 +113,16 @@ async function populateSatelliteMessageTable() {
     });
 
   console.log("Getting snapshot listener...");
+}
+
+function toggleFlush() {
+  let flushBtn = document.querySelector("#flushBtn");
+  if (flushBtn.dataset.checked == "false") {
+    flushBtn.dataset.checked = true;
+    flushBtn.style.boxShadow =
+      "inset 10px 10px 8px #e8e9e9, inset -10px -10px 8px #ffffff";
+  } else {
+    flushBtn.dataset.checked = false;
+    flushBtn.style.boxShadow = "";
+  }
 }

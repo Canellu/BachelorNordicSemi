@@ -83,7 +83,7 @@
       </div>
 
       <!-- ********************* Data tab ********************* -->
-      <div id="data-tab" class="hidden container m-auto py-12 space-y-4">
+      <div id="data-tab" class="container m-auto py-12 space-y-4">
         <!-- Map-->
         <div class="rounded-shadow p-4 bg-light">
           <div id="dataMap" class="big-card h-full"></div>
@@ -219,7 +219,7 @@
                 min="0"
                 step="1"
                 id="input4GData"
-                class="w-16 text-md font-medium text-dark border pl-1 rounded-sm focus:outline-none"
+                class="w-16 text-md font-medium text-dark border pl-1 rounded-sm"
               />
             </div>
           </div>
@@ -482,16 +482,16 @@
             <div class="flex absolute left-0 -bottom-12 w-full space-x-4">
               <button
                 id="resetMissionParams"
-                class="w-1/2 h-10 border rounded-shadow font-medium tracking-wider text-sm flex justify-center items-center bg-light"
+                class="w-1/2 h-10 border rounded-shadow flex justify-center items-center bg-light text-xs font-semibold tracking-widest"
               >
-                Reset
+                RESET
               </button>
               <div class="w-1/2 h-10">
                 <button
                   id="sendMissionParams"
-                  class="w-full h-full rounded-shadow font-medium tracking-wider text-sm flex justify-center items-center bg-light transform transition duration-200"
+                  class="w-full h-full rounded-shadow flex justify-center items-center bg-light transform transition duration-200 text-xs font-semibold tracking-widest"
                 >
-                  Send
+                  SEND
                 </button>
                 <div
                   id="confirmMissionParams"
@@ -499,16 +499,16 @@
                 >
                   <button
                     id="yesMissionParams"
-                    class="w-1/2 h-full rounded-shadow font-medium tracking-wider text-sm flex justify-center items-center bg-green-300"
+                    class="w-1/2 h-full rounded-shadow flex justify-center items-center bg-green-300 text-xs font-semibold tracking-widest"
                   >
-                    Yes
+                    YES
                   </button>
 
                   <button
                     id="noMissionParams"
-                    class="w-1/2 h-full rounded-shadow font-medium tracking-wider text-sm flex justify-center items-center bg-red-300"
+                    class="w-1/2 h-full rounded-shadow flex justify-center items-center bg-red-300 text-xs font-semibold tracking-widest"
                   >
-                    No
+                    NO
                   </button>
                 </div>
               </div>
@@ -518,7 +518,7 @@
       </div>
 
       <!-- ***************Satellite Tab ***************** -->
-      <div id="satellite-tab" class="container m-auto py-12 space-y-4">
+      <div id="satellite-tab" class="hidden container m-auto py-12 space-y-4">
         <div class="container m-auto rounded-shadow bg-light overflow-auto p-4">
           <div
             id="satelliteMessageTableWrapper"
@@ -562,100 +562,121 @@
           </div>
         </div>
 
-        <div class="rounded-shadow p-4 bg-light space-y-4">
-          <div class="w-full h-10 flex space-x-2 items-center">
-            <span class="chartBtn" onclick="showSatelliteModal()">
-              <svg
-                width="36"
-                height="36"
-                fill="currentColor"
-                viewBox="0 0 16 16"
+        <!-- Input Row -->
+        <div class="flex space-x-4">
+          <!-- Input field + counter + sendBtn -->
+          <div class="rounded-shadow p-4 bg-light space-y-4 w-full">
+            <div class="w-full h-10 flex space-x-2 items-center">
+              <span class="chartBtn" onclick="showSatelliteModal()">
+                <svg
+                  width="36"
+                  height="36"
+                  fill="currentColor"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"
+                  />
+                </svg>
+              </span>
+
+              <input
+                class="rounded-md border w-full h-full bg-gray-100 px-3 tracking-wide font-medium text-sm"
+                id="inputSatellite"
+                type="text"
+                maxlength="270"
+              />
+              <span
+                class="flex items-center justify-center rounded-md border h-full bg-gray-100 px-3 text-xs font-medium align-middle tracking-widest"
               >
-                <path
-                  d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"
-                />
-              </svg>
-            </span>
+                <p id="byteCounter" class="">0</p>
+                <p class="w-8">/270</p>
+              </span>
 
-            <input
-              class="rounded-md border w-full h-full bg-gray-100 px-3 tracking-wide font-medium text-sm"
-              id="inputSatellite"
-              type="text"
-              maxlength="270"
-            />
-            <span
-              class="flex items-center justify-center rounded-md border h-full bg-gray-100 px-3 text-xs font-medium align-middle tracking-widest"
-            >
-              <p id="byteCounter" class="">0</p>
-              <p class="w-8">/270</p>
-            </span>
-
-            <button
-              id="satelliteSendBtn"
-              onclick="sendSatelliteData()"
-              class="activeBtn p-4 h-full rounded-shadow font-medium tracking-wider text-sm flex justify-center items-center bg-light transform transition duration-200"
-            >
-              Send
-            </button>
-          </div>
-
-          <!-- Satellite Info Modal -->
-          <div
-            id="satelliteModal"
-            class="hidden w-screen h-screen fixed top-0 left-0 z-50 bg-opacity-60 bg-gray-800"
-          >
-            <div
-              class="fixed top-40 w-1/2 left-1/2 transform -translate-x-1/2 text-left rounded-shadow bg-light overflow-hidden p-10"
-            >
               <button
-                id="closeSatelliteModalBtn"
-                onclick="hideSatelliteModal()"
-                class="absolute right-2 top-2 flex rounded-full hover:bg-gray-300 duration-200 p-1"
+                id="satelliteSendBtn"
+                onclick="sendSatelliteData()"
+                class="activeBtn p-4 h-full rounded-shadow flex justify-center items-center bg-light transform transition duration-300 text-xs font-bold text-gray-700"
               >
-                <span class="material-icons-outlined"> close </span>
+                SEND
               </button>
-              <table id="satelliteErrorTable" class="bg-gray-100 m-auto">
-                <thead>
-                  <th>Error code</th>
-                  <th>Description</th>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>10</td>
-                    <td>Invalid login credentials</td>
-                  </tr>
-                  <tr>
-                    <td>11</td>
-                    <td>No RockBLOCK with this IMEI found on your account</td>
-                  </tr>
-                  <tr>
-                    <td>12</td>
-                    <td>RockBLOCK has no line rental</td>
-                  </tr>
-                  <tr>
-                    <td>13</td>
-                    <td>Your account has insufficient credit</td>
-                  </tr>
-                  <tr>
-                    <td>14</td>
-                    <td>Could not decode hex data</td>
-                  </tr>
-                  <tr>
-                    <td>15</td>
-                    <td>Data too long</td>
-                  </tr>
-                  <tr>
-                    <td>16</td>
-                    <td>No data</td>
-                  </tr>
-                  <tr>
-                    <td>99</td>
-                    <td>System Error</td>
-                  </tr>
-                </tbody>
-              </table>
+
+              <div
+                id="flushBtn"
+                class="w-24 h-full flex rounded-shadow justify-center items-center text-gray-600 cursor-pointer px-3 space-x-2 transition duration-300"
+                data-checked="false"
+                onclick="toggleFlush()"
+              >
+                <span class="material-icons-outlined"> delete_sweep </span>
+                <p class="text-xs font-bold">FLUSH</p>
+              </div>
+            </div>
+
+            <!-- Satellite Info Modal -->
+            <div
+              id="satelliteModal"
+              class="hidden w-screen h-screen fixed top-0 left-0 z-50 bg-opacity-60 bg-gray-800"
+            >
+              <div
+                class="fixed top-40 w-1/2 left-1/2 transform -translate-x-1/2 text-left rounded-shadow bg-light overflow-hidden p-10"
+              >
+                <button
+                  id="closeSatelliteModalBtn"
+                  onclick="hideSatelliteModal()"
+                  class="absolute right-2 top-2 flex rounded-full hover:bg-gray-300 duration-200 p-1"
+                >
+                  <span class="material-icons-outlined"> close </span>
+                </button>
+                <table id="satelliteErrorTable" class="bg-gray-100 m-auto">
+                  <thead>
+                    <th>Error code</th>
+                    <th>Description</th>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>10</td>
+                      <td>Invalid login credentials</td>
+                    </tr>
+                    <tr>
+                      <td>11</td>
+                      <td>No RockBLOCK with this IMEI found on your account</td>
+                    </tr>
+                    <tr>
+                      <td>12</td>
+                      <td>RockBLOCK has no line rental</td>
+                    </tr>
+                    <tr>
+                      <td>13</td>
+                      <td>Your account has insufficient credit</td>
+                    </tr>
+                    <tr>
+                      <td>14</td>
+                      <td>Could not decode hex data</td>
+                    </tr>
+                    <tr>
+                      <td>15</td>
+                      <td>Data too long</td>
+                    </tr>
+                    <tr>
+                      <td>16</td>
+                      <td>No data</td>
+                    </tr>
+                    <tr>
+                      <td>99</td>
+                      <td>System Error</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
+          <!-- 
+          <div
+            class="rounded-shadow p-4 bg-light flex items-center justify-center space-x-2 w-24"
+          >
+            <input type="checkbox" class="h-4 w-4" />
+            <span class="text-sm font-medium h-full pt-2.5"> Flush </span>
+          </div> -->
         </div>
       </div>
     </main>
