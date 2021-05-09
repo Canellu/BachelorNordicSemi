@@ -31742,7 +31742,6 @@ input[type="radio"] {
   border-radius: 0.5rem;
   width: 100%;
   height: 650px;
-  min-width: 244px;
 }
 
 .headerBtn:hover{

@@ -104,7 +104,6 @@ input[type="radio"] {
 .big-card {
   @apply w-full rounded-lg;
   height: 650px;
-  min-width: 244px;
 }
 
 .headerBtn {
