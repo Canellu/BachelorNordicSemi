@@ -102,8 +102,8 @@ exports.fromGliderToDatabase = functions
     let utcDate = moment(context.timestamp);
     let localTime = utcDate.tz("Europe/Oslo").format("YYYY-MM-DD HH:mm:ss");
 
-    // console.log("utcDate: " + utcDate);
-    // console.log("localTime: " + localTime);
+    console.log("utcDate: " + utcDate);
+    console.log("localTime: " + localTime);
 
     // Timestamp on when glider last communicated through 4G
     await db.collection("Gliders").doc(gliderId).set(

@@ -19,6 +19,7 @@ function ascii_to_hexa(str) {
   return arr.join("");
 }
 
+// Input character-counter
 satelliteInput.addEventListener("input", () => {
   document.querySelector("#byteCounter").innerText =
     satelliteInput.value.length;
@@ -30,7 +31,7 @@ async function sendSatelliteData() {
 
   let queryParams = {
     imei: satIMEI,
-    username: "nordicoasys@gmail.com",
+    username: "nordicoasys@gmail.com12",
     password: "Bachelorgroup2021",
     data: ascii_to_hexa(satelliteInput.value),
     //flush: "yes", // Optional
@@ -38,51 +39,75 @@ async function sendSatelliteData() {
 
   let queryString = "";
   for (const [key, value] of Object.entries(queryParams)) {
-    console.log(`${key}: ${value}`);
+    // console.log(`${key}: ${value}`);
     queryString += key + "=" + value + "&";
   }
-  console.log(queryString);
-  console.log(satelliteInput.value.length);
 
-  const options = { method: "POST", mode: "no-cors" };
+  const options = {
+    method: "POST",
+    mode: "no-cors",
+  };
 
   // fetch(`https://rockblock.rock7.com/rockblock/MT?${queryString}`, options)
-  //   .then((response) => console.log(response.body))
-  //   .catch((err) => console.err(err));
+  //   .then((response) => console.log("RESPONSE BODY: ", response.body))
+  //   .catch((err) => console.err({ err }));
   // satelliteInput.value = "";
-}
 
-async function populateSatelliteMessageTable() {
-  let satMessages = await db
+  const currentDateTime = moment()
+    .tz("Europe/Oslo")
+    .format("YYYY-MM-DD HH:mm:ss");
+
+  await db
     .collection("Gliders")
     .doc(gliderUID)
     .collection("Satellite")
-    .get();
+    .doc(currentDateTime)
+    .set({ Direction: "MT", Payload: satelliteInput.value }, { merge: true });
 
+  satelliteInput.value = "";
+}
+
+async function populateSatelliteMessageTable() {
   let tbody = document.querySelector("#satelliteMessageTable tbody");
   tbody.innerHTML = "";
 
-  satMessages.docs.reverse().forEach((msg) => {
-    let date = msg.id.split(" ")[0];
-    let time = msg.id.split(" ")[1];
-    let payload = msg.data().Payload;
-    let direction = msg.data().Direction;
-    let color = direction == "MT" ? "#d0e9c6" : "#c4e3f3"; // blue : green
-    let icon = direction == "MT" ? "arrow_upward" : "arrow_downward";
+  db.collection("Gliders")
+    .doc(gliderUID)
+    .collection("Satellite")
+    .onSnapshot((snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        let msg = change.doc;
+        console.log(change.type);
+        if (change.type === "added") {
+          let date = msg.id.split(" ")[0];
+          let time = msg.id.split(" ")[1];
+          let payload = msg.data().Payload;
+          let direction = msg.data().Direction;
+          let color = direction == "MT" ? "#d0e9c6" : "#c4e3f3"; // blue : green
+          let icon = direction == "MT" ? "arrow_upward" : "arrow_downward";
 
-    let row = `
-    <tr>
-      <td>${date}</td>
-      <td>${time}</td>
-      <td>${payload}</td>
-      <td style="background-color: ${color}">
-        ${direction}
-        <span class="align-middle text-lg font-bold material-icons-outlined">
-          ${icon}
-        </span>
-      </td>
-    </tr>`;
+          let row = `
+          <tr data-datetime="${msg.id}">
+            <td>${date}</td>
+            <td>${time}</td>
+            <td>${payload}</td>
+            <td style="background-color: ${color}">
+              ${direction}
+              <span class="align-middle text-lg font-bold material-icons-outlined">
+                ${icon}
+              </span>
+            </td>
+          </tr>`;
 
-    tbody.innerHTML += row;
-  });
+          tbody.innerHTML += row;
+        }
+
+        if (change.type === "removed") {
+          let row = document.querySelector(`[data-datetime='${msg.id}']`);
+          row.remove();
+        }
+      });
+    });
+
+  console.log("Getting snapshot listener...");
 }
