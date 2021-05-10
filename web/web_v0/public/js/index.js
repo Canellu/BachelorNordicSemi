@@ -22,3 +22,9 @@ auth.onAuthStateChanged((user) => {
     console.log("Is logged out!");
   }
 });
+
+function validateLogIn(errorMsg) {
+  let errorDiv = document.querySelector("#errorMessage");
+  errorDiv.innerHTML = errorMsg;
+  errorDiv.classList.remove("hidden");
+}

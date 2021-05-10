@@ -22,11 +22,11 @@
     <!-- FileSaver JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"></script>
 
-    <!-- XLSX JS -->
-    <script src="../js/xlsx.full.min.js"></script>
-
     <!-- Moment JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+    <!-- Moment Timezone -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.33/moment-timezone-with-data.min.js"></script>
 
     <!-- HammerJS for pan/zoom gestures -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.js"></script>
@@ -64,14 +64,14 @@
     <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="../styles.css" />
+    <link rel="stylesheet" href="styles.css" />
     <title>Device</title>
   </head>
 
   <body class="bg-gray-100 font-montserrat pt-16 flex flex-col min-h-screen">
-    <script src="../js/header.js"></script>
+    <script src="js/header.js"></script>
 
-    <main class="min-h-screen">
+    <main class="min-h-screen mx-10">
       <!-- Tab selector -->
       <div class="tabs m-auto rounded-shadow flex flex-col z-50 bg-light">
         <div class="flex h-9">
@@ -86,7 +86,7 @@
       <div id="data-tab" class="container m-auto py-12 space-y-4">
         <!-- Map-->
         <div class="rounded-shadow p-4 bg-light">
-          <div id="dataMap" class="map h-full"></div>
+          <div id="dataMap" class="big-card h-full"></div>
         </div>
 
         <!-- Data selector -->
@@ -115,14 +115,16 @@
           </div>
 
           <!-- Missionpicker-->
-          <div id="missionSelector" class="h-12 w-48 cursor-pointer">
-            <div class="dropDownBtn activeBtn rounded-shadow relative bg-light">
-              <p class="inline-block font-medium tracking-wider"></p>
-              <span class="material-icons absolute right-4"> expand_more </span>
+          <div id="missionSelector" class="cursor-pointer">
+            <div
+              class="z-10 dropDownBtn relative w-40 activeBtnStyle rounded-shadow px-3 h-12 flex justify-around items-center font-semibold text-sm cursor-pointer duration-200 border bg-light text-dark ring-2 ring-transparent hover:ring-gray-300"
+            >
+              <p class="inline-block uppercase"></p>
+              <span class="material-icons"> expand_more </span>
               <div
-                class="dropDownContent hidden rounded-shadow max-h-56 w-full absolute left-0 top-12 overflow-auto bg-light"
+                class="dropDownContent hidden rounded-shadow max-h-56 w-full absolute left-0 top-12 overflow-auto bg-light flex flex-col items-center"
               >
-                <div class="mission">Mission 10</div>
+                <!-- <div class="mission">Mission 10</div>
                 <div class="mission">Mission 11</div>
                 <div class="mission">Mission 12</div>
                 <div class="mission">Mission 13</div>
@@ -131,7 +133,7 @@
                 <div class="mission">Mission 16</div>
                 <div class="mission">Mission 17</div>
                 <div class="mission">Mission 18</div>
-                <div class="mission">Mission 19</div>
+                <div class="mission">Mission 19</div> -->
               </div>
             </div>
           </div>
@@ -151,7 +153,7 @@
       >
         <!-- Map -->
         <div class="rounded-shadow p-4 bg-light">
-          <div id="missionMap" class="map h-full"></div>
+          <div id="missionMap" class="big-card h-full"></div>
         </div>
 
         <!-- Datetime & Max Messages -->
@@ -219,7 +221,7 @@
                 min="0"
                 step="1"
                 id="input4GData"
-                class="w-16 text-md font-medium text-dark border pl-1 rounded-sm focus:outline-none"
+                class="w-16 text-md font-medium text-dark border pl-1 rounded-sm"
               />
             </div>
           </div>
@@ -482,16 +484,16 @@
             <div class="flex absolute left-0 -bottom-12 w-full space-x-4">
               <button
                 id="resetMissionParams"
-                class="w-1/2 h-10 border rounded-shadow font-medium tracking-wider text-sm flex justify-center items-center bg-light"
+                class="w-1/2 h-10 border rounded-shadow flex justify-center items-center bg-light text-xs font-semibold tracking-widest"
               >
-                Reset
+                RESET
               </button>
               <div class="w-1/2 h-10">
                 <button
                   id="sendMissionParams"
-                  class="w-full h-full rounded-shadow font-medium tracking-wider text-sm flex justify-center items-center bg-light transform transition duration-200"
+                  class="w-full h-full rounded-shadow flex justify-center items-center bg-light transform transition duration-200 text-xs font-semibold tracking-widest"
                 >
-                  Send
+                  SEND
                 </button>
                 <div
                   id="confirmMissionParams"
@@ -499,16 +501,16 @@
                 >
                   <button
                     id="yesMissionParams"
-                    class="w-1/2 h-full rounded-shadow font-medium tracking-wider text-sm flex justify-center items-center bg-green-300"
+                    class="w-1/2 h-full rounded-shadow flex justify-center items-center bg-green-300 text-xs font-semibold tracking-widest"
                   >
-                    Yes
+                    YES
                   </button>
 
                   <button
                     id="noMissionParams"
-                    class="w-1/2 h-full rounded-shadow font-medium tracking-wider text-sm flex justify-center items-center bg-red-300"
+                    class="w-1/2 h-full rounded-shadow flex justify-center items-center bg-red-300 text-xs font-semibold tracking-widest"
                   >
-                    No
+                    NO
                   </button>
                 </div>
               </div>
@@ -519,103 +521,165 @@
 
       <!-- ***************Satellite Tab ***************** -->
       <div id="satellite-tab" class="hidden container m-auto py-12 space-y-4">
-        <div class="rounded-shadow p-4 bg-light space-y-4">
+        <!-- Satellite message table -->
+        <div class="container m-auto rounded-shadow bg-light overflow-auto p-4">
           <div
-            id="consoleText"
-            class="rounded-md w-full h-96 bg-gray-200 px-12 py-4 overflow-auto font-medium"
-          ></div>
-          <div class="w-full h-10 flex space-x-2 items-center">
-            <span class="chartBtn" onclick="showSatelliteModal()">
-              <svg
-                width="36"
-                height="36"
-                fill="currentColor"
-                viewBox="0 0 16 16"
-              >
-                <path
-                  d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"
-                />
-              </svg>
-            </span>
-            <input
-              class="rounded-md w-full h-full bg-gray-200 px-3"
-              id="inputSatellite"
-              type="text"
-              maxlength="270"
-            />
-
-            <!-- <button
-              id=""
-              class="activeBtn p-4 h-10 border rounded-shadow font-medium tracking-wider text-sm flex justify-center items-center bg-light"
-            >
-              <span class="material-icons-outlined text-xl"> backspace </span>
-            </button> -->
-            <button
-              id="satelliteSendBtn"
-              onclick="sendSatelliteData()"
-              class="activeBtn p-4 h-full rounded-shadow font-medium tracking-wider text-sm flex justify-center items-center bg-light transform transition duration-200"
-            >
-              Send
-            </button>
-          </div>
-
-          <!-- Satellite Info Modal -->
-          <div
-            id="satelliteModal"
-            class="hidden w-screen h-screen fixed top-0 left-0 z-50 bg-opacity-60 bg-gray-800"
+            id="satelliteMessageTableWrapper"
+            class="overflow-auto"
+            style="max-height: 650px"
           >
-            <div
-              class="fixed top-40 w-1/2 left-1/2 transform -translate-x-1/2 text-left rounded-shadow bg-light overflow-hidden p-10"
+            <table
+              id="satelliteMessageTable"
+              class="relative bg-gray-100 tracking-wider w-full table-fixed font-medium border"
             >
-              <button
-                id="closeSatelliteModalBtn"
-                onclick="hideSatelliteModal()"
-                class="absolute right-2 top-2 flex rounded-full hover:bg-gray-300 duration-200 p-1"
+              <thead>
+                <tr>
+                  <th class="sticky -top-1 bg-gray-200 w-32">Date</th>
+                  <th class="sticky -top-1 bg-gray-200 w-24">Time</th>
+                  <th class="sticky -top-1 bg-gray-200">Payload</th>
+                  <th class="sticky -top-1 bg-gray-200 w-28">Direction</th>
+                </tr>
+              </thead>
+              <tbody id="testbody">
+                <!-- <script>
+                  for (let i = 0; i < 21; i++) {
+                    let color = i % 2 == 0 ? "#C4E3F3" : "#D0E9C6";
+                    document.querySelector("#testbody").innerHTML += `<tr>
+                  <td>2020-20-20</td>
+                  <td>20:20:${i + 10}</td>
+                  <td>Some rows</td>
+                  <td style="background-color: ${color}">
+                    MO
+                    <span
+                      class="align-middle text-lg font-bold material-icons-outlined"
+                    >
+                      arrow_upwards
+                    </span>
+                  </td>
+                </tr>
+                    `;
+                  }
+                </script> -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Input Row -->
+        <div class="flex space-x-4">
+          <!-- Input field + counter + sendBtn -->
+          <div class="rounded-shadow p-4 bg-light space-y-4 w-full">
+            <div class="w-full h-10 flex space-x-2 items-center">
+              <span class="chartBtn" onclick="showSatelliteModal()">
+                <svg
+                  width="36"
+                  height="36"
+                  fill="currentColor"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"
+                  />
+                </svg>
+              </span>
+
+              <input
+                class="rounded-md border w-full h-full bg-gray-100 px-3 tracking-wide font-medium text-sm"
+                id="inputSatellite"
+                type="text"
+                maxlength="270"
+              />
+              <span
+                class="flex items-center justify-center rounded-md border h-full bg-gray-100 px-3 text-xs font-medium align-middle tracking-widest"
               >
-                <span class="material-icons-outlined"> close </span>
+                <p id="byteCounter" class="">0</p>
+                <p class="w-8">/270</p>
+              </span>
+
+              <button
+                id="satelliteSendBtn"
+                onclick="sendSatelliteData()"
+                class="activeBtn p-4 h-full rounded-shadow flex justify-center items-center bg-light transform transition duration-300 text-xs font-bold text-gray-700"
+              >
+                SEND
               </button>
-              <table class="border bg-gray-100">
-                <thead>
-                  <th>Error code</th>
-                  <th>Description</th>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>10</td>
-                    <td>Invalid login credentials</td>
-                  </tr>
-                  <tr>
-                    <td>11</td>
-                    <td>No RockBLOCK with this IMEI found on your account</td>
-                  </tr>
-                  <tr>
-                    <td>12</td>
-                    <td>RockBLOCK has no line rental</td>
-                  </tr>
-                  <tr>
-                    <td>13</td>
-                    <td>Your account has insufficient credit</td>
-                  </tr>
-                  <tr>
-                    <td>14</td>
-                    <td>Could not decode hex data</td>
-                  </tr>
-                  <tr>
-                    <td>15</td>
-                    <td>Data too long</td>
-                  </tr>
-                  <tr>
-                    <td>16</td>
-                    <td>No data</td>
-                  </tr>
-                  <tr>
-                    <td>99</td>
-                    <td>System Error</td>
-                  </tr>
-                </tbody>
-              </table>
+
+              <div
+                id="flushBtn"
+                class="w-24 h-full flex rounded-shadow justify-center items-center text-gray-600 cursor-pointer px-3 space-x-2 transition duration-300"
+                data-checked="false"
+                onclick="toggleFlush()"
+              >
+                <span class="material-icons-outlined"> delete_sweep </span>
+                <p class="text-xs font-bold">FLUSH</p>
+              </div>
+            </div>
+
+            <!-- Satellite Info Modal -->
+            <div
+              id="satelliteModal"
+              class="hidden w-screen h-screen fixed top-0 left-0 z-50 bg-opacity-60 bg-gray-800"
+            >
+              <div
+                class="fixed top-40 w-1/2 left-1/2 transform -translate-x-1/2 text-left rounded-shadow bg-light overflow-hidden p-10"
+              >
+                <button
+                  id="closeSatelliteModalBtn"
+                  onclick="hideSatelliteModal()"
+                  class="absolute right-2 top-2 flex rounded-full hover:bg-gray-300 duration-200 p-1"
+                >
+                  <span class="material-icons-outlined"> close </span>
+                </button>
+                <table id="satelliteErrorTable" class="bg-gray-100 m-auto">
+                  <thead>
+                    <th>Error code</th>
+                    <th>Description</th>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>10</td>
+                      <td>Invalid login credentials</td>
+                    </tr>
+                    <tr>
+                      <td>11</td>
+                      <td>No RockBLOCK with this IMEI found on your account</td>
+                    </tr>
+                    <tr>
+                      <td>12</td>
+                      <td>RockBLOCK has no line rental</td>
+                    </tr>
+                    <tr>
+                      <td>13</td>
+                      <td>Your account has insufficient credit</td>
+                    </tr>
+                    <tr>
+                      <td>14</td>
+                      <td>Could not decode hex data</td>
+                    </tr>
+                    <tr>
+                      <td>15</td>
+                      <td>Data too long</td>
+                    </tr>
+                    <tr>
+                      <td>16</td>
+                      <td>No data</td>
+                    </tr>
+                    <tr>
+                      <td>99</td>
+                      <td>System Error</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
+          <!-- 
+            <div
+              class="rounded-shadow p-4 bg-light flex items-center justify-center space-x-2 w-24"
+            >
+              <input type="checkbox" class="h-4 w-4" />
+              <span class="text-sm font-medium h-full pt-2.5"> Flush </span>
+            </div> -->
         </div>
       </div>
     </main>
@@ -625,23 +689,24 @@
         "gliderUID"
       );
     </script>
-    <script src="../js/footer.js"></script>
-    <script src="../js/firebase.js"></script>
-    <script src="../js/auth.js"></script>
-    <script src="../js/chartjs-zoompan-plugin.js"></script>
-    <script src="../js/charts.js"></script>
-    <script src="../js/device.js"></script>
-    <script src="../js/xlsx.js"></script>
-    <script src="../js/datepicker.js"></script>
-    <script src="../js/wNumb.js"></script>
-    <script src="../js/missionControlTab.js"></script>
-    <script src="../js/satellite.js"></script>
+    <script src="js/footer.js"></script>
+    <script src="js/firebase.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/chartjs-zoompan-plugin.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/device.js"></script>
+    <script src="js/xlsx.full.min.js"></script>
+    <script src="js/xlsx.js"></script>
+    <script src="js/datepicker.js"></script>
+    <script src="js/wNumb.js"></script>
+    <script src="js/missionControlTab.js"></script>
+    <script src="js/satellite.js"></script>
 
     <!-- MAPS API with KEY -->
     <script
-      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBZdOYcDNzgN42ME1STKLgJpyWucvOatYg&callback=initDataMap&libraries=&v=weekly"
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDmDtuW7lGEvkAUbXOEzuXfcCx3UChoFFc&callback=initDataMap&libraries=&v=weekly"
       async
     ></script>
-    <script src="../js/map.js"></script>
+    <script src="js/map.js"></script>
   </body>
 </html>

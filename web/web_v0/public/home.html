@@ -8,6 +8,12 @@
     <!-- Ground OVERLAY -->
     <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
 
+    <!-- Moment JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+    <!-- Moment Timezone -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.33/moment-timezone-with-data.min.js"></script>
+
     <!-- JSZIP -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.5.0/jszip.min.js"></script>
 
@@ -23,9 +29,7 @@
     <!-- FONTAWESOME ICONS -->
     <link
       rel="stylesheet"
-      href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css"
-      integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p"
-      crossorigin="anonymous"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
     />
 
     <!-- MATERIAL ICONS -->
@@ -42,7 +46,7 @@
   <body class="bg-gray-100 font-montserrat pt-16 flex flex-col">
     <script src="js/header.js"></script>
 
-    <main class="min-h-screen space-y-4 py-12">
+    <main class="min-h-screen space-y-4 py-12 mx-10">
       <!-- <div class="container m-auto rounded-shadow p-4 bg-light">
         <iframe
           id="mareanoMap"
@@ -55,23 +59,23 @@
 
       <!-- Map-->
       <div class="container m-auto rounded-shadow p-4 bg-light">
-        <div id="homeMap" class="map h-full"></div>
+        <div id="homeMap" class="big-card h-full"></div>
       </div>
 
-      <!-- UPLOAD AND CREATE DEVICE bUTTONS -->
+      <!-- UPLOAD AND CREATE DEVICE BUTTONS -->
       <div class="container m-auto flex space-x-4">
         <button
-          class="activeBtnStyle rounded-shadow w-48 px-2 h-10 flex justify-center items-center font-medium tracking-wide cursor-pointer duration-200 border bg-light hover:border-gray-400"
+          class="w-40 activeBtnStyle px-3 h-12 rounded-shadow flex justify-around items-center space-x-4 font-semibold text-sm cursor-pointer duration-200 border bg-light text-dark ring-2 ring-transparent hover:ring-gray-300"
         >
-          Add new Glider
-          <span class="material-icons-outlined ml-2"> add </span>
+          ADD GLIDER
+          <span class="material-icons-outlined"> add </span>
         </button>
         <button
           onclick="showModal()"
-          class="activeBtnStyle rounded-shadow w-44 px-2 h-10 flex justify-center items-center font-medium tracking-wide cursor-pointer duration-200 border bg-light hover:border-gray-400"
+          class="w-44 activeBtnStyle px-3 h-12 space-x-4 rounded-shadow flex justify-around items-center font-semibold text-sm cursor-pointer duration-200 border bg-light text-dark ring-2 ring-transparent hover:ring-gray-300"
         >
-          Upload Data
-          <span class="material-icons-outlined ml-2"> file_upload </span>
+          UPLOAD DATA
+          <span class="material-icons-outlined"> file_upload </span>
         </button>
       </div>
 
@@ -160,35 +164,57 @@
       <!--  GRID -->
       <div
         id="deviceGrid"
-        class="container m-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md: auto-cols-max gap-12"
+        class="container m-auto grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-12"
       >
         <!-- CARD -->
-        <!-- <a href="devices/device.html?gliderUID=1234">
-          <div class="card">
-            <img
-              class="object-cover center w-full h-44"
-              src="assets/img/jelly.jpg"
-              alt=""
-            />
-            <div class="id flex-grow place-self-center mt-4">
-              <h4 class="text-2xl font-semibold tracking-wider">ID: 123420</h4>
-            </div>
+        <!-- <script>
+          let deviceGrid = document.querySelector("#deviceGrid");
 
-            <div class="indicator flex justify-evenly w-full my-2">
-              <span class="material-icons text-3xl"> battery_full </span>
-              <span class="material-icons text-3xl"> error </span>
-            </div>
-            <div class="w-full left-2 bg-gray-800 text-white p-2">
-              <p class="tracking-wide text-center">Last sync: 20-03-04</p>
-            </div>
+          for (let i = 0; i < 6; i++) {
+            deviceGrid.innerHTML += `
+            <a href="device.html?gliderUID=1234">
+              <div
+                class="overflow-hidden flex flex-col justify-between shadow-lg rounded-lg transform transition-all duration-200 hover:scale-95 hover:shadow-2xl"
+              >
+                <div
+                class="absolute px-3 py-1 flex justify-center items-center bg-gray-800 top-4 left-4 rounded-lg font-semibold tracking-widest text-gray-200"
+              >
+                G1233
+              </div>
+              <img
+                class="object-cover center w-full h-44 rounded-lg"
+                src="assets/img/jelly.jpg"
+                alt=""
+              />
 
-            <div
-              class="badge absolute px-3 py-1 flex justify-center items-center bg-gray-800 top-4 left-4 rounded-lg font-semibold tracking-widest text-gray-200"
-            >
-              G1233
+              <div class="flex-grow place-self-center mt-4">
+                <h4 class="text-xl font-bold tracking-widest">ID: 123420</h4>
+              </div>
+
+              <div class="flex justify-evenly w-full p-4">
+                <i
+                  class="fas fa-battery-quarter text-xl transform -rotate-90 scale-y-125 flex items-center text-dark"
+                ></i>
+                <span class="material-icons text-2xl text-dark">
+                  sd_card_alert
+                </span>
+                <span class="material-icons text-2xl text-dark">
+                  check_circle
+                </span>
+                <span class="material-icons text-2xl text-dark"> error </span>
+              </div>
+
+              <div class="w-full bg-dark text-light p-2 flex flex-col rounded-lg">
+                <p class="tracking-wide text-center text-base font-medium">
+                  10 minutes ago
+                </p>
+              </div>
             </div>
-          </div>
-        </a> -->
+          </a>
+            
+            `;
+          }
+        </script> -->
       </div>
     </main>
 
@@ -201,10 +227,8 @@
     <!-- MAPS API with KEY -->
     <script src="js/map.js"></script>
     <script
-      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBZdOYcDNzgN42ME1STKLgJpyWucvOatYg&callback=initHomeMap&libraries=&v=weekly"
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDmDtuW7lGEvkAUbXOEzuXfcCx3UChoFFc&callback=initHomeMap&libraries=&v=weekly"
       async
     ></script>
   </body>
 </html>
-
-AIzaSyBZdOYcDNzgN42ME1STKLgJpyWucvOatYg

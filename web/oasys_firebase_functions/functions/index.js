@@ -102,8 +102,8 @@ exports.fromGliderToDatabase = functions
     let utcDate = moment(context.timestamp);
     let localTime = utcDate.tz("Europe/Oslo").format("YYYY-MM-DD HH:mm:ss");
 
-    // console.log("utcDate: " + utcDate);
-    // console.log("localTime: " + localTime);
+    console.log("utcDate: " + utcDate);
+    console.log("localTime: " + localTime);
 
     // Timestamp on when glider last communicated through 4G
     await db.collection("Gliders").doc(gliderId).set(
@@ -124,10 +124,31 @@ exports.fromGliderToDatabase = functions
     // If glider sent data properly
     //add it to corresponding mission in database
     if (dataJSON != null) {
+      let data;
+      //TODO: check if data contains latlng, if yes
+      // change glider last seen in database.
+      if (data.includes("lat")) {
+        let lat = dataJSON.data.lat;
+        let lng = dataJSON.data.lng;
+
+        await db
+          .collection("Gliders")
+          .doc(gliderId)
+          .set(
+            {
+              "Last seen": `lat: ${lat}, lng:${lng}`,
+            },
+            { merge: true }
+          );
+
+        data = JSON.stringify({ lat, lng }).slice(1, -1);
+      } else {
+        data = JSON.stringify(dataJSON.data).slice(1, -1);
+      }
+
       let missionNum = dataJSON.M;
       let logDate = dataJSON.ts.slice(0, 8);
       let logTime = dataJSON.ts.slice(8);
-      let data = JSON.stringify(dataJSON.data).slice(1, -1);
 
       logDate =
         logDate.slice(0, 4) +
@@ -152,22 +173,7 @@ exports.fromGliderToDatabase = functions
         .doc(logDate)
         .set({ [logTime]: data }, { merge: true });
 
-      //TODO: check if data contains latlng, if yes
-      // change glider last seen in database.
-      if (data.includes("lat")) {
-        let lat = dataJSON.data.lat;
-        let lng = dataJSON.data.lng;
-
-        await db
-          .collection("Gliders")
-          .doc(gliderId)
-          .set(
-            {
-              "Last seen": `lat: ${lat}, lng:${lng}`,
-            },
-            { merge: true }
-          );
-      }
+      console.log({ data });
     }
   });
 
@@ -203,14 +209,26 @@ exports.fromGliderSatellite = functions
         let lng = split[1];
         let data = split[2];
 
+        // Updating glider fields in Firestore
         db.collection("Gliders")
           .doc(glider.id)
           .set(
             {
               "Last seen": `lat: ${lat}, lng: ${lng}`,
               "Last sync": localTime,
-              "Sat payload": data !== undefined ? data : "",
+              Status: data !== undefined ? data : "",
             },
+            { merge: true }
+          );
+
+        console.log(payload);
+        // Updating satellite msg log in Firestore
+        db.collection("Gliders")
+          .doc(glider.id)
+          .collection("Satellite")
+          .doc(localTime)
+          .set(
+            { Direction: "MO", Payload: hex_to_ascii(payload.data) },
             { merge: true }
           );
       }

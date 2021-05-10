@@ -11,31 +11,83 @@ auth.onAuthStateChanged((user) => {
 
 // ****************** CARD-GRID SECTION ******************
 async function createCard(uid, alias, sync, img) {
+  sync = sync.replace(/\D/g, "");
+  let year = Number(sync.slice(0, 4));
+  let month = Number(sync.slice(4, 6)) - 1;
+  let day = Number(sync.slice(6, 8));
+  let hour = Number(sync.slice(8, 10));
+  let minute = Number(sync.slice(10, 12));
+  let second = Number(sync.slice(12));
+  let fromNow = moment([year, month, day, hour, minute, second]).fromNow();
+
+  let batteryState = "";
+  switch (Math.floor(Math.random() * 4)) {
+    case 0:
+      batteryState = "quarter";
+      break;
+    case 1:
+      batteryState = "half";
+      break;
+    case 2:
+      batteryState = "three-quarters";
+      break;
+    case 3:
+      batteryState = "full";
+      break;
+  }
+
+  let sdCardState =
+    Math.floor(Math.random() * 2) == 0 ? "sd_card" : "sd_card_alert";
+  let healthState =
+    Math.floor(Math.random() * 2) == 0 ? "check_circle" : "error";
+  let fixState = Math.floor(Math.random() * 2) == 0 ? "hidden" : "";
+
   let html = ` 
-    <a href="devices/device.html?gliderUID=${uid}">
-      <div class="card">
-        <img
-          class="object-cover center w-full h-44"
-          src=${img}
-          alt=""
-        />
-        <div class="id flex-grow place-self-center mt-4">
-          <h4 class="text-2xl font-semibold tracking-wider">ID: ${uid}</h4>
-        </div>
-
-        <div class="indicator flex justify-evenly w-full my-2">
-          <span class="material-icons text-3xl"> battery_full </span>
-          <span class="material-icons text-3xl"> error </span>
-        </div>
-        <div class="badge w-full left-2 bg-gray-800 text-white p-2">
-          <!-- <i class="far fa-clock fa-lg mr-2"></i> -->
-          <p class="tracking-wide text-center">Last sync: ${sync}</p>
-        </div>
-
+      <a href="device.html?gliderUID=${uid}">
         <div
-        class="badge absolute px-3 py-1 flex justify-center items-center bg-gray-800 top-4 left-4 rounded-lg font-semibold tracking-widest text-gray-200">${alias}</div>
-      </div>
-    </a>`;
+          class="overflow-hidden flex flex-col justify-between shadow-lg rounded-lg transform transition-all duration-200 hover:scale-95 hover:shadow-2xl"
+        >
+          <!--  Badge -->
+          <div
+            class="absolute px-3 py-1 flex justify-center items-center bg-dark top-4 left-4 rounded-lg font-semibold tracking-widest text-gray-200"
+          >
+          ${alias}
+          </div>
+          <!-- IMG -->
+          <img
+            class="object-cover center w-full h-44 rounded-lg"
+            src=${img}
+            alt=""
+          />
+
+          <!-- Unique ID -->
+          <div class="flex-grow place-self-center mt-4">
+            <h4 class="text-xl font-bold tracking-widest">ID: ${uid}</h4>
+          </div>
+
+          <!--  Indicators -->
+          <div class="flex justify-evenly w-full p-4">
+            <i
+              class="fas fa-battery-${batteryState} text-xl transform -rotate-90 scale-y-125 flex items-center text-dark"
+            ></i>
+            <span class="material-icons text-2xl text-dark">
+            ${sdCardState}
+            </span>
+            <span class="material-icons text-2xl text-dark">
+            ${healthState}
+            </span>
+            <span class="material-icons text-2xl text-dark"> error </span>
+          </div>
+
+          <!-- Last Sync -->
+          <div class="w-full bg-dark text-light p-2 flex flex-col rounded-lg">
+            <p class="tracking-wide text-center text-base font-medium">
+              ${fromNow}
+            </p>
+          </div>
+        </div>
+    </a>
+  `;
 
   document.querySelector("#deviceGrid").innerHTML += html;
 }
@@ -113,18 +165,6 @@ function hideModal() {
   cloudBox.classList.remove("hidden");
   confirmBtn.classList.add("disableBtn");
 }
-
-// REMOVE MAYBE? CUZ OF DOUBLE CLICK ISSUE ON FILE SELECT
-// modal.addEventListener("mouseup", (e) => {
-//   let condition =
-//     e.target != zipBtn &&
-//     e.target != btnRow &&
-//     e.target != content &&
-//     e.target != dropBox;
-//   if (condition) {
-//     modal.classList.add("hidden");
-//   }
-// });
 
 async function getFilesFromZip(zipFile) {
   var zipHolder = new JSZip();

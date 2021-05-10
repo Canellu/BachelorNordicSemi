@@ -1,3 +1,14 @@
+// Check if user is logged in and redirect them
+auth.onAuthStateChanged((user) => {
+  if (user) {
+    console.log("Is logged in!");
+  } else {
+    // User is logged out
+    console.log("Is logged out!");
+    location.replace("index.html");
+  }
+});
+
 let dataTabBtn = document.querySelector("#data-tab-btn");
 let controlTabBtn = document.querySelector("#control-tab-btn");
 let satelliteTabBtn = document.querySelector("#satellite-tab-btn");
@@ -50,6 +61,12 @@ satelliteTabBtn.addEventListener("click", () => {
   controlTab.classList.add("hidden");
   dataTab.classList.add("hidden");
   satelliteTab.classList.remove("hidden");
+
+  // Populate satellite message table as long as its not empty
+  if (document.querySelector("#satelliteMessageTable").rows.length <= 1) {
+    console.log(document.querySelector("#satelliteMessageTable").rows.length);
+    populateSatelliteMessageTable();
+  }
 });
 
 dropDownBtn.addEventListener("click", () => {
@@ -81,6 +98,7 @@ addScrollLock(dropDownContent, 50);
 addScrollLock(document.querySelector("#hours"), 50);
 addScrollLock(document.querySelector("#minutes"), 20);
 addScrollLock(document.querySelector("#previewBox"), 20);
+addScrollLock(document.querySelector("#satelliteMessageTableWrapper"), 16);
 
 var charts = []; //Conductivity, Pressure, Temperature
 var activeMission = "";
@@ -106,7 +124,7 @@ async function listMissions() {
       latestMission = missionNum;
     }
     // Create dropdown content for each mission
-    dropDownContent.innerHTML += `<div class="mission">${mission.id}</div>`;
+    dropDownContent.innerHTML += `<div class="mission w-full">${mission.id}</div>`;
   });
 
   activeMission = `Mission ${latestMission}`;
@@ -142,7 +160,7 @@ async function listMissions() {
   });
 
   // Click on latest mission
-  // missionDivs[missionDivs.length - 1].click();
+  missionDivs[missionDivs.length - 1].click();
   document.querySelector("#missionSelector div p").innerText = activeMission;
 }
 
@@ -161,10 +179,6 @@ async function getMissionData(missionName) {
     .collection("Missions")
     .doc(missionName);
 
-  // // Mission commands!
-  // let getCommands = await mission.get();
-  // let commands = getCommands.data();
-
   let missionData = await mission.collection("Data").get();
 
   // Looping through data documents
@@ -175,7 +189,15 @@ async function getMissionData(missionName) {
     // Loop through each row in document
     timestamps.forEach((timestamp) => {
       // Convert row value, to json-object
-      let val = JSON.parse("{" + date.data()[timestamp].slice(0, -1) + "}");
+      let val;
+      if (date.data()[timestamp].slice(-1) == ",") {
+        // console.log(date.data()[timestamp]);
+
+        val = JSON.parse("{" + date.data()[timestamp].slice(0, -1) + "}");
+      } else {
+        // console.log(date.data()[timestamp]);
+        val = JSON.parse("{" + date.data()[timestamp] + "}");
+      }
 
       // For each row, append to dataset
       // row -> { "2020-03-28T02:24:12" : "{"T": 22..."}
@@ -242,27 +264,27 @@ function getDataType(dataset, type) {
 
 // Updates chart and map UI with data
 function updateDataUI(data) {
-  charts.forEach((chartObj) => {
-    chartObj.chart.data.datasets[0].data = data[chartObj.type];
-    chartObj.chart.update();
-    chartObj.chart.resetZoom();
-  });
+  if (Object.entries(data).length !== 0) {
+    charts.forEach((chartObj) => {
+      console.log(chartObj);
 
-  addDataMarkers(data.coordinates, dataMap);
+      chartObj.chart.data.datasets[0].data = data[chartObj.type];
+      chartObj.chart.update();
+      chartObj.chart.resetZoom();
+    });
+    addDataMarkers(data.coordinates, dataMap);
+  } else {
+    clearMapMarkers();
+    charts.forEach((chartObj) => {
+      console.log(chartObj);
+      chartObj.chart.data.datasets[0].data = [];
+      chartObj.chart.update();
+      chartObj.chart.resetZoom();
+    });
+  }
 }
 
 // Creates dropdownlist
 listMissions();
 
 createAllCharts();
-
-// Check if user is logged in and redirect them
-auth.onAuthStateChanged((user) => {
-  if (user) {
-    console.log("Is logged in!");
-  } else {
-    // User is logged out
-    console.log("Is logged out!");
-    location.replace("../index.html");
-  }
-});

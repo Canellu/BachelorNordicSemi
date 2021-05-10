@@ -14,6 +14,10 @@ function initHomeMap() {
   homeMap = new google.maps.Map(homeMapDiv, {
     center: { lat: defaultLocation.lat, lng: defaultLocation.lng },
     zoom: defaultLocation.zoom,
+    disableDefaultUI: true,
+    mapTypeControl: true,
+    zoomControl: true,
+    fullscreenControl: true,
   });
   console.log("HomeMap Made");
 
@@ -36,6 +40,10 @@ function initDataMap() {
   dataMap = new google.maps.Map(dataMapDiv, {
     center: { lat: defaultLocation.lat, lng: defaultLocation.lng },
     zoom: defaultLocation.zoom,
+    disableDefaultUI: true,
+    mapTypeControl: true,
+    zoomControl: true,
+    fullscreenControl: true,
   });
 }
 
@@ -71,7 +79,7 @@ function addHomeMarkers(location, alias) {
   });
 }
 
-function addDataMarkers(coordinates, map) {
+function clearMapMarkers() {
   // Loop through markers and remove them from map.
   markers.forEach((marker) => {
     marker.setMap(null);
@@ -81,20 +89,24 @@ function addDataMarkers(coordinates, map) {
 
   // Reset marker-array
   markers = [];
+}
+
+function addDataMarkers(coordinates, map) {
+  clearMapMarkers();
 
   // Add new markers to marker-array
   let firstMarker;
   coordinates.forEach((loc, index) => {
-    let icon = "../assets/svg/triangleMarker.svg";
+    let icon = "assets/svg/triangleMarker.svg";
 
     // If start give icon, if end, give another
     switch (index) {
       case 0:
         firstMarker = { lat: loc.lat, lng: loc.lng };
-        icon = "../assets/svg/startMarkerWhite.svg";
+        icon = "assets/svg/startMarkerWhite.svg";
         break;
       case coordinates.length - 1:
-        icon = "../assets/svg/endMarkerWhite.svg";
+        icon = "assets/svg/endMarkerWhite.svg";
         break;
     }
 
@@ -135,6 +147,10 @@ function initMissionMap() {
   missionMap = new google.maps.Map(missionMapDiv, {
     center: { lat: defaultLocation.lat, lng: defaultLocation.lng },
     zoom: defaultLocation.zoom,
+    disableDefaultUI: true,
+    mapTypeControl: true,
+    zoomControl: true,
+    fullscreenControl: true,
   });
 
   missionWaypoints = new google.maps.Polyline({
