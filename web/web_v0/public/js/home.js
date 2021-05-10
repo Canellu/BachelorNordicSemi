@@ -49,7 +49,7 @@ async function createCard(uid, alias, sync, img) {
         >
           <!--  Badge -->
           <div
-            class="absolute px-3 py-1 flex justify-center items-center bg-gray-800 top-4 left-4 rounded-lg font-semibold tracking-widest text-gray-200"
+            class="absolute px-3 py-1 flex justify-center items-center bg-dark top-4 left-4 rounded-lg font-semibold tracking-widest text-gray-200"
           >
           ${alias}
           </div>

@@ -176,7 +176,7 @@ function createChartHTML(type) {
         <div class="flex items-center w-full h-12 px-1">
           <!-- Chart header -->
           <div class="flex-grow">
-            <h1 class="font-medium text-lg tracking-tight ml-2 opacity-75">
+            <h1 class="font-semibold text-sm tracking-wider ml-2 opacity-75 uppercase">
               ${type}
             </h1>
           </div> 
