@@ -71,7 +71,7 @@
   <body class="bg-gray-100 font-montserrat pt-16 flex flex-col min-h-screen">
     <script src="js/header.js"></script>
 
-    <main class="min-h-screen">
+    <main class="min-h-screen mx-10">
       <!-- Tab selector -->
       <div class="tabs m-auto rounded-shadow flex flex-col z-50 bg-light">
         <div class="flex h-9">
@@ -115,14 +115,16 @@
           </div>
 
           <!-- Missionpicker-->
-          <div id="missionSelector" class="h-12 w-48 cursor-pointer">
-            <div class="dropDownBtn activeBtn rounded-shadow relative bg-light">
-              <p class="inline-block font-medium tracking-wider"></p>
-              <span class="material-icons absolute right-4"> expand_more </span>
+          <div id="missionSelector" class="cursor-pointer">
+            <div
+              class="z-10 dropDownBtn relative w-40 activeBtnStyle rounded-shadow px-3 h-12 flex justify-around items-center font-semibold text-sm cursor-pointer duration-200 border bg-light text-dark ring-2 ring-transparent hover:ring-gray-300"
+            >
+              <p class="inline-block uppercase"></p>
+              <span class="material-icons"> expand_more </span>
               <div
-                class="dropDownContent hidden rounded-shadow max-h-56 w-full absolute left-0 top-12 overflow-auto bg-light"
+                class="dropDownContent hidden rounded-shadow max-h-56 w-full absolute left-0 top-12 overflow-auto bg-light flex flex-col items-center"
               >
-                <div class="mission">Mission 10</div>
+                <!-- <div class="mission">Mission 10</div>
                 <div class="mission">Mission 11</div>
                 <div class="mission">Mission 12</div>
                 <div class="mission">Mission 13</div>
@@ -131,7 +133,7 @@
                 <div class="mission">Mission 16</div>
                 <div class="mission">Mission 17</div>
                 <div class="mission">Mission 18</div>
-                <div class="mission">Mission 19</div>
+                <div class="mission">Mission 19</div> -->
               </div>
             </div>
           </div>
@@ -519,6 +521,7 @@
 
       <!-- ***************Satellite Tab ***************** -->
       <div id="satellite-tab" class="hidden container m-auto py-12 space-y-4">
+        <!-- Satellite message table -->
         <div class="container m-auto rounded-shadow bg-light overflow-auto p-4">
           <div
             id="satelliteMessageTableWrapper"
@@ -671,12 +674,12 @@
             </div>
           </div>
           <!-- 
-          <div
-            class="rounded-shadow p-4 bg-light flex items-center justify-center space-x-2 w-24"
-          >
-            <input type="checkbox" class="h-4 w-4" />
-            <span class="text-sm font-medium h-full pt-2.5"> Flush </span>
-          </div> -->
+            <div
+              class="rounded-shadow p-4 bg-light flex items-center justify-center space-x-2 w-24"
+            >
+              <input type="checkbox" class="h-4 w-4" />
+              <span class="text-sm font-medium h-full pt-2.5"> Flush </span>
+            </div> -->
         </div>
       </div>
     </main>

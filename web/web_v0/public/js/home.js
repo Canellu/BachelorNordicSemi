@@ -11,6 +11,37 @@ auth.onAuthStateChanged((user) => {
 
 // ****************** CARD-GRID SECTION ******************
 async function createCard(uid, alias, sync, img) {
+  sync = sync.replace(/\D/g, "");
+  let year = Number(sync.slice(0, 4));
+  let month = Number(sync.slice(4, 6)) - 1;
+  let day = Number(sync.slice(6, 8));
+  let hour = Number(sync.slice(8, 10));
+  let minute = Number(sync.slice(10, 12));
+  let second = Number(sync.slice(12));
+  let fromNow = moment([year, month, day, hour, minute, second]).fromNow();
+
+  let batteryState = "";
+  switch (Math.floor(Math.random() * 4)) {
+    case 0:
+      batteryState = "quarter";
+      break;
+    case 1:
+      batteryState = "half";
+      break;
+    case 2:
+      batteryState = "three-quarters";
+      break;
+    case 3:
+      batteryState = "full";
+      break;
+  }
+
+  let sdCardState =
+    Math.floor(Math.random() * 2) == 0 ? "sd_card" : "sd_card_alert";
+  let healthState =
+    Math.floor(Math.random() * 2) == 0 ? "check_circle" : "error";
+  let fixState = Math.floor(Math.random() * 2) == 0 ? "hidden" : "";
+
   let html = ` 
     <a href="device.html?gliderUID=${uid}">
       <div class="card">
@@ -19,17 +50,21 @@ async function createCard(uid, alias, sync, img) {
           src=${img}
           alt=""
         />
-        <div class="id flex-grow place-self-center mt-4">
-          <h4 class="text-2xl font-semibold tracking-wider">ID: ${uid}</h4>
+        <div class="flex-grow place-self-center mt-4">
+          <h4 class="text-xl font-bold tracking-widest">ID: ${uid}</h4>
         </div>
 
-        <div class="indicator flex justify-evenly w-full my-2">
-          <span class="material-icons text-3xl"> battery_full </span>
-          <span class="material-icons text-3xl"> error </span>
+        <div class="flex justify-evenly w-full my-2">
+        <i
+        class="fas fa-battery-${batteryState} flex items-center text-xl transform -rotate-90 scale-y-125"
+      ></i>
+        <span class="material-icons text-3xl"> ${sdCardState} </span>
+        <span class="material-icons text-3xl"> ${healthState} </span>
+        <span class="material-icons text-3xl"> build_circle </span>
         </div>
-        <div class="badge w-full left-2 bg-gray-800 text-white p-2">
+        <div class="w-full left-2 bg-gray-800 text-white p-2">
           <!-- <i class="far fa-clock fa-lg mr-2"></i> -->
-          <p class="tracking-wide text-center">Last sync: ${sync}</p>
+          <p class="tracking-wide text-center text-sm font-medium">Last sync: ${fromNow}</p>
         </div>
 
         <div
@@ -113,18 +148,6 @@ function hideModal() {
   cloudBox.classList.remove("hidden");
   confirmBtn.classList.add("disableBtn");
 }
-
-// REMOVE MAYBE? CUZ OF DOUBLE CLICK ISSUE ON FILE SELECT
-// modal.addEventListener("mouseup", (e) => {
-//   let condition =
-//     e.target != zipBtn &&
-//     e.target != btnRow &&
-//     e.target != content &&
-//     e.target != dropBox;
-//   if (condition) {
-//     modal.classList.add("hidden");
-//   }
-// });
 
 async function getFilesFromZip(zipFile) {
   var zipHolder = new JSZip();
