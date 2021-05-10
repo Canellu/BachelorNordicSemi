@@ -79,7 +79,7 @@ function addHomeMarkers(location, alias) {
   });
 }
 
-function addDataMarkers(coordinates, map) {
+function clearMapMarkers() {
   // Loop through markers and remove them from map.
   markers.forEach((marker) => {
     marker.setMap(null);
@@ -89,6 +89,10 @@ function addDataMarkers(coordinates, map) {
 
   // Reset marker-array
   markers = [];
+}
+
+function addDataMarkers(coordinates, map) {
+  clearMapMarkers();
 
   // Add new markers to marker-array
   let firstMarker;
