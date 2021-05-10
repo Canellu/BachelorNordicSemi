@@ -281,13 +281,20 @@ void awaitStart()
       if (strstr(uart_rx, "wifi_start") != NULL)
       {
         Serial.println("Starting wifi");
+        Serial2.println("OK");
         on_wifi = true;
         wifiBegin();
+        emptyUartBuffer();
+      }
+      else
+      {
+        Serial.println("unrecognized start command");
         emptyUartBuffer();
       }
     }
     else
     {
+      Serial.println(c);
       uart_rx[arr_rx++] = c;
     }
   }
