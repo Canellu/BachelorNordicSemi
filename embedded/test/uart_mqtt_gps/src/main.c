@@ -1220,7 +1220,7 @@ static int wifi_module()
 
 			//strcpy(wifi_response, "{D:20202020.txt}");
 
-			if (strcmp(wifi_response, "connected") == 0)
+			if (strstr(wifi_response, "connected") != NULL)
 			{
 				uint8_t sd_msg_response[256] = "";
 
@@ -1264,8 +1264,19 @@ static int wifi_module()
 			else if (strstr(wifi_response, "time:") != NULL)
 			{
 				// parse unix time
+				time_t wifi_unix = 0;
+				static char *eptr;
+				wifi_unix = strtoll(wifi_response + 5, &eptr, 10) / 1000;
+				LOG_INF("unix from wifi: %d", (int32_t)wifi_unix);
+
+				time_UTC = gmtime(&wifi_unix);
+
+				date_time_set(time_UTC);
+				date_time_now(&unix_time_ms);
+				update_tm_all(unix_time_ms / 1000);
+				LOG_INF("time synchronized through wifi", (int32_t)wifi_unix);
 			}
-			else if (strcmp(wifi_response, "wifi_end") == 0)
+			else if (strstr(wifi_response, "wifi_end") != NULL)
 			{
 				printk("\nReceived wifi end command\n");
 				// uart_send(UART_2, "wifi_end;", strlen("wifi_end;"));
@@ -1282,8 +1293,9 @@ static int wifi_module()
 		LOG_ERR("wifi start unsuccessful");
 		err = -1;
 	}
-
 	uart_exit(UART_2);
+
+	set_LED(30, 0);
 
 	return err;
 }
