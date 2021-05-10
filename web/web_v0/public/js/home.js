@@ -43,34 +43,51 @@ async function createCard(uid, alias, sync, img) {
   let fixState = Math.floor(Math.random() * 2) == 0 ? "hidden" : "";
 
   let html = ` 
-    <a href="device.html?gliderUID=${uid}">
-      <div class="card">
-        <img
-          class="object-cover center w-full h-44"
-          src=${img}
-          alt=""
-        />
-        <div class="flex-grow place-self-center mt-4">
-          <h4 class="text-xl font-bold tracking-widest">ID: ${uid}</h4>
-        </div>
-
-        <div class="flex justify-evenly w-full my-2">
-        <i
-        class="fas fa-battery-${batteryState} flex items-center text-xl transform -rotate-90 scale-y-125"
-      ></i>
-        <span class="material-icons text-3xl"> ${sdCardState} </span>
-        <span class="material-icons text-3xl"> ${healthState} </span>
-        <span class="material-icons text-3xl"> build_circle </span>
-        </div>
-        <div class="w-full left-2 bg-gray-800 text-white p-2">
-          <!-- <i class="far fa-clock fa-lg mr-2"></i> -->
-          <p class="tracking-wide text-center text-sm font-medium">Last sync: ${fromNow}</p>
-        </div>
-
+      <a href="device.html?gliderUID=${uid}">
         <div
-        class="badge absolute px-3 py-1 flex justify-center items-center bg-gray-800 top-4 left-4 rounded-lg font-semibold tracking-widest text-gray-200">${alias}</div>
-      </div>
-    </a>`;
+          class="overflow-hidden flex flex-col justify-between shadow-lg rounded-lg transform transition-all duration-200 hover:scale-95 hover:shadow-2xl"
+        >
+          <!--  Badge -->
+          <div
+            class="absolute px-3 py-1 flex justify-center items-center bg-gray-800 top-4 left-4 rounded-lg font-semibold tracking-widest text-gray-200"
+          >
+          ${alias}
+          </div>
+          <!-- IMG -->
+          <img
+            class="object-cover center w-full h-44 rounded-lg"
+            src=${img}
+            alt=""
+          />
+
+          <!-- Unique ID -->
+          <div class="flex-grow place-self-center mt-4">
+            <h4 class="text-xl font-bold tracking-widest">ID: ${uid}</h4>
+          </div>
+
+          <!--  Indicators -->
+          <div class="flex justify-evenly w-full p-4">
+            <i
+              class="fas fa-battery-${batteryState} text-xl transform -rotate-90 scale-y-125 flex items-center text-dark"
+            ></i>
+            <span class="material-icons text-2xl text-dark">
+            ${sdCardState}
+            </span>
+            <span class="material-icons text-2xl text-dark">
+            ${healthState}
+            </span>
+            <span class="material-icons text-2xl text-dark"> error </span>
+          </div>
+
+          <!-- Last Sync -->
+          <div class="w-full bg-dark text-light p-2 flex flex-col rounded-lg">
+            <p class="tracking-wide text-center text-base font-medium">
+              ${fromNow}
+            </p>
+          </div>
+        </div>
+    </a>
+  `;
 
   document.querySelector("#deviceGrid").innerHTML += html;
 }
