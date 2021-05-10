@@ -124,7 +124,7 @@ async function listMissions() {
       latestMission = missionNum;
     }
     // Create dropdown content for each mission
-    dropDownContent.innerHTML += `<div class="mission">${mission.id}</div>`;
+    dropDownContent.innerHTML += `<div class="mission w-full">${mission.id}</div>`;
   });
 
   activeMission = `Mission ${latestMission}`;
@@ -160,7 +160,7 @@ async function listMissions() {
   });
 
   // Click on latest mission
-  // missionDivs[missionDivs.length - 1].click();
+  missionDivs[missionDivs.length - 1].click();
   document.querySelector("#missionSelector div p").innerText = activeMission;
 }
 
@@ -179,10 +179,6 @@ async function getMissionData(missionName) {
     .collection("Missions")
     .doc(missionName);
 
-  // // Mission commands!
-  // let getCommands = await mission.get();
-  // let commands = getCommands.data();
-
   let missionData = await mission.collection("Data").get();
 
   // Looping through data documents
@@ -195,11 +191,11 @@ async function getMissionData(missionName) {
       // Convert row value, to json-object
       let val;
       if (date.data()[timestamp].slice(-1) == ",") {
-        console.log(date.data()[timestamp]);
+        // console.log(date.data()[timestamp]);
 
         val = JSON.parse("{" + date.data()[timestamp].slice(0, -1) + "}");
       } else {
-        console.log(date.data()[timestamp]);
+        // console.log(date.data()[timestamp]);
         val = JSON.parse("{" + date.data()[timestamp] + "}");
       }
 
@@ -268,13 +264,24 @@ function getDataType(dataset, type) {
 
 // Updates chart and map UI with data
 function updateDataUI(data) {
-  charts.forEach((chartObj) => {
-    chartObj.chart.data.datasets[0].data = data[chartObj.type];
-    chartObj.chart.update();
-    chartObj.chart.resetZoom();
-  });
+  if (Object.entries(data).length !== 0) {
+    charts.forEach((chartObj) => {
+      console.log(chartObj);
 
-  addDataMarkers(data.coordinates, dataMap);
+      chartObj.chart.data.datasets[0].data = data[chartObj.type];
+      chartObj.chart.update();
+      chartObj.chart.resetZoom();
+    });
+    addDataMarkers(data.coordinates, dataMap);
+  } else {
+    clearMapMarkers();
+    charts.forEach((chartObj) => {
+      console.log(chartObj);
+      chartObj.chart.data.datasets[0].data = [];
+      chartObj.chart.update();
+      chartObj.chart.resetZoom();
+    });
+  }
 }
 
 // Creates dropdownlist

@@ -94,13 +94,11 @@ datepickerDataDiv.addEventListener("click", () => {
 
 // Apply dates to show only data within specified dates
 async function applySelection() {
-  document.querySelector("#missionSelector div p").innerText = "Date range";
-
   let splitDate = datepickerDataDiv.value.split("|");
 
   if (splitDate.length > 1) {
-    var startDate = parseInt(splitDate[0].replaceAll("-", "").trim());
-    var endDate = parseInt(splitDate[1].replaceAll("-", "").trim());
+    let startDate = parseInt(splitDate[0].replaceAll("-", "").trim());
+    let endDate = parseInt(splitDate[1].replaceAll("-", "").trim());
 
     const missions = await db
       .collection("Gliders")
@@ -115,37 +113,60 @@ async function applySelection() {
 
     // Get mission start and end dates as INT
     // And push the mission if its within the specified date-range
-    missions.forEach((mission) => {
-      missionStartDate = parseInt(
-        mission.data().start.split(" ")[0].replaceAll("-", "")
-      );
+    let count = 0;
+    missions.forEach(async (mission) => {
+      let sensorData = await db
+        .collection("Gliders")
+        .doc(gliderUID)
+        .collection("Missions")
+        .doc(mission.id)
+        .collection("Data")
+        .get();
+
+      let sensorDocs = sensorData.docs;
+      missionStartDate = parseInt(sensorDocs[0].id.replaceAll("-", ""));
       missionEndDate = parseInt(
-        mission.data().end.split(" ")[0].replaceAll("-", "")
+        sensorDocs[sensorDocs.length - 1].id.replaceAll("-", "")
       );
 
       if (!(endDate < missionStartDate) && !(missionEndDate < startDate)) {
         missionList.push(mission.id);
       }
-    });
-
-    missionList.forEach(async (missionName) => {
-      if (missionName in missionDataset) {
-        getRangedData(missionName, startDate, endDate, data);
-        console.log(`Getting data from missionDataset: ${missionName}`);
-
-        // Update chart
-        updateDataUI(data);
-      } else {
-        let fetchedData = await getMissionData(missionName);
-        console.log(`Getting data from firestore: ${missionName}`);
-
-        missionDataset[missionName] = fetchedData;
-        getRangedData(missionName, startDate, endDate, data);
-
-        // Update chart
-        updateDataUI(data);
+      count++;
+      if (count == missions.size) {
+        if (missionList.length) {
+          _loopMissionList();
+          document.querySelector("#missionSelector div p").innerText =
+            "Date range";
+        } else {
+          document.querySelector("#missionSelector div p").innerText =
+            "No data";
+          updateDataUI({});
+        }
       }
     });
+
+    function _loopMissionList() {
+      missionList.forEach(async (missionName) => {
+        if (missionName in missionDataset) {
+          getRangedData(missionName, startDate, endDate, data);
+          console.log(`Getting data from missionDataset: ${missionName}`);
+
+          // Update chart
+          updateDataUI(data);
+        } else {
+          let fetchedData = await getMissionData(missionName);
+          console.log(`Getting data from firestore: ${missionName}`);
+
+          missionDataset[missionName] = fetchedData;
+          getRangedData(missionName, startDate, endDate, data);
+
+          // Update chart
+          updateDataUI(data);
+          console.log(data);
+        }
+      });
+    }
   }
 }
 

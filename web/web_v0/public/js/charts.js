@@ -197,7 +197,7 @@ function createChartHTML(type) {
             <!-- chart ranger -->
             <div
               id="chartRange"
-              class="flex items-center h-full tracking-wider"
+              class="hidden flex items-center h-full tracking-wider"
             > 
               <div
                 id="rangeBtn${type}"
