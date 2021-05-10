@@ -1,3 +1,4 @@
+/*
 import 'dart:math';
 
 import 'package:bachelor_app/service/database.dart';
@@ -213,3 +214,4 @@ class CustomCircleSymbolRenderer extends charts.CircleSymbolRenderer {
     );
   }
 }
+*/

@@ -2,7 +2,6 @@ import 'package:bachelor_app/bloc/nav_bloc/navigation_bloc.dart';
 import 'package:bachelor_app/models/device.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import '../deviceTile.dart';
 import 'map_screen.dart';
 
@@ -11,10 +10,8 @@ class HomePage extends StatelessWidget with NavigationStates {
 
   const HomePage({Key key, this.onMenuTap}) : super(key: key);
 
-
   @override
   Widget build(BuildContext context) {
-
     final device = Provider.of<List<Device>>(context);
     /*
     device.forEach((device) {
@@ -59,9 +56,7 @@ class HomePage extends StatelessWidget with NavigationStates {
                   scrollDirection: Axis.horizontal,
                   pageSnapping: true,
                   children: <Widget>[
-                    Container(
-                        child: MapScreen()
-                    ),
+                    Container(child: MapScreen(device)),
                   ],
                 ),
               ),
@@ -76,16 +71,15 @@ class HomePage extends StatelessWidget with NavigationStates {
                 shrinkWrap: true,
                 physics: ClampingScrollPhysics(),
                 itemCount: device.length,
-                itemBuilder: (context,index){
+                itemBuilder: (context, index) {
                   return DeviceTile(oneDevice: device[index]);
                 },
               ),
-             /*SizedBox(height: 20), //Place holder for the device widgets*/
+              /*SizedBox(height: 20), //Place holder for the device widgets*/
             ],
           ),
         ),
       ),
-
     );
     /*
     return ListView.builder(
@@ -96,5 +90,3 @@ class HomePage extends StatelessWidget with NavigationStates {
     );*/
   }
 }
-
-

@@ -1,3 +1,4 @@
+/*
 import 'package:bachelor_app/service/database.dart';
 import 'package:charts_flutter/flutter.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -24,16 +25,31 @@ class ChartPage extends StatelessWidget {
           if (!snapshot.hasData) return const Text("Loading....");
 
           Map dataset = new Map<String,dynamic>.from(snapshot.data);
+          print(dataset);
           //List<Series<dynamic,DateTime>> testDataset = [];
-          return Container(
-            child: Chart(missionID: '', dataType: "C",),
+          return SingleChildScrollView(
+            child: Column(
+              children: <Widget>[
+Container(
+             child: Chart(missionID: '', dataType: "C",),
+),
+//Map screen here 
+              ],
+            ),
+
           );
         }
     );
   }
 }
 
+*/
 
+
+
+
+
+//Prior in commments
 /*
           return Container(
             child: FloatingActionButton(
