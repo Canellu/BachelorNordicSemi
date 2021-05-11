@@ -30,11 +30,20 @@ AsyncWebServer webServer(HTTP_PORT);
 AsyncWebSocket webSocket("/ws");
 AsyncEventSource events("/events");
 
+// Satellite
+boolean on_sat = false;
+
 // UART
-#define RXD2 13
-#define TXD2 12
-int arr_rx = 0;
-char uart_rx[512] = "";
+#define RXnrf 13
+#define TXnrf 12
+
+#define RXsat 27
+#define TXsat 14
+
+int arr_nrf = 0;
+char rx_nrf[512] = "";
+int arr_sat = 0;
+char rx_sat[128] = "";
 
 // --------------------------------------------------
 // ESP File system
@@ -57,16 +66,16 @@ void initSPIFFS()
 // --------------------------------------------------
 void flushSerial()
 {
-  while (Serial2.available() > 0)
+  while (Serial1.available() > 0)
   {
-    Serial2.read();
+    Serial1.read();
   }
 }
 
 void emptyUartBuffer()
 {
-  memset(uart_rx, 0, sizeof(uart_rx));
-  arr_rx = 0;
+  memset(rx_nrf, 0, sizeof(rx_nrf));
+  arr_nrf = 0;
 }
 
 void wifiEnd()
@@ -104,7 +113,7 @@ void handleWebSocketMessage(AsyncWebSocket *server,
       }
       data[len] = 0;
       Serial.printf("%s\n", (char *)data);
-      Serial2.printf("%s\r", (char *)data);
+      Serial1.printf("%s\r", (char *)data);
     }
     // else
     // {
@@ -181,7 +190,7 @@ void onEvent(AsyncWebSocket *server,
   {
   case WS_EVT_CONNECT:
     // Serial.printf("WebSocket client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
-    Serial2.println("connected");
+    Serial1.println("connected");
 
     break;
   case WS_EVT_DISCONNECT:
@@ -259,12 +268,13 @@ void wifiBegin()
   initWebSocket();
   flushSerial();
 
-  events.onConnect([](AsyncEventSourceClient *client) {
-    if (client->lastId())
-    {
-      Serial.printf("Client reconnected! Last message ID that it gat is: %u\n", client->lastId());
-    }
-  });
+  events.onConnect([](AsyncEventSourceClient *client)
+                   {
+                     if (client->lastId())
+                     {
+                       Serial.printf("Client reconnected! Last message ID that it gat is: %u\n", client->lastId());
+                     }
+                   });
   webServer.addHandler(&events);
 }
 
@@ -273,17 +283,24 @@ void wifiBegin()
 // --------------------------------------------------
 void awaitStart()
 {
-  if (Serial2.available() > 0)
+  if (Serial1.available() > 0)
   {
-    char c = Serial2.read();
+    char c = Serial1.read();
     if (c == '\r')
     {
-      if (strstr(uart_rx, "wifi_start") != NULL)
+      if (strstr(rx_nrf, "wifi_start") != NULL)
       {
         Serial.println("Starting wifi");
-        Serial2.println("OK");
+        Serial1.println("OK");
         on_wifi = true;
         wifiBegin();
+        emptyUartBuffer();
+      }
+      else if (strstr(rx_nrf, "sat_start") != NULL)
+      {
+        Serial.println("Starting satellite");
+        Serial1.println("OK");
+        on_sat = true;
         emptyUartBuffer();
       }
       else
@@ -294,8 +311,7 @@ void awaitStart()
     }
     else
     {
-      Serial.println(c);
-      uart_rx[arr_rx++] = c;
+      rx_nrf[arr_nrf++] = c;
     }
   }
 }
@@ -306,7 +322,8 @@ void awaitStart()
 void setup()
 {
   Serial.begin(115200);
-  Serial2.begin(115200, SERIAL_8N1, RXD2, TXD2);
+  Serial1.begin(115200, SERIAL_8N1, RXnrf, TXnrf);
+  Serial2.begin(19200, SERIAL_8N1, RXsat, TXsat);
   delay(500);
   initSPIFFS();
 }
@@ -320,23 +337,70 @@ void loop()
 
   if (on_wifi)
   {
-    webSocket.cleanupClients(); // Limiting number of clients, cleaning up and freeing resources, defaults to 8 connected clients
+    webSocket.cleanupClients(1); // Limiting number of clients, cleaning up and freeing resources, defaults to 8 connected clients
 
     // read input from serial and send to webpage
-    if (Serial2.available() > 0)
+    if (Serial1.available() > 0)
     {
-      char c = Serial2.read();
+      char c = Serial1.read();
       Serial.print(c);
       if (c == '\r')
       {
-        // sendToClients(uart_rx);
-        events.send(uart_rx, NULL, millis());
-        memset(uart_rx, 0, sizeof(uart_rx));
-        arr_rx = 0;
+        // sendToClients(rx_nrf);
+        events.send(rx_nrf, NULL, millis());
+        memset(rx_nrf, 0, sizeof(rx_nrf));
+        arr_nrf = 0;
       }
       else
       {
-        uart_rx[arr_rx++] = c;
+        rx_nrf[arr_nrf++] = c;
+      }
+    }
+  }
+  else if (on_sat)
+  {
+    if (Serial1.available() > 0) // nRF
+    {
+      char c = Serial1.read();
+      Serial.print(c);
+      if (c == '\r')
+      {
+        if (strstr(rx_nrf, "sat_end") != NULL)
+        {
+          Serial1.println("sat_end OK");
+          memset(rx_nrf, 0, sizeof(rx_nrf));
+          memset(rx_sat, 0, sizeof(rx_sat));
+          arr_nrf = 0;
+          arr_sat = 0;
+          on_sat = false;
+        }
+        else
+        {
+          Serial.println(rx_nrf);
+          Serial2.println(rx_nrf);
+          memset(rx_nrf, 0, sizeof(rx_nrf));
+          arr_nrf = 0;
+        }
+      }
+      else
+      {
+        rx_nrf[arr_nrf++] = c;
+      }
+    }
+
+    if (Serial2.available() > 0) // satellite
+    {
+      char c = Serial2.read();
+      if (c == '\r')
+      {
+        Serial.println(rx_sat);
+        Serial1.println(rx_sat);
+        memset(rx_sat, 0, sizeof(rx_sat));
+        arr_sat = 0;
+      }
+      else
+      {
+        rx_sat[arr_sat++] = c;
       }
     }
   }

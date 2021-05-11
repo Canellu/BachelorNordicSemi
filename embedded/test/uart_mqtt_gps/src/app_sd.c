@@ -203,23 +203,23 @@ static int create_file_path(char *file_path, char *filename)
 static int read_file(char *file_path)
 {
 	// For catching return values from fs_functions
-	int retval = 1;
+	int ret = 1;
 
 	struct fs_file_t file;
-	retval = fs_open(&file, file_path, FS_O_READ);
+	ret = fs_open(&file, file_path, FS_O_READ);
 
 	// Read characters until end of file
 
-	if (retval == 0)
+	if (ret == 0)
 	{
 		uint8_t line[256] = "";
 		while (1)
 		{
 			uint8_t buf[2] = "";
-			retval = fs_read(&file, &buf, 1);
+			ret = fs_read(&file, &buf, 1);
 
 			// test for EOF
-			if (retval == 0)
+			if (ret == 0)
 			{
 				// if any remaining strings, send
 				if (strlen(line) != 0)
@@ -278,22 +278,22 @@ static int read_JSON(char *file_path, int json_total)
 	int counter = 0;
 
 	// For catching return values from fs_functions
-	int retval = 1;
+	int ret = 1;
 
 	// Open file for reading, if file doesnt exist, create one.
 	struct fs_file_t file;
-	retval = fs_open(&file, file_path, FS_O_READ);
+	ret = fs_open(&file, file_path, FS_O_READ);
 
-	if (retval == 0)
+	if (ret == 0)
 	{
 		uint8_t line[256] = "";
 		while (1)
 		{
 			uint8_t buf[2] = "";
-			retval = fs_read(&file, &buf, 1);
+			ret = fs_read(&file, &buf, 1);
 
 			// test for EOF
-			if (retval == 0)
+			if (ret == 0)
 			{
 				break;
 			}
@@ -403,23 +403,23 @@ static int read_JSON_4G(char *file_path, uint8_t *param_str, size_t file_size)
 	}
 
 	// For catching return values from fs_functions
-	int retval = 1;
+	int ret = 1;
 
 	// Open file for reading
 	struct fs_file_t file;
-	retval = fs_open(&file, file_path, FS_O_READ);
+	ret = fs_open(&file, file_path, FS_O_READ);
 
-	if (retval == 0)
+	if (ret == 0)
 	{
 		fs_seek(&file, cursor, FS_SEEK_SET);
 		uint8_t line[256] = "";
 		while (1)
 		{
 			uint8_t buf[2] = "";
-			retval = fs_read(&file, &buf, 1);
+			ret = fs_read(&file, &buf, 1);
 
 			// test for EOF
-			if (retval == 0)
+			if (ret == 0)
 			{
 				LOG_INF("EOF");
 				break;
@@ -485,12 +485,12 @@ static int read_JSON_4G(char *file_path, uint8_t *param_str, size_t file_size)
 // write into file, creates new file if it doesn't exist
 static int write_file(char *file_path, char *data, int size)
 {
-	int retval = 1;
+	int ret = 1;
 	static struct fs_file_t file;
 
-	retval = fs_open(&file, file_path, (FS_O_WRITE | FS_O_APPEND | FS_O_CREATE));
+	ret = fs_open(&file, file_path, (FS_O_WRITE | FS_O_APPEND | FS_O_CREATE));
 
-	if (retval == 0)
+	if (ret == 0)
 	{
 		fs_write(&file, data, size);
 		fs_write(&file, "\r\n", strlen("\r\n"));
@@ -498,7 +498,7 @@ static int write_file(char *file_path, char *data, int size)
 	else
 	{
 		LOG_ERR("Error in writing to file");
-		return retval;
+		return ret;
 	}
 
 	fs_close(&file);
@@ -508,17 +508,17 @@ static int write_file(char *file_path, char *data, int size)
 
 static int overwrite_file(char *file_path, char *data, int size)
 {
-	int retval = 1;
+	int ret = 1;
 	struct fs_file_t file;
 
-	// retval = fs_open(&file, file_path, 0);
+	// ret = fs_open(&file, file_path, 0);
 
 	LOG_INF("Overwriting mission parameters");
 	fs_unlink(file_path);
 
-	retval = fs_open(&file, file_path, (FS_O_WRITE | FS_O_CREATE));
+	ret = fs_open(&file, file_path, (FS_O_WRITE | FS_O_CREATE));
 
-	if (retval == 0)
+	if (ret == 0)
 	{
 		fs_write(&file, data, size);
 		fs_write(&file, "\r\n", strlen("\r\n"));
@@ -526,7 +526,7 @@ static int overwrite_file(char *file_path, char *data, int size)
 	else
 	{
 		LOG_ERR("Error writing new parameters");
-		return retval;
+		return ret;
 	}
 	fs_close(&file);
 
@@ -592,7 +592,7 @@ static int mountSD()
 
 void app_sd_thread(void *unused1, void *unused2, void *unused3)
 {
-	int retval = 0;
+	int ret = 0;
 
 	// sd_msg_t sd_msg_prev;
 	sd_msg_t sd_msg;
@@ -615,25 +615,25 @@ void app_sd_thread(void *unused1, void *unused2, void *unused3)
 		switch (sd_msg.event)
 		{
 		case WRITE_FILE:
-			retval = create_file_path(file_path, sd_msg.filename);
-			if (retval == 0)
+			ret = create_file_path(file_path, sd_msg.filename);
+			if (ret == 0)
 			{
 				write_file(file_path, sd_msg.string, strlen(sd_msg.string));
 			}
 			break;
 		case OVERWRITE_FILE:
-			retval = create_file_path(file_path, sd_msg.filename);
-			if (retval == 0)
+			ret = create_file_path(file_path, sd_msg.filename);
+			if (ret == 0)
 			{
 				overwrite_file(file_path, sd_msg.string, strlen(sd_msg.string));
 			}
 
 			break;
 		case FIND_FILE:
-			retval = look_for_file(disk_mount_pt, sd_msg.filename);
-			if (retval >= 0)
+			ret = look_for_file(disk_mount_pt, sd_msg.filename);
+			if (ret >= 0)
 			{
-				k_msgq_put(&main_msg_q, &retval, K_NO_WAIT);
+				k_msgq_put(&main_msg_q, &ret, K_NO_WAIT);
 			}
 			else
 			{
@@ -646,23 +646,23 @@ void app_sd_thread(void *unused1, void *unused2, void *unused3)
 
 			break;
 		case READ_JSON:
-			retval = create_file_path(file_path, sd_msg.filename);
-			if (retval == 0)
+			ret = create_file_path(file_path, sd_msg.filename);
+			if (ret == 0)
 			{
 				read_JSON(file_path, 1);
 			}
 			break;
 		case READ_JSON_4G:
-			retval = create_file_path(file_path, sd_msg.filename);
-			if (retval == 0)
+			ret = create_file_path(file_path, sd_msg.filename);
+			if (ret == 0)
 			{
 				file_size = look_for_file(disk_mount_pt, sd_msg.filename);
 				read_JSON_4G(file_path, sd_msg.string, file_size);
 			}
 			break;
 		case READ_FILE:
-			retval = create_file_path(file_path, sd_msg.filename);
-			if (retval == 0)
+			ret = create_file_path(file_path, sd_msg.filename);
+			if (ret == 0)
 			{
 				read_file(file_path);
 			}

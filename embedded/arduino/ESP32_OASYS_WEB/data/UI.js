@@ -203,6 +203,7 @@ function sendMissionParams() {
   };
 
   websocket.send(JSON.stringify(params));
+  console.log(JSON.stringify(params));
 }
 
 function freqModeToNum(mode) {

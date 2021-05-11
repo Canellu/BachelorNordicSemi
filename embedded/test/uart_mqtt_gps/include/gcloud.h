@@ -47,12 +47,12 @@ int gcloud_publish_state(uint8_t *data, uint32_t size, enum mqtt_qos qos);
  */
 int gcloud_provision(void);
 
-int app_gcloud_init_and_connect(void);
+int app_gcloud_init_and_connect(int retries);
 
-int app_gcloud_reconnect(void);
+int app_gcloud_reconnect(int retries);
 
 int app_gcloud(void);
 
-int app_gcloud_disconnect(void);
+int app_gcloud_disconnect(int retries);
 
 #endif /* __MQTT_H__ */

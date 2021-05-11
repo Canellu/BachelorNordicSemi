@@ -143,22 +143,22 @@ void date_time_handler(const struct date_time_evt *evt)
  */
 static void broker_init(void)
 {
-    int err;
+    int ret;
     struct addrinfo *result;
     struct addrinfo *addr;
     struct addrinfo hints = {
         .ai_family = AF_INET,
         .ai_socktype = SOCK_STREAM};
 
-    err = getaddrinfo(GCLOUD_HOSTNAME, NULL, &hints, &result);
-    if (err)
+    ret = getaddrinfo(GCLOUD_HOSTNAME, NULL, &hints, &result);
+    if (ret)
     {
-        LOG_ERR("ERROR: getaddrinfo failed [%d] %s", err, strerror(err));
+        LOG_ERR("ERROR: getaddrinfo failed [%d] %s", ret, strerror(ret));
         return;
     }
 
     addr = result;
-    err = -ENOENT;
+    ret = -ENOENT;
 
     /* Look for address of the broker. */
     while (addr != NULL)
@@ -198,14 +198,14 @@ static void broker_init(void)
 static int make_jwt(char *buffer, size_t buffer_size)
 {
 
-    int err;
+    int ret;
     struct jwt_builder jb;
 
-    err = jwt_init_builder(&jb, buffer, buffer_size);
-    if (err != 0)
+    ret = jwt_init_builder(&jb, buffer, buffer_size);
+    if (ret != 0)
     {
-        LOG_ERR("Unable to init JWT builder: %d", err);
-        return err;
+        LOG_ERR("Unable to init JWT builder: %d", ret);
+        return ret;
     }
 
     /* Get Unix time from modem thread and mask upper bits */
@@ -219,24 +219,24 @@ static int make_jwt(char *buffer, size_t buffer_size)
     int32_t expiry_time = (y + (12 * 60 * 60));
     int32_t issue_time = y;
 
-    err = jwt_add_payload(&jb, expiry_time, issue_time, CONFIG_GCLOUD_PROJECT_NAME);
-    if (err != 0)
+    ret = jwt_add_payload(&jb, expiry_time, issue_time, CONFIG_GCLOUD_PROJECT_NAME);
+    if (ret != 0)
     {
-        LOG_ERR("Unable to add JWT payload: %d", err);
-        return err;
+        LOG_ERR("Unable to add JWT payload: %d", ret);
+        return ret;
     }
-    err = jwt_sign(&jb, zepfull_private_der, zepfull_private_der_len);
-    if (err != 0)
+    ret = jwt_sign(&jb, zepfull_private_der, zepfull_private_der_len);
+    if (ret != 0)
     {
-        LOG_ERR("Unable to add JWT payload: %d", err);
-        return err;
+        LOG_ERR("Unable to add JWT payload: %d", ret);
+        return ret;
     }
     if (jb.overflowed != 0)
     {
         LOG_ERR("JWT buffer overflowed");
         return -ENOMEM;
     }
-    return err;
+    return ret;
 }
 
 static int gcloud_subscribe()
@@ -254,11 +254,11 @@ static int client_init(void)
 
     mqtt_client_init(&client);
 
-    int err = make_jwt(jwt_buffer, JWT_BUFFER_SIZE);
-    if (err != 0)
+    int ret = make_jwt(jwt_buffer, JWT_BUFFER_SIZE);
+    if (ret != 0)
     {
-        LOG_ERR("Unable to make jwt: [%d] %s", err, strerror(-err));
-        return err;
+        LOG_ERR("Unable to make jwt: [%d] %s", ret, strerror(-ret));
+        return ret;
     }
 
     LOG_DBG("JWT:\n%s\n", log_strdup(jwt_buffer));
@@ -328,7 +328,7 @@ int gcloud_publish(uint8_t *data, uint32_t len, enum mqtt_qos qos)
 /*
 int gcloud_publish_state(uint8_t *data, uint32_t size, enum mqtt_qos qos)
 {
-    int err;
+    int ret;
     if (!connected)
     {
         LOG_WRN("Cannot publish state while not connected to Google Cloud");
@@ -343,8 +343,8 @@ int gcloud_publish_state(uint8_t *data, uint32_t size, enum mqtt_qos qos)
                     .size = strlen(GCLOUD_STATE_TOPIC)},
                 .qos = qos},
             .payload = {.data = data, .len = size}}};
-    err = k_msgq_put_atomic(&gcloud_msgq, &state_cmd, K_FOREVER);
-    return err;
+    ret = k_msgq_put_atomic(&gcloud_msgq, &state_cmd, K_FOREVER);
+    return ret;
 }
 */
 
@@ -396,7 +396,7 @@ static int fds_init(struct mqtt_client *c)
 
 static int gcloud_connect(received_config_handler_t received_config_cb)
 {
-    int err = 0;
+    int ret = 0;
     received_config_handler = received_config_cb;
 
     // send connect command
@@ -411,22 +411,22 @@ static int gcloud_connect(received_config_handler_t received_config_cb)
 
     LOG_DBG("Connecting mqtt");
     connecting = true;
-    err = mqtt_connect(&client);
-    if (err)
+    ret = mqtt_connect(&client);
+    if (ret)
     {
-        LOG_ERR("mqtt_connect failed: [%d] %s", err, strerror(-err));
+        LOG_ERR("mqtt_connect failed: [%d] %s", ret, strerror(-ret));
         // TODO: Find a way to report this error to the application.
     }
 
     printk("Mqtt connected\n");
 
-    return err;
+    return ret;
 }
 
 int gcloud_provision(void)
 {
 
-    int err;
+    int ret;
 
     /* Security configuration */
     static sec_tag_t sec_tag_list[] = {GCLOUD_SEC_TAG};
@@ -447,28 +447,28 @@ int gcloud_provision(void)
 
     for (enum modem_key_mgmt_cred_type type = 0; type < 5; type++)
     {
-        err = modem_key_mgmt_delete(sec_tag, type);
-        if (err)
+        ret = modem_key_mgmt_delete(sec_tag, type);
+        if (ret)
         {
-            LOG_ERR("key delete err: [%d] %s", err, strerror(err));
+            LOG_ERR("key delete err: [%d] %s", ret, strerror(ret));
         }
     }
     // LOG_DBG("CERT:\n%s\n", GCLOUD_CA_CERTIFICATE);
     /* Provision CA Certificate */
-    err = modem_key_mgmt_write(
+    ret = modem_key_mgmt_write(
         GCLOUD_SEC_TAG,
         MODEM_KEY_MGMT_CRED_TYPE_CA_CHAIN,
         GCLOUD_CA_CERTIFICATE,
         strlen(GCLOUD_CA_CERTIFICATE));
-    if (err != 0)
+    if (ret != 0)
     {
-        LOG_ERR("GCLOUD_CA_CERTIFICATE err: [%d] %s\n", err, strerror(err));
-        return err;
+        LOG_ERR("GCLOUD_CA_CERTIFICATE err: [%d] %s\n", ret, strerror(ret));
+        return ret;
     }
 
     // This function should probably only be called once.
     // connecting = true;
-    // err = mqtt_connect(&client);
+    // ret = mqtt_connect(&client);
 
     return 0;
 }
@@ -476,7 +476,7 @@ int gcloud_provision(void)
 static void mqtt_event_handler(struct mqtt_client *client,
                                const struct mqtt_evt *evt)
 {
-    int err = 0;
+    int ret = 0;
     LOG_INF("MQTT event: %d", evt->type);
 
     switch (evt->type)
@@ -493,10 +493,10 @@ static void mqtt_event_handler(struct mqtt_client *client,
         connected = true;
         connecting = false;
 
-        err = gcloud_subscribe();
-        if (err)
+        ret = gcloud_subscribe();
+        if (ret)
         {
-            LOG_ERR("gcloud_subscribe failed: [%d] %s", err, strerror(-err));
+            LOG_ERR("gcloud_subscribe failed: [%d] %s", ret, strerror(-ret));
             // TODO: Find a way to report this error to the application.
         }
         else
@@ -556,10 +556,10 @@ static void mqtt_event_handler(struct mqtt_client *client,
 
         if (connected || connecting)
         {
-            err = gcloud_connect(received_config_handler);
-            if (err)
+            ret = gcloud_connect(received_config_handler);
+            if (ret)
             {
-                LOG_ERR("event handler reconnect failed [%d] %s", err, strerror(err));
+                LOG_ERR("event handler reconnect failed [%d] %s", ret, strerror(ret));
             }
         }
         break;
@@ -589,10 +589,10 @@ static void mqtt_event_handler(struct mqtt_client *client,
         const struct mqtt_pubrel_param rel_param = {
             .message_id = evt->param.pubrec.message_id};
 
-        err = mqtt_publish_qos2_release(client, &rel_param);
-        if (err != 0)
+        ret = mqtt_publish_qos2_release(client, &rel_param);
+        if (ret != 0)
         {
-            LOG_ERR("Failed to send MQTT PUBREL: [%d] %s", err, strerror(err));
+            LOG_ERR("Failed to send MQTT PUBREL: [%d] %s", ret, strerror(ret));
         }
 
         break;
@@ -652,7 +652,7 @@ static void mqtt_event_handler(struct mqtt_client *client,
  */
 static int modem_configure()
 {
-    int err;
+    int ret;
 
     if (IS_ENABLED(CONFIG_LTE_AUTO_INIT_AND_CONNECT))
     {
@@ -665,179 +665,252 @@ static int modem_configure()
         //lte_lc_psm_req(true);
 
         LOG_INF("Establishing LTE link\n");
-        err = lte_lc_init_and_connect();
-        if (err)
+        ret = lte_lc_init_and_connect();
+        if (ret)
         {
-            LOG_INF("Failed to establish LTE connection: %d", err);
-            return err;
+            LOG_INF("Failed to establish LTE connection: %d", ret);
+            return ret;
         }
     }
     LOG_INF("LTE Link Connected!");
 
-    return err;
+    return ret;
 }
 
 static int modem_reconnect()
 {
-    int err;
+    int ret;
 
     LOG_INF("LTE Link Connecting...");
-    err = lte_lc_connect();
-    if (err)
+    ret = lte_lc_connect();
+    if (ret)
     {
-        LOG_INF("Failed to establish LTE connection: %d", err);
-        return err;
+        LOG_INF("Failed to establish LTE connection: %d", ret);
+        return ret;
     }
     LOG_INF("LTE Link Connected!");
 
-    return err;
+    return ret;
 }
 
-int app_gcloud_init_and_connect(void)
+int app_gcloud_init_and_connect(int retries)
 {
-    int err = 0;
+    int cnt = 0;
+    int ret = 0;
 
     // modem configure
     LOG_INF("Initializing modem\n");
-    do
+    while (cnt < retries)
     {
-        err = modem_configure();
-        if (err)
+        ret = modem_configure();
+        if (ret == 0)
+        {
+            break;
+        }
+        else
         {
             LOG_INF("Retrying in %d seconds", CONFIG_LTE_CONNECT_RETRY_DELAY_S);
             k_sleep(K_SECONDS(CONFIG_LTE_CONNECT_RETRY_DELAY_S));
+            cnt++;
         }
-    } while (err);
+    }
+    if (ret)
+    {
+        LOG_ERR("Unable to configure modem");
+        return ret;
+    }
 
     date_time_update_async(date_time_handler);
     k_sem_take(&date_time_ok, K_FOREVER);
 
-    err = gcloud_provision();
-    if (err)
+    ret = gcloud_provision();
+    if (ret != 0)
     {
-        LOG_ERR("Provisioning failed, error: %d\n", err);
-        return err;
+        LOG_ERR("Provisioning failed, error: %d\n", ret);
+        return ret;
     }
 
     /* Connect to Google Cloud */
-    LOG_INF("Connecting to Google Cloud\n");
-    err = gcloud_connect(gcloud_received_data_handler);
-    if (err)
+    cnt = 0;
+    while (cnt < retries)
     {
-        LOG_ERR("Failed to connect to Google Cloud, error: %d\n", err);
-        return err;
+        ret = gcloud_connect(gcloud_received_data_handler);
+        if (ret == 0)
+        {
+            break;
+        }
+        else
+        {
+            LOG_ERR("Failed to connect to Google Cloud, error: %d\n", ret);
+            cnt++;
+        }
+    }
+    if (ret)
+    {
+        LOG_ERR("Unable to connect to Google Cloud, max retries reached");
+        return ret;
     }
 
     // fds init
-    err = fds_init(&client);
-    if (err != 0)
+    ret = fds_init(&client);
+    if (ret != 0)
     {
-        LOG_ERR("fds_init: %d", err);
-        return err;
+        LOG_ERR("fds_init: %d", ret);
+        return ret;
     }
 
-    return err;
+    return 0;
 }
 
-int app_gcloud_reconnect(void)
+int app_gcloud_reconnect(int retries)
 {
-    int err = 0;
+    int cnt = 0;
+    int ret = 0;
 
     // modem configure
-    do
+    LOG_INF("Reinitializing modem\n");
+    while (cnt < retries)
     {
-        err = modem_reconnect();
-        if (err)
+        ret = modem_reconnect();
+        if (ret == 0)
+        {
+            break;
+        }
+        else
         {
             LOG_INF("Retrying in %d seconds", CONFIG_LTE_CONNECT_RETRY_DELAY_S);
             k_sleep(K_SECONDS(CONFIG_LTE_CONNECT_RETRY_DELAY_S));
+            cnt++;
         }
-    } while (err);
+    }
+    if (ret)
+    {
+        LOG_ERR("Unable to configure modem");
+        return ret;
+    }
 
+    // synchronize time through modem
     date_time_update_async(date_time_handler);
     k_sem_take(&date_time_ok, K_FOREVER);
 
+    // mqtt connect
     LOG_DBG("Connecting mqtt");
     connecting = true;
-    err = mqtt_connect(&client);
-    if (err)
+    cnt = 0;
+    while (cnt < retries)
     {
-        LOG_ERR("mqtt_connect failed: [%d] %s", err, strerror(-err));
+        ret = mqtt_connect(&client);
+        if (ret == 0)
+        {
+            break;
+        }
+        else
+        {
+            LOG_ERR("mqtt_connect failed: [%d] %s", ret, strerror(-ret));
+            cnt++;
+        }
+    }
+    if (ret)
+    {
+        LOG_ERR("Unable to connect to Google Cloud, max retries reached");
+        return ret;
     }
 
-    return err;
+    return 0;
 }
 
 int app_gcloud(void)
 {
-    int err;
+    int ret;
 
-    err = poll(&fds, 1, mqtt_keepalive_time_left(&client));
-    if (err < 0)
+    ret = poll(&fds, 1, mqtt_keepalive_time_left(&client));
+    if (ret < 0)
     {
         LOG_ERR("poll: %d", errno);
-        return err;
+        return ret;
     }
 
-    err = mqtt_live(&client);
-    if ((err != 0) && (err != -EAGAIN))
+    ret = mqtt_live(&client);
+    if ((ret != 0) && (ret != -EAGAIN))
     {
-        LOG_ERR("ERROR: mqtt_live: %d", err);
-        return err;
+        LOG_ERR("ERROR: mqtt_live: %d", ret);
+        return ret;
     }
 
     if ((fds.revents & POLLIN) == POLLIN)
     {
-        err = mqtt_input(&client);
-        if (err != 0)
+        ret = mqtt_input(&client);
+        if (ret != 0)
         {
-            LOG_ERR("mqtt_input: %d", err);
-            return err;
+            LOG_ERR("mqtt_input: %d", ret);
+            return ret;
         }
     }
 
     if ((fds.revents & POLLERR) == POLLERR)
     {
         LOG_ERR("POLLERR");
-        return err;
+        return ret;
     }
 
     if ((fds.revents & POLLNVAL) == POLLNVAL)
     {
         LOG_ERR("POLLNVAL");
-        return err;
+        return ret;
     }
 
     return 0;
 }
 
-int app_gcloud_disconnect(void)
+int app_gcloud_disconnect(int retries)
 {
-    int err;
+    int cnt = 0;
+    int ret = 0;
 
     LOG_INF("Disconnecting GCloud MQTT client...");
 
     connected = false;
 
-    err = mqtt_disconnect(&client);
-    if (err)
+    // MQTT disconnect client
+    while (cnt < retries)
     {
-        LOG_ERR("Could not disconnect GCloud MQTT client: %d", err);
+        ret = mqtt_disconnect(&client);
+        if (ret == 0)
+        {
+            break;
+        }
+        else
+        {
+            LOG_ERR("Could not disconnect GCloud MQTT client: %d", ret);
+            cnt++;
+        }
+    }
+    if (ret)
+    {
+        LOG_ERR("Unable to properly disconnect from MQTT client, max retries reached");
+        return ret;
     }
 
     // lte off
-    err = lte_lc_offline();
-    if (err)
+    cnt = 0;
+    while (cnt < retries)
     {
-        LOG_ERR("Could not set modem to offline: %d", err);
+        ret = lte_lc_offline();
+        if (ret == 0)
+        {
+            break;
+        }
+        else
+        {
+            LOG_ERR("Could not set modem to offline: %d", ret);
+            cnt++;
+        }
+    }
+    if (ret)
+    {
+        LOG_ERR("Unable to properly turn off modem, max retries reached");
+        return ret;
     }
 
-    return err;
+    return 0;
 }
-
-/* TODO:
-
-    - Combine publish & publish state, maybe use enum to choose between the two
-    - Reorganize functions
-
-*/

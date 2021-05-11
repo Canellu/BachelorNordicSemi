@@ -36,7 +36,6 @@ k_tid_t sd_tid;
 
 enum glider_event_type
 {
-	EVT_INIT,
 	EVT_AWAIT_MISSION,
 	EVT_DIVE,
 	EVT_SURFACE,
@@ -45,7 +44,7 @@ enum glider_event_type
 
 enum glider_mission_status
 {
-	MISSION_WAITING,
+	MISSION_WAIT_START,
 	MISSION_ONGOING,
 	MISSION_FINISHED
 };
@@ -95,8 +94,8 @@ struct glider_t
 // --------------------------------------------------
 
 struct glider_t glider;
-enum glider_event_type event = EVT_INIT;
-enum glider_mission_status mission_state;
+static enum glider_event_type event = EVT_AWAIT_MISSION;
+static enum glider_mission_status mission_state;
 
 static const char file_mission[] = "M_PARAM.TXT";
 
@@ -118,9 +117,6 @@ struct k_msgq button_msg_qr;
 static uint8_t button_msgq_buffer[3 * sizeof(int)];
 
 // UART variables
-enum uart_device_type uart_dev1 = UART_1;
-enum uart_device_type uart_dev2 = UART_2;
-
 struct k_msgq uart_msg_q;
 static uint8_t uart_msgq_buffer[3 * 256];
 static uint8_t uart_msg[256];
@@ -130,6 +126,7 @@ struct k_msgq gcloud_msg_q;
 static uint8_t gcloud_msgq_buffer[2 * 512];
 static uint8_t gcloud_msg[512];
 
+static bool mission_params_wifi = false;
 static bool data_available_to_send = false;
 static bool gcloud_init_complete = false;
 
@@ -196,7 +193,7 @@ static int set_button_config(int local_button_config)
 // waiting function, waits for button 1 to be pressed
 static int button_wait()
 {
-	uint8_t test = 0;
+	static uint8_t test = 0;
 	set_button_config(0);
 	while (1)
 	{
@@ -213,14 +210,14 @@ static int button_wait()
 // fills out current date as filename, sends string to sd module to write
 static int sd_save_data(void *data_string)
 {
-	sd_msg_t sd_msg;
+	static sd_msg_t sd_msg;
 	sd_msg.event = WRITE_FILE;
 
 	// LOG_INF("saving to sd card");
 
 	// create filename, format (assuming mission 2): [M2.TXT]
-	uint8_t filename[16] = "";
-	uint8_t tmp_str[16] = "";
+	static uint8_t filename[16] = "";
+	static uint8_t tmp_str[16] = "";
 
 	// snprintf(tmp_str, sizeof(tmp_str), "%u", glider.m_param.mission);
 	// strcat(filename, tmp_str);
@@ -270,14 +267,44 @@ static int message_queue_init()
 	return 0;
 }
 
+// minor function that causes LEDs to blink on nrf startup. NOTE: buttons need to be initialized before call
+static int blink_LED()
+{
+	set_LED(21, 1);
+	set_LED(22, 1);
+	set_LED(20, 1);
+	set_LED(30, 1);
+	set_LED(31, 1);
+	k_sleep(K_MSEC(200));
+	set_LED(21, 0);
+	set_LED(22, 0);
+	set_LED(20, 0);
+	set_LED(30, 0);
+	set_LED(31, 0);
+	k_sleep(K_MSEC(200));
+	set_LED(21, 1);
+	set_LED(22, 1);
+	set_LED(20, 1);
+	set_LED(30, 1);
+	set_LED(31, 1);
+	k_sleep(K_MSEC(200));
+	set_LED(21, 0);
+	set_LED(22, 0);
+	set_LED(20, 0);
+	set_LED(30, 0);
+	set_LED(31, 0);
+
+	return 0;
+}
+
 //CANDO: pass devices to initialise
 static int device_inits()
 {
 	button_dev_init();
 	dk_leds_init();
 	ext_led_init();
-	uart_dev_init(uart_dev1);
-	uart_dev_init(uart_dev2);
+	uart_dev_init(UART_1);
+	uart_dev_init(UART_2);
 	return 0;
 }
 
@@ -302,6 +329,12 @@ static int format_payload_4G(char *dest_str, char *source_str)
 	{
 		uint8_t ts_str[32] = "";
 		int ts_arr = 0;
+
+		// if payload is mission parameters, remove mission state
+		if (cJSON_HasObjectItem(payload_JSON, "Ms"))
+		{
+			cJSON_DeleteItemFromObject(payload_JSON, "Ms");
+		}
 
 		// fetching datetime (dt) and timestamp (ts) to combine into one variable
 		cJSON *dt_JSON = cJSON_DetachItemFromObject(payload_JSON, "dt");
@@ -354,14 +387,41 @@ static int publish_data_4G()
 	// printk("\nRunning test, press button 1 to start\n");
 	// button_wait();
 
-	int retval = 0;
+	static int ret = 0;
 
 	// separate from m_param msg_sent, this only keeps track locally
-	int msg_sent = 0;
+	static int msg_sent = 0;
 	int msg_to_send = glider.m_param.msg_max / glider.m_param.wp_max - 1;
-	uint8_t payload_4G[256] = "";
+	static uint8_t payload_4G[256] = "";
+
+	static sd_msg_t sd_msg;
+	static uint8_t sd_msg_response[256] = "";
+	// helper variable
+	static uint8_t tmp_str[16] = "";
 
 	k_msgq_purge(&main_msg_q);
+
+	// if mission parameters were provided from local wifi, send to database
+	// this is to increase the chances of missions being synchronized
+	// does not count towards msg max, as it is sent relatively infrequently
+	if (mission_params_wifi)
+	{
+		sd_msg.event = READ_JSON;
+		k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
+
+		k_msgq_get(&main_msg_q, &sd_msg_response, K_FOREVER);
+		ret = format_payload_4G(payload_4G, sd_msg_response);
+		if (ret == 0)
+		{
+			gcloud_publish(payload_4G, strlen(payload_4G), MQTT_QOS_1_AT_LEAST_ONCE);
+		}
+		else
+		{
+			LOG_ERR("Error in converting mission params to mqtt payload");
+		}
+
+		mission_params_wifi = false;
+	}
 
 	// sending gps message first, this is to ensure at least 1 datapoint containing gps coordinates
 	// check if there is gps data, if empty attempt to get fix
@@ -372,8 +432,8 @@ static int publish_data_4G()
 	}
 	k_msgq_get(&gps_msg_q, &gps_msg, K_NO_WAIT);
 
-	retval = format_payload_4G(payload_4G, gps_msg);
-	if (retval == 0)
+	ret = format_payload_4G(payload_4G, gps_msg);
+	if (ret == 0)
 	{
 		gcloud_publish(payload_4G, strlen(payload_4G), MQTT_QOS_1_AT_LEAST_ONCE);
 		msg_sent++;
@@ -384,8 +444,6 @@ static int publish_data_4G()
 	}
 
 	// fetching datapoints from sd card
-	sd_msg_t sd_msg;
-	uint8_t tmp_str[16] = "";
 
 	sd_msg.event = READ_JSON_4G;
 
@@ -401,16 +459,13 @@ static int publish_data_4G()
 	// LOG_INF("%s", log_strdup(sd_msg.string));
 	k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
 
-	// testing responses from sd card
-	uint8_t sd_msg_response[256] = "";
-
 	while (msg_sent < msg_to_send)
 	{
 		k_msgq_get(&main_msg_q, &sd_msg_response, K_FOREVER);
 
 		// LOG_INF("%s", log_strdup(sd_msg_response));
-		retval = format_payload_4G(payload_4G, sd_msg_response);
-		if (retval == 0)
+		ret = format_payload_4G(payload_4G, sd_msg_response);
+		if (ret == 0)
 		{
 			gcloud_publish(payload_4G, strlen(payload_4G), MQTT_QOS_1_AT_LEAST_ONCE);
 			msg_sent++;
@@ -436,7 +491,7 @@ static int update_mission_status(enum glider_mission_status new_mission_state)
 	static sd_msg_t sd_msg;
 	strcpy(sd_msg.filename, file_mission);
 
-	uint8_t json_str[512] = "";
+	static uint8_t json_str[512] = "";
 	sd_msg.event = READ_JSON;
 
 	k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
@@ -497,7 +552,7 @@ static int parse_m_params(void *json_str)
 	cJSON *m_JSON = cJSON_Parse(json_str);
 	if (cJSON_IsObject(m_JSON))
 	{
-		bool new_mission = false;
+		static bool new_mission = false;
 
 		// parameter mission number
 		if (cJSON_HasObjectItem(m_JSON, "M"))
@@ -572,30 +627,29 @@ static int parse_m_params(void *json_str)
 
 					memcpy(tmp_str, tmp_JSON->valuestring, 4);
 					glider.m_param.m_start_tm.tm_year = strtol(tmp_str, &eptr, 10) - 1900;
-					LOG_INF("year: %d", glider.m_param.m_start_tm.tm_year + 1900);
-
 					memset(tmp_str, 0, sizeof(tmp_str));
 
 					memcpy(tmp_str, tmp_JSON->valuestring + 4, 2);
 					glider.m_param.m_start_tm.tm_mon = strtol(tmp_str, &eptr, 10) - 1;
-					LOG_INF("month: %d", glider.m_param.m_start_tm.tm_mon + 1);
-
 					memset(tmp_str, 0, sizeof(tmp_str));
 
 					memcpy(tmp_str, tmp_JSON->valuestring + 6, 2);
 					glider.m_param.m_start_tm.tm_mday = strtol(tmp_str, &eptr, 10);
-					LOG_INF("day: %d", glider.m_param.m_start_tm.tm_mday);
 					memset(tmp_str, 0, sizeof(tmp_str));
 
 					memcpy(tmp_str, tmp_JSON->valuestring + 8, 2);
 					glider.m_param.m_start_tm.tm_hour = strtol(tmp_str, &eptr, 10);
-					LOG_INF("hour: %d", glider.m_param.m_start_tm.tm_hour);
 					memset(tmp_str, 0, sizeof(tmp_str));
 
 					memcpy(tmp_str, tmp_JSON->valuestring + 10, 2);
 					glider.m_param.m_start_tm.tm_min = strtol(tmp_str, &eptr, 10);
-					LOG_INF("minute: %d", glider.m_param.m_start_tm.tm_min);
 					memset(tmp_str, 0, sizeof(tmp_str));
+
+					LOG_INF("start date: %d-%d-%d %d:%d", glider.m_param.m_start_tm.tm_year + 1900,
+							glider.m_param.m_start_tm.tm_mon + 1,
+							glider.m_param.m_start_tm.tm_mday,
+							glider.m_param.m_start_tm.tm_hour,
+							glider.m_param.m_start_tm.tm_min);
 
 					glider.m_param.m_start_tm.tm_sec = 0;
 					glider.m_param.m_start_s = mktime(&glider.m_param.m_start_tm);
@@ -806,15 +860,15 @@ static int check_mission()
 // checks signal, returns signal strength
 static int sat_check_signal()
 {
-	int signal = 0;
+	static int signal = 0;
 
-	uint8_t sat_msg[64] = "";
-	uint8_t sat_response[64] = "";
-	uint8_t sat_response_test[64] = "";
+	static uint8_t sat_msg[64] = "";
+	static uint8_t sat_response[64] = "";
+	static uint8_t sat_response_test[64] = "";
 
 	// send message
 	strcpy(sat_msg, "AT+CSQ");
-	uart_send(uart_dev1, sat_msg, strlen(sat_msg));
+	uart_send(UART_2, sat_msg, strlen(sat_msg));
 
 	// test response
 	while (1)
@@ -856,8 +910,8 @@ static int sat_check_signal()
 // needs to be called to send / receive messages, currently only reads 1 message
 static int sat_sbd_session()
 {
-	int retval = 0;
-	// retval values:
+	static int ret = 0;
+	// ret values:
 	// -1 - AT command problem, e.g. serial msg is sent wrong
 	// 0 - message sent, no message rcv pending
 	// 1 - message sent, message rcv pending
@@ -866,17 +920,18 @@ static int sat_sbd_session()
 	// 2 - message sent unsuccessful, maybe due to signal
 	// 3 - message receive unsuccessful, maybe due to signal
 
-	uint8_t sat_msg[] = "AT+SBDI";
-	uint8_t sat_response[64] = "";
-	uint8_t sat_response_test[64] = "";
+	static uint8_t sat_msg[] = "AT+SBDI";
+	static uint8_t sat_response[64] = "";
+	static uint8_t sat_response_test[64] = "";
 
-	char *saveptr;
-	char *test;
+	static char *saveptr;
+	static char *eptr;
+	static char *test;
 
-	int i = 0;
-	int sbd_response[6];
+	static int i = 0;
+	static int sbd_response[6];
 
-	uart_send(uart_dev1, sat_msg, strlen(sat_msg));
+	uart_send(UART_2, sat_msg, strlen(sat_msg));
 
 	// test response
 	while (1)
@@ -907,10 +962,7 @@ static int sat_sbd_session()
 
 	LOG_INF("response: %s", log_strdup(sat_response));
 
-	char *eptr;
-
-	// TODO: check param 1, was always zero under testing
-	test = strtok_r(sat_response, ",", &saveptr);
+	test = strtok_r(sat_response, ",", &saveptr); // TODO: check param 1, was always zero under testing
 	LOG_INF("test: %s", log_strdup(test));
 	sbd_response[i++] = strtol(test, &eptr, 10);
 	// LOG_INF("param %d: %d", i, sbd_response[0]);
@@ -930,38 +982,38 @@ static int sat_sbd_session()
 	if (sbd_response[0] > 4)
 	{
 		LOG_INF("satellite error on send msg");
-		retval = 2;
+		ret = 2;
 	}
 	if (sbd_response[2] > 0)
 	{
 		if (sbd_response[2] > 1)
 		{
 			LOG_INF("satellite error on read msg, retry fetch");
-			retval = 3;
+			ret = 3;
 		}
 		else
 		{
 			// currently it will only fetch the first message that it receives
 			// further logic for several messages pending needs to be set up e.g. returning no. of messages
 			LOG_INF("satellite read msg(s) pending: %d msg(s)", sbd_response[5] + 1);
-			retval = 1;
+			ret = 1;
 		}
 	}
 
-	return retval;
+	return ret;
 }
 
 // if sat_sbd_session returns message pending, this function can be called
 static int sat_rcv_msg()
 {
-	int retval = 0;
+	static int ret = 0;
 
-	uint8_t sat_msg[] = "AT+SBDRT";
-	uint8_t sat_response[64] = "";
-	uint8_t sat_response_test[64] = "";
+	static uint8_t sat_msg[] = "AT+SBDRT";
+	static uint8_t sat_response[64] = "";
+	static uint8_t sat_response_test[64] = "";
 
 	// fetch satellite message
-	uart_send(uart_dev1, sat_msg, strlen(sat_msg));
+	uart_send(UART_2, sat_msg, strlen(sat_msg));
 
 	// test response
 	while (1)
@@ -993,17 +1045,17 @@ static int sat_rcv_msg()
 	// TODO: parse satellite message
 	LOG_INF("response: %s", log_strdup(sat_response));
 
-	return retval;
+	return ret;
 }
 
 // saves message to satellite MO buffer, call function sat_sbd_session after this
 static int sat_send_msg(uint8_t *sat_payload)
 {
-	int retval = 0;
+	static int ret = 0;
 
-	uint8_t sat_msg[64] = "";
-	uint8_t sat_response[64] = "";
-	uint8_t sat_response_test[64] = "";
+	static uint8_t sat_msg[64] = "";
+	static uint8_t sat_response[64] = "";
+	static uint8_t sat_response_test[64] = "";
 
 	strcpy(sat_msg, "AT+SBDWT=");
 	strcat(sat_msg, sat_payload);
@@ -1011,7 +1063,7 @@ static int sat_send_msg(uint8_t *sat_payload)
 	LOG_INF("sat msg: %s", log_strdup(sat_msg));
 
 	// send payload
-	uart_send(uart_dev1, sat_msg, strlen(sat_msg));
+	uart_send(UART_2, sat_msg, strlen(sat_msg));
 
 	// test response
 	while (1)
@@ -1040,7 +1092,7 @@ static int sat_send_msg(uint8_t *sat_payload)
 	memset(sat_response_test, 0, sizeof(sat_response_test));
 	k_msgq_purge(&uart_msg_q);
 
-	return retval;
+	return ret;
 }
 
 // --------------------------------------------------
@@ -1049,11 +1101,13 @@ static int sat_send_msg(uint8_t *sat_payload)
 
 static int sensor_module()
 {
+	set_LED(20, 1);
+
 	printk("\n\npress button 1 to start sensor test\n\n");
-	button_wait();
+	// button_wait();
 
 	set_button_config(1);
-	uart_start(uart_dev1);
+	uart_start(UART_1);
 
 	// update time before sending to sensors
 	// NOTE: this does not work for some reason, is instead run right before module
@@ -1068,15 +1122,15 @@ static int sensor_module()
 	snprintf(time_millis_str, sizeof(time_millis_str), "time:%d", time_millis);
 	LOG_INF("time (str): %s", log_strdup(time_millis_str));
 
-	uart_send(uart_dev1, time_millis_str, strlen(time_millis_str));
+	uart_send(UART_1, time_millis_str, strlen(time_millis_str));
 
 	uint8_t tmp_str[16] = "";
 	snprintf(tmp_str, sizeof(tmp_str), "to_c:%d", glider.m_param.sens_param.freq_c);
-	uart_send(uart_dev1, tmp_str, strlen(tmp_str));
+	uart_send(UART_1, tmp_str, strlen(tmp_str));
 	snprintf(tmp_str, sizeof(tmp_str), "to_p:%d", glider.m_param.sens_param.freq_p);
-	uart_send(uart_dev1, tmp_str, strlen(tmp_str));
+	uart_send(UART_1, tmp_str, strlen(tmp_str));
 	snprintf(tmp_str, sizeof(tmp_str), "to_t:%d", glider.m_param.sens_param.freq_t);
-	uart_send(uart_dev1, tmp_str, strlen(tmp_str));
+	uart_send(UART_1, tmp_str, strlen(tmp_str));
 
 	printk("\nsensor test start\n");
 
@@ -1091,8 +1145,8 @@ static int sensor_module()
 
 		if (strcmp(uart_msg, "surfaced") == 0)
 		{
-			uart_send(uart_dev1, "sensor_end", strlen("sensor_end"));
-			uart_exit(uart_dev1);
+			uart_send(UART_1, "sensor_end", strlen("sensor_end"));
+			uart_exit(UART_1);
 			data_available_to_send = true;
 			break;
 		}
@@ -1174,21 +1228,21 @@ static int sensor_module()
 	/* UART loop end */
 
 	printk("\nsensor test end\n\n");
-	set_LED(30, 0);
-
+	set_LED(20, 0);
+	k_sleep(K_SECONDS(2));
 	return 0;
 }
 
 static int wifi_module()
 {
-	int err = 0;
+	int ret = 0;
 	int cnt = 0;
-	int retries = 5;
+	int retries = 3;
 	bool wifi_start = false;
 
 	set_LED(30, 1);
 	printk("\n\npress button 1 to start wifi test\n\n");
-	button_wait();
+	// button_wait();
 
 	uint8_t wifi_response[512] = "";
 	uart_start(UART_2);
@@ -1274,7 +1328,7 @@ static int wifi_module()
 				date_time_set(time_UTC);
 				date_time_now(&unix_time_ms);
 				update_tm_all(unix_time_ms / 1000);
-				LOG_INF("time synchronized through wifi", (int32_t)wifi_unix);
+				LOG_INF("time synchronized through wifi: %d", (int32_t)wifi_unix);
 			}
 			else if (strstr(wifi_response, "wifi_end") != NULL)
 			{
@@ -1284,25 +1338,35 @@ static int wifi_module()
 			}
 			else
 			{
-				printk("\n\nSomething went wrong, press button 1 to continue");
+				ret = parse_m_params(&gcloud_msg);
+				if (ret == 0)
+				{
+					mission_params_wifi = true;
+					LOG_INF("Received new mission parameters");
+				}
+				else
+				{
+					printk("\n\nUnknown request from ESP");
+				}
 			}
 		}
 	}
 	else
 	{
 		LOG_ERR("wifi start unsuccessful");
-		err = -1;
+		uart_exit(UART_2);
+		set_LED(30, 0);
+		return -1;
 	}
+
 	uart_exit(UART_2);
-
 	set_LED(30, 0);
-
-	return err;
+	return 0;
 }
 
 static int gps_module()
 {
-	int retval = 0;
+	int ret = 0;
 
 	static glider_gps_data_t gps_data;
 
@@ -1311,9 +1375,9 @@ static int gps_module()
 	// button_wait();
 	printk("\ngps test start");
 
-	retval = app_gps(&gps_data, 1000, 400);
+	ret = app_gps(&gps_data, 1000, 400);
 
-	if (retval == 0)
+	if (ret == 0)
 	{
 		time_UTC->tm_year = gps_data.time.tm_year;
 		time_UTC->tm_mon = gps_data.time.tm_mon;
@@ -1338,13 +1402,13 @@ static int gps_module()
 	else
 	{
 		LOG_INF("Unable to get gps data");
-		retval = -1;
+		set_LED(22, 0);
+		return -1;
 	}
 
 	printk("\ngps test end");
 	set_LED(22, 0);
-
-	return retval;
+	return 0;
 }
 
 static int gcloud_module()
@@ -1358,186 +1422,250 @@ static int gcloud_module()
 
 	// publish_data_4G();
 
-	int retval = -1;
+	int ret = -1;
+	int max_retries = 3;
+	int64_t start_time = 0;
+	int64_t current_time = 0;
+	int64_t timeout = 300000; // 5 minutes
 
 	// strcpy(gcloud_msg, "{\"M\":11,\"4G\":10,\"C\":0,\"P\":0,\"T\":0,\"lat\":[\"51.7558\",\"60.7558\"],\"lng\":[\"19.2726\",\"21.2726\"],\"maxD\":0,\"minD\":0,\"start\":\"202104280559\"}");
 
 	// mqtt init
 	if (!gcloud_init_complete)
 	{
-		retval = app_gcloud_init_and_connect();
-		if (retval != 0)
+		ret = app_gcloud_init_and_connect(max_retries);
+		if (ret != 0)
 		{
-			return retval;
+			LOG_INF("Unable to connect to gcloud");
+			set_LED(31, 0);
+			return 1;
 		}
 		gcloud_init_complete = true;
 	}
 	// reconnect
 	else
 	{
-		retval = app_gcloud_reconnect();
-		if (retval != 0)
+		ret = app_gcloud_reconnect(max_retries);
+		if (ret != 0)
 		{
-			return retval;
+			LOG_INF("Unable to connect to gcloud");
+			set_LED(31, 0);
+			return 1;
 		}
 	}
 
+	start_time = k_uptime_get();
+
 	// /* Gcloud loop */
-	while (1)
+	while (current_time <= timeout)
 	{
 		// button_wait();
+		current_time = k_uptime_get() - start_time;
 
 		// gcloud function
-		retval = app_gcloud();
+		ret = app_gcloud();
+		if (ret != 0)
+		{
+			LOG_ERR("Error in running MQTT loop, ending loop");
+			break;
+		}
 
+		// fetch message from gcloud
 		k_msgq_get(&gcloud_msg_q, &gcloud_msg, K_NO_WAIT);
 		LOG_INF("gcloud string: %s", log_strdup(gcloud_msg));
 
-		retval = parse_m_params(&gcloud_msg);
-
-		if (retval >= 0)
+		// test if received payload is a mission
+		ret = parse_m_params(&gcloud_msg);
+		if (ret >= 0)
 		{
 			break;
 		}
 
+		// send data
 		if (data_available_to_send)
 		{
 			publish_data_4G();
 			data_available_to_send = false;
 		}
+		// if mission is still ongoing and data has been sent, return
+		else if (!data_available_to_send && mission_state == MISSION_ONGOING)
+		{
+			LOG_INF("Data sent, returning to mission");
+			break;
+		}
 	}
 	/* Gcloud loop end */
 
-	retval = app_gcloud_disconnect();
-	if (retval != 0)
+	ret = app_gcloud_disconnect(max_retries);
+	if (ret != 0)
 	{
-		LOG_ERR("Disconnect unsuccessful: %d", retval);
+		LOG_ERR("Disconnect unsuccessful: %d", ret);
 		LOG_ERR("Closing program, check for errors in code lol");
+		set_LED(31, 0);
+		return -1;
 	}
-	set_LED(31, 0);
 
-	return retval;
+	set_LED(31, 0);
+	return 0;
 }
 
 static int satellite_module()
 {
+	set_LED(30, 1);
+	set_LED(31, 1);
 	printk("\n\npress button 1 to start satellite test\n\n");
-	button_wait();
+	// button_wait();
 
-	int retval = 0;
-	int cnt = 0;
-	int cnt2 = 0;
-	int max_retries = 10;
+	static int ret = 0;
+	static int cnt = 0;
+	static int cnt2 = 0;
+	static int max_retries_ESP = 3;
+	static int max_retries = 2;
 
-	uint8_t sat_payload[64] = "";
+	static uint8_t sat_response[128] = "";
+	static uint8_t sat_payload[64] = "";
 
-	int signal = 0;
-	bool msg_rdy = false;
-	bool msg_sent = false;
+	static bool sat_start = false;
+	static int signal = 0;
+	static bool msg_rdy = false;
+	static bool msg_sent = false;
 
 	// start uart
-	uart_start(uart_dev1);
+	uart_start(UART_2);
 
-	cnt = 0;
-	while (cnt < max_retries && !msg_sent)
-	{ // finding signal
-		signal = sat_check_signal();
-
-		if (signal)
-		{ // if signal found
-			LOG_INF("got signal");
-
-			if (!msg_rdy)
-			{
-				// if no valid gps data, attempt to get fix
-				if (k_msgq_num_used_get(&gps_msg_q) == 0)
-				{
-					LOG_INF("No gps message, attempting to get gps fix");
-					gps_module();
-				}
-
-				cJSON *gps_JSON;
-				cJSON *data_JSON;
-				cJSON *lat_JSON;
-				cJSON *lng_JSON;
-
-				// fetch gps message to be sent
-				k_msgq_get(&gps_msg_q, &gps_msg, K_NO_WAIT);
-
-				// LOG_DBG("%s", log_strdup(gps_msg));
-				gps_JSON = cJSON_Parse(gps_msg);
-				if (cJSON_IsObject(gps_JSON))
-				{
-					data_JSON = cJSON_GetObjectItem(gps_JSON, "data");
-					lat_JSON = cJSON_GetObjectItem(data_JSON, "lat");
-					lng_JSON = cJSON_GetObjectItem(data_JSON, "lng");
-
-					strcpy(sat_payload, lat_JSON->valuestring);
-					strcat(sat_payload, ",");
-					strcat(sat_payload, lng_JSON->valuestring);
-					msg_rdy = true;
-				}
-				else
-				{
-					LOG_ERR("error in gps data");
-					return -1;
-				}
-				cJSON_Delete(gps_JSON);
-			}
-
-			LOG_INF("attempting send");
-			retval = sat_send_msg(sat_payload);
-			if (retval == 0)
-			{
-				retval = sat_sbd_session();
-			}
-			if (retval == 0 || retval == 1)
-			{
-				LOG_INF("satellite msg sent");
-				msg_sent = true;
-			}
-			else if (retval >= 2)
-			{
-				LOG_INF("sbd session unsuccessful");
-				cnt2++;
-			}
-			else if (retval < 0)
-			{
-				LOG_ERR("Error in serial communication");
-				return -1;
-			}
-
-			if (retval == 1)
-			{
-				sat_rcv_msg();
-			}
-
-			if (cnt2 >= max_retries)
-			{
-				break;
-			}
-
-		} // if signal found end
-		else
-		{
-			cnt++;
-			k_sleep(K_SECONDS(20));
-		}
-	} // finding signal end
-	if (!signal)
+	while (!sat_start && cnt < max_retries_ESP)
 	{
-		LOG_INF("Unable to get satellite fix");
-		retval = -1;
+		uart_send(UART_2, "", strlen(""));
+		uart_send(UART_2, "sat_start", strlen("sat_start"));
+		LOG_INF("sent command satellite start to esp");
+		k_msgq_get(&uart_msg_q, sat_response, K_FOREVER);
+		LOG_INF("response: %s", log_strdup(sat_response));
+		if (strcmp(sat_response, "OK") == 0)
+		{
+			LOG_INF("Received OK");
+			sat_start = true;
+		}
+		cnt++;
+	}
+	if (sat_start)
+	{
+
+		cnt = 0;
+		while (cnt < max_retries && !msg_sent)
+		{ // finding signal
+			signal = sat_check_signal();
+
+			if (signal)
+			{ // if signal found
+				LOG_INF("got signal");
+				break;
+
+				if (!msg_rdy)
+				{
+					// if no valid gps data, attempt to get fix
+					if (k_msgq_num_used_get(&gps_msg_q) == 0)
+					{
+						LOG_INF("No gps message, attempting to get gps fix");
+						gps_module();
+					}
+
+					cJSON *gps_JSON;
+					cJSON *data_JSON;
+					cJSON *lat_JSON;
+					cJSON *lng_JSON;
+
+					// fetch gps message to be sent
+					k_msgq_get(&gps_msg_q, &gps_msg, K_NO_WAIT);
+
+					// LOG_DBG("%s", log_strdup(gps_msg));
+					gps_JSON = cJSON_Parse(gps_msg);
+					if (cJSON_IsObject(gps_JSON))
+					{
+						data_JSON = cJSON_GetObjectItem(gps_JSON, "data");
+						lat_JSON = cJSON_GetObjectItem(data_JSON, "lat");
+						lng_JSON = cJSON_GetObjectItem(data_JSON, "lng");
+
+						strcpy(sat_payload, lat_JSON->valuestring);
+						strcat(sat_payload, ",");
+						strcat(sat_payload, lng_JSON->valuestring);
+						msg_rdy = true;
+					}
+					else
+					{
+						LOG_ERR("error in gps data");
+						ret = -1;
+						break;
+					}
+					cJSON_Delete(gps_JSON);
+				}
+
+				LOG_INF("attempting send");
+				ret = sat_send_msg(sat_payload);
+				if (ret == 0)
+				{
+					ret = sat_sbd_session();
+				}
+				if (ret == 0 || ret == 1)
+				{
+					LOG_INF("satellite msg sent");
+					msg_sent = true;
+				}
+				else if (ret >= 2)
+				{
+					LOG_INF("sbd session unsuccessful");
+					cnt2++;
+				}
+				else if (ret < 0)
+				{
+					LOG_ERR("Error in serial communication");
+					ret = -1;
+					break;
+				}
+
+				if (ret == 1)
+				{
+					sat_rcv_msg();
+				}
+
+				if (cnt2 >= max_retries)
+				{
+					break;
+				}
+
+			} // if signal found end
+			else
+			{
+				cnt++;
+				k_sleep(K_SECONDS(20));
+			}
+		} // finding signal end
+		if (!signal)
+		{
+			LOG_INF("Unable to get satellite fix");
+			ret = 1;
+		}
+
+		uart_send(UART_2, "sat_end", strlen("sat_end"));
+		LOG_INF("sent command satellite end to esp");
+	}
+	else
+	{
+		LOG_ERR("ESP communication unsuccessful");
+		ret = -1;
 	}
 
-	uart_exit(uart_dev1);
+	uart_exit(UART_2);
+	set_LED(30, 0);
+	set_LED(31, 0);
 
-	return retval;
+	LOG_INF("Ending satellite module, ret: %d", ret);
+
+	return ret;
 }
 
 static int glider_init()
 {
-
+	int ret = 0;
 	/* Fetch serial number (uid) */
 	uint8_t imei[18] = "";
 	uint8_t uid[18] = "";
@@ -1549,7 +1677,7 @@ static int glider_init()
 
 	// initialize parameters, TODO: Add if there are any other important params
 	glider.m_param.mission = 0;
-	mission_state = 0;
+	mission_state = MISSION_FINISHED;
 	glider.m_param.wp_cur = 0;
 	glider.m_param.wp_max = 1;
 	glider.m_param.msg_sent = 0;
@@ -1562,29 +1690,8 @@ static int glider_init()
 	/* device inits and configurations */
 	device_inits();
 
-	set_LED(21, 1);
-	set_LED(22, 1);
-	set_LED(20, 1);
-	set_LED(30, 1);
-	set_LED(31, 1);
-	k_sleep(K_MSEC(200));
-	set_LED(21, 0);
-	set_LED(22, 0);
-	set_LED(20, 0);
-	set_LED(30, 0);
-	set_LED(31, 0);
-	k_sleep(K_MSEC(200));
-	set_LED(21, 1);
-	set_LED(22, 1);
-	set_LED(20, 1);
-	set_LED(30, 1);
-	set_LED(31, 1);
-	k_sleep(K_MSEC(200));
-	set_LED(21, 0);
-	set_LED(22, 0);
-	set_LED(20, 0);
-	set_LED(30, 0);
-	set_LED(31, 0);
+	// blink to signify init
+	blink_LED();
 
 	// message queues
 	message_queue_init();
@@ -1596,7 +1703,18 @@ static int glider_init()
 
 	glider.m_started = false;
 
-	check_mission();
+	ret = check_mission();
+	if (ret == 0)
+	{
+		// temporary for testing
+		mission_state = MISSION_FINISHED;
+		glider.m_param.m_start_s = 1620724035;
+	}
+	else
+	{
+		printk("\nMission params not found, waiting for mission\n\n");
+		mission_state = MISSION_FINISHED;
+	}
 
 	printk("\nInit complete. Press button 1 to start\n\n");
 
@@ -1611,14 +1729,46 @@ void main(void)
 {
 	printk("\n\n**** NordicOasys v0.99 - Started ****\n\n");
 
-	int wifi_on = 0;
+	static int ret = 0;
+	static int wifi_on = 0;
 
-	int64_t unix_time_start = 1620639117;
+	static int64_t unix_time_start = 1620723992;
 	time_UTC = gmtime(&unix_time_start);
 
 	date_time_set(time_UTC);
 	date_time_now(&unix_time_ms);
 	update_tm_all(unix_time_ms / 1000);
+
+	LOG_INF("\nEvent: init");
+
+	// initialize glider
+	glider_init();
+	// button_wait();
+
+	// TODO: create check for finished missions
+	if (mission_state == MISSION_ONGOING)
+	{
+		event = EVT_DIVE;
+		LOG_INF("Mission ongoing");
+	}
+	else if (mission_state == MISSION_WAIT_START)
+	{
+		event = EVT_IDLE;
+		LOG_INF("Idling until mission start");
+	}
+	else if (mission_state == MISSION_FINISHED)
+	{
+		LOG_INF("Running gps module");
+		// button_wait();
+		// gps_module();
+		event = EVT_AWAIT_MISSION;
+		LOG_INF("No mission ongoing, on standby for new mission");
+	}
+	else
+	{
+		event = EVT_AWAIT_MISSION;
+		LOG_INF("Unknown event, waiting for mission");
+	}
 
 	while (1)
 	{
@@ -1626,47 +1776,38 @@ void main(void)
 
 		switch (event)
 		{
-		case EVT_INIT:
-			// initialize glider
-			glider_init();
-			button_wait();
-
-			// get gps fix
-			gps_module();
-
-			// TODO: create check for finished missions
-			if (mission_state == MISSION_ONGOING || mission_state == MISSION_WAITING)
-			{
-				event = EVT_DIVE;
-				LOG_INF("Mission ongoing");
-			}
-			else if (mission_state == MISSION_FINISHED)
-			{
-				event = EVT_AWAIT_MISSION;
-				LOG_INF("No mission ongoing, on standby for new mission");
-			}
-			else
-			{
-				event = EVT_IDLE;
-				LOG_INF("Idling until mission start");
-			}
-
-			break;
 		case EVT_AWAIT_MISSION:
+			LOG_INF("\nEvent: await mission");
 
 			set_button_config(3);
 
+			set_LED(22, 1);
+			set_LED(30, 1);
+			set_LED(31, 1);
 			LOG_INF("Waiting for wifi command");
 			k_msgq_get(&button_msg_qr, &wifi_on, K_SECONDS(30));
+			set_LED(22, 0);
+			set_LED(30, 0);
+			set_LED(31, 0);
 			if (wifi_on == 1)
 			{
+				LOG_INF("Running wifi module");
+				// button_wait();
 				wifi_module();
+				wifi_on = 0;
 			}
 			else
 			{
-				gcloud_module();
-				// if unsuccessful, check satellite for any commands
-				// satellite_module();
+				LOG_INF("Running gcloud module");
+				// button_wait();
+				// ret = gcloud_module();
+				if (ret == 1)
+				{
+					// if unsuccessful, check satellite for any commands
+					LOG_INF("Running satellite module");
+					// button_wait();
+					// satellite_module();
+				}
 			}
 
 			if (mission_state == MISSION_ONGOING)
@@ -1680,19 +1821,22 @@ void main(void)
 
 			break;
 		case EVT_DIVE:
+			LOG_INF("\nEvent: dive");
+
 			// function: send command to navigation
 
+			LOG_INF("Running sensor module");
+			// button_wait();
 			// read sensor data
-			set_LED(20, 1);
 			date_time_now(&unix_time_ms);
 			update_tm_all(unix_time_ms / 1000);
 			sensor_module();
-			set_LED(20, 0);
 
 			event = EVT_SURFACE;
 
 			break;
 		case EVT_SURFACE:
+			LOG_INF("\nEvent: surface");
 
 			glider.m_param.wp_cur++;
 
@@ -1705,26 +1849,30 @@ void main(void)
 				event = EVT_AWAIT_MISSION;
 				update_mission_status(MISSION_FINISHED);
 			}
-
+			LOG_INF("Running gps module");
+			// button_wait();
 			// gps_module();
 
-			//
-			// gcloud_module();
-			// set_LED(31, 0);
-
-			set_LED(30, 1);
-			set_LED(31, 1);
-			// satellite_module();
-			set_LED(30, 0);
-			set_LED(31, 0);
+			LOG_INF("Running gcloud module");
+			// button_wait();
+			// ret = gcloud_module();
+			if (ret == 1)
+			{
+				// if unsuccessful, check satellite for any commands
+				LOG_INF("Running satellite module");
+				// button_wait();
+				// satellite_module();
+			}
 
 			break;
 		case EVT_IDLE:
+			LOG_INF("\nEvent: idle");
 
 			date_time_now(&unix_time_ms);
 			update_tm_all(unix_time_ms / 1000);
 			if ((unix_time_ms / 1000) > glider.m_param.m_start_s)
 			{
+				LOG_INF("Start time OK, starting mission");
 				event = EVT_DIVE;
 				update_mission_status(MISSION_ONGOING);
 			}
@@ -1740,6 +1888,10 @@ void main(void)
 				set_LED(20, 0);
 				set_LED(30, 0);
 				set_LED(31, 0);
+
+				LOG_INF("Running gps module");
+				// button_wait();
+				// gps_module();
 
 				event = EVT_IDLE;
 			}
@@ -1869,12 +2021,12 @@ static bool mqtt_init_complete = false;
 static int wifi_mqtt_module()
 {
 	set_button_config(1);
-	uart_start(uart_dev1);
+	uart_start(UART_1);
 
 	printk("\nwifi test start\n");
 
 	// send wifi command to wifi controller
-	uart_send(uart_dev1, "wifi", strlen("wifi"));
+	uart_send(UART_1, "wifi", strlen("wifi"));
 
 	// wifi loop 
 for (int i = 0;; i++)
@@ -1886,14 +2038,14 @@ for (int i = 0;; i++)
 
 	if (strcmp(uart_msg, "{exit}") == 0)
 	{
-		uart_exit(uart_dev1);
+		uart_exit(UART_1);
 		break;
 	}
 	// wifi setup success, send further commands
 	else if (strcmp(uart_msg, "{wifi ok}") == 0)
 	{
 		LOG_INF("\nReceived wifi ok");
-		uart_send(uart_dev1, "{mqtt}\n", strlen("{mqtt}\n"));
+		uart_send(UART_1, "{mqtt}\n", strlen("{mqtt}\n"));
 	}
 	// send data from uart_data_array
 	else if (strcmp(uart_msg, "{mqtt ok}") == 0)
@@ -1925,16 +2077,16 @@ static int mqtt_module()
 
 	printk("mqtt test start\n");
 
-	int err;
+	int ret;
 
 	// mqtt init
 	if (!mqtt_init_complete)
 	{
 
-		err = app_mqtt_init_and_connect();
-		if (err != 0)
+		ret = app_mqtt_init_and_connect();
+		if (ret != 0)
 		{
-			return err;
+			return ret;
 		}
 
 		mqtt_init_complete = true;
@@ -1943,10 +2095,10 @@ static int mqtt_module()
 	else
 	{
 
-		err = app_mqtt_connect();
-		if (err != 0)
+		ret = app_mqtt_connect();
+		if (ret != 0)
 		{
-			return err;
+			return ret;
 		}
 	}
 
@@ -1956,13 +2108,13 @@ static int mqtt_module()
 	{
 
 		// mqtt function
-		err = app_mqtt_run();
+		ret = app_mqtt_run();
 
 		// test messages received from mqtt
 		k_msgq_get(&mqtt_msg_q, &mqtt_msg, K_NO_WAIT);
 		int mqtt_val = check_mqtt_msg(&mqtt_msg, sizeof(mqtt_msg));
 
-		if (mqtt_val == 1 || err != 0)
+		if (mqtt_val == 1 || ret != 0)
 		{
 			strcpy(mqtt_msg, "");
 			break;
@@ -1981,12 +2133,12 @@ static int mqtt_module()
 	}
 	// MQTT loop end
 
-	err = app_mqtt_disconnect();
-	if (err != 0)
+	ret = app_mqtt_disconnect();
+	if (ret != 0)
 	{
-		printk("\nDisconnect unsuccessful: %d", err);
+		printk("\nDisconnect unsuccessful: %d", ret);
 		printk("\n\nClosing program, check for errors in code lol");
-		return err;
+		return ret;
 	}
 
 	return 0;

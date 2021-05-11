@@ -140,7 +140,7 @@ static int activate_lte(bool activate)
 
 static int gnss_ctrl(uint32_t ctrl)
 {
-	int retval;
+	int ret;
 
 	nrf_gnss_fix_retry_t fix_retry = 0;
 	nrf_gnss_fix_interval_t fix_interval = 1;
@@ -167,34 +167,34 @@ static int gnss_ctrl(uint32_t ctrl)
 			return -1;
 		}
 
-		retval = nrf_setsockopt(gnss_fd,
-								NRF_SOL_GNSS,
-								NRF_SO_GNSS_FIX_RETRY,
-								&fix_retry,
-								sizeof(fix_retry));
-		if (retval != 0)
+		ret = nrf_setsockopt(gnss_fd,
+							 NRF_SOL_GNSS,
+							 NRF_SO_GNSS_FIX_RETRY,
+							 &fix_retry,
+							 sizeof(fix_retry));
+		if (ret != 0)
 		{
 			LOG_ERR("Failed to set fix retry value");
 			return -1;
 		}
 
-		retval = nrf_setsockopt(gnss_fd,
-								NRF_SOL_GNSS,
-								NRF_SO_GNSS_FIX_INTERVAL,
-								&fix_interval,
-								sizeof(fix_interval));
-		if (retval != 0)
+		ret = nrf_setsockopt(gnss_fd,
+							 NRF_SOL_GNSS,
+							 NRF_SO_GNSS_FIX_INTERVAL,
+							 &fix_interval,
+							 sizeof(fix_interval));
+		if (ret != 0)
 		{
 			LOG_ERR("Failed to set fix interval value");
 			return -1;
 		}
 
-		retval = nrf_setsockopt(gnss_fd,
-								NRF_SOL_GNSS,
-								NRF_SO_GNSS_NMEA_MASK,
-								&nmea_mask,
-								sizeof(nmea_mask));
-		if (retval != 0)
+		ret = nrf_setsockopt(gnss_fd,
+							 NRF_SOL_GNSS,
+							 NRF_SO_GNSS_NMEA_MASK,
+							 &nmea_mask,
+							 sizeof(nmea_mask));
+		if (ret != 0)
 		{
 			LOG_ERR("Failed to set nmea mask");
 			return -1;
@@ -204,12 +204,12 @@ static int gnss_ctrl(uint32_t ctrl)
 	if ((ctrl == GNSS_INIT_AND_START) ||
 		(ctrl == GNSS_RESTART))
 	{
-		retval = nrf_setsockopt(gnss_fd,
-								NRF_SOL_GNSS,
-								NRF_SO_GNSS_START,
-								&delete_mask,
-								sizeof(delete_mask));
-		if (retval != 0)
+		ret = nrf_setsockopt(gnss_fd,
+							 NRF_SOL_GNSS,
+							 NRF_SO_GNSS_START,
+							 &delete_mask,
+							 sizeof(delete_mask));
+		if (ret != 0)
 		{
 			LOG_ERR("Failed to start GPS");
 			return -1;
@@ -218,12 +218,12 @@ static int gnss_ctrl(uint32_t ctrl)
 
 	if (ctrl == GNSS_STOP)
 	{
-		retval = nrf_setsockopt(gnss_fd,
-								NRF_SOL_GNSS,
-								NRF_SO_GNSS_STOP,
-								&delete_mask,
-								sizeof(delete_mask));
-		if (retval != 0)
+		ret = nrf_setsockopt(gnss_fd,
+							 NRF_SOL_GNSS,
+							 NRF_SO_GNSS_STOP,
+							 &delete_mask,
+							 sizeof(delete_mask));
+		if (ret != 0)
 		{
 			LOG_ERR("Failed to stop GPS");
 			return -1;
@@ -235,17 +235,17 @@ static int gnss_ctrl(uint32_t ctrl)
 
 static int gps_init()
 {
-	int retval;
+	int ret;
 
-	retval = setup_modem();
-	if (retval != 0)
+	ret = setup_modem();
+	if (ret != 0)
 	{
-		return retval;
+		return ret;
 	}
-	retval = gnss_ctrl(GNSS_INIT_AND_START);
-	if (retval != 0)
+	ret = gnss_ctrl(GNSS_INIT_AND_START);
+	if (ret != 0)
 	{
-		return retval;
+		return ret;
 	}
 
 	return 0;
@@ -253,20 +253,20 @@ static int gps_init()
 
 static int gps_reinit()
 {
-	int retval;
+	int ret;
 
-	retval = setup_modem();
-	if (retval != 0)
+	ret = setup_modem();
+	if (ret != 0)
 	{
-		return retval;
+		return ret;
 	}
-	retval = gnss_ctrl(GNSS_RESTART);
-	if (retval != 0)
+	ret = gnss_ctrl(GNSS_RESTART);
+	if (ret != 0)
 	{
-		return retval;
+		return ret;
 	}
 
-	return retval;
+	return ret;
 }
 
 static void print_satellite_stats(nrf_gnss_data_frame_t *pvt_data)
@@ -337,14 +337,14 @@ static void print_nmea_data(void)
 
 int process_gps_data(nrf_gnss_data_frame_t *gps_data)
 {
-	int retval;
+	int ret;
 
-	retval = nrf_recv(gnss_fd,
-					  gps_data,
-					  sizeof(nrf_gnss_data_frame_t),
-					  NRF_MSG_DONTWAIT);
+	ret = nrf_recv(gnss_fd,
+				   gps_data,
+				   sizeof(nrf_gnss_data_frame_t),
+				   NRF_MSG_DONTWAIT);
 
-	if (retval > 0)
+	if (ret > 0)
 	{
 
 		switch (gps_data->data_id)
@@ -370,7 +370,7 @@ int process_gps_data(nrf_gnss_data_frame_t *gps_data)
 			{
 				memcpy(nmea_strings[nmea_string_cnt++],
 					   gps_data->nmea,
-					   retval);
+					   ret);
 			}
 			break;
 
@@ -401,7 +401,7 @@ int process_gps_data(nrf_gnss_data_frame_t *gps_data)
 		}
 	}
 
-	return retval;
+	return ret;
 }
 
 #ifdef CONFIG_SUPL_CLIENT_LIB
@@ -411,14 +411,14 @@ int inject_agps_type(void *agps,
 					 void *user_data)
 {
 	ARG_UNUSED(user_data);
-	int retval = nrf_sendto(gnss_fd,
-							agps,
-							agps_size,
-							0,
-							&type,
-							sizeof(type));
+	int ret = nrf_sendto(gnss_fd,
+						 agps,
+						 agps_size,
+						 0,
+						 &type,
+						 sizeof(type));
 
-	if (retval != 0)
+	if (ret != 0)
 	{
 		LOG_ERR("Failed to send AGNSS data, type: %d (err: %d)",
 				type,
@@ -516,7 +516,7 @@ static int gps_fill_struct(glider_gps_data_t *app_gps_data, nrf_gnss_data_frame_
 
 int app_gps(glider_gps_data_t *app_gps_data, int64_t gps_timeout, int retry_interval)
 {
-	int retval = 0;
+	int ret = 0;
 
 	nrf_gnss_data_frame_t gps_data;
 	got_fix = false;
@@ -541,7 +541,6 @@ int app_gps(glider_gps_data_t *app_gps_data, int64_t gps_timeout, int retry_inte
 
 		init_complete = true;
 	}
-
 	// Reconnect
 	else
 	{
@@ -553,7 +552,7 @@ int app_gps(glider_gps_data_t *app_gps_data, int64_t gps_timeout, int retry_inte
 	}
 
 	LOG_INF("Getting GPS data...");
-	while ((current_time) <= gps_timeout)
+	while (current_time <= gps_timeout)
 	{
 
 		current_time = k_uptime_get() - start_time;
@@ -605,7 +604,7 @@ int app_gps(glider_gps_data_t *app_gps_data, int64_t gps_timeout, int retry_inte
 		gnss_data_to_JSON(&gps_string, &last_pvt);
 		gps_fill_struct(app_gps_data, &last_pvt, &gps_string);
 
-		// retval = 1;
+		// ret = 1;
 	}
 	else
 	{
@@ -617,11 +616,11 @@ int app_gps(glider_gps_data_t *app_gps_data, int64_t gps_timeout, int retry_inte
 	LOG_INF("Stopping GPS module");
 
 	// AT command to turn off GPS
-	retval = gnss_ctrl(GNSS_STOP);
+	ret = gnss_ctrl(GNSS_STOP);
 	if (at_cmd_write(AT_DEACTIVATE_GPS, NULL, 0, NULL) != 0)
 	{
 		LOG_ERR("\nunable to deactivate GPS");
 	}
 
-	return retval;
+	return ret;
 }

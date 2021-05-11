@@ -18,10 +18,6 @@ static bool led1_on = false;
 #define MSG_DEFAULT "\"hi\"\n"
 #define MSG_DEFAULT2 "ABCDEFGHIJ"
 #define MSG_DEFAULT3 "short"
-
-// external variables
-extern enum uart_device_type uart_dev1;
-
 // message queues
 extern struct k_msgq button_msg_q;
 extern struct k_msgq button_msg_qr;
@@ -58,10 +54,6 @@ static void button_handler(uint32_t button_states, uint32_t has_changed)
 		if (has_changed == 1 && !gpio_pin_get(dev_gpio, 6))
 		{
 			k_msgq_put(&uart_msg_q, "surfaced", K_NO_WAIT);
-		}
-		if (has_changed == 2 && !gpio_pin_get(dev_gpio, 7))
-		{
-			uart_send(uart_dev1, MSG_3, strlen(MSG_3));
 		}
 
 		break;
