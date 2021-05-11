@@ -93,12 +93,12 @@ let slider4GLimit = document.querySelector("#slider4GLimit");
 let input4GLimit = document.querySelector("#input4GLimit");
 
 let sliderRange4G = {
-  min: [0, 10],
-  "20%": [100, 10],
-  "40%": [200, 10],
-  "60%": [300, 10],
-  "80%": [400, 10],
-  max: [500, 10],
+  min: [0],
+  "20%": [20],
+  "40%": [40],
+  "60%": [60],
+  "80%": [80],
+  max: [100],
 };
 noUiSlider.create(slider4GLimit, {
   start: 50,
