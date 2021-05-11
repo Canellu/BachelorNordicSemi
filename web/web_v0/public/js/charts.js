@@ -11,7 +11,7 @@ Chart.controllers.LineWithLine = Chart.controllers.line.extend({
         topY = this.chart.scales["y-axis-0"].top,
         bottomY = this.chart.scales["y-axis-0"].bottom;
 
-      // draw line
+      // draw vertical line
       ctx.save();
       ctx.beginPath();
       ctx.moveTo(x, topY);
@@ -266,8 +266,6 @@ function createChartContent(type, ylabel, color, stepSize) {
       },
       tooltips: {
         intersect: false,
-        axis: "x",
-
         xPadding: 10,
         yPadding: 10,
 
@@ -293,6 +291,8 @@ function createChartContent(type, ylabel, color, stepSize) {
               displayFormats: {
                 minute: "HH:mm",
                 hour: "HH:mm",
+                second: "HH:mm:ss",
+                millisecond: "HH:mm:ss",
               },
               tooltipFormat: "YYYY-MM-DD   HH:mm:ss",
             },
