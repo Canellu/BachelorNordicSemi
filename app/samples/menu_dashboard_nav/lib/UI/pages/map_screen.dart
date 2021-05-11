@@ -30,17 +30,45 @@ class _MapScreenState extends State<MapScreen> {
 
   void _onMapCreated(GoogleMapController controller) {
     _controller.complete(controller);
+
     locationMap.forEach((key, value) {
       _markers.add(
         Marker(
-          markerId: MarkerId(key),
-          position: LatLng(lat, lng),
+          markerId: MarkerId(key[0]),
+          position: LatLng(value[0], value[1]),
           infoWindow: InfoWindow(title: '$key'),
           icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
         ),
       );
+
+      _markers.add(
+        Marker(
+          markerId: MarkerId(key[1]),
+          position: LatLng(value[2], value[3]),
+          infoWindow: InfoWindow(title: '$key'),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+        ),
+      );
+
+      _markers.add(
+        Marker(
+          markerId: MarkerId(key[2]),
+          position: LatLng(value[4], value[5]),
+          infoWindow: InfoWindow(title: '$key'),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+        ),
+      );
+
+      _markers.add(
+        Marker(
+          markerId: MarkerId(key[3]),
+          position: LatLng(value[6], value[7]),
+          infoWindow: InfoWindow(title: '$key'),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+        ),
+      );
+      setState(() {});
     });
-    setState(() {});
   }
 
   @override
@@ -59,7 +87,7 @@ class _MapScreenState extends State<MapScreen> {
       latlng.add(lat);
       latlng.add(lng);
 
-      print(lat);
+      print(locationMap.keys);
       print("-----------------------------------");
 
       print(lng);
@@ -69,7 +97,7 @@ class _MapScreenState extends State<MapScreen> {
       print("-----------------------------------");
 
 //DeviceId
-      // locationMap[element.deviceId] = latlng;
+      locationMap[element.deviceId] = latlng;
       //print("-----------------------------------");
       // print(locationMap.values);
     });
