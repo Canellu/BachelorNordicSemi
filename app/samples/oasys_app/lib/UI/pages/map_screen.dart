@@ -86,20 +86,18 @@ class _MapScreenState extends State<MapScreen> {
       lng = double.parse(coor.substring(8, 14));
       latlng.add(lat);
       latlng.add(lng);
-
+/*
       print(locationMap.keys);
       print("-----------------------------------");
 
       print(lng);
       print("-----------------------------------");
-//Problemet ligger i markers, den är tom
       print(_markers);
       print("-----------------------------------");
+*/
 
 //DeviceId
       locationMap[element.deviceId] = latlng;
-      //print("-----------------------------------");
-      // print(locationMap.values);
     });
 
     return MaterialApp(
