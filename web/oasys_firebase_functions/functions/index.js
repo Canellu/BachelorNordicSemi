@@ -105,7 +105,6 @@ exports.fromGliderToDatabase = functions
     console.log("utcDate: " + utcDate);
     console.log("localTime: " + localTime);
 
-    // Timestamp on when glider last communicated through 4G
     await db.collection("Gliders").doc(gliderId).set(
       {
         "Last sync": localTime,
@@ -113,67 +112,71 @@ exports.fromGliderToDatabase = functions
       { merge: true }
     );
 
-    let dataJSON = null;
+    let messageJSON = null;
     try {
-      dataJSON = message.json;
-      console.log("JSON: ", dataJSON);
+      messageJSON = message.json;
+      console.log("JSON: ", messageJSON);
     } catch (e) {
       console.error("PubSub message was not JSON", e);
     }
 
-    // If glider sent data properly
-    //add it to corresponding mission in database
-    if (dataJSON != null) {
-      let data;
-      //TODO: check if data contains latlng, if yes
-      // change glider last seen in database.
-      if (data.includes("lat")) {
-        let lat = dataJSON.data.lat;
-        let lng = dataJSON.data.lng;
+    if (messageJSON != null) {
+      const { start, data } = messageJSON;
+
+      // Add mission to Firestore
+      if (start !== undefined) {
+        await db
+          .collection("Gliders")
+          .doc(gliderId)
+          .collection("Missions")
+          .doc("Mission " + messageJSON.M)
+          .set(messageJSON, { merge: true });
+      }
+
+      // Add data to Firestore
+      if (data !== undefined) {
+        // Update 'Last seen' if data includes latlng
+        if ("lat" in data) {
+          await db
+            .collection("Gliders")
+            .doc(gliderId)
+            .set(
+              {
+                "Last seen": `lat: ${data.lat}, lng:${data.lng}`,
+              },
+              { merge: true }
+            );
+        }
+
+        let gliderData = JSON.stringify({ data }).slice(1, -1);
+        let logDate = messageJSON.ts.slice(0, 8);
+        let logTime = messageJSON.ts.slice(8);
+
+        logDate =
+          logDate.slice(0, 4) +
+          "-" +
+          logDate.slice(4, 6) +
+          "-" +
+          logDate.slice(6);
+
+        logTime =
+          logTime.slice(0, 2) +
+          ":" +
+          logTime.slice(2, 4) +
+          ":" +
+          logTime.slice(4);
 
         await db
           .collection("Gliders")
           .doc(gliderId)
-          .set(
-            {
-              "Last seen": `lat: ${lat}, lng:${lng}`,
-            },
-            { merge: true }
-          );
+          .collection("Missions")
+          .doc("Mission " + messageJSON.M)
+          .collection("Data")
+          .doc(logDate)
+          .set({ [logTime]: gliderData }, { merge: true });
 
-        data = JSON.stringify({ lat, lng }).slice(1, -1);
-      } else {
-        data = JSON.stringify(dataJSON.data).slice(1, -1);
+        console.log({ logDate, logTime, gliderData });
       }
-
-      let missionNum = dataJSON.M;
-      let logDate = dataJSON.ts.slice(0, 8);
-      let logTime = dataJSON.ts.slice(8);
-
-      logDate =
-        logDate.slice(0, 4) +
-        "-" +
-        logDate.slice(4, 6) +
-        "-" +
-        logDate.slice(6);
-
-      logTime =
-        logTime.slice(0, 2) +
-        ":" +
-        logTime.slice(2, 4) +
-        ":" +
-        logTime.slice(4);
-
-      await db
-        .collection("Gliders")
-        .doc(gliderId)
-        .collection("Missions")
-        .doc("Mission " + missionNum)
-        .collection("Data")
-        .doc(logDate)
-        .set({ [logTime]: data }, { merge: true });
-
-      console.log({ data });
     }
   });
 
