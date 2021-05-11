@@ -1,4 +1,3 @@
-import 'package:bachelor_app/UI/chart.dart';
 import 'package:bachelor_app/models/mission.dart';
 import 'package:bachelor_app/service/database.dart';
 import 'package:flutter/material.dart';
