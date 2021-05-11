@@ -98,6 +98,20 @@ exports.fromGliderToDatabase = functions
 
     // console.log("GLIDER UID: " + message.attributes.deviceId);
 
+    // Helper function
+    function numToLogLvl(type) {
+      switch (type) {
+        case 3:
+          return "High";
+        case 2:
+          return "Medium";
+        case 1:
+          return "Low";
+        default:
+          return "None";
+      }
+    }
+
     let gliderId = message.attributes.deviceId.substring(1);
     let utcDate = moment(context.timestamp);
     let localTime = utcDate.tz("Europe/Oslo").format("YYYY-MM-DD HH:mm:ss");
@@ -125,12 +139,31 @@ exports.fromGliderToDatabase = functions
 
       // Add mission to Firestore
       if (start !== undefined) {
+        let { C, P, T, M, lat, lng, ...rest } = messageJSON;
+
+        C = numToLogLvl(C);
+        P = numToLogLvl(P);
+        T = numToLogLvl(T);
+
+        let WP = [];
+        lat.forEach((lat, index) => {
+          WP.push(`${lat},${lng[index]}`);
+        });
+
+        let dataObj = {
+          C,
+          P,
+          T,
+          WP,
+          ...rest,
+        };
+
         await db
           .collection("Gliders")
           .doc(gliderId)
           .collection("Missions")
           .doc("Mission " + messageJSON.M)
-          .set(messageJSON, { merge: true });
+          .set(dataObj, { merge: true });
       }
 
       // Add data to Firestore
