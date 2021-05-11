@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import 'chart_page.dart';
+import 'mission_Control.dart';
 
 class DevicePageTab extends StatelessWidget {
   //final String gliderId;
@@ -21,7 +22,7 @@ class DevicePageTab extends StatelessWidget {
   Widget build(BuildContext context) {
 
     //final mission = Provider.of<List<Mission>>(context);
-
+    final gid = selectedDevice.deviceId;
 
     return StreamBuilder(
         stream: DatabaseService(selectedDevice.deviceId,"").mission,
@@ -71,10 +72,12 @@ class DevicePageTab extends StatelessWidget {
               body: TabBarView(
                 physics: NeverScrollableScrollPhysics(),
                 children: <Widget>[
-                  ChartPage(),
+                  ChartPage(gid: gid,missionList: missionIdList),
+                  MissionTabPage(gid: gid,missionList: missionIdList),
+                  /*
                   Center(
                     child: Text('Mission Control Tab'),
-                  ),
+                  ),*/
                 ],
               ),
             ),
@@ -83,6 +86,7 @@ class DevicePageTab extends StatelessWidget {
     );
   }
 }
+
 /*
 class DevicePageTab extends StatelessWidget {
   final deviceID;
@@ -101,27 +105,4 @@ class DevicePageTab extends StatelessWidget {
   }
 }*/
 
-
-/*
-        return Container(
-          child: FloatingActionButton(
-            onPressed: (){
-              //snapshot.data.docs.forEach((element) => {print(element)});
-              snapshot.data.docs.forEach((element) {print(element.id);});
-              /*
-              var createMissionID = snapshot.data.docs.length + 1;
-              DatabaseService(gliderId,"").newMission(
-                Mission(
-                  missionId: "Mission $createMissionID",
-                  startTime: DateFormat('yyyy-MM-dd kk:mm:ss').format(DateTime.now()),
-                  freqC: 5,
-                  freqP: 5,
-                  freqT: 50,
-                  maxD: 200,
-                  minD: 10
-              )
-              );*/
-            },
-          ),
-        );*/
 

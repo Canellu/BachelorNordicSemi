@@ -49,7 +49,8 @@ class DatabaseService {
       "freqT" : missionObject.freqT,
       "maxD" : missionObject.maxD,
       "minD" : missionObject.minD,
-      "start" : missionObject.startTime
+      "start" : missionObject.startTime,
+      "4G" : missionObject.nett
     }).then((value) => print("New Mission Added"))
     .catchError((error) => print("Failed to add new mission : $error"));
   }
@@ -66,7 +67,7 @@ class DatabaseService {
         .map(_missionListFromSnapshot);
   }*/
   Stream<QuerySnapshot> get mission {
-    return connectCollection.doc("311910").collection("Missions").snapshots();
+    return connectCollection.doc(gid).collection("Missions").snapshots();
   }
 
 /*
@@ -97,8 +98,16 @@ class DatabaseService {
     //Loop through to find each data type
     var dataTypeFound = [];
     dataset.forEach((key, value) {
+      var loopEnd;
+
       var split = value.split(",");
-      for(var i = 0; i < split.length -1; i++) {
+
+      if(value.substring(value.length-1,value.length) == ",") {
+        loopEnd = split.length-1;
+      }else {loopEnd = split.length;}
+
+      for(var i = 0; i < loopEnd; i++) {
+
         const start = '"';
         const end = '"';
 
@@ -119,19 +128,24 @@ class DatabaseService {
     final Map<String, Map> dataCoodinatesRaw = new Map();
 
     dataTypeFound.forEach((type) {
-
       final Map<String, String> typeDataset = {};
-
       dataset.forEach((key, value) {
-        if(value.contains(type)) {
-          var start = '$type":';
-          const end = ",";
+        var loopEnd;
 
-          final startIndex = value.indexOf(start);
-          final endIndex = value.indexOf(end, startIndex + start.length);
-          var typeData = value.substring(startIndex + start.length, endIndex);
+        var split = value.split(",");
 
-          typeDataset[key] = typeData;
+        if(value.substring(value.length-1,value.length) == ",") {
+          loopEnd = split.length-1;
+        }else {loopEnd = split.length;}
+
+        for(var i = 0; i < loopEnd; i++) {
+          if(split[i].contains(type)) {
+            var start = '$type":';
+
+            final startIndex = split[i].indexOf(start);
+            var typeData = split[i].substring(startIndex + start.length, split[i].length);
+            typeDataset[key] = typeData;
+          }
         }
       });
 
