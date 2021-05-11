@@ -91,14 +91,8 @@ static void button_handler(uint32_t button_states, uint32_t has_changed)
 		if (has_changed == 1 && !gpio_pin_get(dev_gpio, 6))
 		{
 			app_button_ret_val = 1;
+			k_msgq_put(&button_msg_qr, &app_button_ret_val, K_NO_WAIT);
 		}
-
-		else if (has_changed == 2 && !gpio_pin_get(dev_gpio, 7))
-		{
-			app_button_ret_val = 2;
-		}
-
-		k_msgq_put(&button_msg_qr, &app_button_ret_val, K_NO_WAIT);
 
 		break;
 		// case 999: // DO NOT USE, ONLY FOR TEMPLATE

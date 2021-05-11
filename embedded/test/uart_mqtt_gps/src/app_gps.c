@@ -12,8 +12,12 @@
 #include <modem/at_cmd.h>
 #include <modem/at_notif.h>
 #include <cJSON.h>
+#include <time.h>
+#include <date_time.h>
 
 #include "app_gps.h"
+
+LOG_MODULE_REGISTER(app_gps);
 
 #ifdef CONFIG_SUPL_CLIENT_LIB
 #include <supl_os_client.h>
@@ -73,6 +77,7 @@ static int setup_modem(void)
 
 		if (at_cmd_write(at_commands[i], NULL, 0, NULL) != 0)
 		{
+			LOG_ERR("Unable to execute AT command gps start");
 			return -1;
 		}
 	}
@@ -154,11 +159,11 @@ static int gnss_ctrl(uint32_t ctrl)
 
 		if (gnss_fd >= 0)
 		{
-			printk("GPS Socket created\n");
+			LOG_INF("GPS Socket created");
 		}
 		else
 		{
-			printk("Could not init socket (err: %d)\n", gnss_fd);
+			LOG_ERR("Could not init socket (err: %d)", gnss_fd);
 			return -1;
 		}
 
@@ -169,7 +174,7 @@ static int gnss_ctrl(uint32_t ctrl)
 								sizeof(fix_retry));
 		if (retval != 0)
 		{
-			printk("Failed to set fix retry value\n");
+			LOG_ERR("Failed to set fix retry value");
 			return -1;
 		}
 
@@ -180,7 +185,7 @@ static int gnss_ctrl(uint32_t ctrl)
 								sizeof(fix_interval));
 		if (retval != 0)
 		{
-			printk("Failed to set fix interval value\n");
+			LOG_ERR("Failed to set fix interval value");
 			return -1;
 		}
 
@@ -191,7 +196,7 @@ static int gnss_ctrl(uint32_t ctrl)
 								sizeof(nmea_mask));
 		if (retval != 0)
 		{
-			printk("Failed to set nmea mask\n");
+			LOG_ERR("Failed to set nmea mask");
 			return -1;
 		}
 	}
@@ -206,7 +211,7 @@ static int gnss_ctrl(uint32_t ctrl)
 								sizeof(delete_mask));
 		if (retval != 0)
 		{
-			printk("Failed to start GPS\n");
+			LOG_ERR("Failed to start GPS");
 			return -1;
 		}
 	}
@@ -220,7 +225,7 @@ static int gnss_ctrl(uint32_t ctrl)
 								sizeof(delete_mask));
 		if (retval != 0)
 		{
-			printk("Failed to stop GPS\n");
+			LOG_ERR("Failed to stop GPS");
 			return -1;
 		}
 	}
@@ -228,17 +233,38 @@ static int gnss_ctrl(uint32_t ctrl)
 	return 0;
 }
 
-static int init_app(void)
+static int gps_init()
 {
 	int retval;
 
-	if (setup_modem() != 0)
+	retval = setup_modem();
+	if (retval != 0)
 	{
-		printk("Failed to initialize modem\n");
-		return -1;
+		return retval;
+	}
+	retval = gnss_ctrl(GNSS_INIT_AND_START);
+	if (retval != 0)
+	{
+		return retval;
 	}
 
-	retval = gnss_ctrl(GNSS_INIT_AND_START);
+	return 0;
+}
+
+static int gps_reinit()
+{
+	int retval;
+
+	retval = setup_modem();
+	if (retval != 0)
+	{
+		return retval;
+	}
+	retval = gnss_ctrl(GNSS_RESTART);
+	if (retval != 0)
+	{
+		return retval;
+	}
 
 	return retval;
 }
@@ -272,40 +298,40 @@ static void print_satellite_stats(nrf_gnss_data_frame_t *pvt_data)
 		}
 	}
 
-	printk("Tracking: %d Using: %d Unhealthy: %d\n", tracked,
-		   in_fix,
-		   unhealthy);
+	LOG_INF("Tracking: %d Using: %d Unhealthy: %d", tracked,
+			in_fix,
+			unhealthy);
 }
 
 static void print_gnss_stats(nrf_gnss_data_frame_t *pvt_data)
 {
 	if (pvt_data->pvt.flags & NRF_GNSS_PVT_FLAG_DEADLINE_MISSED)
 	{
-		printk("GNSS notification deadline missed\n");
+		LOG_INF("GNSS notification deadline missed");
 	}
 	if (pvt_data->pvt.flags & NRF_GNSS_PVT_FLAG_NOT_ENOUGH_WINDOW_TIME)
 	{
-		printk("GNSS operation blocked by insufficient time windows\n");
+		LOG_INF("GNSS operation blocked by insufficient time windows");
 	}
 }
 
 static void print_fix_data(nrf_gnss_data_frame_t *pvt_data)
 {
-	printf("Longitude:  %f\n", pvt_data->pvt.longitude);
-	printf("Latitude:   %f\n", pvt_data->pvt.latitude);
-	printk("Date:       %02u-%02u-%02u\n", pvt_data->pvt.datetime.year,
-		   pvt_data->pvt.datetime.month,
-		   pvt_data->pvt.datetime.day);
-	printk("Time (UTC): %02u:%02u:%02u\n", pvt_data->pvt.datetime.hour,
-		   pvt_data->pvt.datetime.minute,
-		   pvt_data->pvt.datetime.seconds);
+	LOG_INF("Longitude:  %f", pvt_data->pvt.longitude);
+	LOG_INF("Latitude:   %f", pvt_data->pvt.latitude);
+	LOG_INF("Date:       %02u-%02u-%02u", pvt_data->pvt.datetime.year,
+			pvt_data->pvt.datetime.month,
+			pvt_data->pvt.datetime.day);
+	LOG_INF("Time (UTC): %02u:%02u:%02u", pvt_data->pvt.datetime.hour,
+			pvt_data->pvt.datetime.minute,
+			pvt_data->pvt.datetime.seconds);
 }
 
 static void print_nmea_data(void)
 {
 	for (int i = 0; i < nmea_string_cnt; ++i)
 	{
-		printk("%s", nmea_strings[i]);
+		LOG_INF("%s", nmea_strings[i]);
 	}
 }
 
@@ -350,18 +376,18 @@ int process_gps_data(nrf_gnss_data_frame_t *gps_data)
 
 		case NRF_GNSS_AGPS_DATA_ID:
 #ifdef CONFIG_SUPL_CLIENT_LIB
-			printk("\033[1;1H");
-			printk("\033[2J");
-			printk("New AGPS data requested, contacting SUPL server, flags %d\n",
-				   gps_data->agps.data_flags);
+			LOG_INF("\033[1;1H");
+			LOG_INF("\033[2J");
+			LOG_INF("New AGPS data requested, contacting SUPL server, flags %d",
+					gps_data->agps.data_flags);
 			gnss_ctrl(GNSS_STOP);
 			activate_lte(true);
-			printk("Established LTE link\n");
+			LOG_INF("Established LTE link");
 			if (open_supl_socket() == 0)
 			{
-				printf("Starting SUPL session\n");
+				LOG_INF("Starting SUPL session");
 				supl_session(&gps_data->agps);
-				printk("Done\n");
+				LOG_INF("Done");
 				close_supl_socket();
 			}
 			activate_lte(false);
@@ -394,20 +420,20 @@ int inject_agps_type(void *agps,
 
 	if (retval != 0)
 	{
-		printk("Failed to send AGNSS data, type: %d (err: %d)\n",
-			   type,
-			   errno);
+		LOG_ERR("Failed to send AGNSS data, type: %d (err: %d)",
+				type,
+				errno);
 		return -1;
 	}
 
-	printk("Injected AGPS data, flags: %d, size: %d\n", type, agps_size);
+	LOG_INF("Injected AGPS data, flags: %d, size: %d\n", type, agps_size);
 
 	return 0;
 }
 #endif
 
 // Creates JSON version of desired gps data, converts back to string in JSON format
-static int gps_struct_to_JSON(void *gps_str, nrf_gnss_data_frame_t *pvt_data)
+static int gnss_data_to_JSON(void *gps_str, nrf_gnss_data_frame_t *pvt_data)
 {
 	cJSON *gps_JSON = cJSON_CreateObject();
 	cJSON *gps_data = cJSON_CreateObject();
@@ -469,45 +495,47 @@ static int create_dummy_gps_data(nrf_gnss_data_frame_t *pvt_data)
 	pvt_data->pvt.datetime.minute = 07;
 	pvt_data->pvt.datetime.seconds = 34;
 
-	printk("\n\nCreated dummy gps data");
+	LOG_INF("Created dummy gps data");
 
 	return 0;
 }
 
-static int glider_gps_fill(glider_gps_data_t *app_gps_data, nrf_gnss_data_frame_t *pvt_data, void *gps_string)
+static int gps_fill_struct(glider_gps_data_t *app_gps_data, nrf_gnss_data_frame_t *pvt_data, void *gps_string)
 {
 	strcpy(app_gps_data->gps_string, gps_string);
 
-	app_gps_data->year = pvt_data->pvt.datetime.year;
-	app_gps_data->month = pvt_data->pvt.datetime.month;
-	app_gps_data->day = pvt_data->pvt.datetime.day;
-	app_gps_data->hour = pvt_data->pvt.datetime.hour;
-	app_gps_data->minute = pvt_data->pvt.datetime.minute;
-	app_gps_data->seconds = pvt_data->pvt.datetime.seconds;
+	app_gps_data->time.tm_year = pvt_data->pvt.datetime.year - 1900;
+	app_gps_data->time.tm_mon = pvt_data->pvt.datetime.month - 1;
+	app_gps_data->time.tm_mday = pvt_data->pvt.datetime.day;
+	app_gps_data->time.tm_hour = pvt_data->pvt.datetime.hour;
+	app_gps_data->time.tm_min = pvt_data->pvt.datetime.minute;
+	app_gps_data->time.tm_sec = pvt_data->pvt.datetime.seconds;
 
 	return 0;
 }
 
 int app_gps(glider_gps_data_t *app_gps_data, int64_t gps_timeout, int retry_interval)
 {
+	int retval = 0;
+
 	nrf_gnss_data_frame_t gps_data;
 	got_fix = false;
 
 	uint8_t gps_string[128] = "";
-	int64_t current_time = 0;
 	int64_t start_time = k_uptime_get();
+	int64_t current_time = 0;
 
 	int cnt = 0;
 
-	printk("Starting GPS application\n");
+	LOG_INF("Starting GPS application");
 
-	// Runs first time init
-	// CANDO: create separate function and run in main?
+	// first time gps runs
 	if (init_complete == false)
 	{
 
-		if (init_app() != 0)
+		if (gps_init() != 0)
 		{
+			LOG_ERR("Error in gps initialization");
 			return -1;
 		}
 
@@ -517,11 +545,14 @@ int app_gps(glider_gps_data_t *app_gps_data, int64_t gps_timeout, int retry_inte
 	// Reconnect
 	else
 	{
-		setup_modem();
-		gnss_ctrl(GNSS_RESTART);
+		if (gps_reinit() != 0)
+		{
+			LOG_ERR("Error in gps reinitialization");
+			return -1;
+		}
 	}
 
-	printk("Getting GPS data...\n");
+	LOG_INF("Getting GPS data...");
 	while ((current_time) <= gps_timeout)
 	{
 
@@ -541,27 +572,27 @@ int app_gps(glider_gps_data_t *app_gps_data, int64_t gps_timeout, int retry_inte
 		}
 		else
 		{
-			// printk("\033[1;1H");
-			// printk("\033[2J");
+			// LOG_INF("\033[1;1H");
+			// LOG_INF("\033[2J");
 			print_satellite_stats(&last_pvt);
 			print_gnss_stats(&last_pvt);
-			printk("---------------------------------\n");
+			LOG_INF("---------------------------------");
 
 			if (!got_fix)
 			{
-				printk("Searching [%c] ---- Elapsed time: %lld s\n",
-					   update_indicator[cnt++ % 4], (current_time) / 1000);
+				LOG_INF("Searching [%c] ---- Elapsed time: %d s",
+						update_indicator[cnt++ % 4], (int32_t)(current_time) / 1000);
 			}
 			else
 			{
-				printk("\n\nGot fix\n");
+				LOG_INF("Got fix");
 				print_fix_data(&last_pvt);
 				break;
 			}
 
-			// printk("\nNMEA strings:\n\n");
+			// LOG_INF("\nNMEA strings:\n\n");
 			// print_nmea_data();
-			// printk("---------------------------------");
+			// LOG_INF("---------------------------------");
 		}
 
 		k_sleep(K_MSEC(retry_interval));
@@ -569,29 +600,28 @@ int app_gps(glider_gps_data_t *app_gps_data, int64_t gps_timeout, int retry_inte
 
 	if (!got_fix)
 	{
-		strcpy(gps_string, "no fix");
-
 		// create dummy data, REMINDER: COMMENT WHEN RUNNING PROPER TESTS
 		create_dummy_gps_data(&last_pvt);
-		gps_struct_to_JSON(&gps_string, &last_pvt);
+		gnss_data_to_JSON(&gps_string, &last_pvt);
+		gps_fill_struct(app_gps_data, &last_pvt, &gps_string);
+
+		// retval = 1;
 	}
 	else
 	{
-		gps_struct_to_JSON(&gps_string, &last_pvt);
-		got_fix = 0;
+		// fill out struct
+		gnss_data_to_JSON(&gps_string, &last_pvt);
+		gps_fill_struct(app_gps_data, &last_pvt, &gps_string);
 	}
 
-	// fill out struct to add to message queue
-	glider_gps_fill(app_gps_data, &last_pvt, &gps_string);
-
-	printk("\nStopping GPS module");
+	LOG_INF("Stopping GPS module");
 
 	// AT command to turn off GPS
-	gnss_ctrl(GNSS_STOP);
+	retval = gnss_ctrl(GNSS_STOP);
 	if (at_cmd_write(AT_DEACTIVATE_GPS, NULL, 0, NULL) != 0)
 	{
-		printk("\nunable to deactivate GPS\n");
+		LOG_ERR("\nunable to deactivate GPS");
 	}
 
-	return 0;
+	return retval;
 }

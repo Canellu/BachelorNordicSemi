@@ -66,39 +66,28 @@ struct sens_param_t
 	int freq_c;
 };
 
-struct mission_start_t
-{
-	int year;
-	int month;
-	int day;
-
-	int hour;
-	int minute;
-};
-
-struct mission_param_t
+struct m_param_t
 {
 	int mission;
-	int mission_state;
+	time_t m_start_s;	  // mission start (sec)
+	struct tm m_start_tm; // mission start (tm)
 	int depth_max;
 	int depth_min;
 	int msg_sent;
 	int msg_max;
-	uint8_t unsent_data_files[10][32]; // TODO: check if this is necessary, so far unused
 	uint8_t wp_arr[10][2][16];
 	int wp_max;
 	int wp_cur;
-	struct mission_start_t mission_start;
 	struct sens_param_t sens_param;
 };
 
 struct glider_t
 {
 	uint8_t uid[7];
-	struct mission_param_t mission_param;
+	struct m_param_t m_param;
 	struct prog_param_t prog_param;
 
-	bool mission_started;
+	bool m_started;
 };
 
 // --------------------------------------------------
@@ -106,7 +95,17 @@ struct glider_t
 // --------------------------------------------------
 
 struct glider_t glider;
+enum glider_event_type event = EVT_INIT;
+enum glider_mission_status mission_state;
+
 static const char file_mission[] = "M_PARAM.TXT";
+
+// time variables
+static time_t unix_time_ms = 0;
+static time_t unix_time_CET = 0;
+static time_t offset_CET = 7200;
+struct tm *time_UTC = {0};
+struct tm *time_CET = {0};
 
 // Main message queue, used for getting responses from other modules
 struct k_msgq main_msg_q;
@@ -123,12 +122,12 @@ enum uart_device_type uart_dev1 = UART_1;
 enum uart_device_type uart_dev2 = UART_2;
 
 struct k_msgq uart_msg_q;
-static uint8_t uart_msgq_buffer[3 * 128];
-static uint8_t uart_msg[128];
+static uint8_t uart_msgq_buffer[3 * 256];
+static uint8_t uart_msg[256];
 
 // Gcloud variables
 struct k_msgq gcloud_msg_q;
-static uint8_t gcloud_msgq_buffer[512];
+static uint8_t gcloud_msgq_buffer[2 * 512];
 static uint8_t gcloud_msg[512];
 
 static bool data_available_to_send = false;
@@ -142,16 +141,6 @@ static uint8_t sd_msgq_buffer[5 * sizeof(sd_msg_t)];
 struct k_msgq gps_msg_q;
 static uint8_t gps_msgq_buffer[256];
 static uint8_t gps_msg[256];
-
-// Time variables
-static int current_year = 0;
-static int current_month = 0;
-static int current_day = 0;
-
-// TEMPORARY, FOR TESTING
-static int current_hour = 0;
-static int current_minute = 0;
-static int current_seconds = 0;
 
 // --------------------------------------------------
 // FORWARD DECLARATIONS
@@ -172,6 +161,28 @@ static int glider_init();
 // --------------------------------------------------
 
 /* HELPER FUNCTIONS */
+
+// updates tm UTC and tm CET, also updates unix time CET
+static int update_tm_all(time_t new_time)
+{
+	LOG_INF("New unix ts: %d", (int32_t)new_time);
+
+	time_UTC = gmtime(&new_time);
+	date_time_set(time_UTC);
+	date_time_now(&unix_time_ms);
+	unix_time_CET = (unix_time_ms / 1000) + offset_CET;
+	time_CET = gmtime(&unix_time_CET);
+
+	LOG_INF("Time updated: %04d-%02d-%02d %02d:%02d:%02d",
+			time_CET->tm_year + 1900,
+			time_CET->tm_mon + 1,
+			time_CET->tm_mday,
+			time_CET->tm_hour,
+			time_CET->tm_min,
+			time_CET->tm_sec);
+
+	return 0;
+}
 
 // changes button configuration
 static int set_button_config(int local_button_config)
@@ -211,10 +222,10 @@ static int sd_save_data(void *data_string)
 	uint8_t filename[16] = "";
 	uint8_t tmp_str[16] = "";
 
-	// snprintf(tmp_str, sizeof(tmp_str), "%u", glider.mission_param.mission);
+	// snprintf(tmp_str, sizeof(tmp_str), "%u", glider.m_param.mission);
 	// strcat(filename, tmp_str);
 
-	snprintf(tmp_str, sizeof(tmp_str), "M%u.TXT", glider.mission_param.mission);
+	snprintf(tmp_str, sizeof(tmp_str), "M%u.TXT", glider.m_param.mission);
 	strcat(filename, tmp_str);
 
 	// copy string over to struct
@@ -251,7 +262,7 @@ static int message_queue_init()
 	// k_msgq_init(&mqtt_msg_q, mqtt_msgq_buffer, sizeof(mqtt_msg), 3);
 
 	// GCloud
-	k_msgq_init(&gcloud_msg_q, gcloud_msgq_buffer, sizeof(gcloud_msg), 3);
+	k_msgq_init(&gcloud_msg_q, gcloud_msgq_buffer, sizeof(gcloud_msg), 2);
 
 	// SD
 	k_msgq_init(&sd_msg_q, sd_msgq_buffer, sizeof(sd_msg_t), 5);
@@ -320,7 +331,7 @@ static int format_payload_4G(char *dest_str, char *source_str)
 		// add new timestamp
 		cJSON_AddStringToObject(payload_JSON, "ts", ts_str);
 		// add mission number
-		cJSON_AddNumberToObject(payload_JSON, "M", glider.mission_param.mission);
+		cJSON_AddNumberToObject(payload_JSON, "M", glider.m_param.mission);
 
 		// convert JSON to string
 		strcpy(dest_str, cJSON_Print(payload_JSON));
@@ -343,12 +354,12 @@ static int publish_data_4G()
 	// printk("\nRunning test, press button 1 to start\n");
 	// button_wait();
 
-	int ret = 0;
+	int retval = 0;
 
-	// separate from mission_param msg_sent, this only keeps track locally
+	// separate from m_param msg_sent, this only keeps track locally
 	int msg_sent = 0;
-	int msg_to_send = glider.mission_param.msg_max / glider.mission_param.wp_max - 1;
-	uint8_t payload_4G[512] = "";
+	int msg_to_send = glider.m_param.msg_max / glider.m_param.wp_max - 1;
+	uint8_t payload_4G[256] = "";
 
 	k_msgq_purge(&main_msg_q);
 
@@ -361,8 +372,8 @@ static int publish_data_4G()
 	}
 	k_msgq_get(&gps_msg_q, &gps_msg, K_NO_WAIT);
 
-	ret = format_payload_4G(payload_4G, gps_msg);
-	if (ret == 0)
+	retval = format_payload_4G(payload_4G, gps_msg);
+	if (retval == 0)
 	{
 		gcloud_publish(payload_4G, strlen(payload_4G), MQTT_QOS_1_AT_LEAST_ONCE);
 		msg_sent++;
@@ -378,12 +389,12 @@ static int publish_data_4G()
 
 	sd_msg.event = READ_JSON_4G;
 
-	snprintf(tmp_str, sizeof(tmp_str), "M%d.TXT", glider.mission_param.mission);
+	snprintf(tmp_str, sizeof(tmp_str), "M%d.TXT", glider.m_param.mission);
 	strcpy(sd_msg.filename, tmp_str);
 
 	snprintf(tmp_str, sizeof(tmp_str), "max:%d\r", msg_to_send);
 	strcat(sd_msg.string, tmp_str);
-	snprintf(tmp_str, sizeof(tmp_str), "wp_cur:%d\r", glider.mission_param.wp_cur);
+	snprintf(tmp_str, sizeof(tmp_str), "wp_cur:%d\r", glider.m_param.wp_cur);
 	strcat(sd_msg.string, tmp_str);
 
 	// sending event to sd card
@@ -391,15 +402,15 @@ static int publish_data_4G()
 	k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
 
 	// testing responses from sd card
-	uint8_t sd_msg_response[512] = "";
+	uint8_t sd_msg_response[256] = "";
 
 	while (msg_sent < msg_to_send)
 	{
 		k_msgq_get(&main_msg_q, &sd_msg_response, K_FOREVER);
 
 		// LOG_INF("%s", log_strdup(sd_msg_response));
-		ret = format_payload_4G(payload_4G, sd_msg_response);
-		if (ret == 0)
+		retval = format_payload_4G(payload_4G, sd_msg_response);
+		if (retval == 0)
 		{
 			gcloud_publish(payload_4G, strlen(payload_4G), MQTT_QOS_1_AT_LEAST_ONCE);
 			msg_sent++;
@@ -418,9 +429,9 @@ static int publish_data_4G()
 }
 
 // updates mission status for struct glider and saves to sd card
-static int update_mission_status(enum glider_mission_status mission_state)
+static int update_mission_status(enum glider_mission_status new_mission_state)
 {
-	glider.mission_param.mission_state = mission_state;
+	mission_state = new_mission_state;
 
 	static sd_msg_t sd_msg;
 	strcpy(sd_msg.filename, file_mission);
@@ -441,7 +452,7 @@ static int update_mission_status(enum glider_mission_status mission_state)
 				cJSON *tmp_JSON = cJSON_GetObjectItem(m_JSON, "Ms");
 				if (cJSON_IsNumber(tmp_JSON))
 				{
-					cJSON_SetIntValue(tmp_JSON, glider.mission_param.mission_state);
+					cJSON_SetIntValue(tmp_JSON, mission_state);
 				}
 				else
 				{
@@ -452,7 +463,7 @@ static int update_mission_status(enum glider_mission_status mission_state)
 			else
 			{
 				LOG_ERR("Mission state does not exist, attempting to write current state");
-				cJSON_AddNumberToObject(m_JSON, "Ms", glider.mission_param.mission_state);
+				cJSON_AddNumberToObject(m_JSON, "Ms", mission_state);
 			}
 
 			// saving to sd card
@@ -479,7 +490,7 @@ static int update_mission_status(enum glider_mission_status mission_state)
 }
 
 // checks mission if it is new or not, saves parameters to glider struct and sd card
-static int parse_mission_params(void *json_str)
+static int parse_m_params(void *json_str)
 {
 	cJSON *tmp_JSON;
 	cJSON *tmpsub_JSON;
@@ -495,9 +506,9 @@ static int parse_mission_params(void *json_str)
 			if (cJSON_IsNumber(tmp_JSON))
 			{
 				// test if mission received is new
-				if (glider.mission_param.mission < tmp_JSON->valueint)
+				if (glider.m_param.mission < tmp_JSON->valueint)
 				{
-					glider.mission_param.mission = tmp_JSON->valueint;
+					glider.m_param.mission = tmp_JSON->valueint;
 					new_mission = true;
 				}
 				else
@@ -516,15 +527,15 @@ static int parse_mission_params(void *json_str)
 		if (new_mission)
 		{
 			// resetting necessary parameters
-			glider.mission_param.wp_cur = 0;
-			glider.mission_param.msg_sent = 0;
+			glider.m_param.wp_cur = 0;
+			glider.m_param.msg_sent = 0;
 
 			if (cJSON_HasObjectItem(m_JSON, "Ms"))
 			{
 				tmp_JSON = cJSON_GetObjectItem(m_JSON, "Ms");
 				if (cJSON_IsNumber(tmp_JSON))
 				{
-					glider.mission_param.mission_state = tmp_JSON->valueint;
+					mission_state = tmp_JSON->valueint;
 				}
 				else
 				{
@@ -542,7 +553,7 @@ static int parse_mission_params(void *json_str)
 				tmp_JSON = cJSON_GetObjectItem(m_JSON, "4G");
 				if (cJSON_IsNumber(tmp_JSON))
 				{
-					glider.mission_param.msg_max = tmp_JSON->valueint;
+					glider.m_param.msg_max = tmp_JSON->valueint;
 				}
 				else
 				{
@@ -556,27 +567,39 @@ static int parse_mission_params(void *json_str)
 				tmp_JSON = cJSON_GetObjectItem(m_JSON, "start");
 				if (cJSON_IsString(tmp_JSON))
 				{
+					static char *eptr;
 					uint8_t tmp_str[16] = "";
 
 					memcpy(tmp_str, tmp_JSON->valuestring, 4);
-					LOG_INF("year: %s", log_strdup(tmp_str));
+					glider.m_param.m_start_tm.tm_year = strtol(tmp_str, &eptr, 10) - 1900;
+					LOG_INF("year: %d", glider.m_param.m_start_tm.tm_year + 1900);
+
 					memset(tmp_str, 0, sizeof(tmp_str));
 
 					memcpy(tmp_str, tmp_JSON->valuestring + 4, 2);
-					LOG_INF("month: %s", log_strdup(tmp_str));
+					glider.m_param.m_start_tm.tm_mon = strtol(tmp_str, &eptr, 10) - 1;
+					LOG_INF("month: %d", glider.m_param.m_start_tm.tm_mon + 1);
+
 					memset(tmp_str, 0, sizeof(tmp_str));
 
 					memcpy(tmp_str, tmp_JSON->valuestring + 6, 2);
-					LOG_INF("day: %s", log_strdup(tmp_str));
+					glider.m_param.m_start_tm.tm_mday = strtol(tmp_str, &eptr, 10);
+					LOG_INF("day: %d", glider.m_param.m_start_tm.tm_mday);
 					memset(tmp_str, 0, sizeof(tmp_str));
 
 					memcpy(tmp_str, tmp_JSON->valuestring + 8, 2);
-					LOG_INF("hour: %s", log_strdup(tmp_str));
+					glider.m_param.m_start_tm.tm_hour = strtol(tmp_str, &eptr, 10);
+					LOG_INF("hour: %d", glider.m_param.m_start_tm.tm_hour);
 					memset(tmp_str, 0, sizeof(tmp_str));
 
 					memcpy(tmp_str, tmp_JSON->valuestring + 10, 2);
-					LOG_INF("minute: %s", log_strdup(tmp_str));
+					glider.m_param.m_start_tm.tm_min = strtol(tmp_str, &eptr, 10);
+					LOG_INF("minute: %d", glider.m_param.m_start_tm.tm_min);
 					memset(tmp_str, 0, sizeof(tmp_str));
+
+					glider.m_param.m_start_tm.tm_sec = 0;
+					glider.m_param.m_start_s = mktime(&glider.m_param.m_start_tm);
+					LOG_INF("start time unix: %d", (int32_t)glider.m_param.m_start_s);
 				}
 				else
 				{
@@ -590,7 +613,7 @@ static int parse_mission_params(void *json_str)
 				tmp_JSON = cJSON_GetObjectItem(m_JSON, "maxD");
 				if (cJSON_IsNumber(tmp_JSON))
 				{
-					glider.mission_param.depth_max = tmp_JSON->valueint;
+					glider.m_param.depth_max = tmp_JSON->valueint;
 				}
 				else
 				{
@@ -604,7 +627,7 @@ static int parse_mission_params(void *json_str)
 				tmp_JSON = cJSON_GetObjectItem(m_JSON, "minD");
 				if (cJSON_IsNumber(tmp_JSON))
 				{
-					glider.mission_param.depth_min = tmp_JSON->valueint;
+					glider.m_param.depth_min = tmp_JSON->valueint;
 				}
 				else
 				{
@@ -618,7 +641,7 @@ static int parse_mission_params(void *json_str)
 				tmp_JSON = cJSON_GetObjectItem(m_JSON, "C");
 				if (cJSON_IsNumber(tmp_JSON))
 				{
-					glider.mission_param.sens_param.freq_c = tmp_JSON->valueint;
+					glider.m_param.sens_param.freq_c = tmp_JSON->valueint;
 				}
 				else
 				{
@@ -630,7 +653,7 @@ static int parse_mission_params(void *json_str)
 				tmp_JSON = cJSON_GetObjectItem(m_JSON, "P");
 				if (cJSON_IsNumber(tmp_JSON))
 				{
-					glider.mission_param.sens_param.freq_p = tmp_JSON->valueint;
+					glider.m_param.sens_param.freq_p = tmp_JSON->valueint;
 				}
 				else
 				{
@@ -642,7 +665,7 @@ static int parse_mission_params(void *json_str)
 				tmp_JSON = cJSON_GetObjectItem(m_JSON, "T");
 				if (cJSON_IsNumber(tmp_JSON))
 				{
-					glider.mission_param.sens_param.freq_t = tmp_JSON->valueint;
+					glider.m_param.sens_param.freq_t = tmp_JSON->valueint;
 				}
 				else
 				{
@@ -657,15 +680,15 @@ static int parse_mission_params(void *json_str)
 				tmp_JSON = cJSON_GetObjectItem(m_JSON, "lat");
 				if (cJSON_IsArray(tmp_JSON))
 				{
-					glider.mission_param.wp_max = cJSON_GetArraySize(tmp_JSON);
+					glider.m_param.wp_max = cJSON_GetArraySize(tmp_JSON);
 
-					for (int i = 0; i < glider.mission_param.wp_max; i++)
+					for (int i = 0; i < glider.m_param.wp_max; i++)
 					{
 						tmpsub_JSON = cJSON_GetArrayItem(tmp_JSON, i);
 						if (cJSON_IsString(tmpsub_JSON))
 						{
-							strcpy(glider.mission_param.wp_arr[i][0], tmpsub_JSON->valuestring);
-							// LOG_INF("lng: %lf", glider.mission_param.wp_arr[i][1]);
+							strcpy(glider.m_param.wp_arr[i][0], tmpsub_JSON->valuestring);
+							// LOG_INF("lng: %lf", glider.m_param.wp_arr[i][1]);
 						}
 						else
 						{
@@ -685,13 +708,13 @@ static int parse_mission_params(void *json_str)
 				tmp_JSON = cJSON_GetObjectItem(m_JSON, "lng");
 				if (cJSON_IsArray(tmp_JSON))
 				{
-					for (int i = 0; i < glider.mission_param.wp_max; i++)
+					for (int i = 0; i < glider.m_param.wp_max; i++)
 					{
 						tmpsub_JSON = cJSON_GetArrayItem(tmp_JSON, i);
 						if (cJSON_IsString(tmpsub_JSON))
 						{
-							strcpy(glider.mission_param.wp_arr[i][1], tmpsub_JSON->valuestring);
-							// LOG_INF("lng: %lf", glider.mission_param.wp_arr[i][1]);
+							strcpy(glider.m_param.wp_arr[i][1], tmpsub_JSON->valuestring);
+							// LOG_INF("lng: %lf", glider.m_param.wp_arr[i][1]);
 						}
 						else
 						{
@@ -755,22 +778,22 @@ static int check_mission()
 
 		if (strcmp(json_str, "ERROR") != 0)
 		{
-			parse_mission_params(&json_str);
+			parse_m_params(&json_str);
 
 			LOG_INF("Current parameters:");
-			LOG_INF("Mission: %d", glider.mission_param.mission);
+			LOG_INF("Mission: %d", glider.m_param.mission);
 
 			// TODO: change behavior based on this status
-			LOG_INF("Mission status: %d", glider.mission_param.mission_state);
-			LOG_INF("Max depth: %d", glider.mission_param.depth_max);
-			LOG_INF("Min depth: %d", glider.mission_param.depth_min);
-			LOG_INF("Message max: %d", glider.mission_param.msg_max);
-			LOG_INF("Waypoints: %d", glider.mission_param.wp_max);
+			LOG_INF("Mission status: %d", mission_state);
+			LOG_INF("Max depth: %d", glider.m_param.depth_max);
+			LOG_INF("Min depth: %d", glider.m_param.depth_min);
+			LOG_INF("Message max: %d", glider.m_param.msg_max);
+			LOG_INF("Waypoints: %d", glider.m_param.wp_max);
 
 			LOG_INF("Sensor parameters:");
-			LOG_INF("C: %d", glider.mission_param.sens_param.freq_c);
-			LOG_INF("P: %d", glider.mission_param.sens_param.freq_p);
-			LOG_INF("T: %d", glider.mission_param.sens_param.freq_t);
+			LOG_INF("C: %d", glider.m_param.sens_param.freq_c);
+			LOG_INF("P: %d", glider.m_param.sens_param.freq_p);
+			LOG_INF("T: %d", glider.m_param.sens_param.freq_t);
 		}
 
 		return 0;
@@ -830,11 +853,11 @@ static int sat_check_signal()
 }
 
 // turn on SBD session (send/receive satellite messages)
-// needs to be called to send / receive messages
+// needs to be called to send / receive messages, currently only reads 1 message
 static int sat_sbd_session()
 {
-	int ret = 0;
-	// ret values:
+	int retval = 0;
+	// retval values:
 	// -1 - AT command problem, e.g. serial msg is sent wrong
 	// 0 - message sent, no message rcv pending
 	// 1 - message sent, message rcv pending
@@ -886,9 +909,11 @@ static int sat_sbd_session()
 
 	char *eptr;
 
+	// TODO: check param 1, was always zero under testing
 	test = strtok_r(sat_response, ",", &saveptr);
+	LOG_INF("test: %s", log_strdup(test));
 	sbd_response[i++] = strtol(test, &eptr, 10);
-	LOG_INF("param %d: %d", i + 1, sbd_response[0]);
+	// LOG_INF("param %d: %d", i, sbd_response[0]);
 	// splitting up parameters
 	while ((test = strtok_r(NULL, ",", &saveptr)) != NULL)
 	{
@@ -896,38 +921,40 @@ static int sat_sbd_session()
 	}
 
 	// for checking parameters
-	// for (i = 0; i < 6; i++)
-	// {
-	// 	LOG_INF("param %d: %d", i + 1, sbd_response[i]);
-	// }
+	for (i = 0; i < 6; i++)
+	{
+		LOG_INF("param %d: %d", i + 1, sbd_response[i]);
+	}
 
 	// testing parameters for success or not
 	if (sbd_response[0] > 4)
 	{
 		LOG_INF("satellite error on send msg");
-		ret = 2;
+		retval = 2;
 	}
 	if (sbd_response[2] > 0)
 	{
 		if (sbd_response[2] > 1)
 		{
 			LOG_INF("satellite error on read msg, retry fetch");
-			ret = 3;
+			retval = 3;
 		}
 		else
 		{
+			// currently it will only fetch the first message that it receives
+			// further logic for several messages pending needs to be set up e.g. returning no. of messages
 			LOG_INF("satellite read msg(s) pending: %d msg(s)", sbd_response[5] + 1);
-			ret = 1;
+			retval = 1;
 		}
 	}
 
-	return ret;
+	return retval;
 }
 
 // if sat_sbd_session returns message pending, this function can be called
 static int sat_rcv_msg()
 {
-	int ret = 0;
+	int retval = 0;
 
 	uint8_t sat_msg[] = "AT+SBDRT";
 	uint8_t sat_response[64] = "";
@@ -966,13 +993,13 @@ static int sat_rcv_msg()
 	// TODO: parse satellite message
 	LOG_INF("response: %s", log_strdup(sat_response));
 
-	return ret;
+	return retval;
 }
 
 // saves message to satellite MO buffer, call function sat_sbd_session after this
 static int sat_send_msg(uint8_t *sat_payload)
 {
-	int ret = 0;
+	int retval = 0;
 
 	uint8_t sat_msg[64] = "";
 	uint8_t sat_response[64] = "";
@@ -1013,7 +1040,7 @@ static int sat_send_msg(uint8_t *sat_payload)
 	memset(sat_response_test, 0, sizeof(sat_response_test));
 	k_msgq_purge(&uart_msg_q);
 
-	return ret;
+	return retval;
 }
 
 // --------------------------------------------------
@@ -1028,18 +1055,27 @@ static int sensor_module()
 	set_button_config(1);
 	uart_start(uart_dev1);
 
+	// update time before sending to sensors
+	// NOTE: this does not work for some reason, is instead run right before module
+	// date_time_now(&unix_time_ms);
+	// update_tm_all(unix_time_ms / 1000);
+
 	// send time to sensors
-	uint8_t time_millis_str[16] = "";
-	uint32_t time_millis = ((current_hour * 60 * 60) + (current_minute * 60) + current_seconds) * 1000;
-	snprintf(time_millis_str, sizeof(time_millis_str), "time:%u", time_millis);
+	uint8_t time_millis_str[32] = "";
+
+	int32_t time_millis = ((time_CET->tm_hour * 60 * 60) + (time_CET->tm_min * 60) + time_CET->tm_sec) * 1000;
+	LOG_INF("time (ms): %d", time_millis);
+	snprintf(time_millis_str, sizeof(time_millis_str), "time:%d", time_millis);
+	LOG_INF("time (str): %s", log_strdup(time_millis_str));
+
 	uart_send(uart_dev1, time_millis_str, strlen(time_millis_str));
 
 	uint8_t tmp_str[16] = "";
-	snprintf(tmp_str, sizeof(tmp_str), "to_c:%d", glider.mission_param.sens_param.freq_c);
+	snprintf(tmp_str, sizeof(tmp_str), "to_c:%d", glider.m_param.sens_param.freq_c);
 	uart_send(uart_dev1, tmp_str, strlen(tmp_str));
-	snprintf(tmp_str, sizeof(tmp_str), "to_p:%d", glider.mission_param.sens_param.freq_p);
+	snprintf(tmp_str, sizeof(tmp_str), "to_p:%d", glider.m_param.sens_param.freq_p);
 	uart_send(uart_dev1, tmp_str, strlen(tmp_str));
-	snprintf(tmp_str, sizeof(tmp_str), "to_t:%d", glider.mission_param.sens_param.freq_t);
+	snprintf(tmp_str, sizeof(tmp_str), "to_t:%d", glider.m_param.sens_param.freq_t);
 	uart_send(uart_dev1, tmp_str, strlen(tmp_str));
 
 	printk("\nsensor test start\n");
@@ -1076,7 +1112,7 @@ static int sensor_module()
 				cJSON_Delete(ts_raw);
 				LOG_INF("tmp int: %u", tmp_int);
 
-				// converting
+				// conversion from ms to respective type
 				uint16_t hour = tmp_int / 3600 % 24;
 				LOG_INF("hour: %u", hour);
 
@@ -1091,12 +1127,16 @@ static int sensor_module()
 				uint8_t date_string[64] = "";
 				uint8_t tmp_str[16] = "";
 
+				// fetching timestamp to ensure correct date
+				date_time_now(&unix_time_ms);
+				update_tm_all(unix_time_ms / 1000);
+
 				// adding date to JSON
-				snprintf(tmp_str, sizeof(tmp_str), "%02u-", current_year);
+				snprintf(tmp_str, sizeof(tmp_str), "%04d-", time_CET->tm_year + 1900);
 				strcat(date_string, tmp_str);
-				snprintf(tmp_str, sizeof(tmp_str), "%02u-", current_month);
+				snprintf(tmp_str, sizeof(tmp_str), "%02d-", time_CET->tm_mon + 1);
 				strcat(date_string, tmp_str);
-				snprintf(tmp_str, sizeof(tmp_str), "%02u", current_day);
+				snprintf(tmp_str, sizeof(tmp_str), "%02d", time_CET->tm_mday);
 				strcat(date_string, tmp_str);
 
 				cJSON_AddStringToObject(sensor_JSON, "dt", date_string);
@@ -1134,6 +1174,7 @@ static int sensor_module()
 	/* UART loop end */
 
 	printk("\nsensor test end\n\n");
+	set_LED(30, 0);
 
 	return 0;
 }
@@ -1141,104 +1182,151 @@ static int sensor_module()
 static int wifi_module()
 {
 	int err = 0;
+	int cnt = 0;
+	int retries = 5;
+	bool wifi_start = false;
 
+	set_LED(30, 1);
 	printk("\n\npress button 1 to start wifi test\n\n");
 	button_wait();
 
-	uint8_t wifi_response[128] = "";
+	uint8_t wifi_response[512] = "";
 	uart_start(UART_2);
 
 	printk("wifi test start\n");
 
-	uart_send(UART_2, "wifi_start", strlen("wifi_start"));
-	LOG_INF("sent command wifi start to esp");
-
-	while (1)
+	while (!wifi_start && cnt < retries)
 	{
+		uart_send(UART_2, "", strlen(""));
+		uart_send(UART_2, "wifi_start", strlen("wifi_start"));
+		LOG_INF("sent command wifi start to esp");
 		k_msgq_get(&uart_msg_q, wifi_response, K_FOREVER);
-		LOG_INF("%s", log_strdup(wifi_response));
-		//button_wait();
-
-		//strcpy(wifi_response, "{D:20202020.txt}");
-
-		if (strcmp(wifi_response, "connected") == 0)
+		if (strcmp(wifi_response, "OK") == 0)
 		{
-			uint8_t sd_msg_response[512] = "";
+			wifi_start = true;
+		}
+		cnt++;
+	}
 
-			sd_msg_t sd_msg;
-			sd_msg.event = READ_JSON;
-			strcpy(sd_msg.filename, file_mission);
+	if (wifi_start)
+	{
+		LOG_INF("wifi started");
 
-			k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
+		while (1)
+		{
+			k_msgq_get(&uart_msg_q, wifi_response, K_FOREVER);
+			LOG_INF("%s", log_strdup(wifi_response));
+			//button_wait();
 
-			k_msgq_get(&main_msg_q, &sd_msg_response, K_FOREVER);
+			//strcpy(wifi_response, "{D:20202020.txt}");
 
-			if (strcmp(sd_msg_response, "ERROR") != 0)
+			if (strstr(wifi_response, "connected") != NULL)
 			{
-				LOG_INF("%s", log_strdup(sd_msg_response));
-				// uart_send(UART_2, sd_msg_response, strlen(sd_msg_response));
+				uint8_t sd_msg_response[256] = "";
+
+				sd_msg_t sd_msg;
+				sd_msg.event = READ_JSON;
+				strcpy(sd_msg.filename, file_mission);
+
+				k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
+
+				k_msgq_get(&main_msg_q, &sd_msg_response, K_FOREVER);
+
+				if (strcmp(sd_msg_response, "ERROR") != 0)
+				{
+					LOG_INF("%s", log_strdup(sd_msg_response));
+					// uart_send(UART_2, sd_msg_response, strlen(sd_msg_response));
+				}
+
+				sd_msg.event = SEND_FILE_INFO;
+				k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
+
+				printk("\n\nConnect successful, press button 1 to continue");
+				// strcpy(wifi_response, "read1");
 			}
+			else if (wifi_response[0] == 'D')
+			{
+				sd_msg_t sd_msg;
 
-			sd_msg.event = SEND_FILE_INFO;
-			k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
+				// fetch filename
+				// format yyyymmdd.txt
+				char *date = wifi_response + 2;
+				date[strlen(date)] = 0;
 
-			printk("\n\nConnect successful, press button 1 to continue");
-			// strcpy(wifi_response, "read1");
-		}
-		else if (wifi_response[0] == 'D')
-		{
-			sd_msg_t sd_msg;
+				strcpy(sd_msg.filename, date);
+				LOG_INF("%s", log_strdup(sd_msg.filename));
 
-			// fetch filename
-			// format yyyymmdd.txt
-			char *date = wifi_response + 2;
-			date[strlen(date)] = 0;
+				sd_msg.event = READ_FILE;
 
-			strcpy(sd_msg.filename, date);
-			LOG_INF("%s", log_strdup(sd_msg.filename));
+				printk("\nStarting SD file read2");
+				k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
+			}
+			else if (strstr(wifi_response, "time:") != NULL)
+			{
+				// parse unix time
+				time_t wifi_unix = 0;
+				static char *eptr;
+				wifi_unix = strtoll(wifi_response + 5, &eptr, 10) / 1000;
+				LOG_INF("unix from wifi: %d", (int32_t)wifi_unix);
 
-			sd_msg.event = READ_FILE;
+				time_UTC = gmtime(&wifi_unix);
 
-			printk("\nStarting SD file read2");
-			k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
-		}
-		else if (strcmp(wifi_response, "wifi_end") == 0)
-		{
-			printk("\nReceived wifi end command\n");
-			// uart_send(UART_2, "wifi_end;", strlen("wifi_end;"));
-			break;
-		}
-		else
-		{
-			printk("\n\nSomething went wrong, press button 1 to continue");
+				date_time_set(time_UTC);
+				date_time_now(&unix_time_ms);
+				update_tm_all(unix_time_ms / 1000);
+				LOG_INF("time synchronized through wifi", (int32_t)wifi_unix);
+			}
+			else if (strstr(wifi_response, "wifi_end") != NULL)
+			{
+				printk("\nReceived wifi end command\n");
+				// uart_send(UART_2, "wifi_end;", strlen("wifi_end;"));
+				break;
+			}
+			else
+			{
+				printk("\n\nSomething went wrong, press button 1 to continue");
+			}
 		}
 	}
+	else
+	{
+		LOG_ERR("wifi start unsuccessful");
+		err = -1;
+	}
 	uart_exit(UART_2);
+
+	set_LED(30, 0);
 
 	return err;
 }
 
 static int gps_module()
 {
+	int retval = 0;
+
 	static glider_gps_data_t gps_data;
 
+	set_LED(22, 1);
 	// printk("\n\npress button 1 to start gps test\n\n");
 	// button_wait();
 	printk("\ngps test start");
 
-	app_gps(&gps_data, 1000, 400);
+	retval = app_gps(&gps_data, 1000, 400);
 
-	// update date CANDO: create function?
-	current_year = gps_data.year;
-	current_month = gps_data.month;
-	current_day = gps_data.day;
-
-	current_hour = gps_data.hour;
-	current_minute = gps_data.minute;
-	current_seconds = gps_data.seconds;
-
-	if (strcmp(gps_data.gps_string, "no fix") != 0)
+	if (retval == 0)
 	{
+		time_UTC->tm_year = gps_data.time.tm_year;
+		time_UTC->tm_mon = gps_data.time.tm_mon;
+		time_UTC->tm_mday = gps_data.time.tm_mday;
+
+		time_UTC->tm_hour = gps_data.time.tm_hour - 2;
+		time_UTC->tm_min = gps_data.time.tm_min;
+		time_UTC->tm_sec = gps_data.time.tm_sec;
+
+		date_time_set(time_UTC);
+		date_time_now(&unix_time_ms);
+		update_tm_all(unix_time_ms / 1000);
+
 		// save gps data on sd card
 		LOG_INF("%s", log_strdup(gps_data.gps_string));
 		sd_save_data(gps_data.gps_string);
@@ -1247,14 +1335,21 @@ static int gps_module()
 
 		data_available_to_send = true;
 	}
+	else
+	{
+		LOG_INF("Unable to get gps data");
+		retval = -1;
+	}
 
 	printk("\ngps test end");
+	set_LED(22, 0);
 
-	return 0;
+	return retval;
 }
 
 static int gcloud_module()
 {
+	set_LED(31, 1);
 	printk("\n\npress button 1 to start gcloud test\n\n");
 	button_wait();
 	printk("gcloud test start\n");
@@ -1263,27 +1358,27 @@ static int gcloud_module()
 
 	// publish_data_4G();
 
-	int ret = -1;
+	int retval = -1;
 
 	// strcpy(gcloud_msg, "{\"M\":11,\"4G\":10,\"C\":0,\"P\":0,\"T\":0,\"lat\":[\"51.7558\",\"60.7558\"],\"lng\":[\"19.2726\",\"21.2726\"],\"maxD\":0,\"minD\":0,\"start\":\"202104280559\"}");
 
 	// mqtt init
 	if (!gcloud_init_complete)
 	{
-		ret = app_gcloud_init_and_connect();
-		if (ret != 0)
+		retval = app_gcloud_init_and_connect();
+		if (retval != 0)
 		{
-			return ret;
+			return retval;
 		}
 		gcloud_init_complete = true;
 	}
 	// reconnect
 	else
 	{
-		ret = app_gcloud_reconnect();
-		if (ret != 0)
+		retval = app_gcloud_reconnect();
+		if (retval != 0)
 		{
-			return ret;
+			return retval;
 		}
 	}
 
@@ -1293,14 +1388,14 @@ static int gcloud_module()
 		// button_wait();
 
 		// gcloud function
-		ret = app_gcloud();
+		retval = app_gcloud();
 
 		k_msgq_get(&gcloud_msg_q, &gcloud_msg, K_NO_WAIT);
 		LOG_INF("gcloud string: %s", log_strdup(gcloud_msg));
 
-		ret = parse_mission_params(&gcloud_msg);
+		retval = parse_m_params(&gcloud_msg);
 
-		if (ret >= 0)
+		if (retval >= 0)
 		{
 			break;
 		}
@@ -1313,14 +1408,15 @@ static int gcloud_module()
 	}
 	/* Gcloud loop end */
 
-	ret = app_gcloud_disconnect();
-	if (ret != 0)
+	retval = app_gcloud_disconnect();
+	if (retval != 0)
 	{
-		LOG_ERR("Disconnect unsuccessful: %d", ret);
+		LOG_ERR("Disconnect unsuccessful: %d", retval);
 		LOG_ERR("Closing program, check for errors in code lol");
-		return ret;
 	}
-	return 0;
+	set_LED(31, 0);
+
+	return retval;
 }
 
 static int satellite_module()
@@ -1328,8 +1424,9 @@ static int satellite_module()
 	printk("\n\npress button 1 to start satellite test\n\n");
 	button_wait();
 
-	int ret = 0;
+	int retval = 0;
 	int cnt = 0;
+	int cnt2 = 0;
 	int max_retries = 10;
 
 	uint8_t sat_payload[64] = "";
@@ -1342,7 +1439,7 @@ static int satellite_module()
 	uart_start(uart_dev1);
 
 	cnt = 0;
-	while (!(cnt >= max_retries) && !msg_sent)
+	while (cnt < max_retries && !msg_sent)
 	{ // finding signal
 		signal = sat_check_signal();
 
@@ -1389,32 +1486,38 @@ static int satellite_module()
 			}
 
 			LOG_INF("attempting send");
-			ret = sat_send_msg(sat_payload);
-			if (ret == 0)
+			retval = sat_send_msg(sat_payload);
+			if (retval == 0)
 			{
-				ret = sat_sbd_session();
+				retval = sat_sbd_session();
 			}
-			if (ret == 0 || ret == 1)
+			if (retval == 0 || retval == 1)
 			{
 				LOG_INF("satellite msg sent");
 				msg_sent = true;
 			}
-			else if (ret >= 2)
+			else if (retval >= 2)
 			{
 				LOG_INF("sbd session unsuccessful");
+				cnt2++;
 			}
-			else if (ret < 0)
+			else if (retval < 0)
 			{
 				LOG_ERR("Error in serial communication");
 				return -1;
 			}
 
-			if (ret == 1)
+			if (retval == 1)
 			{
 				sat_rcv_msg();
 			}
 
-		} // if signal found
+			if (cnt2 >= max_retries)
+			{
+				break;
+			}
+
+		} // if signal found end
 		else
 		{
 			cnt++;
@@ -1424,12 +1527,12 @@ static int satellite_module()
 	if (!signal)
 	{
 		LOG_INF("Unable to get satellite fix");
-		ret = -1;
+		retval = -1;
 	}
 
 	uart_exit(uart_dev1);
 
-	return ret;
+	return retval;
 }
 
 static int glider_init()
@@ -1444,20 +1547,44 @@ static int glider_init()
 
 	LOG_INF("UID: %s", log_strdup(glider.uid));
 
-	// initialize values for glider details, TODO: Initialize other parameters
-	glider.mission_param.mission = 0;
-	glider.mission_param.mission_state = 0;
-	glider.mission_param.wp_cur = 0;
-	glider.mission_param.wp_max = 1;
-	glider.mission_param.msg_sent = 0;
-	glider.mission_param.msg_max = 1;
+	// initialize parameters, TODO: Add if there are any other important params
+	glider.m_param.mission = 0;
+	mission_state = 0;
+	glider.m_param.wp_cur = 0;
+	glider.m_param.wp_max = 1;
+	glider.m_param.msg_sent = 0;
+	glider.m_param.msg_max = 1;
 
-	current_year = 2021;
-	current_month = 05;
-	current_day = 06;
+	time_CET->tm_year = 121;
+	time_CET->tm_mon = 4;
+	time_CET->tm_mday = 6;
 
 	/* device inits and configurations */
 	device_inits();
+
+	set_LED(21, 1);
+	set_LED(22, 1);
+	set_LED(20, 1);
+	set_LED(30, 1);
+	set_LED(31, 1);
+	k_sleep(K_MSEC(200));
+	set_LED(21, 0);
+	set_LED(22, 0);
+	set_LED(20, 0);
+	set_LED(30, 0);
+	set_LED(31, 0);
+	k_sleep(K_MSEC(200));
+	set_LED(21, 1);
+	set_LED(22, 1);
+	set_LED(20, 1);
+	set_LED(30, 1);
+	set_LED(31, 1);
+	k_sleep(K_MSEC(200));
+	set_LED(21, 0);
+	set_LED(22, 0);
+	set_LED(20, 0);
+	set_LED(30, 0);
+	set_LED(31, 0);
 
 	// message queues
 	message_queue_init();
@@ -1467,7 +1594,7 @@ static int glider_init()
 							 (k_thread_entry_t)app_sd_thread, NULL, NULL, NULL,
 							 7, 0, K_NO_WAIT);
 
-	glider.mission_started = false;
+	glider.m_started = false;
 
 	check_mission();
 
@@ -1484,16 +1611,14 @@ void main(void)
 {
 	printk("\n\n**** NordicOasys v0.99 - Started ****\n\n");
 
-	enum glider_event_type event = EVT_INIT;
+	int wifi_on = 0;
 
-	// int64_t ntp;
-	// date_time_now(&ntp);
-	// int64_t unixtime = 1620378863;
-	// LOG_INF("Unix Timestamp: %llu\n", unixtime);
+	int64_t unix_time_start = 1620639117;
+	time_UTC = gmtime(&unix_time_start);
 
-	// struct tm *time_test = gmtime(&unixtime);
-
-	// LOG_INF("Time struct: %d", time_test->tm_year);
+	date_time_set(time_UTC);
+	date_time_now(&unix_time_ms);
+	update_tm_all(unix_time_ms / 1000);
 
 	while (1)
 	{
@@ -1504,48 +1629,53 @@ void main(void)
 		case EVT_INIT:
 			// initialize glider
 			glider_init();
+			button_wait();
 
 			// get gps fix
-			// set_LED(22, 1);
-			// gps_module();
-			// set_LED(22, 0);
+			gps_module();
 
 			// TODO: create check for finished missions
-			if (glider.mission_param.mission_state == MISSION_ONGOING)
+			if (mission_state == MISSION_ONGOING || mission_state == MISSION_WAITING)
 			{
 				event = EVT_DIVE;
+				LOG_INF("Mission ongoing");
 			}
-			else if (glider.mission_param.mission_state == MISSION_FINISHED)
+			else if (mission_state == MISSION_FINISHED)
 			{
-				LOG_INF("No mission ongoing, on standby for new mission");
 				event = EVT_AWAIT_MISSION;
+				LOG_INF("No mission ongoing, on standby for new mission");
 			}
 			else
 			{
-				LOG_INF("Idling until mission start");
 				event = EVT_IDLE;
+				LOG_INF("Idling until mission start");
 			}
 
 			break;
 		case EVT_AWAIT_MISSION:
 
-			gcloud_module();
-			// if unsuccessful, check satellite for any commands
-			// satellite_module();
+			set_button_config(3);
 
-			// function: on button press
-			// // turn on wifi
-			// set_LED(30, 1);
-			// wifi_module();
-			// set_LED(30, 0);
-
-			if (glider.mission_param.mission_state == MISSION_ONGOING)
+			LOG_INF("Waiting for wifi command");
+			k_msgq_get(&button_msg_qr, &wifi_on, K_SECONDS(30));
+			if (wifi_on == 1)
 			{
-				event = EVT_DIVE;
+				wifi_module();
 			}
 			else
 			{
+				gcloud_module();
+				// if unsuccessful, check satellite for any commands
+				// satellite_module();
+			}
+
+			if (mission_state == MISSION_ONGOING)
+			{
 				event = EVT_IDLE;
+			}
+			else if (mission_state == MISSION_FINISHED)
+			{
+				event = EVT_AWAIT_MISSION;
 			}
 
 			break;
@@ -1553,60 +1683,70 @@ void main(void)
 			// function: send command to navigation
 
 			// read sensor data
-			// set_LED(20, 1);
-			// sensor_module();
-			// set_LED(20, 0);
+			set_LED(20, 1);
+			date_time_now(&unix_time_ms);
+			update_tm_all(unix_time_ms / 1000);
+			sensor_module();
+			set_LED(20, 0);
 
 			event = EVT_SURFACE;
 
 			break;
 		case EVT_SURFACE:
 
-			glider.mission_param.wp_cur++;
+			glider.m_param.wp_cur++;
 
-			if (glider.mission_param.wp_cur <= glider.mission_param.wp_max)
+			if (glider.m_param.wp_cur <= glider.m_param.wp_max)
 			{
 				event = EVT_DIVE;
 			}
 			else
 			{
-				glider.mission_param.mission_state = MISSION_FINISHED;
-				event = EVT_IDLE;
+				event = EVT_AWAIT_MISSION;
+				update_mission_status(MISSION_FINISHED);
 			}
 
-			// set_LED(22, 1);
 			// gps_module();
-			// set_LED(22, 0);
 
-			// set_LED(31, 1);
+			//
 			// gcloud_module();
 			// set_LED(31, 0);
 
 			set_LED(30, 1);
 			set_LED(31, 1);
-			satellite_module();
+			// satellite_module();
 			set_LED(30, 0);
 			set_LED(31, 0);
 
 			break;
 		case EVT_IDLE:
-			set_LED(22, 1);
-			set_LED(20, 1);
-			set_LED(30, 1);
-			set_LED(31, 1);
-			LOG_INF("Idling");
-			k_sleep(K_SECONDS(30));
-			set_LED(22, 0);
-			set_LED(20, 0);
-			set_LED(30, 0);
-			set_LED(31, 0);
 
-			event = EVT_AWAIT_MISSION;
+			date_time_now(&unix_time_ms);
+			update_tm_all(unix_time_ms / 1000);
+			if ((unix_time_ms / 1000) > glider.m_param.m_start_s)
+			{
+				event = EVT_DIVE;
+				update_mission_status(MISSION_ONGOING);
+			}
+			else
+			{
+				set_LED(22, 1);
+				set_LED(20, 1);
+				set_LED(30, 1);
+				set_LED(31, 1);
+				LOG_INF("Idling");
+				k_sleep(K_SECONDS(30));
+				set_LED(22, 0);
+				set_LED(20, 0);
+				set_LED(30, 0);
+				set_LED(31, 0);
+
+				event = EVT_IDLE;
+			}
 
 			break;
 		default:
 			LOG_ERR("Unknown event type");
-
 			break;
 		}
 	}

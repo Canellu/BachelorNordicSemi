@@ -155,7 +155,7 @@ void uart_send(enum uart_device_type uart_dev_no, char *msg, size_t len)
 					uart_irq_tx_enable(dev_uart2);
 					break;
 				}
-				k_sleep(K_MSEC(5));
+				k_sleep(K_MSEC(4));
 			}
 		}
 
@@ -172,7 +172,7 @@ void uart_send(enum uart_device_type uart_dev_no, char *msg, size_t len)
 			uart_irq_tx_enable(dev_uart2);
 			break;
 		}
-		k_sleep(K_MSEC(5));
+		k_sleep(K_MSEC(4));
 	}
 }
 /* Function ideas and TODOs
