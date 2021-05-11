@@ -4,9 +4,9 @@ import 'package:bachelor_app/models/mission.dart';
 import 'package:bachelor_app/service/database.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+//import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-
+import 'map_screen.dart';
 import 'chart_page.dart';
 import 'mission_Control.dart';
 
@@ -20,18 +20,24 @@ class DevicePageTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final device = Provider.of<List<Device>>(context);
 
     //final mission = Provider.of<List<Mission>>(context);
+<<<<<<< HEAD
     final gid = selectedDevice.deviceId;
+=======
+>>>>>>> ebb59c2553e381c8081e459d7a2685d78874c166
 
     return StreamBuilder(
-        stream: DatabaseService(selectedDevice.deviceId,"").mission,
+        stream: DatabaseService(selectedDevice.deviceId, "").mission,
         builder: (context, snapshot) {
           if (!snapshot.hasData) return const Text("Loading....");
 
           final List<String> missionIdList = [];
           final List<DocumentSnapshot> document = snapshot.data.docs;
-          document.forEach((element) {missionIdList.add(element.id);});
+          document.forEach((element) {
+            missionIdList.add(element.id);
+          });
 
           return DefaultTabController(
             length: 2,
@@ -49,9 +55,7 @@ class DevicePageTab extends StatelessWidget {
                       gradient: LinearGradient(
                           colors: [Colors.greenAccent, Colors.blue],
                           begin: Alignment.bottomRight,
-                          end: Alignment.topLeft
-                      )
-                  ),
+                          end: Alignment.topLeft)),
                 ),
                 bottom: TabBar(
                   //indicatorPadding: EdgeInsets.all(10),
@@ -70,8 +74,8 @@ class DevicePageTab extends StatelessWidget {
                 ),
               ),
               body: TabBarView(
-                physics: NeverScrollableScrollPhysics(),
                 children: <Widget>[
+<<<<<<< HEAD
                   ChartPage(gid: gid,missionList: missionIdList),
                   MissionTabPage(gid: gid,missionList: missionIdList),
                   /*
@@ -79,11 +83,33 @@ class DevicePageTab extends StatelessWidget {
                     child: Text('Mission Control Tab'),
                   ),*/
                 ],
+=======
+                  SizedBox(height: 20),
+                  Container(
+                    height: 200,
+                    child: PageView(
+                      controller: PageController(viewportFraction: 1),
+                      scrollDirection: Axis.horizontal,
+                      pageSnapping: true,
+                      children: <Widget>[
+                        Container(child: MapScreen(device)),
+                      ],
+                    ),
+                  ),
+                ],
+                physics: NeverScrollableScrollPhysics(),
+
+                /* children: <Widget>[
+                  ChartPage(),
+                  Center(
+                    child: Text('Mission Control Tab'),
+                  ),
+                ],*/
+>>>>>>> ebb59c2553e381c8081e459d7a2685d78874c166
               ),
             ),
           );
-        }
-    );
+        });
   }
 }
 
