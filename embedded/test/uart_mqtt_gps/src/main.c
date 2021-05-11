@@ -372,7 +372,7 @@ static int format_payload_4G(char *dest_str, char *source_str)
 	}
 	else
 	{
-		LOG_INF("sd message is not JSON");
+		LOG_INF("payload is not in JSON format");
 		cJSON_Delete(payload_JSON);
 		return -1;
 	}
@@ -406,21 +406,26 @@ static int publish_data_4G()
 	// does not count towards msg max, as it is sent relatively infrequently
 	if (mission_params_wifi)
 	{
+		strcpy(sd_msg.filename, file_mission);
 		sd_msg.event = READ_JSON;
 		k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
 
 		k_msgq_get(&main_msg_q, &sd_msg_response, K_FOREVER);
-		ret = format_payload_4G(payload_4G, sd_msg_response);
-		if (ret == 0)
+		LOG_INF("Mission params: %s", log_strdup(sd_msg_response));
+		if (strcmp(sd_msg_response, "ERROR") != 0)
 		{
-			gcloud_publish(payload_4G, strlen(payload_4G), MQTT_QOS_1_AT_LEAST_ONCE);
-		}
-		else
-		{
-			LOG_ERR("Error in converting mission params to mqtt payload");
-		}
+			ret = format_payload_4G(payload_4G, sd_msg_response);
+			if (ret == 0)
+			{
+				gcloud_publish(payload_4G, strlen(payload_4G), MQTT_QOS_1_AT_LEAST_ONCE);
+			}
+			else
+			{
+				LOG_ERR("Error in converting mission params to mqtt payload");
+			}
 
-		mission_params_wifi = false;
+			mission_params_wifi = false;
+		}
 	}
 
 	// sending gps message first, this is to ensure at least 1 datapoint containing gps coordinates
@@ -428,19 +433,17 @@ static int publish_data_4G()
 	if (k_msgq_num_used_get(&gps_msg_q) == 0)
 	{
 		LOG_INF("No gps message, attempting to get gps fix");
-		gps_module();
-	}
-	k_msgq_get(&gps_msg_q, &gps_msg, K_NO_WAIT);
-
-	ret = format_payload_4G(payload_4G, gps_msg);
-	if (ret == 0)
-	{
-		gcloud_publish(payload_4G, strlen(payload_4G), MQTT_QOS_1_AT_LEAST_ONCE);
-		msg_sent++;
 	}
 	else
 	{
-		LOG_ERR("gps data wrong format");
+		k_msgq_get(&gps_msg_q, &gps_msg, K_NO_WAIT);
+
+		ret = format_payload_4G(payload_4G, gps_msg);
+		if (ret == 0)
+		{
+			gcloud_publish(payload_4G, strlen(payload_4G), MQTT_QOS_1_AT_LEAST_ONCE);
+			msg_sent++;
+		}
 	}
 
 	// fetching datapoints from sd card
@@ -474,6 +477,7 @@ static int publish_data_4G()
 		// in case there are not enough datapoints to satisfy number of messages to be sent (reached end of read)
 		if (strcmp(sd_msg_response, "EOM") == 0)
 		{
+			LOG_INF("Received EOM");
 			break;
 		}
 	}
@@ -549,10 +553,64 @@ static int parse_m_params(void *json_str)
 {
 	cJSON *tmp_JSON;
 	cJSON *tmpsub_JSON;
+	LOG_INF("json string: %s", log_strdup(json_str));
 	cJSON *m_JSON = cJSON_Parse(json_str);
 	if (cJSON_IsObject(m_JSON))
 	{
 		static bool new_mission = false;
+
+		time_t tmp_start_s = 0;
+		struct tm tmp_start = {0};
+
+		// parameter start time
+		if (cJSON_HasObjectItem(m_JSON, "start"))
+		{
+			tmp_JSON = cJSON_GetObjectItem(m_JSON, "start");
+			if (cJSON_IsString(tmp_JSON))
+			{
+				static char *eptr;
+				uint8_t tmp_str[16] = "";
+
+				memcpy(tmp_str, tmp_JSON->valuestring, 4);
+				tmp_start.tm_year = strtol(tmp_str, &eptr, 10) - 1900;
+				memset(tmp_str, 0, sizeof(tmp_str));
+
+				memcpy(tmp_str, tmp_JSON->valuestring + 4, 2);
+				tmp_start.tm_mon = strtol(tmp_str, &eptr, 10) - 1;
+				memset(tmp_str, 0, sizeof(tmp_str));
+
+				memcpy(tmp_str, tmp_JSON->valuestring + 6, 2);
+				tmp_start.tm_mday = strtol(tmp_str, &eptr, 10);
+				memset(tmp_str, 0, sizeof(tmp_str));
+
+				memcpy(tmp_str, tmp_JSON->valuestring + 8, 2);
+				tmp_start.tm_hour = strtol(tmp_str, &eptr, 10);
+				memset(tmp_str, 0, sizeof(tmp_str));
+
+				memcpy(tmp_str, tmp_JSON->valuestring + 10, 2);
+				tmp_start.tm_min = strtol(tmp_str, &eptr, 10);
+				memset(tmp_str, 0, sizeof(tmp_str));
+
+				tmp_start.tm_sec = 0;
+				tmp_start_s = mktime(&tmp_start);
+				LOG_INF("start time unix: %d", (int32_t)tmp_start_s);
+				date_time_now(&unix_time_ms);
+				if (tmp_start_s < glider.m_param.m_start_s || tmp_start_s < (unix_time_ms / 1000))
+				{
+					LOG_INF("Mission expired");
+					return 1;
+				}
+				else
+				{
+					LOG_INF("Start time valid, newer than current mission and current time");
+					LOG_INF("Now testing Mission number");
+				}
+			}
+			else
+			{
+				LOG_ERR("start needs to be string");
+			}
+		}
 
 		// parameter mission number
 		if (cJSON_HasObjectItem(m_JSON, "M"))
@@ -560,11 +618,25 @@ static int parse_m_params(void *json_str)
 			tmp_JSON = cJSON_GetObjectItem(m_JSON, "M");
 			if (cJSON_IsNumber(tmp_JSON))
 			{
+				LOG_INF("Mission: %d", tmp_JSON->valueint);
 				// test if mission received is new
 				if (glider.m_param.mission < tmp_JSON->valueint)
 				{
+					LOG_INF("Mission valid, parsing further");
 					glider.m_param.mission = tmp_JSON->valueint;
 					new_mission = true;
+
+					glider.m_param.m_start_tm.tm_year = tmp_start.tm_year;
+					glider.m_param.m_start_tm.tm_mon = tmp_start.tm_mon;
+					glider.m_param.m_start_tm.tm_mday = tmp_start.tm_mday;
+					glider.m_param.m_start_tm.tm_hour = tmp_start.tm_hour;
+					glider.m_param.m_start_tm.tm_min = tmp_start.tm_min;
+
+					LOG_INF("new start time: %04d-%02d-%02d %02d:%02d", glider.m_param.m_start_tm.tm_year + 1900,
+							glider.m_param.m_start_tm.tm_mon + 1,
+							glider.m_param.m_start_tm.tm_mday,
+							glider.m_param.m_start_tm.tm_hour,
+							glider.m_param.m_start_tm.tm_min);
 				}
 				else
 				{
@@ -599,7 +671,7 @@ static int parse_m_params(void *json_str)
 			}
 			else
 			{
-				cJSON_AddNumberToObject(m_JSON, "Ms", 0);
+				cJSON_AddNumberToObject(m_JSON, "Ms", MISSION_WAIT_START);
 			}
 
 			// parameter max mqtt message count
@@ -613,51 +685,6 @@ static int parse_m_params(void *json_str)
 				else
 				{
 					LOG_ERR("4G needs to be number");
-				}
-			}
-
-			// parameter start time
-			if (cJSON_HasObjectItem(m_JSON, "start"))
-			{
-				tmp_JSON = cJSON_GetObjectItem(m_JSON, "start");
-				if (cJSON_IsString(tmp_JSON))
-				{
-					static char *eptr;
-					uint8_t tmp_str[16] = "";
-
-					memcpy(tmp_str, tmp_JSON->valuestring, 4);
-					glider.m_param.m_start_tm.tm_year = strtol(tmp_str, &eptr, 10) - 1900;
-					memset(tmp_str, 0, sizeof(tmp_str));
-
-					memcpy(tmp_str, tmp_JSON->valuestring + 4, 2);
-					glider.m_param.m_start_tm.tm_mon = strtol(tmp_str, &eptr, 10) - 1;
-					memset(tmp_str, 0, sizeof(tmp_str));
-
-					memcpy(tmp_str, tmp_JSON->valuestring + 6, 2);
-					glider.m_param.m_start_tm.tm_mday = strtol(tmp_str, &eptr, 10);
-					memset(tmp_str, 0, sizeof(tmp_str));
-
-					memcpy(tmp_str, tmp_JSON->valuestring + 8, 2);
-					glider.m_param.m_start_tm.tm_hour = strtol(tmp_str, &eptr, 10);
-					memset(tmp_str, 0, sizeof(tmp_str));
-
-					memcpy(tmp_str, tmp_JSON->valuestring + 10, 2);
-					glider.m_param.m_start_tm.tm_min = strtol(tmp_str, &eptr, 10);
-					memset(tmp_str, 0, sizeof(tmp_str));
-
-					LOG_INF("start date: %d-%d-%d %d:%d", glider.m_param.m_start_tm.tm_year + 1900,
-							glider.m_param.m_start_tm.tm_mon + 1,
-							glider.m_param.m_start_tm.tm_mday,
-							glider.m_param.m_start_tm.tm_hour,
-							glider.m_param.m_start_tm.tm_min);
-
-					glider.m_param.m_start_tm.tm_sec = 0;
-					glider.m_param.m_start_s = mktime(&glider.m_param.m_start_tm);
-					LOG_INF("start time unix: %d", (int32_t)glider.m_param.m_start_s);
-				}
-				else
-				{
-					LOG_ERR("start needs to be string");
 				}
 			}
 
@@ -1312,7 +1339,6 @@ static int wifi_module()
 
 				sd_msg.event = READ_FILE;
 
-				printk("\nStarting SD file read2");
 				k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
 			}
 			else if (strstr(wifi_response, "time:") != NULL)
@@ -1332,21 +1358,22 @@ static int wifi_module()
 			}
 			else if (strstr(wifi_response, "wifi_end") != NULL)
 			{
-				printk("\nReceived wifi end command\n");
+				LOG_INF("\nReceived wifi end command\n");
 				// uart_send(UART_2, "wifi_end;", strlen("wifi_end;"));
 				break;
 			}
 			else
 			{
-				ret = parse_m_params(&gcloud_msg);
+				ret = parse_m_params(&wifi_response);
 				if (ret == 0)
 				{
+					mission_state = MISSION_WAIT_START;
 					mission_params_wifi = true;
 					LOG_INF("Received new mission parameters");
 				}
 				else
 				{
-					printk("\n\nUnknown request from ESP");
+					LOG_INF("Unknown request from ESP");
 				}
 			}
 		}
@@ -1375,7 +1402,7 @@ static int gps_module()
 	// button_wait();
 	printk("\ngps test start");
 
-	ret = app_gps(&gps_data, 1000, 400);
+	ret = app_gps(&gps_data, 1000, 500);
 
 	if (ret == 0)
 	{
@@ -1415,7 +1442,7 @@ static int gcloud_module()
 {
 	set_LED(31, 1);
 	printk("\n\npress button 1 to start gcloud test\n\n");
-	button_wait();
+	// button_wait();
 	printk("gcloud test start\n");
 
 	memset(gcloud_msg, 0, sizeof(gcloud_msg));
@@ -1456,6 +1483,7 @@ static int gcloud_module()
 
 	start_time = k_uptime_get();
 
+	LOG_INF("Starting gcloud loop");
 	// /* Gcloud loop */
 	while (current_time <= timeout)
 	{
@@ -1466,8 +1494,15 @@ static int gcloud_module()
 		ret = app_gcloud();
 		if (ret != 0)
 		{
-			LOG_ERR("Error in running MQTT loop, ending loop");
-			break;
+			LOG_ERR("Error in running MQTT loop, exiting module");
+			ret = app_gcloud_disconnect(max_retries);
+			if (ret != 0)
+			{
+				LOG_ERR("Disconnect unsuccessful: %d", ret);
+				LOG_ERR("Closing program, check for errors in code lol");
+			}
+			set_LED(31, 0);
+			return -1;
 		}
 
 		// fetch message from gcloud
@@ -1478,6 +1513,10 @@ static int gcloud_module()
 		ret = parse_m_params(&gcloud_msg);
 		if (ret >= 0)
 		{
+			if (ret == 0)
+			{
+				mission_state = MISSION_WAIT_START;
+			}
 			break;
 		}
 
@@ -1706,13 +1745,14 @@ static int glider_init()
 	ret = check_mission();
 	if (ret == 0)
 	{
+		LOG_INF("Mission found");
 		// temporary for testing
-		mission_state = MISSION_FINISHED;
-		glider.m_param.m_start_s = 1620724035;
+		// mission_state = MISSION_FINISHED;
+		// glider.m_param.m_start_s = 1620724035;
 	}
 	else
 	{
-		printk("\nMission params not found, waiting for mission\n\n");
+		LOG_INF("\nMission params not found, waiting for mission\n\n");
 		mission_state = MISSION_FINISHED;
 	}
 
@@ -1745,29 +1785,26 @@ void main(void)
 	glider_init();
 	// button_wait();
 
+	mission_state = MISSION_FINISHED;
+
 	// TODO: create check for finished missions
-	if (mission_state == MISSION_ONGOING)
-	{
-		event = EVT_DIVE;
-		LOG_INF("Mission ongoing");
-	}
-	else if (mission_state == MISSION_WAIT_START)
+	if (mission_state == MISSION_WAIT_START)
 	{
 		event = EVT_IDLE;
 		LOG_INF("Idling until mission start");
+	}
+	else if (mission_state == MISSION_ONGOING)
+	{
+		event = EVT_DIVE;
+		LOG_INF("Mission ongoing");
 	}
 	else if (mission_state == MISSION_FINISHED)
 	{
 		LOG_INF("Running gps module");
 		// button_wait();
-		// gps_module();
+		gps_module();
 		event = EVT_AWAIT_MISSION;
 		LOG_INF("No mission ongoing, on standby for new mission");
-	}
-	else
-	{
-		event = EVT_AWAIT_MISSION;
-		LOG_INF("Unknown event, waiting for mission");
 	}
 
 	while (1)
@@ -1789,6 +1826,7 @@ void main(void)
 			set_LED(22, 0);
 			set_LED(30, 0);
 			set_LED(31, 0);
+
 			if (wifi_on == 1)
 			{
 				LOG_INF("Running wifi module");
@@ -1800,17 +1838,21 @@ void main(void)
 			{
 				LOG_INF("Running gcloud module");
 				// button_wait();
-				// ret = gcloud_module();
+				ret = gcloud_module();
 				if (ret == 1)
 				{
 					// if unsuccessful, check satellite for any commands
 					LOG_INF("Running satellite module");
 					// button_wait();
-					// satellite_module();
+					satellite_module();
 				}
 			}
 
-			if (mission_state == MISSION_ONGOING)
+			if (mission_state == MISSION_WAIT_START)
+			{
+				event = EVT_IDLE;
+			}
+			else if (mission_state == MISSION_ONGOING)
 			{
 				event = EVT_IDLE;
 			}
@@ -1851,17 +1893,21 @@ void main(void)
 			}
 			LOG_INF("Running gps module");
 			// button_wait();
-			// gps_module();
+			gps_module();
 
 			LOG_INF("Running gcloud module");
 			// button_wait();
-			// ret = gcloud_module();
+			ret = gcloud_module();
 			if (ret == 1)
 			{
-				// if unsuccessful, check satellite for any commands
+				// if unsuccessful, send data through satellite
 				LOG_INF("Running satellite module");
 				// button_wait();
-				// satellite_module();
+				satellite_module();
+			}
+			if (mission_state == MISSION_WAIT_START)
+			{
+				event = EVT_IDLE;
 			}
 
 			break;
@@ -1891,7 +1937,7 @@ void main(void)
 
 				LOG_INF("Running gps module");
 				// button_wait();
-				// gps_module();
+				gps_module();
 
 				event = EVT_IDLE;
 			}
