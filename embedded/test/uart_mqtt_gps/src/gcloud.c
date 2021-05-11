@@ -720,6 +720,8 @@ int app_gcloud_init_and_connect(int retries)
         return ret;
     }
 
+    // synchronize time
+    date_time_clear();
     date_time_update_async(date_time_handler);
     k_sem_take(&date_time_ok, K_FOREVER);
 
@@ -759,6 +761,7 @@ int app_gcloud_init_and_connect(int retries)
         return ret;
     }
 
+    LOG_INF("Connect successful");
     return 0;
 }
 
@@ -789,7 +792,7 @@ int app_gcloud_reconnect(int retries)
         return ret;
     }
 
-    // synchronize time through modem
+    // synchronize time
     date_time_update_async(date_time_handler);
     k_sem_take(&date_time_ok, K_FOREVER);
 
@@ -816,6 +819,7 @@ int app_gcloud_reconnect(int retries)
         return ret;
     }
 
+    LOG_INF("Reconnect successful");
     return 0;
 }
 
@@ -872,27 +876,14 @@ int app_gcloud_disconnect(int retries)
     connected = false;
 
     // MQTT disconnect client
-    while (cnt < retries)
+    ret = mqtt_disconnect(&client);
+    if (ret != 0)
     {
-        ret = mqtt_disconnect(&client);
-        if (ret == 0)
-        {
-            break;
-        }
-        else
-        {
-            LOG_ERR("Could not disconnect GCloud MQTT client: %d", ret);
-            cnt++;
-        }
-    }
-    if (ret)
-    {
-        LOG_ERR("Unable to properly disconnect from MQTT client, max retries reached");
-        return ret;
+        LOG_ERR("Could not disconnect GCloud MQTT client: %d", ret);
+        cnt++;
     }
 
     // lte off
-    cnt = 0;
     while (cnt < retries)
     {
         ret = lte_lc_offline();

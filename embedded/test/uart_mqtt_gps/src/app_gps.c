@@ -600,11 +600,21 @@ int app_gps(glider_gps_data_t *app_gps_data, int64_t gps_timeout, int retry_inte
 	if (!got_fix)
 	{
 		// create dummy data, REMINDER: COMMENT WHEN RUNNING PROPER TESTS
-		create_dummy_gps_data(&last_pvt);
-		gnss_data_to_JSON(&gps_string, &last_pvt);
-		gps_fill_struct(app_gps_data, &last_pvt, &gps_string);
+		// create_dummy_gps_data(&last_pvt);
+		// gnss_data_to_JSON(&gps_string, &last_pvt);
+		// gps_fill_struct(app_gps_data, &last_pvt, &gps_string);
+		LOG_INF("Unable to get gps data within timeout");
 
-		// ret = 1;
+		LOG_INF("Stopping GPS module");
+
+		// AT command to turn off GPS
+		ret = gnss_ctrl(GNSS_STOP);
+		if (at_cmd_write(AT_DEACTIVATE_GPS, NULL, 0, NULL) != 0)
+		{
+			LOG_ERR("\nunable to deactivate GPS");
+		}
+
+		return 1;
 	}
 	else
 	{
@@ -622,5 +632,5 @@ int app_gps(glider_gps_data_t *app_gps_data, int64_t gps_timeout, int retry_inte
 		LOG_ERR("\nunable to deactivate GPS");
 	}
 
-	return ret;
+	return 0;
 }

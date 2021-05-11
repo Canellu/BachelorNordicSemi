@@ -401,6 +401,7 @@ static int read_JSON_4G(char *file_path, uint8_t *param_str, size_t file_size)
 	{
 		cursor = 0;
 	}
+	LOG_INF("cursor: %d", cursor);
 
 	// For catching return values from fs_functions
 	int ret = 1;
@@ -466,6 +467,7 @@ static int read_JSON_4G(char *file_path, uint8_t *param_str, size_t file_size)
 			}
 		}
 
+		LOG_INF("Reached end of read");
 		uint8_t sd_msg_response[] = "EOM";
 		k_msgq_put(&main_msg_q, &sd_msg_response, K_NO_WAIT);
 
