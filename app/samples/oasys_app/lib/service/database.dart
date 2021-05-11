@@ -42,18 +42,6 @@ class DatabaseService {
   }*/
 
   Future<void> newMission(Mission missionObject) async {
-<<<<<<< HEAD
-    return await connectCollection.doc(gid).collection("Missions").doc(missionObject.missionId).set({
-      "freqC" : missionObject.freqC,
-      "freqP" : missionObject.freqP,
-      "freqT" : missionObject.freqT,
-      "maxD" : missionObject.maxD,
-      "minD" : missionObject.minD,
-      "start" : missionObject.startTime,
-      "4G" : missionObject.nett
-    }).then((value) => print("New Mission Added"))
-    .catchError((error) => print("Failed to add new mission : $error"));
-=======
     return await connectCollection
         .doc(gid)
         .collection("Missions")
@@ -68,7 +56,6 @@ class DatabaseService {
         })
         .then((value) => print("New Mission Added"))
         .catchError((error) => print("Failed to add new mission : $error"));
->>>>>>> ebb59c2553e381c8081e459d7a2685d78874c166
   }
 
   //get stream
@@ -83,7 +70,7 @@ class DatabaseService {
         .map(_missionListFromSnapshot);
   }*/
   Stream<QuerySnapshot> get mission {
-    return connectCollection.doc(gid).collection("Missions").snapshots();
+    return connectCollection.doc("311910").collection("Missions").snapshots();
   }
 
 /*
@@ -118,20 +105,8 @@ class DatabaseService {
     //Loop through to find each data type
     var dataTypeFound = [];
     dataset.forEach((key, value) {
-      var loopEnd;
-
       var split = value.split(",");
-<<<<<<< HEAD
-
-      if(value.substring(value.length-1,value.length) == ",") {
-        loopEnd = split.length-1;
-      }else {loopEnd = split.length;}
-
-      for(var i = 0; i < loopEnd; i++) {
-
-=======
       for (var i = 0; i < split.length - 1; i++) {
->>>>>>> ebb59c2553e381c8081e459d7a2685d78874c166
         const start = '"';
         const end = '"';
 
@@ -153,29 +128,17 @@ class DatabaseService {
 
     dataTypeFound.forEach((type) {
       final Map<String, String> typeDataset = {};
+
       dataset.forEach((key, value) {
-<<<<<<< HEAD
-        var loopEnd;
-
-        var split = value.split(",");
-
-        if(value.substring(value.length-1,value.length) == ",") {
-          loopEnd = split.length-1;
-        }else {loopEnd = split.length;}
-=======
         if (value.contains(type)) {
           var start = '$type":';
           const end = ",";
->>>>>>> ebb59c2553e381c8081e459d7a2685d78874c166
 
-        for(var i = 0; i < loopEnd; i++) {
-          if(split[i].contains(type)) {
-            var start = '$type":';
+          final startIndex = value.indexOf(start);
+          final endIndex = value.indexOf(end, startIndex + start.length);
+          var typeData = value.substring(startIndex + start.length, endIndex);
 
-            final startIndex = split[i].indexOf(start);
-            var typeData = split[i].substring(startIndex + start.length, split[i].length);
-            typeDataset[key] = typeData;
-          }
+          typeDataset[key] = typeData;
         }
       });
 

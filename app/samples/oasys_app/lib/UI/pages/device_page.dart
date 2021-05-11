@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'map_screen.dart';
 import 'chart_page.dart';
-import 'mission_Control.dart';
 
 class DevicePageTab extends StatelessWidget {
   //final String gliderId;
@@ -23,10 +22,6 @@ class DevicePageTab extends StatelessWidget {
     final device = Provider.of<List<Device>>(context);
 
     //final mission = Provider.of<List<Mission>>(context);
-<<<<<<< HEAD
-    final gid = selectedDevice.deviceId;
-=======
->>>>>>> ebb59c2553e381c8081e459d7a2685d78874c166
 
     return StreamBuilder(
         stream: DatabaseService(selectedDevice.deviceId, "").mission,
@@ -75,15 +70,6 @@ class DevicePageTab extends StatelessWidget {
               ),
               body: TabBarView(
                 children: <Widget>[
-<<<<<<< HEAD
-                  ChartPage(gid: gid,missionList: missionIdList),
-                  MissionTabPage(gid: gid,missionList: missionIdList),
-                  /*
-                  Center(
-                    child: Text('Mission Control Tab'),
-                  ),*/
-                ],
-=======
                   SizedBox(height: 20),
                   Container(
                     height: 200,
@@ -105,14 +91,12 @@ class DevicePageTab extends StatelessWidget {
                     child: Text('Mission Control Tab'),
                   ),
                 ],*/
->>>>>>> ebb59c2553e381c8081e459d7a2685d78874c166
               ),
             ),
           );
         });
   }
 }
-
 /*
 class DevicePageTab extends StatelessWidget {
   final deviceID;
@@ -131,4 +115,27 @@ class DevicePageTab extends StatelessWidget {
   }
 }*/
 
+
+/*
+        return Container(
+          child: FloatingActionButton(
+            onPressed: (){
+              //snapshot.data.docs.forEach((element) => {print(element)});
+              snapshot.data.docs.forEach((element) {print(element.id);});
+              /*
+              var createMissionID = snapshot.data.docs.length + 1;
+              DatabaseService(gliderId,"").newMission(
+                Mission(
+                  missionId: "Mission $createMissionID",
+                  startTime: DateFormat('yyyy-MM-dd kk:mm:ss').format(DateTime.now()),
+                  freqC: 5,
+                  freqP: 5,
+                  freqT: 50,
+                  maxD: 200,
+                  minD: 10
+              )
+              );*/
+            },
+          ),
+        );*/
 

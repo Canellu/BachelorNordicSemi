@@ -1,12 +1,13 @@
 class Mission {
   final String missionId;
   final String endTime;
-  final int freqC;
-  final int freqP;
-  final int freqT;
+  final String freqC;
+  final String freqP;
+  final String freqT;
   final int maxD;
   final int minD;
   final String startTime;
+  final int nett;
 
-  Mission({this.missionId, this.endTime, this.freqC, this.freqP, this.freqT, this.maxD, this.minD, this.startTime});
+  Mission({this.nett, this.missionId, this.endTime, this.freqC, this.freqP, this.freqT, this.maxD, this.minD, this.startTime});
 }
