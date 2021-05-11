@@ -133,19 +133,20 @@ let tbodyWP = document.querySelector("#tbodyWP");
 let wpLatInput = document.querySelector("#wpLat");
 let wpLngInput = document.querySelector("#wpLng");
 let waypoints = [];
+let index = 0;
 function addWaypoint() {
   let lat = Number(Number(wpLatInput.value).toFixed(4));
   let lng = Number(Number(wpLngInput.value).toFixed(4));
 
   if (!(lat == "" || lng == "")) {
-    let row = `<tr>
+    let row = `<tr data-index="${index++}">
                 <td>${waypoints.length + 1}</td>
                 <td>${lat}</td>
                 <td>${lng}</td>
                </tr>`;
 
     tbodyWP.innerHTML += row;
-    waypoints.push({ lat, lng });
+    waypoints.push({ index, lat, lng });
   }
 
   wpLatInput.value = "";
@@ -186,8 +187,8 @@ function sendMissionParams() {
     }
   });
 
-  let latArr = waypoints.map((obj) => obj.lat);
-  let lngArr = waypoints.map((obj) => obj.lng);
+  let latArr = waypoints.map((obj) => obj.lat.toString());
+  let lngArr = waypoints.map((obj) => obj.lng.toString());
 
   let params = {
     M: parseInt(currentMissionNum),
