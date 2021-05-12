@@ -209,7 +209,6 @@ th h5 {
 }
 
 .rounded-shadow {
-  margin: 10px;
   border-radius: 6px;
   border: 1px solid rgb(224, 224, 224);
   box-shadow: 0 2px 2px 0 rgb(0 0 0 / 14%), 0 3px 1px -2px rgb(0 0 0 / 12%),
@@ -252,9 +251,15 @@ input {
   background-color: white !important;
 }
 
+.noUi-target {
+  max-height: 13px;
+}
+
 .noUi-handle {
+  margin-top: 2px;
   cursor: pointer;
-  box-shadow: none;
+  box-shadow: none !important;
+  max-height: 20px;
   /* width: 20px !important; */
 }
 
