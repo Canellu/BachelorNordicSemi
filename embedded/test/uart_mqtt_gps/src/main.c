@@ -419,9 +419,9 @@ static int publish_data_4G()
 
 			if (cJSON_IsObject(payload_JSON))
 			{
-				if (cJSON_HasObjectItem(payload_JSON, "Ms"))
+				if (cJSON_HasObjectItem(payload_JSON, "state"))
 				{
-					cJSON_DeleteItemFromObject(payload_JSON, "Ms");
+					cJSON_DeleteItemFromObject(payload_JSON, "state");
 				}
 				strcpy(payload_4G, cJSON_Print(payload_JSON));
 				cJSON_Minify(payload_4G);
