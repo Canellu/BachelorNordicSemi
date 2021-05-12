@@ -1830,7 +1830,7 @@ void main(void)
 			set_LED(30, 1);
 			set_LED(31, 1);
 			LOG_INF("Waiting for wifi command");
-			k_msgq_get(&button_msg_qr, &wifi_on, K_SECONDS(30));
+			k_msgq_get(&button_msg_qr, &wifi_on, K_SECONDS(60));
 			set_LED(22, 0);
 			set_LED(30, 0);
 			set_LED(31, 0);
