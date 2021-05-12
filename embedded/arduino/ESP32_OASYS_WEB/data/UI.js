@@ -47,24 +47,21 @@ condGroupBtns.forEach((btn) => {
 let sliderDepth = document.querySelector("#sliderDepth");
 let inputMinDepth = document.querySelector("#inputMinDepth");
 let inputMaxDepth = document.querySelector("#inputMaxDepth");
-let sliderRange = {
-  min: [0, 10],
-  "20%": [100, 10],
-  "40%": [200, 10],
-  "60%": [300, 10],
-  "80%": [400, 10],
-  max: [500, 10],
-};
+
 noUiSlider.create(sliderDepth, {
   start: [100, 300],
   connect: true,
   step: 1,
   orientation: "horizontal", // 'horizontal' or 'vertical'
-  range: sliderRange,
-  pips: {
-    mode: "range",
-    density: 4,
+  range: {
+    min: 0,
+    max: 300,
   },
+  // tooltips: [true, true],
+  // pips: {
+  //   mode: "range",
+  //   density: 4,
+  // },
   format: wNumb({
     decimals: 0,
   }),
@@ -106,10 +103,10 @@ noUiSlider.create(slider4GLimit, {
   step: 1,
   orientation: "horizontal", // 'horizontal' or 'vertical'
   range: sliderRange4G,
-  pips: {
-    mode: "range",
-    density: 4,
-  },
+  // pips: {
+  //   mode: "range",
+  //   density: 4,
+  // },
   format: wNumb({
     decimals: 0,
   }),
@@ -129,7 +126,7 @@ input4GLimit.addEventListener("change", function () {
 // Waypoints
 // --------------------------------------------------------------------
 
-let tbodyWP = document.querySelector("#tbodyWP");
+let waypointListDiv = document.querySelector("#waypointList");
 let wpLatInput = document.querySelector("#wpLat");
 let wpLngInput = document.querySelector("#wpLng");
 let waypoints = [];
@@ -139,14 +136,26 @@ function addWaypoint() {
   let lng = Number(Number(wpLngInput.value).toFixed(4));
 
   if (!(lat == "" || lng == "")) {
-    let row = `<tr data-index="${index++}">
-                <td>${waypoints.length + 1}</td>
-                <td>${lat}</td>
-                <td>${lng}</td>
-               </tr>`;
+    let row = `  
+    <div class="row" style="margin-bottom: 10px">
+      <div class="col s2" id="numberBox">${index + 1}</div>
+      <div class="col s4">
+        <input type="number" id="latlngInputBox" value="${lat}" />
+      </div>
+      <div class="col s4">
+        <input type="number" id="latlngInputBox" value="${lng}"  />
+      </div>
+      <div class="col s2" onclick="deleteRow(this)">
+        <div class="smallBtn">
+          <img src="delete.svg" alt="" />
+        </div>
+      </div>
+    </div>
+    `;
 
-    tbodyWP.innerHTML += row;
-    waypoints.push({ index, lat, lng });
+    waypointListDiv.innerHTML += row;
+    waypoints.push({ lat, lng });
+    index++;
   }
 
   wpLatInput.value = "";
@@ -205,6 +214,14 @@ function sendMissionParams() {
 
   websocket.send(JSON.stringify(params));
   console.log(JSON.stringify(params));
+
+  resetParams();
+}
+
+function resetParams() {
+  waypoints = [];
+  waypointListDiv.innerHTML = "";
+  index = 0;
 }
 
 function freqModeToNum(mode) {
@@ -222,4 +239,8 @@ function freqModeToNum(mode) {
       return 0;
       break;
   }
+}
+
+function deleteRow(e) {
+  e.parentElement.remove();
 }
