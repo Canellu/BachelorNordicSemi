@@ -322,19 +322,13 @@ static int message_queue_reset()
 // adds mission number, concatenates date and string to save bytes
 static int format_payload_4G(char *dest_str, char *source_str)
 {
-	// LOG_INF("%s", log_strdup(sd_msg_response));
+	// LOG_INF("%s", log_strdup(source_str));
 	cJSON *payload_JSON = cJSON_Parse(source_str);
 
 	if (cJSON_IsObject(payload_JSON))
 	{
 		uint8_t ts_str[32] = "";
 		int ts_arr = 0;
-
-		// if payload is mission parameters, remove mission state
-		if (cJSON_HasObjectItem(payload_JSON, "Ms"))
-		{
-			cJSON_DeleteItemFromObject(payload_JSON, "Ms");
-		}
 
 		// fetching datetime (dt) and timestamp (ts) to combine into one variable
 		cJSON *dt_JSON = cJSON_DetachItemFromObject(payload_JSON, "dt");
@@ -377,6 +371,7 @@ static int format_payload_4G(char *dest_str, char *source_str)
 		return -1;
 	}
 	cJSON_Delete(payload_JSON);
+	LOG_INF("payload formatted");
 
 	return 0;
 }
@@ -414,25 +409,33 @@ static int publish_data_4G()
 		LOG_INF("Mission params: %s", log_strdup(sd_msg_response));
 		if (strcmp(sd_msg_response, "ERROR") != 0)
 		{
-			ret = format_payload_4G(payload_4G, sd_msg_response);
-			if (ret == 0)
-			{
-				gcloud_publish(payload_4G, strlen(payload_4G), MQTT_QOS_1_AT_LEAST_ONCE);
-			}
-			else
-			{
-				LOG_ERR("Error in converting mission params to mqtt payload");
-			}
+			cJSON *payload_JSON = cJSON_Parse(sd_msg_response);
 
-			mission_params_wifi = false;
+			if (cJSON_IsObject(payload_JSON))
+			{
+				if (cJSON_HasObjectItem(payload_JSON, "Ms"))
+				{
+					cJSON_DeleteItemFromObject(payload_JSON, "Ms");
+				}
+				strcpy(payload_4G, cJSON_Print(payload_JSON));
+				cJSON_Minify(payload_4G);
+				cJSON_Delete(payload_JSON);
+
+				gcloud_publish(payload_4G, strlen(payload_4G), MQTT_QOS_1_AT_LEAST_ONCE);
+				mission_params_wifi = false;
+			}
+		}
+		else
+		{
+			LOG_ERR("Error in converting mission params to mqtt payload");
 		}
 	}
 
 	// sending gps message first, this is to ensure at least 1 datapoint containing gps coordinates
-	// check if there is gps data, if empty attempt to get fix
+	// check if there is gps data
 	if (k_msgq_num_used_get(&gps_msg_q) == 0)
 	{
-		LOG_INF("No gps message, attempting to get gps fix");
+		LOG_INF("No gps message to fetch");
 	}
 	else
 	{
@@ -479,6 +482,11 @@ static int publish_data_4G()
 		{
 			LOG_INF("Received EOM");
 			break;
+		}
+		else if (strcmp(sd_msg_response, "ERROR") == 0)
+		{
+			LOG_ERR("Error in fetching data");
+			return -1;
 		}
 	}
 
@@ -1785,7 +1793,8 @@ void main(void)
 	glider_init();
 	// button_wait();
 
-	mission_state = MISSION_FINISHED;
+	mission_state = MISSION_ONGOING;
+	mission_params_wifi = true;
 
 	// TODO: create check for finished missions
 	if (mission_state == MISSION_WAIT_START)
