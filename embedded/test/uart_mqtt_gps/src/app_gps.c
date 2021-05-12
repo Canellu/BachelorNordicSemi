@@ -317,6 +317,7 @@ static void print_gnss_stats(nrf_gnss_data_frame_t *pvt_data)
 
 static void print_fix_data(nrf_gnss_data_frame_t *pvt_data)
 {
+	// float logging does not work currently, data received is valid
 	LOG_INF("Longitude:  %f", pvt_data->pvt.longitude);
 	LOG_INF("Latitude:   %f", pvt_data->pvt.latitude);
 	LOG_INF("Date:       %02u-%02u-%02u", pvt_data->pvt.datetime.year,
