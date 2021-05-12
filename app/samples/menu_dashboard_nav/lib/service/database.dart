@@ -131,21 +131,46 @@ class DatabaseService {
     dataTypeFound.forEach((type) {
       final Map<String, String> typeDataset = {};
       dataset.forEach((key, value) {
-        var loopEnd;
+        if(value.contains(type)) {
+          var loopEnd;
 
-        var split = value.split(",");
+          var split = value.split(",");
 
-        if(value.substring(value.length-1,value.length) == ",") {
-          loopEnd = split.length-1;
-        }else {loopEnd = split.length;}
+          if(value.substring(value.length-1,value.length) == ",") {
+            loopEnd = split.length-1;
+          }else {loopEnd = split.length;}
 
-        for(var i = 0; i < loopEnd; i++) {
-          if(split[i].contains(type)) {
-            var start = '$type":';
+          if(type == "lng" || type == "lat") {
+            for(var i = 0; i < loopEnd; i++) {
+              if(split[i].contains(type)) {
 
-            final startIndex = split[i].indexOf(start);
-            var typeData = split[i].substring(startIndex + start.length, split[i].length);
-            typeDataset[key] = typeData;
+                var start;
+                var end;
+
+                if(split[i].characters.last == '"') {
+                  start = '$type":"';
+                  end = split[i].length-1;
+                }else {
+                  start = '$type":';
+                  end = split[i].length;
+                }
+
+                final startIndex = split[i].indexOf(start);
+                var typeData = split[i].substring(startIndex + start.length, end);
+                typeDataset[key] = typeData;
+              }
+            }
+          }
+          else {
+            for(var i = 0; i < loopEnd; i++) {
+              if(split[i].contains(type)) {
+                var start = '$type":';
+
+                final startIndex = split[i].indexOf(start);
+                var typeData = split[i].substring(startIndex + start.length, split[i].length);
+                typeDataset[key] = typeData;
+              }
+            }
           }
         }
       });
