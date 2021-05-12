@@ -1733,8 +1733,8 @@ static int glider_init()
 	glider.m_param.msg_max = 1;
 
 	time_CET->tm_year = 121;
-	time_CET->tm_mon = 4;
-	time_CET->tm_mday = 6;
+	time_CET->tm_mon = 5;
+	time_CET->tm_mday = 12;
 
 	/* device inits and configurations */
 	device_inits();
@@ -1782,7 +1782,7 @@ void main(void)
 	static int ret = 0;
 	static int wifi_on = 0;
 
-	static int64_t unix_time_start = 1620723992;
+	static int64_t unix_time_start = 1620810897;
 	time_UTC = gmtime(&unix_time_start);
 
 	date_time_set(time_UTC);
