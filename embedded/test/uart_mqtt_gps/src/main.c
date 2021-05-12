@@ -223,12 +223,12 @@ static int sd_save_data(void *data_string)
 	// strcat(filename, tmp_str);
 
 	snprintf(tmp_str, sizeof(tmp_str), "M%u.TXT", glider.m_param.mission);
-	strcat(filename, tmp_str);
+	strcpy(filename, tmp_str);
 
 	// copy string over to struct
 	strcpy(sd_msg.filename, filename);
 	//sd_msg.filename[strlen(filename)] = 0;
-	//LOG_INF("%s", log_strdup(sd_msg.filename));
+	LOG_INF("filename: %s", log_strdup(sd_msg.filename));
 
 	strcpy(sd_msg.string, data_string);
 
@@ -1248,6 +1248,8 @@ static int sensor_module()
 				strcpy(sensor_str, cJSON_Print(sensor_JSON));
 				cJSON_Minify(sensor_str);
 
+				LOG_INF("data to save:%s", log_strdup(sensor_str));
+
 				// save to sd card
 				sd_save_data(sensor_str);
 				data_available_to_send = true;
@@ -1792,9 +1794,6 @@ void main(void)
 	// initialize glider
 	glider_init();
 	// button_wait();
-
-	mission_state = MISSION_ONGOING;
-	mission_params_wifi = true;
 
 	// TODO: create check for finished missions
 	if (mission_state == MISSION_WAIT_START)
