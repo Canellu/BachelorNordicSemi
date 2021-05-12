@@ -32,16 +32,19 @@ class _ChartPageState extends State<ChartPage> {
   @override
   Widget build(BuildContext context) {
     List<String> _missions = widget.missionList;
-    return Padding(
-      padding: EdgeInsets.only(left: 30,top: 30,right: 30,bottom: 0),
+    return Container(
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
-          Row(
-            children: <Widget>[
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.only(left: 0,top: 0,right: 80,bottom: 20),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(30, 0, 120, 0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Expanded(
                   child: Container(
+                    margin: EdgeInsets.fromLTRB(0, 0, 10, 0),
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.black26,width: 2),
                       borderRadius: BorderRadius.circular(15),
@@ -74,9 +77,18 @@ class _ChartPageState extends State<ChartPage> {
                     ),
                   ),
                 ),
-              ),
-              RaisedButton(onPressed: (){}),
-            ],
+                //RaisedButton(onPressed: (){}),
+                TextButton(
+                  onPressed: () {},
+                  child: Text(
+                    'Detail info',
+                    style: prefix.TextStyle(
+                      color: Colors.black45,
+                    ),
+                  ),
+                )
+              ],
+            ),
           ),
           FutureBuilder(
               future: DatabaseService(widget.gid, selectedMission ?? "Mission 1").datas,
@@ -84,11 +96,11 @@ class _ChartPageState extends State<ChartPage> {
                 if (!snapshot.hasData) return const Text("Loading....");
                 Map dataset = new Map<String,dynamic>.from(snapshot.data);
                 return Container(
+                  padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
                   child: OneChart(dataType: dataType,dataset: dataset),
                 );
               }
           ),
-          SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[

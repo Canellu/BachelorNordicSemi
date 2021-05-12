@@ -140,9 +140,9 @@ class _MissionTabPageState extends State<MissionTabPage> {
                       Mission(
                         missionId: "Mission $createMissionID",
                         startTime: DateFormat('yyyyMMddHHmm').format(dateTime),
-                        freqC: _freqCvalue,
-                        freqP: _freqPvalue,
-                        freqT: _freqTvalue,
+                        C: _freqCvalue,
+                        P: _freqPvalue,
+                        T: _freqTvalue,
                         maxD: _freqDvalue.end.round(),
                         minD: _freqDvalue.start.round(),
                         nett: _4GValue.round(),

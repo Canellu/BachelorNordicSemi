@@ -45,9 +45,9 @@ class DatabaseService {
 
   Future<void> newMission(Mission missionObject) async {
     return await connectCollection.doc(gid).collection("Missions").doc(missionObject.missionId).set({
-      "freqC" : missionObject.freqC,
-      "freqP" : missionObject.freqP,
-      "freqT" : missionObject.freqT,
+      "freqC" : missionObject.C,
+      "freqP" : missionObject.P,
+      "freqT" : missionObject.T,
       "maxD" : missionObject.maxD,
       "minD" : missionObject.minD,
       "start" : missionObject.startTime,
