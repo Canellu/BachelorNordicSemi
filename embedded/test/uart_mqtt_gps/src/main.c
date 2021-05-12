@@ -509,7 +509,7 @@ static int publish_data_4G()
 // updates mission status and saves to sd card
 static int update_mission_status(enum glider_mission_status new_mission_state)
 {
-	LOG_INF("Setting mission state to: %d", mission_state);
+	LOG_INF("Setting mission state to: %d", new_mission_state);
 	mission_state = new_mission_state;
 
 	date_time_now(&unix_time_ms);
@@ -535,7 +535,6 @@ static int update_mission_status(enum glider_mission_status new_mission_state)
 			}
 
 			cJSON *state_JSON = cJSON_CreateObject();
-			LOG_INF("state not yet added, adding default values");
 			cJSON_AddNumberToObject(state_JSON, "Ms", new_mission_state);
 			cJSON_AddNumberToObject(state_JSON, "wp_cur", glider.m_state.wp_cur);
 			cJSON_AddNumberToObject(state_JSON, "msg_sent", glider.m_state.msg_sent);
@@ -570,6 +569,7 @@ static int parse_m_params(void *json_str)
 {
 	cJSON *tmp_JSON;
 	cJSON *tmpsub_JSON;
+
 	LOG_INF("json string: %s", log_strdup(json_str));
 	cJSON *m_JSON = cJSON_Parse(json_str);
 	if (cJSON_IsObject(m_JSON))
@@ -677,6 +677,7 @@ static int parse_m_params(void *json_str)
 			glider.m_state.wp_cur = 1;
 			glider.m_state.msg_sent = 0;
 
+			// fetching last saved state, if it does not exist add with default values
 			if (cJSON_HasObjectItem(m_JSON, "state"))
 			{
 				LOG_INF("state exists, fetching values");
@@ -907,6 +908,7 @@ static int parse_m_params(void *json_str)
 
 			strcpy(sd_msg.string, cJSON_Print(m_JSON));
 			cJSON_Minify(sd_msg.string);
+			LOG_INF("Converted to string");
 
 			k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
 
@@ -2017,7 +2019,8 @@ void main(void)
 
 			date_time_now(&unix_time_ms);
 			update_tm_all(unix_time_ms / 1000);
-			if ((unix_time_ms / 1000) > glider.m_param.m_start_s)
+			LOG_INF("CET unix: %d, start time: %d", (int32_t)unix_time_CET, (int32_t)glider.m_param.m_start_s);
+			if (unix_time_CET > glider.m_param.m_start_s)
 			{
 				LOG_INF("Start time OK, starting mission");
 				event = EVT_DIVE;
@@ -2037,7 +2040,7 @@ void main(void)
 
 				LOG_INF("Running gps module");
 				// button_wait();
-				gps_module();
+				// gps_module();
 
 				event = EVT_IDLE;
 			}

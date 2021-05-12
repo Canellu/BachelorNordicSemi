@@ -17,7 +17,7 @@ typedef struct
 {
     enum sd_event_type event;
     uint8_t filename[32];
-    uint8_t string[256];
+    uint8_t string[512];
 } sd_msg_t;
 
 void app_sd(void);
