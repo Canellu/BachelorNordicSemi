@@ -24,6 +24,36 @@ void flush_serial()
   }
 }
 
+long sensor_freq(int setting)
+{
+  long freq = 0;
+
+  switch(setting)
+  {
+    case 0:
+      freq = 0;
+      
+      break;
+    case 1:
+      freq = 30000;
+      
+      break;
+    case 2:
+      freq = 10000;
+      
+      break;
+    case 3:
+      freq = 1000;
+      
+      break;
+    default:
+    
+      break;
+  }
+  
+  return freq;
+}
+
 void setup(void)
 {
   Serial.begin(115200);
@@ -47,7 +77,7 @@ void loop(void)
       // command turn on sensor
       if (strstr(uart_rx, "time:") != NULL && !on_sensor)
       {
-        Serial.print("Turning on sensor\n\r");
+        Serial.print("\nTurning on sensor\n\r");
 
         char *ptr = strstr(uart_rx, "time:");
         
@@ -60,9 +90,9 @@ void loop(void)
         // Serial.print(timestamp);
       }
       // command turn off sensor
-      else if (strcmp(uart_rx, "sensor_end") == 0 && on_sensor)
+      else if (strstr(uart_rx, "sensor_end") != NULL && on_sensor)
       {
-        Serial.print("Turning off sensor\n\r");
+        Serial.print("\nTurning off sensor\n\r");
         on_sensor = false;
 
         timeout_t = 1000;
@@ -77,9 +107,9 @@ void loop(void)
       {
         char *ptr = strstr(uart_rx, "to_t:");
         static char *eptr;
-        timeout_t = strtoul(ptr + 5, &eptr, 10);
+        timeout_t = sensor_freq(strtol(ptr + 5, &eptr, 10));
         
-        Serial.print("timeoutT set to: ");
+        Serial.print("\ntimeoutT set to: ");
         Serial.print(timeout_t);
         Serial.print("\r");
       }
@@ -88,9 +118,9 @@ void loop(void)
       {
         char *ptr = strstr(uart_rx, "to_p:");
         static char *eptr;
-        timeout_p = strtoul(ptr + 5, &eptr, 10);
+        timeout_p = sensor_freq(strtol(ptr + 5, &eptr, 10));
         
-        Serial.print("timeoutP set to: ");
+        Serial.print("\ntimeoutP set to: ");
         Serial.print(timeout_p);
         Serial.print("\r");
       }
@@ -99,9 +129,9 @@ void loop(void)
       {
         char *ptr = strstr(uart_rx, "to_c:");
         static char *eptr;
-        timeout_t = strtoul(ptr + 5, &eptr, 10);
+        timeout_c = sensor_freq(strtol(ptr + 5, &eptr, 10));
         
-        Serial.print("timeoutC set to: ");
+        Serial.print("\ntimeoutC set to: ");
         Serial.print(timeout_c);
         Serial.println("\r");
       }
@@ -125,49 +155,61 @@ void loop(void)
     char value[128] = "";
 
     // temperature sensor
-    if (current_time % timeout_t < last_t)
+    if (timeout_t != 0)
     {
-      // log data
-      char temp_str[16] = "";
-      sprintf(temp_str,"\"T\":%d,", random(1, 20));
-      strcat(value, temp_str);
-      
-      last_t = 0;
+      if (current_time % timeout_t < last_t)
+      {
+        // log data
+        char temp_str[16] = "";
+        sprintf(temp_str,"\"T\":%d,", random(1, 20));
+        strcat(value, temp_str);
+        
+        last_t = 0;
+      }
+      else
+      {
+        last_t = current_time % timeout_t;
+      }
     }
-    else
-    {
-      last_t = current_time % timeout_t;
-    }
+
 
     // pressure sensor
-    if (current_time % timeout_p < last_p)
+    if (timeout_p != 0)
     {
-      // log data
-      char temp_str[16] = "";
-      sprintf(temp_str,"\"P\":%d,", random(1, 20));
-      strcat(value, temp_str);
-      
-      last_p = 0;
-    }
-    else
-    {
-      last_p = current_time % timeout_p;
+      if (current_time % timeout_p < last_p)
+      {
+        // log data
+        char temp_str[16] = "";
+        sprintf(temp_str,"\"P\":%d,", random(1, 20));
+        strcat(value, temp_str);
+        
+        last_p = 0;
+      }
+      else
+      {
+        last_p = current_time % timeout_p;
+      }
     }
 
+
     // conductivity sensor
-    if (current_time % timeout_c < last_c)
+    if (timeout_c != 0)
     {
-      // log data
-      char temp_str[16] = "";
-      sprintf(temp_str,"\"C\":%d,", random(1, 20));
-      strcat(value, temp_str);
-      
-      last_c = 0;
+      if (current_time % timeout_c < last_c)
+      {
+        // log data
+        char temp_str[16] = "";
+        sprintf(temp_str,"\"C\":%d,", random(1, 20));
+        strcat(value, temp_str);
+        
+        last_c = 0;
+      }
+      else
+      {
+        last_c = current_time % timeout_c;
+      }
     }
-    else
-    {
-      last_c = current_time % timeout_c;
-    }
+
 
     // if there are any sensor readings, print data
     if(strlen(value) != 0)
@@ -175,13 +217,13 @@ void loop(void)
       char data_JSON[256] = "";
       char temp_str[32] = "";
       
-      sprintf(temp_str,"{\"ts\":%lu,\"data\": {", timestamp + current_time);
+      sprintf(temp_str,"{\"ts\":%lu,\"data\":{", timestamp + current_time);
       strcat(data_JSON, temp_str);
       strcat(data_JSON, value);
       data_JSON[strlen(data_JSON)-1] = '\0';
       strcat(data_JSON, "}}\r");
 
-      Serial.print(data_JSON);
+      Serial.println(data_JSON);
     }
   }
 }

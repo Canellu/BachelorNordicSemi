@@ -286,7 +286,7 @@ static int read_JSON(char *file_path, int json_total)
 
 	if (ret == 0)
 	{
-		uint8_t line[256] = "";
+		uint8_t line[512] = "";
 		while (1)
 		{
 			uint8_t buf[2] = "";

@@ -72,18 +72,24 @@ struct m_param_t
 	struct tm m_start_tm; // mission start (tm)
 	int depth_max;
 	int depth_min;
-	int msg_sent;
 	int msg_max;
 	uint8_t wp_arr[10][2][16];
 	int wp_max;
-	int wp_cur;
 	struct sens_param_t sens_param;
+};
+
+struct m_state_t
+{
+	int msg_sent;
+	int wp_cur;
+	int surfaced;
 };
 
 struct glider_t
 {
 	uint8_t uid[7];
 	struct m_param_t m_param;
+	struct m_state_t m_state;
 	struct prog_param_t prog_param;
 
 	bool m_started;
@@ -108,8 +114,8 @@ struct tm *time_CET = {0};
 
 // Main message queue, used for getting responses from other modules
 struct k_msgq main_msg_q;
-static uint8_t main_msgq_buffer[3 * 256];
-static uint8_t main_msg[256];
+static uint8_t main_msgq_buffer[3 * 512];
+static uint8_t main_msg[512];
 
 // button variables
 struct k_msgq button_msg_q;
@@ -223,12 +229,12 @@ static int sd_save_data(void *data_string)
 	// strcat(filename, tmp_str);
 
 	snprintf(tmp_str, sizeof(tmp_str), "M%u.TXT", glider.m_param.mission);
-	strcat(filename, tmp_str);
+	strcpy(filename, tmp_str);
 
 	// copy string over to struct
 	strcpy(sd_msg.filename, filename);
 	//sd_msg.filename[strlen(filename)] = 0;
-	//LOG_INF("%s", log_strdup(sd_msg.filename));
+	LOG_INF("filename: %s", log_strdup(sd_msg.filename));
 
 	strcpy(sd_msg.string, data_string);
 
@@ -413,9 +419,9 @@ static int publish_data_4G()
 
 			if (cJSON_IsObject(payload_JSON))
 			{
-				if (cJSON_HasObjectItem(payload_JSON, "Ms"))
+				if (cJSON_HasObjectItem(payload_JSON, "state"))
 				{
-					cJSON_DeleteItemFromObject(payload_JSON, "Ms");
+					cJSON_DeleteItemFromObject(payload_JSON, "state");
 				}
 				strcpy(payload_4G, cJSON_Print(payload_JSON));
 				cJSON_Minify(payload_4G);
@@ -445,6 +451,7 @@ static int publish_data_4G()
 		if (ret == 0)
 		{
 			gcloud_publish(payload_4G, strlen(payload_4G), MQTT_QOS_1_AT_LEAST_ONCE);
+			glider.m_state.msg_sent++;
 			msg_sent++;
 		}
 	}
@@ -458,13 +465,15 @@ static int publish_data_4G()
 
 	snprintf(tmp_str, sizeof(tmp_str), "max:%d\r", msg_to_send);
 	strcat(sd_msg.string, tmp_str);
-	snprintf(tmp_str, sizeof(tmp_str), "wp_cur:%d\r", glider.m_param.wp_cur);
+	snprintf(tmp_str, sizeof(tmp_str), "wp_cur:%d\r", glider.m_state.wp_cur);
 	strcat(sd_msg.string, tmp_str);
+	LOG_INF("string for fetching sd data: %s", log_strdup(sd_msg.string));
 
 	// sending event to sd card
 	// LOG_INF("%s", log_strdup(sd_msg.string));
 	k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
 
+	LOG_INF("messages sent: %d", msg_sent);
 	while (msg_sent < msg_to_send)
 	{
 		k_msgq_get(&main_msg_q, &sd_msg_response, K_FOREVER);
@@ -474,7 +483,9 @@ static int publish_data_4G()
 		if (ret == 0)
 		{
 			gcloud_publish(payload_4G, strlen(payload_4G), MQTT_QOS_1_AT_LEAST_ONCE);
+			glider.m_state.msg_sent++;
 			msg_sent++;
+			LOG_INF("messages sent: %d", msg_sent);
 		}
 
 		// in case there are not enough datapoints to satisfy number of messages to be sent (reached end of read)
@@ -495,10 +506,13 @@ static int publish_data_4G()
 	return 0;
 }
 
-// updates mission status for struct glider and saves to sd card
+// updates mission status and saves to sd card
 static int update_mission_status(enum glider_mission_status new_mission_state)
 {
+	LOG_INF("Setting mission state to: %d", new_mission_state);
 	mission_state = new_mission_state;
+
+	date_time_now(&unix_time_ms);
 
 	static sd_msg_t sd_msg;
 	strcpy(sd_msg.filename, file_mission);
@@ -514,25 +528,21 @@ static int update_mission_status(enum glider_mission_status new_mission_state)
 		cJSON *m_JSON = cJSON_Parse(json_str);
 		if (cJSON_IsObject(m_JSON))
 		{
-			if (cJSON_HasObjectItem(m_JSON, "Ms"))
+			if (cJSON_HasObjectItem(m_JSON, "state"))
 			{
-				cJSON *tmp_JSON = cJSON_GetObjectItem(m_JSON, "Ms");
-				if (cJSON_IsNumber(tmp_JSON))
-				{
-					cJSON_SetIntValue(tmp_JSON, mission_state);
-				}
-				else
-				{
-					LOG_ERR("Mission state needs to be number");
-					return -1;
-				}
-			}
-			else
-			{
-				LOG_ERR("Mission state does not exist, attempting to write current state");
-				cJSON_AddNumberToObject(m_JSON, "Ms", mission_state);
+				LOG_INF("Updating previously written state");
+				cJSON_DeleteItemFromObject(m_JSON, "state");
 			}
 
+			cJSON *state_JSON = cJSON_CreateObject();
+			cJSON_AddNumberToObject(state_JSON, "Ms", new_mission_state);
+			cJSON_AddNumberToObject(state_JSON, "wp_cur", glider.m_state.wp_cur);
+			cJSON_AddNumberToObject(state_JSON, "msg_sent", glider.m_state.msg_sent);
+			cJSON_AddNumberToObject(state_JSON, "unix", (unix_time_ms / 1000));
+			cJSON_AddNumberToObject(state_JSON, "surfaced", glider.m_state.surfaced);
+			cJSON_AddItemToObject(m_JSON, "state", state_JSON);
+
+			LOG_INF("Writing new state to SD card");
 			// saving to sd card
 			sd_msg.event = OVERWRITE_FILE;
 
@@ -551,8 +561,6 @@ static int update_mission_status(enum glider_mission_status new_mission_state)
 		cJSON_Delete(m_JSON);
 	}
 
-	LOG_INF("Mission state set to: %d", mission_state);
-
 	return 0;
 }
 
@@ -561,6 +569,7 @@ static int parse_m_params(void *json_str)
 {
 	cJSON *tmp_JSON;
 	cJSON *tmpsub_JSON;
+
 	LOG_INF("json string: %s", log_strdup(json_str));
 	cJSON *m_JSON = cJSON_Parse(json_str);
 	if (cJSON_IsObject(m_JSON))
@@ -603,7 +612,7 @@ static int parse_m_params(void *json_str)
 				tmp_start_s = mktime(&tmp_start);
 				LOG_INF("start time unix: %d", (int32_t)tmp_start_s);
 				date_time_now(&unix_time_ms);
-				if (tmp_start_s < glider.m_param.m_start_s || tmp_start_s < (unix_time_ms / 1000))
+				if (tmp_start_s < glider.m_param.m_start_s || tmp_start_s < (unix_time_ms / 1000 + offset_CET))
 				{
 					LOG_INF("Mission expired");
 					return 1;
@@ -631,14 +640,17 @@ static int parse_m_params(void *json_str)
 				if (glider.m_param.mission < tmp_JSON->valueint)
 				{
 					LOG_INF("Mission valid, parsing further");
-					glider.m_param.mission = tmp_JSON->valueint;
 					new_mission = true;
+
+					glider.m_param.mission = tmp_JSON->valueint;
 
 					glider.m_param.m_start_tm.tm_year = tmp_start.tm_year;
 					glider.m_param.m_start_tm.tm_mon = tmp_start.tm_mon;
 					glider.m_param.m_start_tm.tm_mday = tmp_start.tm_mday;
 					glider.m_param.m_start_tm.tm_hour = tmp_start.tm_hour;
 					glider.m_param.m_start_tm.tm_min = tmp_start.tm_min;
+
+					glider.m_param.m_start_s = tmp_start_s;
 
 					LOG_INF("new start time: %04d-%02d-%02d %02d:%02d", glider.m_param.m_start_tm.tm_year + 1900,
 							glider.m_param.m_start_tm.tm_mon + 1,
@@ -662,24 +674,95 @@ static int parse_m_params(void *json_str)
 		if (new_mission)
 		{
 			// resetting necessary parameters
-			glider.m_param.wp_cur = 0;
-			glider.m_param.msg_sent = 0;
+			glider.m_state.wp_cur = 1;
+			glider.m_state.msg_sent = 0;
 
-			if (cJSON_HasObjectItem(m_JSON, "Ms"))
+			// fetching last saved state, if it does not exist add with default values
+			if (cJSON_HasObjectItem(m_JSON, "state"))
 			{
-				tmp_JSON = cJSON_GetObjectItem(m_JSON, "Ms");
-				if (cJSON_IsNumber(tmp_JSON))
+				LOG_INF("state exists, fetching values");
+				tmp_JSON = cJSON_GetObjectItem(m_JSON, "state");
+				if (cJSON_IsObject(tmp_JSON))
 				{
-					mission_state = tmp_JSON->valueint;
-				}
-				else
-				{
-					LOG_ERR("Mission state needs to be number");
+					if (cJSON_HasObjectItem(tmp_JSON, "Ms"))
+					{
+						tmpsub_JSON = cJSON_GetObjectItem(tmp_JSON, "Ms");
+						if (cJSON_IsNumber(tmpsub_JSON))
+						{
+							mission_state = tmpsub_JSON->valueint;
+						}
+						else
+						{
+							LOG_ERR("Mission state needs to be number");
+						}
+					}
+					if (cJSON_HasObjectItem(tmp_JSON, "wp_cur"))
+					{
+						tmpsub_JSON = cJSON_GetObjectItem(tmp_JSON, "wp_cur");
+						if (cJSON_IsNumber(tmpsub_JSON))
+						{
+							glider.m_state.wp_cur = tmpsub_JSON->valueint;
+						}
+						else
+						{
+							LOG_ERR("Waypoint current needs to be number");
+						}
+					}
+					if (cJSON_HasObjectItem(tmp_JSON, "msg_sent"))
+					{
+						tmpsub_JSON = cJSON_GetObjectItem(tmp_JSON, "msg_sent");
+						if (cJSON_IsNumber(tmpsub_JSON))
+						{
+							glider.m_state.msg_sent = tmpsub_JSON->valueint;
+						}
+						else
+						{
+							LOG_ERR("Messages sent needs to be number");
+						}
+					}
+					if (cJSON_HasObjectItem(tmp_JSON, "unix"))
+					{
+						tmpsub_JSON = cJSON_GetObjectItem(tmp_JSON, "unix");
+						if (cJSON_IsNumber(tmpsub_JSON))
+						{
+							int64_t unix_time_start = tmpsub_JSON->valuedouble;
+							time_UTC = gmtime(&unix_time_start);
+
+							date_time_set(time_UTC);
+							date_time_now(&unix_time_ms);
+							update_tm_all(unix_time_ms / 1000);
+						}
+						else
+						{
+							LOG_ERR("Messages sent needs to be number");
+						}
+					}
+					if (cJSON_HasObjectItem(tmp_JSON, "surfaced"))
+					{
+						tmpsub_JSON = cJSON_GetObjectItem(tmp_JSON, "surfaced");
+						if (cJSON_IsNumber(tmpsub_JSON))
+						{
+							glider.m_state.surfaced = tmpsub_JSON->valueint;
+						}
+						else
+						{
+							LOG_ERR("Surface status needs to be number");
+						}
+					}
 				}
 			}
 			else
 			{
-				cJSON_AddNumberToObject(m_JSON, "Ms", MISSION_WAIT_START);
+				date_time_now(&unix_time_ms);
+
+				cJSON *state_JSON = cJSON_CreateObject();
+				LOG_INF("state not yet added, adding default values");
+				cJSON_AddNumberToObject(state_JSON, "Ms", MISSION_WAIT_START);
+				cJSON_AddNumberToObject(state_JSON, "wp_cur", 1);
+				cJSON_AddNumberToObject(state_JSON, "msg_sent", 0);
+				cJSON_AddNumberToObject(state_JSON, "unix", (unix_time_ms / 1000));
+				cJSON_AddNumberToObject(state_JSON, "surfaced", 1);
+				cJSON_AddItemToObject(m_JSON, "state", state_JSON);
 			}
 
 			// parameter max mqtt message count
@@ -825,6 +908,7 @@ static int parse_m_params(void *json_str)
 
 			strcpy(sd_msg.string, cJSON_Print(m_JSON));
 			cJSON_Minify(sd_msg.string);
+			LOG_INF("Converted to string");
 
 			k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
 
@@ -873,7 +957,6 @@ static int check_mission()
 			LOG_INF("Mission: %d", glider.m_param.mission);
 
 			// TODO: change behavior based on this status
-			LOG_INF("Mission status: %d", mission_state);
 			LOG_INF("Max depth: %d", glider.m_param.depth_max);
 			LOG_INF("Min depth: %d", glider.m_param.depth_min);
 			LOG_INF("Message max: %d", glider.m_param.msg_max);
@@ -883,6 +966,12 @@ static int check_mission()
 			LOG_INF("C: %d", glider.m_param.sens_param.freq_c);
 			LOG_INF("P: %d", glider.m_param.sens_param.freq_p);
 			LOG_INF("T: %d", glider.m_param.sens_param.freq_t);
+
+			LOG_INF("State:");
+			LOG_INF("Mission status: %d", mission_state);
+			LOG_INF("Messages sent: %d", glider.m_state.msg_sent);
+			LOG_INF("Current waypoint: %d", glider.m_state.wp_cur);
+			LOG_INF("Surfaced: %d", glider.m_state.surfaced);
 		}
 
 		return 0;
@@ -1248,6 +1337,8 @@ static int sensor_module()
 				strcpy(sensor_str, cJSON_Print(sensor_JSON));
 				cJSON_Minify(sensor_str);
 
+				LOG_INF("data to save:%s", log_strdup(sensor_str));
+
 				// save to sd card
 				sd_save_data(sensor_str);
 				data_available_to_send = true;
@@ -1410,7 +1501,7 @@ static int gps_module()
 	// button_wait();
 	printk("\ngps test start");
 
-	ret = app_gps(&gps_data, 1000, 500);
+	ret = app_gps(&gps_data, 120 * 1000, 500);
 
 	if (ret == 0)
 	{
@@ -1418,7 +1509,7 @@ static int gps_module()
 		time_UTC->tm_mon = gps_data.time.tm_mon;
 		time_UTC->tm_mday = gps_data.time.tm_mday;
 
-		time_UTC->tm_hour = gps_data.time.tm_hour - 2;
+		time_UTC->tm_hour = gps_data.time.tm_hour;
 		time_UTC->tm_min = gps_data.time.tm_min;
 		time_UTC->tm_sec = gps_data.time.tm_sec;
 
@@ -1725,14 +1816,15 @@ static int glider_init()
 	// initialize parameters, TODO: Add if there are any other important params
 	glider.m_param.mission = 0;
 	mission_state = MISSION_FINISHED;
-	glider.m_param.wp_cur = 0;
 	glider.m_param.wp_max = 1;
-	glider.m_param.msg_sent = 0;
 	glider.m_param.msg_max = 1;
+	glider.m_state.wp_cur = 0;
+	glider.m_state.msg_sent = 0;
+	glider.m_state.surfaced = 1;
 
 	time_CET->tm_year = 121;
-	time_CET->tm_mon = 4;
-	time_CET->tm_mday = 6;
+	time_CET->tm_mon = 5;
+	time_CET->tm_mday = 12;
 
 	/* device inits and configurations */
 	device_inits();
@@ -1780,7 +1872,7 @@ void main(void)
 	static int ret = 0;
 	static int wifi_on = 0;
 
-	static int64_t unix_time_start = 1620723992;
+	static int64_t unix_time_start = 1620810897;
 	time_UTC = gmtime(&unix_time_start);
 
 	date_time_set(time_UTC);
@@ -1792,9 +1884,6 @@ void main(void)
 	// initialize glider
 	glider_init();
 	// button_wait();
-
-	mission_state = MISSION_ONGOING;
-	mission_params_wifi = true;
 
 	// TODO: create check for finished missions
 	if (mission_state == MISSION_WAIT_START)
@@ -1809,9 +1898,9 @@ void main(void)
 	}
 	else if (mission_state == MISSION_FINISHED)
 	{
-		LOG_INF("Running gps module");
+		// LOG_INF("Running gps module");
 		// button_wait();
-		gps_module();
+		// gps_module();
 		event = EVT_AWAIT_MISSION;
 		LOG_INF("No mission ongoing, on standby for new mission");
 	}
@@ -1831,7 +1920,7 @@ void main(void)
 			set_LED(30, 1);
 			set_LED(31, 1);
 			LOG_INF("Waiting for wifi command");
-			k_msgq_get(&button_msg_qr, &wifi_on, K_SECONDS(30));
+			k_msgq_get(&button_msg_qr, &wifi_on, K_SECONDS(60));
 			set_LED(22, 0);
 			set_LED(30, 0);
 			set_LED(31, 0);
@@ -1873,6 +1962,8 @@ void main(void)
 			break;
 		case EVT_DIVE:
 			LOG_INF("\nEvent: dive");
+			glider.m_state.surfaced = 0;
+			update_mission_status(MISSION_ONGOING);
 
 			// function: send command to navigation
 
@@ -1883,22 +1974,25 @@ void main(void)
 			update_tm_all(unix_time_ms / 1000);
 			sensor_module();
 
+			glider.m_state.surfaced = 1;
 			event = EVT_SURFACE;
 
 			break;
 		case EVT_SURFACE:
 			LOG_INF("\nEvent: surface");
 
-			glider.m_param.wp_cur++;
+			glider.m_state.wp_cur++;
+			LOG_INF("Current waypoint: %d", glider.m_state.wp_cur);
+			update_mission_status(MISSION_ONGOING);
 
-			if (glider.m_param.wp_cur <= glider.m_param.wp_max)
-			{
-				event = EVT_DIVE;
-			}
-			else
+			if (glider.m_state.wp_cur >= glider.m_param.wp_max)
 			{
 				event = EVT_AWAIT_MISSION;
 				update_mission_status(MISSION_FINISHED);
+			}
+			else
+			{
+				event = EVT_DIVE;
 			}
 			LOG_INF("Running gps module");
 			// button_wait();
@@ -1925,14 +2019,15 @@ void main(void)
 
 			date_time_now(&unix_time_ms);
 			update_tm_all(unix_time_ms / 1000);
-			if ((unix_time_ms / 1000) > glider.m_param.m_start_s)
+			LOG_INF("CET unix: %d, start time: %d", (int32_t)unix_time_CET, (int32_t)glider.m_param.m_start_s);
+			if (unix_time_CET > glider.m_param.m_start_s)
 			{
 				LOG_INF("Start time OK, starting mission");
 				event = EVT_DIVE;
-				update_mission_status(MISSION_ONGOING);
 			}
 			else
 			{
+				update_mission_status(MISSION_WAIT_START);
 				set_LED(22, 1);
 				set_LED(20, 1);
 				set_LED(30, 1);
@@ -1946,7 +2041,7 @@ void main(void)
 
 				LOG_INF("Running gps module");
 				// button_wait();
-				gps_module();
+				// gps_module();
 
 				event = EVT_IDLE;
 			}
