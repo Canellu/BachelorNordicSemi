@@ -1,13 +1,4 @@
-// Check if user is logged in and redirect them
-auth.onAuthStateChanged((user) => {
-  if (user) {
-    console.log("Is logged in!");
-  } else {
-    // User is logged out
-    console.log("Is logged out!");
-    location.replace("index.html");
-  }
-});
+userStateListener();
 
 let dataTabBtn = document.querySelector("#data-tab-btn");
 let controlTabBtn = document.querySelector("#control-tab-btn");
@@ -101,67 +92,148 @@ addScrollLock(document.querySelector("#previewBox"), 20);
 addScrollLock(document.querySelector("#satelliteMessageTableWrapper"), 16);
 
 var charts = []; //Conductivity, Pressure, Temperature
-var activeMission = "";
-var latestMission = 0;
+var activeMission = ""; // Full mission name "Mission X"
+var latestMission = 0; // Mission number only. "Mission X" <-- the X only
 
 // Store all chartdata from clicked missions
 var missionDataset = {};
-// When clicking on a dropdown mission, retrieve data from firestore and update charts
+// Creates mission items and set global variables.
+// Clicking on a dropdown mission-item, retrieves data from firestore and updates charts
+// async function listMissions() {
+//   dropDownContent.innerHTML = "";
+//   // All mission documents for this glider
+//   const missions = await getMissionDocs();
+//   // Create mission-items in dropdown menu
+//   missions.forEach((mission) => {
+//     // test if mission is newer than previously fetched
+//     let missionNum = parseInt(mission.id.split(" ")[1]);
+//     if (missionNum > latestMission) {
+//       latestMission = missionNum;
+//     }
+//     // Create dropdown content for each mission
+//     dropDownContent.innerHTML += `<div class="mission w-full">${mission.id}</div>`;
+//   });
+
+//   activeMission = `Mission ${latestMission}`;
+
+//   // Add click-event for each dropdown-content
+//   let missionDivs = document.querySelectorAll(".mission");
+//   missionDivs.forEach((div) => {
+//     // When clicked, get data from firestore, update chart
+//     div.addEventListener("click", async () => {
+//       // Current mission data
+//       let data;
+
+//       // Get data from firestore
+//       activeMission = div.innerText;
+
+//       // Give missionSelector the current mission as text
+//       document.querySelector(
+//         "#missionSelector div p"
+//       ).innerText = activeMission;
+
+//       // Do not retrieve mission if data is already retrieved
+//       if (activeMission in missionDataset) {
+//         data = missionDataset[activeMission];
+//         console.log(`Getting data from missionDataset: ${activeMission}`);
+//       } else {
+//         data = await getMissionData(div.innerHTML);
+//         console.log(data);
+//         missionDataset[activeMission] = data;
+//         console.log(`Getting data from firestore: ${activeMission}`);
+//       }
+//       // Update chart
+//       updateDataUI(data);
+//     });
+//   });
+
+//   // Click on latest mission
+//   missionDivs[missionDivs.length - 1].click();
+// }
+
 async function listMissions() {
   dropDownContent.innerHTML = "";
-  // All mission documents for this glider
-  let missions = await db
-    .collection("Gliders")
+
+  db.collection("Gliders")
     .doc(gliderUID)
     .collection("Missions")
-    .get();
+    .onSnapshot((snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        const missionDoc = change.doc;
 
-  // Loop through all mission-docs
-  missions.forEach((mission) => {
-    // test if mission is newer than previously fetched
-    let missionNum = parseInt(mission.id.split(" ")[1]);
-    if (missionNum > latestMission) {
-      latestMission = missionNum;
-    }
-    // Create dropdown content for each mission
-    dropDownContent.innerHTML += `<div class="mission w-full">${mission.id}</div>`;
-  });
+        // Create new mission-item and add it to dropdown menu for each mission added to Firestore
+        if (change.type === "added") {
+          // Setting latest mission number to global variable
+          const missionNum = Number(missionDoc.id.split(" ")[1]);
+          if (missionNum > latestMission) {
+            latestMission = missionNum;
+          }
 
-  activeMission = `Mission ${latestMission}`;
+          // Creating mission-item
+          const missionItem = document.createElement("div");
+          missionItem.innerHTML = missionDoc.id;
+          missionItem.classList.add("mission", "w-full");
+          missionItem.dataset.index = missionNum;
+          missionItem.addEventListener("click", async (e) => {
+            const missionName = e.target.innerHTML;
+            // Current mission data
+            let data;
+            // Set mission-name to global variable
+            activeMission = missionDoc.id;
 
-  // Add click-event for each dropdown-content
-  let missionDivs = document.querySelectorAll(".mission");
-  missionDivs.forEach((div) => {
-    // When clicked, get data from firestore, update chart
-    div.addEventListener("click", async () => {
-      // Current mission data
-      let data;
+            // Give missionSelector the current mission as text
+            document.querySelector(
+              "#missionSelector div p"
+            ).innerText = missionName;
 
-      // Get data from firestore
-      activeMission = div.innerText;
+            // Do not retrieve mission if data is already retrieved
+            if (missionName in missionDataset) {
+              data = missionDataset[missionName];
+              console.log(`Getting data from missionDataset: ${missionName}`);
+            } else {
+              data = await getMissionData(missionName);
+              missionDataset[missionName] = data;
+              console.log(`Getting data from firestore: ${missionName}`);
+            }
+            // Update chart
+            updateDataUI(data);
+          });
 
-      // Give missionSelector the current mission as text
-      document.querySelector(
-        "#missionSelector div p"
-      ).innerText = activeMission;
+          /*
+            Logic for appending in right order. Mission-items in right order.
+          */
+          // Get current mission-items in dropdown-menu, is empty-array if none found
+          const missionItems = [
+            ...document.querySelector(".dropDownContent").children,
+          ];
 
-      // Do not retrieve mission if data is already retrieved
-      if (activeMission in missionDataset) {
-        data = missionDataset[activeMission];
-        console.log(`Getting data from missionDataset: ${activeMission}`);
-      } else {
-        data = await getMissionData(div.innerHTML);
-        missionDataset[activeMission] = data;
-        console.log(`Getting data from firestore: ${activeMission}`);
-      }
-      // Update chart
-      updateDataUI(data);
+          // Get first mission-item that has higher number than current mission.
+          // Is Undefined if none found
+          const highestMissionDiv = missionItems.find((item) => {
+            return Number(item.innerHTML.split(" ")[1]) > missionNum;
+          });
+
+          if (highestMissionDiv) {
+            highestMissionDiv.parentElement.insertBefore(
+              missionItem,
+              highestMissionDiv
+            );
+          } else {
+            dropDownContent.appendChild(missionItem);
+          }
+        }
+
+        console.log(
+          `Creating mission-item: %c${missionDoc.id}`,
+          "color: teal; font-weight: bold; letter-spacing: 2px;"
+        );
+      });
     });
-  });
+  console.log("Got Missions-snapshot listener...");
 
-  // Click on latest mission
-  missionDivs[missionDivs.length - 1].click();
-  document.querySelector("#missionSelector div p").innerText = activeMission;
+  // TODO: Find a way to click on latest mission without stalling function with another query.
+  await getMissionDocs();
+  document.querySelector(`.mission[data-index="${latestMission}"]`).click();
 }
 
 // Returns promise of missionData-object
@@ -180,7 +252,6 @@ async function getMissionData(missionName) {
     .doc(missionName);
 
   let missionData = await mission.collection("Data").get();
-
   // Looping through data documents
   missionData.forEach((date) => {
     //Get document keys, which is timestamp
@@ -266,8 +337,6 @@ function getDataType(dataset, type) {
 function updateDataUI(data) {
   if (Object.entries(data).length !== 0) {
     charts.forEach((chartObj) => {
-      console.log(chartObj);
-
       chartObj.chart.data.datasets[0].data = data[chartObj.type];
       chartObj.chart.update();
       chartObj.chart.resetZoom();
@@ -276,7 +345,6 @@ function updateDataUI(data) {
   } else {
     clearMapMarkers();
     charts.forEach((chartObj) => {
-      console.log(chartObj);
       chartObj.chart.data.datasets[0].data = [];
       chartObj.chart.update();
       chartObj.chart.resetZoom();
