@@ -612,7 +612,7 @@ static int parse_m_params(void *json_str)
 				tmp_start_s = mktime(&tmp_start);
 				LOG_INF("start time unix: %d", (int32_t)tmp_start_s);
 				date_time_now(&unix_time_ms);
-				if (tmp_start_s < glider.m_param.m_start_s || tmp_start_s < (unix_time_ms / 1000))
+				if (tmp_start_s < glider.m_param.m_start_s || tmp_start_s < (unix_time_ms / 1000 + offset_CET))
 				{
 					LOG_INF("Mission expired");
 					return 1;
@@ -2027,6 +2027,7 @@ void main(void)
 			}
 			else
 			{
+				update_mission_status(MISSION_WAIT_START);
 				set_LED(22, 1);
 				set_LED(20, 1);
 				set_LED(30, 1);
