@@ -1,5 +1,6 @@
 import 'dart:collection';
 
+import 'package:bachelor_app/models/coodinateData.dart';
 import 'package:bachelor_app/models/device.dart';
 import 'package:bachelor_app/models/mission.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -183,7 +184,7 @@ class DatabaseService {
       }
     });
 
-    var data = [];
+    List<Coordinates> data = [];
     //elementAt(0) == lng, elementAt(1) == lat
     var dataCoodinatesValue = dataCoodinatesRaw.values;
 
@@ -193,7 +194,7 @@ class DatabaseService {
       var lng = double.parse(dataCoodinatesValue.elementAt(0).values.elementAt(i));
       var lat = double.parse(dataCoodinatesValue.elementAt(1).values.elementAt(i));
 
-      data.add({'t':t, 'lng':lng, 'lat':lat});
+      data.add(Coordinates(t, lat, lng));
     }
     dataObj["coodinates"] = data;
 
