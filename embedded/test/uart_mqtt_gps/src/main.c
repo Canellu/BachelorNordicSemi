@@ -1412,7 +1412,7 @@ static int gps_module()
 	// button_wait();
 	printk("\ngps test start");
 
-	ret = app_gps(&gps_data, 1000, 500);
+	ret = app_gps(&gps_data, 120 * 1000, 500);
 
 	if (ret == 0)
 	{
@@ -1808,9 +1808,9 @@ void main(void)
 	}
 	else if (mission_state == MISSION_FINISHED)
 	{
-		LOG_INF("Running gps module");
+		// LOG_INF("Running gps module");
 		// button_wait();
-		gps_module();
+		// gps_module();
 		event = EVT_AWAIT_MISSION;
 		LOG_INF("No mission ongoing, on standby for new mission");
 	}
