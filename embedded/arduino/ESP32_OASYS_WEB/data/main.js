@@ -33,6 +33,8 @@ var requestDataReceived = 0;
 var requestTotalSize = 0;
 var espString = "";
 let missionNumFromNrf = 0;
+let satIMEI = 0;
+let nrfIMEI = 0;
 
 var checkValAll = true;
 
@@ -128,7 +130,7 @@ document.addEventListener("DOMContentLoaded", function () {
   M.Tabs.init(document.querySelectorAll(".tabs"));
   M.Modal.init(document.querySelectorAll(".modal"));
   M.FormSelect.init(document.querySelectorAll("select"));
-
+  // M.Pushpin.init(document.querySelectorAll(".pushpin"), {});
   M.Datepicker.init(document.querySelectorAll(".datepicker"), {
     // autoClose: true,
     format: "yyyy-mm-dd",
@@ -411,9 +413,13 @@ if (!!window.EventSource) {
       if (event.lastEventId == lastEventId) return;
 
       // Updates mission number if NRF sent it.
-      if (event.data.includes('"M":')) {
-        let dataJSON = JSON.parse(event.data);
-        missionNumFromNrf = dataJSON.M;
+      if (event.data.includes("nIMEI")) {
+        let parts = event.data.split(",");
+        nrfIMEI = parts.find((part) => part.includes("nIMEI:")).split(":")[1];
+        satIMEI = parts.find((part) => part.includes("sIMEI:")).split(":")[1];
+        missionNumFromNrf = parts
+          .find((part) => part.includes("M:"))
+          .split(":")[1];
         updateMissionNum();
       }
 
