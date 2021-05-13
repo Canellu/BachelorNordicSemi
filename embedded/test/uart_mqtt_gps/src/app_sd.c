@@ -84,7 +84,7 @@ static int lsdir(const char *path)
 	return res;
 }
 
-static int look_for_file(const char *path, const char *filename)
+static int look_for_file(size_t *size, const char *path, const char *filename)
 {
 	int res;
 	struct fs_dir_t dirp;
@@ -115,7 +115,9 @@ static int look_for_file(const char *path, const char *filename)
 
 			if (strcmp(entry.name, filename) == 0)
 			{
-				res = entry.size;
+				LOG_INF("Found file, size: %d", entry.size);
+				*size = entry.size;
+				res = 0;
 				break;
 			}
 		}
@@ -348,9 +350,10 @@ static int read_JSON(char *file_path, int json_total)
 }
 
 // reads JSON with more parameters specifically for 4G use, DO NOT USE ELSEWHERE
-static int read_JSON_4G(char *file_path, uint8_t *param_str, size_t file_size)
+static int read_JSON_4G(char *file_path, uint8_t *param_str, off_t *cursor, size_t file_size)
 {
-	uint32_t cursor = 0;
+	LOG_INF("In read JSON 4G");
+
 	int counter = 0;
 	int interval = 0;
 	size_t file_part = 0;
@@ -381,13 +384,15 @@ static int read_JSON_4G(char *file_path, uint8_t *param_str, size_t file_size)
 		wp_cur = strtol(ptr + 7, &eptr, 10);
 		LOG_INF("waypoint: %d", wp_cur);
 
-		if (wp_cur <= 0)
+		// first resurface since mission start, reset cursor value
+		if (wp_cur <= 2)
 		{
-			wp_cur = 1;
+			*cursor = 0;
 		}
 	}
 
-	file_part = file_size / wp_cur;
+	file_part = file_size - (*cursor);
+	LOG_INF("file part: %d", (int32_t)file_part);
 
 	interval = (file_part / json_size) / msg_max;
 	if (interval <= 0)
@@ -395,13 +400,7 @@ static int read_JSON_4G(char *file_path, uint8_t *param_str, size_t file_size)
 		interval = 1;
 	}
 	LOG_INF("interval: %d", interval);
-
-	cursor = file_part - file_size;
-	if (cursor < 0)
-	{
-		cursor = 0;
-	}
-	LOG_INF("cursor: %d", (int32_t)cursor);
+	LOG_INF("Cursor before read: %d", (int32_t)(*cursor));
 
 	// For catching return values from fs_functions
 	int ret = 1;
@@ -412,7 +411,7 @@ static int read_JSON_4G(char *file_path, uint8_t *param_str, size_t file_size)
 
 	if (ret == 0)
 	{
-		fs_seek(&file, cursor, FS_SEEK_SET);
+		fs_seek(&file, *cursor, FS_SEEK_SET);
 		uint8_t line[256] = "";
 		while (1)
 		{
@@ -439,6 +438,10 @@ static int read_JSON_4G(char *file_path, uint8_t *param_str, size_t file_size)
 					cJSON *line_JSON = cJSON_Parse(line);
 					if (cJSON_IsObject(line_JSON))
 					{
+						if (*cursor < fs_tell(&file))
+						{
+							*cursor = fs_tell(&file);
+						}
 						// LOG_INF("line: %s", log_strdup(line));
 						k_msgq_put(&main_msg_q, &line, K_NO_WAIT);
 						msg_cur++;
@@ -467,6 +470,7 @@ static int read_JSON_4G(char *file_path, uint8_t *param_str, size_t file_size)
 			}
 		}
 
+		LOG_INF("Cursor val: %d", (int32_t)(*cursor));
 		LOG_INF("Reached end of read");
 		uint8_t sd_msg_response[] = "EOM";
 		k_msgq_put(&main_msg_q, &sd_msg_response, K_NO_WAIT);
@@ -601,6 +605,7 @@ void app_sd_thread(void *unused1, void *unused2, void *unused3)
 
 	char file_path[32] = "";
 	// helper variables for event READ_JSON_4G
+	off_t cursor = 0;
 	size_t file_size = 0;
 
 	set_LED(21, 1);
@@ -612,7 +617,7 @@ void app_sd_thread(void *unused1, void *unused2, void *unused3)
 		// get msg from main
 		k_msgq_get(&sd_msg_q, &sd_msg, K_FOREVER);
 
-		// LOG_INF("\n%s %s\n", log_strdup(sd_msg.filename), log_strdup(sd_msg.string));
+		// LOG_INF("\nname:%s\n%s", log_strdup(sd_msg.filename), log_strdup(sd_msg.string));
 
 		switch (sd_msg.event)
 		{
@@ -622,6 +627,7 @@ void app_sd_thread(void *unused1, void *unused2, void *unused3)
 			{
 				write_file(file_path, sd_msg.string, strlen(sd_msg.string));
 			}
+
 			break;
 		case OVERWRITE_FILE:
 			ret = create_file_path(file_path, sd_msg.filename);
@@ -632,10 +638,10 @@ void app_sd_thread(void *unused1, void *unused2, void *unused3)
 
 			break;
 		case FIND_FILE:
-			ret = look_for_file(disk_mount_pt, sd_msg.filename);
+			ret = look_for_file(&file_size, disk_mount_pt, sd_msg.filename);
 			if (ret >= 0)
 			{
-				k_msgq_put(&main_msg_q, &ret, K_NO_WAIT);
+				k_msgq_put(&main_msg_q, &file_size, K_NO_WAIT);
 			}
 			else
 			{
@@ -653,14 +659,16 @@ void app_sd_thread(void *unused1, void *unused2, void *unused3)
 			{
 				read_JSON(file_path, 1);
 			}
+
 			break;
 		case READ_JSON_4G:
 			ret = create_file_path(file_path, sd_msg.filename);
 			if (ret == 0)
 			{
-				file_size = look_for_file(disk_mount_pt, sd_msg.filename);
-				read_JSON_4G(file_path, sd_msg.string, file_size);
+				ret = look_for_file(&file_size, disk_mount_pt, sd_msg.filename);
+				read_JSON_4G(file_path, sd_msg.string, &cursor, file_size);
 			}
+
 			break;
 		case READ_FILE:
 			ret = create_file_path(file_path, sd_msg.filename);
@@ -668,6 +676,7 @@ void app_sd_thread(void *unused1, void *unused2, void *unused3)
 			{
 				read_file(file_path);
 			}
+
 			break;
 		default:
 			LOG_ERR("Unknown SD event type");
