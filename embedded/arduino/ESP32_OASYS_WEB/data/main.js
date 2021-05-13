@@ -414,9 +414,9 @@ if (!!window.EventSource) {
 
       // Updates mission number if NRF sent it.
       if (event.data.includes("nIMEI")) {
-        missionNumFromNrf = event.data.split(",")[0];
-        satIMEI = event.data.split(",")[1];
-        nrfIMEI = event.data.split(",")[2];
+        missionNumFromNrf = event.data.split(",")[0].split(":")[1];
+        satIMEI = event.data.split(",")[1].split(":")[1];
+        nrfIMEI = event.data.split(",")[2].split(":")[1];
         updateMissionNum();
       }
 
