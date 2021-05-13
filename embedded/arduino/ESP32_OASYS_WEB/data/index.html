@@ -13,24 +13,17 @@
     <title>OASYS</title>
   </head>
 
-  <body style="background: #f3f4f6">
+  <body style="background: #f3f4f6" onload="adjustCheckboxesPosition()">
     <nav>
       <div class="nav-wrapper bg-dark">
         <div class="container">
-          <a
-            href="#!"
+          <div
+            href=""
             class="center brand-logo white-text text-darken-3"
             style="font-size: 24px; font-weight: 700"
           >
             OASYS
-          </a>
-          <a
-            id="endConnectionBtn"
-            onclick="endConnection()"
-            class="waves-effect waves-light btn-flat red lighten-2"
-          >
-            DISCONNECT
-          </a>
+          </div>
         </div>
       </div>
     </nav>
@@ -38,8 +31,8 @@
     <div class="tabSelectorBottom bg-dark">
       <div class="container">
         <ul class="tabs tabs-fixed-width bg-dark">
-          <li class="tab valign-wrapper">
-            <a href="#info" class="">
+          <li class="tab">
+            <a class="" href="#info" onclick="scrollToTop()">
               <p class="icon">
                 <svg
                   width="22"
@@ -54,8 +47,8 @@
               </p>
             </a>
           </li>
-          <li class="tab valign-wrapper">
-            <a href="#terminal">
+          <li class="tab">
+            <a class="" href="#module" onclick="scrollToTop()">
               <p class="icon">
                 <svg
                   width="22"
@@ -70,8 +63,8 @@
               </p>
             </a>
           </li>
-          <li class="tab valign-wrapper">
-            <a class="" href="#files">
+          <li class="tab">
+            <a class="" href="#files" onclick="scrollToTop()">
               <p class="icon">
                 <svg
                   width="22"
@@ -86,8 +79,8 @@
               </p>
             </a>
           </li>
-          <li class="tab valign-wrapper">
-            <a class="active" href="#config">
+          <li class="tab">
+            <a class="active" href="#config" onclick="scrollToTop()">
               <p class="icon">
                 <svg
                   width="22"
@@ -106,237 +99,267 @@
       </div>
     </div>
     <!-- INFO TAB -->
-    <div class="container mtop" id="info">
+    <div class="container mtop" id="info" style="padding-bottom: 50px">
       <div class="row">
-        <div class="col s12 m6 l4" style="padding: 0">
+        <!-- Glider Info -->
+        <div class="col s12">
           <div class="card bg-light">
-            <div class="card-image glider"></div>
-            <div class="card-content black-text">
-              <span class="card-title black-text">G2</span>
+            <div class="card-image flexCenter">
+              <img src="OASYS_dark.jpg" id="infoImg" class="mtop" />
+            </div>
+            <div class="card-content">
+              <div class="card-title">Glider info</div>
+              <div class="row" style="letter-spacing: 0.5px">
+                <p class="col s12">
+                  nrf IMEI:
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+                    id="nrfIMEI"
+                    >8518989151</span
+                  >
+                </p>
+                <p class="col s12">
+                  Satellite IMEI: &nbsp;
+                  <span id="satIMEI">123456395828492</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Modules Info -->
+        <div class="col s12">
+          <div class="card bg-light">
+            <div class="card-content">
+              <div class="card-title row">
+                <div class="col s12">
+                  <svg
+                    width="22"
+                    height="22"
+                    fill="#1F2937"
+                    viewBox="0 -1 16 16"
+                  >
+                    <path
+                      d="M0 3a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3zm9.5 5.5h-3a.5.5 0 0 0 0 1h3a.5.5 0 0 0 0-1zm-6.354-.354a.5.5 0 1 0 .708.708l2-2a.5.5 0 0 0 0-.708l-2-2a.5.5 0 1 0-.708.708L4.793 6.5 3.146 8.146z"
+                    />
+                  </svg>
+                  <span style="margin-left: 8px">Modules</span>
+                </div>
+              </div>
               <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Quaerat
-                sapiente quasi iure ea sequi a doloribus ratione accusamus, esse
-                necessitatibus.
+                You can test individual modules for their current health status.
+                Tap/Click on a button to start a test. It may take a minute or
+                two for results to show.
+
+                <span class="green-text text-lighten-1">Green</span> signifies
+                that module is ok.
+
+                <span class="red-text text-lighten-1">Red</span> signifies that
+                a module has an error.
               </p>
             </div>
           </div>
         </div>
-        <div class="col s7 m4 l5">
-          <div class="card bg-light">
-            <div class="card-content text-black">
-              <p class="card-title">
-                &nbsp Battery
-                <svg
-                  class="left"
-                  width="15"
-                  height="30"
-                  viewBox="0 0 8 15"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M6.7525 2H5.5V0.5H2.5V2H1.2475C0.7 2 0.25 2.45 0.25 2.9975V14.495C0.25 15.05 0.7 15.5 1.2475 15.5H6.745C7.3 15.5 7.75 15.05 7.75 14.5025V2.9975C7.75 2.45 7.3 2 6.7525 2Z"
-                    fill="#424242"
-                  />
-                </svg>
-              </p>
-            </div>
-          </div>
-        </div>
-        <div class="col s5 m2 l3">
+        <!-- Files Info -->
+        <div class="col s12">
           <div class="card bg-light">
             <div class="card-content">
-              <p class="card-title center">20%</p>
-            </div>
-          </div>
-        </div>
-        <div class="col s12 m6 l5">
-          <div class="card bg-light">
-            <div class="card-content">
-              <span class="card-title">Moar info</span>
+              <div class="card-title row">
+                <div class="col s12">
+                  <svg
+                    width="22"
+                    height="22"
+                    fill="#1F2937"
+                    viewBox="0 -1 16 16"
+                  >
+                    <path
+                      d="M9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31L.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3zm-8.322.12C1.72 3.042 1.95 3 2.19 3h5.396l-.707-.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981l.006.139z"
+                    />
+                  </svg>
+
+                  <span style="margin-left: 8px">Files</span>
+                </div>
+              </div>
               <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Nihil
-                amet adipisci unde fugit! Deleniti libero numquam eligendi.
-                Repellendus officia quas nam vitae incidunt fuga inventore dicta
-                placeat blanditiis, veniam labore!
+                You can select and download data stored in glider SD-card as
+                .zip-files Downloading data can take up to several minutes. Do
+                not refresh the page while it is downloading. The progress is
+                reset in doing so.
               </p>
             </div>
           </div>
         </div>
-        <div class="col s12 m12 l3">
+        <!-- Config Info -->
+        <div class="col s12">
           <div class="card bg-light">
             <div class="card-content">
-              <span class="card-title">Some info</span>
-              <p>Lorem ipsum dolor sit amet.</p>
-            </div>
-          </div>
-        </div>
-        <div class="col s12 m12 l3">
-          <div class="card bg-light">
-            <div class="card-content">
-              <span class="card-title">Moar info</span>
-              <p class="midlertidigTerminal">Hei</p>
+              <div class="card-title row">
+                <div class="col s12">
+                  <svg
+                    width="22"
+                    height="22"
+                    fill="#1F2937"
+                    viewBox="0 0 16 16"
+                  >
+                    <path
+                      d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"
+                    />
+                  </svg>
+                  <span style="margin-left: 8px">Configurations</span>
+                </div>
+              </div>
+              <p>
+                This tab is for sending the glider out on a mission. Configure
+                the parameters and send it!
+              </p>
             </div>
           </div>
         </div>
       </div>
     </div>
     <!-- END INFO TAB -->
-    <!-- TERMINAL TAB -->
-    <div class="container mtop" id="terminal">
+    <!-- MODULES TAB -->
+    <div class="container mtop" id="module" style="padding-bottom: 50px">
       <div class="row">
-        <div class="col s10 m11">
-          <form autocomplete="off">
-            <div class="input-field">
-              <i class="prefix penIcon">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="22"
-                  height="22"
-                  fill="currentColor"
-                  class="bi bi-pen-fill"
-                  viewBox="0 0 16 16"
-                >
-                  <path
-                    d="M13.498.795l.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001z"
-                  />
-                </svg>
-              </i>
-              <input id="commands" type="text" />
-
-              <label for="commands">Insert command</label>
-              <span
-                class="helper-text"
-                data-error="Invalid command"
-                data-success="Command sent"
-              >
-                command format is a key value pair separated by space
-              </span>
-            </div>
-          </form>
+        <!-- Title -->
+        <div class="col s12">
+          <h5 class="center">MODULES</h5>
         </div>
-        <div class="col s2 m1">
-          <a class="modal-trigger right" data-target="commandModal">
-            <svg
-              class="infoCircle"
-              width="31"
-              height="31"
-              viewBox="0 0 31 31"
-              fill="none"
-            >
-              <path
-                d="M15.3334 0.333252C7.05337 0.333252 0.333374 7.05325 0.333374 15.3333C0.333374 23.6133 7.05337 30.3333 15.3334 30.3333C23.6134 30.3333 30.3334 23.6133 30.3334 15.3333C30.3334 7.05325 23.6134 0.333252 15.3334 0.333252ZM16.8334 22.8333H13.8334V13.8333H16.8334V22.8333ZM16.8334 10.8333H13.8334V7.83325H16.8334V10.8333Z"
-                fill="#26A69A"
-              />
-            </svg>
+        <!-- testBtn Satellite -->
+        <div class="col s6">
+          <a
+            id="testBtnSatellite"
+            class="waves-effect waves-light btn bg-dark flexCenter"
+          >
+            <h6 style="margin: 0">Satellite</h6>
+          </a>
+        </div>
+
+        <!-- testBtn GPS -->
+        <div class="col s6">
+          <a
+            id="testBtnGPS"
+            class="waves-effect waves-light btn bg-dark flexCenter"
+          >
+            <h6 style="margin: 0">GPS</h6>
+          </a>
+        </div>
+
+        <!-- testBtn 4G -->
+        <div class="col s6">
+          <a
+            id="testBtn4G"
+            class="waves-effect waves-light btn bg-dark flexCenter"
+          >
+            <h6 style="margin: 0">4G</h6>
+          </a>
+        </div>
+
+        <!-- testBtn Sensor -->
+        <div class="col s6">
+          <a
+            id="testBtn4G"
+            class="waves-effect waves-light btn bg-dark flexCenter"
+          >
+            <h6 style="margin: 0">Sensor</h6>
+          </a>
+        </div>
+
+        <div class="col s12">
+          <h5 class="divider"></h5>
+        </div>
+
+        <div class="col s4">
+          <h6 class="center green lighten-2 indicator flexCenter">FAULTY</h6>
+        </div>
+        <div class="col s4">
+          <h6 class="center bg-dark white-text indicator flexCenter">
+            UNTESTED
+          </h6>
+        </div>
+        <div class="col s4">
+          <h6 class="center red lighten-2 indicator flexCenter">ERROR</h6>
+        </div>
+
+        <div class="col s12">
+          <h5 class="divider"></h5>
+        </div>
+
+        <div class="col s12">
+          <div class="card bg-light">
+            <div class="card-content">
+              <div class="card-title">Message window</div>
+              <p id="messageWindow">
+                If there are any error messages during testing. It will appear
+                here...
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- row -->
+    </div>
+    <!-- END MODULES TAB -->
+    <!-- FILES TAB -->
+    <div class="container mtop" id="files" style="padding-bottom: 50px">
+      <div class="row">
+        <div class="col s6">
+          <div class="card bg-light center">
+            <div class="card-content">
+              <span class="card-title">Files</span>
+              <h4 class="totalFiles hide-on-small-and-down">0</h4>
+              <h5 class="totalFiles hide-on-med-and-up">0</h5>
+            </div>
+          </div>
+        </div>
+        <div class="col s6">
+          <div class="card bg-light center">
+            <div class="card-content">
+              <span class="card-title">Size</span>
+              <h4 class="totalFiles hide-on-small-and-down">0</h4>
+              <h5 class="totalFiles hide-on-med-and-up">0</h5>
+            </div>
+          </div>
+        </div>
+
+        <div class="col s12">
+          <div class="card">
+            <table class="striped centered borderB bg-light">
+              <thead>
+                <tr>
+                  <th colspan="2">Filename [Date]</th>
+                  <th colspan="2">Size [kB]</th>
+                  <th id="numChecked">0/0</th>
+                </tr>
+                <tr>
+                  <th colspan="2" class="no-padding"></th>
+                  <th colspan="2" class="no-padding"></th>
+                  <th>
+                    <label>
+                      <input type="checkbox" id="checkAll" class="filled-in" />
+                      <span class="checkSpan"></span>
+                    </label>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyFiles"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="col s12 center">
+          <a class="download-btn waves-effect waves-light btn disabled">
+            DOWNLOAD
+            <i class="left">
+              <svg width="14" height="17" viewBox="0 0 14 17" fill="none">
+                <path
+                  d="M0.583374 16.3333H13.4167V14.5H0.583374V16.3333ZM13.4167 6.25H9.75004V0.75H4.25004V6.25H0.583374L7.00004 12.6667L13.4167 6.25Z"
+                  fill="white"
+                />
+              </svg>
+            </i>
           </a>
         </div>
       </div>
-      <div id="commandModal" class="modal">
-        <div class="modal-content">
-          <table class="striped centered borderB" style="width: 100%">
-            <thead class="table-header yellow darken-2">
-              <tr>
-                <th colspan="3">
-                  <h5>Valid commands</h5>
-                </th>
-              </tr>
-              <tr>
-                <th>Command</th>
-                <th>Value</th>
-                <th>Info</th>
-              </tr>
-            </thead>
-            <tbody class="tbodyModal"></tbody>
-          </table>
-        </div>
-        <div class="modal-footer">
-          <a class="modal-close waves-effect waves-green btn-flat">Close</a>
-        </div>
-      </div>
 
-      <!-- <table class="striped centered borderB rounded-shadow col s-12">
-        <thead class="table-header bg-light">
-          <tr>
-            <th colspan="3">
-              <h5>Commands sent</h5>
-            </th>
-          </tr>
-          <tr>
-            <th>Time</th>
-            <th>Command</th>
-            <th>Value</th>
-          </tr>
-        </thead>
-        <tbody class="tbodyCommands"></tbody>
-      </table> -->
-    </div>
-    <!-- END TERMINAL TAB -->
-    <!-- FILES TAB -->
-    <div class="container mtop" id="files">
-      <div class="row">
-        <div class="col s6">
-          <div class="card bg-light rounded-shadow center">
-            <div class="card-content">
-              <span class="card-title">Files</span>
-              <h4 class="totalFiles">0</h4>
-            </div>
-          </div>
-        </div>
-        <div class="col s6">
-          <div class="card bg-light rounded-shadow center">
-            <div class="card-content">
-              <span class="card-title">Size</span>
-              <h4 class="totalSize">0</h4>
-            </div>
-          </div>
-        </div>
-      </div>
-      <table class="striped centered borderB fileTable bg-light rounded-shadow">
-        <thead class="table-header">
-          <tr>
-            <th colspan="5">
-              <h5>Files in microSD</h5>
-            </th>
-          </tr>
-          <tr>
-            <th colspan="2">Filename [Date]</th>
-            <th colspan="2">Size [kB]</th>
-            <th id="numChecked">0/0</th>
-          </tr>
-          <tr>
-            <th colspan="2" class="no-padding"></th>
-            <th colspan="2" class="no-padding"></th>
-            <th class="no-padding">
-              <label>
-                <input type="checkbox" id="checkAll" class="filled-in" />
-                <span class="checkSpan"></span>
-              </label>
-            </th>
-          </tr>
-        </thead>
-        <tbody class="tbodyFiles"></tbody>
-      </table>
-
-      <div class="center">
-        <a class="download-btn waves-effect waves-light btn">
-          generate & download
-          <i class="left">
-            <svg
-              width="14"
-              height="17"
-              viewBox="0 0 14 17"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M0.583374 16.3333H13.4167V14.5H0.583374V16.3333ZM13.4167 6.25H9.75004V0.75H4.25004V6.25H0.583374L7.00004 12.6667L13.4167 6.25Z"
-                fill="white"
-              />
-            </svg>
-          </i>
-        </a>
-      </div>
       <div class="row valign-wrapper hide prog-bar mtop">
         <div class="col s10 m11">
           <div class="progress mtop">
@@ -355,7 +378,7 @@
     </div>
     <!-- END FILES TAB-->
     <!-- CONFIG TAB -->
-    <div class="container mtop" id="config">
+    <div class="container mtop" id="config" style="padding-bottom: 50px">
       <!-- TAB HEADER -->
 
       <h5>Configure parameters</h5>
@@ -592,7 +615,6 @@
         </a>
       </div>
     </div>
-
     <!-- END CONFIG TAB -->
 
     <script src="wNumb.min.js"></script>
