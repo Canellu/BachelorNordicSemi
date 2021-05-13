@@ -414,9 +414,12 @@ if (!!window.EventSource) {
 
       // Updates mission number if NRF sent it.
       if (event.data.includes("nIMEI")) {
-        missionNumFromNrf = event.data.split(",")[0].split(":")[1];
-        satIMEI = event.data.split(",")[1].split(":")[1];
-        nrfIMEI = event.data.split(",")[2].split(":")[1];
+        let parts = event.data.split(",");
+        nrfIMEI = parts.find((part) => part.includes("nIMEI:")).split(":")[1];
+        satIMEI = parts.find((part) => part.includes("sIMEI:")).split(":")[1];
+        missionNumFromNrf = parts
+          .find((part) => part.includes("M:"))
+          .split(":")[1];
         updateMissionNum();
       }
 
