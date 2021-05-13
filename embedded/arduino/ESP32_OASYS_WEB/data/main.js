@@ -7,36 +7,32 @@ let gateway = `ws://${window.location.hostname}/ws`;
 let websocket;
 
 // DOM Elements
-var progressBar = document.querySelector(".prog-bar");
-var progressFill = document.querySelector(".determinate");
-var progressLabel = document.querySelector(".progressLabel");
-var downloadBtn = document.querySelector(".download-btn");
-var fileListBody = document.querySelector(".tbodyFiles");
-var commandList = document.querySelector(".tbodyCommands");
-var modalList = document.querySelector(".tbodyModal");
-var form = document.querySelector("form");
-var commandInput = document.querySelector("#commands");
-var commandLabel = document.querySelector("label[for=commands]");
-var checkAll = document.querySelector("#checkAll");
-var sizeCard = document.querySelector(".totalSize");
-var fileCard = document.querySelector(".totalFiles");
-var checkedLabel = document.querySelector("#numChecked");
-var toastHTML =
+let progressBar = document.querySelector(".prog-bar");
+let progressFill = document.querySelector(".determinate");
+let progressLabel = document.querySelector(".progressLabel");
+let downloadBtn = document.querySelector(".download-btn");
+let fileListBody = document.querySelector("#tbodyFiles");
+let checkAll = document.querySelector("#checkAll");
+let sizeCard = document.querySelector(".totalSize");
+let fileCard = document.querySelector(".totalFiles");
+let checkedLabel = document.querySelector("#numChecked");
+let toastHTML =
   '<span style="color: #ffc400; font-weight: bold;">Do <u>NOT</u> close or refresh the browser while files are downloading!</span>';
 
 // Funciton variables
-var zip = new JSZip();
-var files = []; // Contains file objects
-var requestList = [];
-var requestFile;
-var requestDataReceived = 0;
-var requestTotalSize = 0;
-var espString = "";
+let zip = new JSZip();
+let files = []; // Contains file objects
+let requestList = [];
+let requestFile;
+let requestDataReceived = 0;
+let requestTotalSize = 0;
+let espString = "";
 let missionNumFromNrf = 0;
 let satIMEI = 0;
 let nrfIMEI = 0;
+let testStr = "";
 
-var checkValAll = true;
+let checkValAll = true;
 
 // ----------------------------------------------------------------------------
 // Initialization
@@ -107,6 +103,11 @@ checkAll.addEventListener("click", () => {
     checkbox.checked = checkValAll;
   });
   checkValAll = !checkValAll;
+  if (!checkValAll) {
+    downloadBtn.classList.remove("disabled");
+  } else {
+    downloadBtn.classList.add("disabled");
+  }
 });
 
 // Listen for clicks, update total files checked
@@ -123,6 +124,12 @@ fileListBody.addEventListener("click", () => {
   document.querySelector(
     "#numChecked"
   ).innerText = `${checkedFiles}/${checkBoxes.length}`;
+
+  if (checkedFiles) {
+    downloadBtn.classList.remove("disabled");
+  } else {
+    downloadBtn.classList.add("disabled");
+  }
 });
 
 // Init materialize elements
@@ -143,34 +150,6 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
-function printTime() {}
-
-// Prevent default submit action when Enter
-form.addEventListener("submit", (e) => {
-  e.preventDefault();
-});
-
-// Terminal inputField ON ENTER
-commandInput.addEventListener("keypress", (e) => {
-  if (e.keyCode == 13) {
-    let split = commandInput.value.split(" ");
-    // websocket.send(commandInput.value);
-    addCommandRow(split[0], split[1]);
-    // Validation
-    for (var key in validCommands) {
-      if (split[0] == key && split.length == 2) {
-        commandInput.classList.remove("invalid");
-        commandInput.classList.add("valid");
-        break;
-      } else {
-        commandInput.classList.remove("valid");
-        commandInput.classList.add("invalid");
-      }
-    }
-    commandInput.value = "";
-  }
-});
-
 // Add row to file table
 function addFileRow(fileName, fileSize) {
   var row = `<tr><td colspan="2">${fileName}</td><td colspan="2">${(
@@ -180,55 +159,6 @@ function addFileRow(fileName, fileSize) {
   )}</td><td><label><input type="checkbox" class="filled-in" /><span></span></label></td></tr>`;
   fileListBody.innerHTML = row + fileListBody.innerHTML;
 }
-
-// Add row to command table
-function addCommandRow(key, value) {
-  var date = new Date();
-  var time =
-    date.getHours() +
-    ":" +
-    (date.getMinutes() < 10 ? "0" : "") +
-    date.getMinutes() +
-    ":" +
-    (date.getSeconds() < 10 ? "0" : "") +
-    date.getSeconds();
-  var row = `<tr><td>${time}</td><td>${key.toUpperCase()}</td><td>${value}</td></tr>`;
-  commandList.innerHTML = row + commandList.innerHTML;
-}
-
-// Modal data
-var validCommands = {
-  T: "0 - 12",
-  P: "0 - 15",
-  C: "0 - 20",
-  D: "0 - 20",
-  E: "0 - 20",
-  F: "0 - 20",
-  G: "0 - 20",
-  H: "0 - 20",
-};
-var descriptions = [
-  "Temperature",
-  "Pressure",
-  "Conductivity",
-  "S",
-  "S",
-  "S",
-  "S",
-  "S",
-];
-
-// Populate modal table with data
-function createModalContent(commandObj) {
-  let count = 0;
-  for (var key in commandObj) {
-    var row = `<tr><td>${key}</td><td>${commandObj[key]}</td><td>${
-      descriptions[count++]
-    }</td></tr>`;
-    modalList.innerHTML += row;
-  }
-}
-createModalContent(validCommands);
 
 downloadBtn.addEventListener("click", () => {
   // Resetting variables for next download
@@ -243,6 +173,7 @@ downloadBtn.addEventListener("click", () => {
   requestList = [];
   Array.from(fileListBody.rows).forEach((row) => {
     let name = row.cells[0].textContent;
+    console.log(name);
     // let size = parseInt(row.cells[1].textContent);
     let checkBox = row.cells[2].querySelector("input[type=checkbox]").checked;
 
@@ -252,11 +183,11 @@ downloadBtn.addEventListener("click", () => {
         return file.name == name;
       });
 
-      file.checked = true;
-
-      if (!file.complete) requestList.push(file);
-
-      requestTotalSize += file.size;
+      if (file !== undefined) {
+        file.checked = true;
+        if (!file.complete) requestList.push(file);
+        requestTotalSize += file.size;
+      }
     }
   });
 
@@ -421,6 +352,10 @@ if (!!window.EventSource) {
           .find((part) => part.includes("M:"))
           .split(":")[1];
         updateMissionNum();
+      }
+
+      if (event.data.includes(testStr)) {
+        // TODO: get error or ok msg from response test:str
       }
 
       lastEventId = event.lastEventId;
