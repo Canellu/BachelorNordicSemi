@@ -224,6 +224,17 @@ function resetParams() {
   index = 0;
 }
 
+// --------------------------------------------------------------------
+// HELPER FUNCTIONS
+// --------------------------------------------------------------------
+
+// Scrolls window to top
+function scrollToTop() {
+  document.body.scrollTop = 0;
+  document.documentElement.scrollTop = 0;
+}
+
+// Converts logging level to integer
 function freqModeToNum(mode) {
   switch (mode) {
     case "High":
@@ -240,7 +251,21 @@ function freqModeToNum(mode) {
       break;
   }
 }
+// Disabling outer scroll while scrolling in this div
+// function addScrollLock(div, scrollSpeed = 100) {
+//   div.addEventListener(
+//     "wheel",
+//     (e) => {
+//       e.preventDefault();
+//       let scrollTo = e.wheelDelta * -(scrollSpeed / 100);
+//       div.scrollTop = scrollTo + div.scrollTop;
+//     },
+//     { passive: false }
+//   );
+// }
+// addScrollLock(fileListBody, 50);
 
+// Latlng row delete
 function deleteRow(e) {
   e.parentElement.remove();
 }
