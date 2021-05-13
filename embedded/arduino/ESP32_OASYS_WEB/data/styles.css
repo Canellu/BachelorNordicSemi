@@ -38,15 +38,6 @@ input[id*="wp"] {
   background: var(--light);
 }
 
-.penIcon {
-  display: flex;
-  height: 100%;
-  justify-content: center;
-  align-items: flex-start;
-  padding-top: 4px;
-  transform: scaleX(-1);
-}
-
 .icon {
   margin: 0;
   height: 100%;
@@ -59,22 +50,12 @@ input[id*="wp"] {
 .btn,
 .btn-flat {
   margin-top: 20px;
-}
-
-#terminal {
-  margin-top: 30px;
+  font-weight: 500;
+  font-size: 0.9rem;
 }
 
 .mtop {
   margin-top: 20px;
-}
-
-.padding {
-  padding: 8px;
-}
-
-.pleft {
-  padding-left: 20px;
 }
 
 table tbody {
@@ -90,9 +71,13 @@ tbody tr {
   table-layout: fixed;
 }
 
+td p {
+  margin: 0;
+}
+
 #files label span {
   padding: 0;
-  padding-right: 18px;
+  padding-right: 20px;
 }
 
 .adjustForScrollbar {
@@ -101,11 +86,7 @@ tbody tr {
 
 .adjustForMiniScrollbar {
   padding-right: 0px !important;
-  padding-left: 7px !important;
-}
-
-td p {
-  margin: 0;
+  padding-left: 10px !important;
 }
 
 h4 {
@@ -133,59 +114,9 @@ h4 {
   background-color: var(--light);
 }
 
-textarea {
-  cursor: none;
-}
-
-.collection {
-  max-height: 40vh;
-  overflow: auto;
-}
-
-.input-field input[type="text"]:focus + label {
-  color: var(--dark) !important;
-}
-
-.input-field input[type="text"]:focus {
-  border-bottom: 1px solid var(--dark) !important;
-  box-shadow: 0 1px 0 0 var(--dark) !important;
-}
-
-.input-field .prefix.active {
-  color: var(--bluegreen);
-}
-
-.modal-trigger {
-  position: relative;
-  top: 20px;
-}
-
-.infoCircle {
-  position: relative;
-  top: 8px;
-}
-
-.infoCircle:hover path {
-  fill: #2bbbad;
-  cursor: pointer;
-}
-
-.infoCircle:active path {
-  fill: #8bdad2;
-  cursor: pointer;
-}
-
 th h5 {
   font-weight: 500;
   margin: 0;
-}
-
-.glider {
-  padding: 40px;
-}
-
-.borderB {
-  border-bottom: 1px rgb(190, 190, 190) solid;
 }
 
 /* width */
@@ -201,6 +132,7 @@ th h5 {
 /* Handle */
 ::-webkit-scrollbar-thumb {
   background: #888;
+  border-radius: 20px;
 }
 
 /* Handle on hover */
@@ -284,14 +216,12 @@ input {
 
 h5 {
   font-size: 1.5rem;
-  font-weight: 600;
-  text-align: center;
-  margin-bottom: 16px;
+  font-weight: 500;
 }
 
 h6 {
   font-size: 1.1rem;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .smallBtn {
@@ -305,6 +235,11 @@ h6 {
   align-items: center;
   background-color: var(--light);
   transition-duration: 200ms;
+}
+
+.indicator {
+  height: 32px;
+  border-radius: 0.125rem;
 }
 
 .smallBtn:hover {
@@ -332,9 +267,43 @@ h6 {
 }
 
 .flexCenter {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+.flexBetween {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
+}
+
+.flexAround {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+#infoImg {
+  border-radius: 50%;
+  width: 50%;
+  max-width: 250px;
+}
+
+span[id*="IMEI"] {
+  font-weight: 500;
+}
+
+.card-title {
+  font-weight: 400 !important;
+  margin-bottom: 10px !important;
+  color: #202020 !important;
+}
+
+a[id*="testBtn"] {
+  max-height: 120px;
+  min-height: 60px;
+  height: 12vw;
 }
 
 @media screen and (max-width: 480px) {
