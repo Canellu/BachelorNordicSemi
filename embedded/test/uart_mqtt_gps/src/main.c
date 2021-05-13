@@ -89,6 +89,7 @@ struct m_state_t
 struct glider_t
 {
 	uint8_t uid[7];
+	uint8_t sIMEI[20];
 	struct m_param_t m_param;
 	struct m_state_t m_state;
 	struct prog_param_t prog_param;
@@ -760,7 +761,7 @@ static int check_mission()
 
 	k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
 
-	int sd_msg_response = 0;
+	size_t sd_msg_response = 0;
 
 	k_msgq_get(&main_msg_q, &sd_msg_response, K_FOREVER);
 
@@ -869,12 +870,21 @@ static int publish_data_4G()
 	// printk("\nRunning test, press button 1 to start\n");
 	// button_wait();
 
-	static int ret = 0;
+	int ret = 0;
 
 	// separate from m_param msg_sent, this only keeps track locally
-	static int msg_sent = 0;
-	int msg_to_send = glider.m_param.msg_max / glider.m_param.wp_max - 1;
-	static uint8_t payload_4G[256] = "";
+	int msg_sent = 0;
+	int msg_to_send = 0;
+	if ((glider.m_param.wp_max - 1) > 0)
+	{
+		msg_to_send = glider.m_param.msg_max / (glider.m_param.wp_max - 1);
+	}
+	else
+	{
+		msg_to_send = glider.m_param.msg_max;
+	}
+
+	static uint8_t payload_4G[512] = "";
 
 	static sd_msg_t sd_msg;
 	static uint8_t sd_msg_response[256] = "";
@@ -908,7 +918,8 @@ static int publish_data_4G()
 				cJSON_Minify(payload_4G);
 				cJSON_Delete(payload_JSON);
 
-				gcloud_publish(payload_4G, strlen(payload_4G), MQTT_QOS_1_AT_LEAST_ONCE);
+				LOG_INF("payload: %s", log_strdup(payload_4G));
+				// gcloud_publish(payload_4G, strlen(payload_4G), MQTT_QOS_1_AT_LEAST_ONCE);
 				glider.m_state.m_database = 1;
 				update_mission_status(MISSION_ONGOING);
 			}
@@ -932,7 +943,8 @@ static int publish_data_4G()
 		ret = format_payload_4G(payload_4G, gps_msg);
 		if (ret == 0)
 		{
-			gcloud_publish(payload_4G, strlen(payload_4G), MQTT_QOS_1_AT_LEAST_ONCE);
+			LOG_INF("payload: %s", log_strdup(payload_4G));
+			// gcloud_publish(payload_4G, strlen(payload_4G), MQTT_QOS_1_AT_LEAST_ONCE);
 			glider.m_state.msg_sent++;
 			msg_sent++;
 		}
@@ -946,9 +958,10 @@ static int publish_data_4G()
 	strcpy(sd_msg.filename, tmp_str);
 
 	snprintf(tmp_str, sizeof(tmp_str), "max:%d\r", msg_to_send);
-	strcat(sd_msg.string, tmp_str);
+	strcpy(sd_msg.string, tmp_str);
 	snprintf(tmp_str, sizeof(tmp_str), "wp_cur:%d\r", glider.m_state.wp_cur);
 	strcat(sd_msg.string, tmp_str);
+	LOG_INF("Filename for fetching sd data: %s", log_strdup(sd_msg.filename));
 	LOG_INF("string for fetching sd data: %s", log_strdup(sd_msg.string));
 
 	// sending event to sd card
@@ -964,7 +977,8 @@ static int publish_data_4G()
 		ret = format_payload_4G(payload_4G, sd_msg_response);
 		if (ret == 0)
 		{
-			gcloud_publish(payload_4G, strlen(payload_4G), MQTT_QOS_1_AT_LEAST_ONCE);
+			LOG_INF("payload: %s", log_strdup(payload_4G));
+			// gcloud_publish(payload_4G, strlen(payload_4G), MQTT_QOS_1_AT_LEAST_ONCE);
 			glider.m_state.msg_sent++;
 			msg_sent++;
 			LOG_INF("messages sent: %d", msg_sent);
@@ -986,6 +1000,89 @@ static int publish_data_4G()
 	printk("\nAll messages sent");
 
 	return 0;
+}
+
+// fetch satellite IMEI
+// NOTE: This function runs separate of satellite module and should not be used simultaneously
+static int sat_fetch_IMEI()
+{
+	static int ret = 0;
+	static int cnt = 0;
+	static bool sat_start = false;
+
+	static int max_retries_ESP = 3;
+
+	static uint8_t sat_msg[64] = "";
+	static uint8_t sat_response[64] = "";
+	static uint8_t sat_response_test[64] = "";
+
+	// start uart
+	uart_start(UART_2);
+
+	while (!sat_start && cnt < max_retries_ESP)
+	{
+		uart_send(UART_2, "", strlen(""));
+		uart_send(UART_2, "sat_start", strlen("sat_start"));
+		LOG_INF("sent command satellite start to esp");
+		k_msgq_get(&uart_msg_q, sat_response, K_FOREVER);
+		LOG_INF("response: %s", log_strdup(sat_response));
+		if (strstr(sat_response, "OK") != NULL)
+		{
+			LOG_INF("Received OK");
+			sat_start = true;
+		}
+		cnt++;
+	}
+
+	if (sat_start)
+	{
+		// send message
+		strcpy(sat_msg, "AT+CGSN");
+		uart_send(UART_2, sat_msg, strlen(sat_msg));
+
+		// test response
+		while (1)
+		{
+			// fetch from uart
+			k_msgq_get(&uart_msg_q, &sat_response_test, K_FOREVER);
+
+			// break on OK
+			if (strcmp(sat_response_test, "OK") == 0)
+			{
+				break;
+			}
+			// end function on error
+			else if (strcmp(sat_response_test, "ERROR") == 0)
+			{
+				LOG_ERR("satellite serial error, check connection/serial msg sent");
+				uart_exit(UART_2);
+				return -1;
+			}
+			// copy response if valid
+			else if (strcmp(sat_response_test, sat_msg) != 0)
+			{
+				strcpy(sat_response, sat_response_test);
+			}
+		}
+		// clear response and any pending messages from satellite
+		memset(sat_response_test, 0, sizeof(sat_response_test));
+		k_msgq_purge(&uart_msg_q);
+
+		LOG_DBG("sat IMEI: %s", log_strdup(sat_response));
+		strcpy(glider.sIMEI, sat_response);
+
+		uart_send(UART_2, "sat_end", strlen("sat_end"));
+		LOG_INF("sent command satellite end to esp");
+	}
+	else
+	{
+		LOG_ERR("ESP communication unsuccessful");
+		ret = -1;
+	}
+
+	uart_exit(UART_2);
+
+	return ret;
 }
 
 // checks signal, returns signal strength
@@ -1299,13 +1396,9 @@ static int sensor_module()
 
 				// conversion from ms to respective type
 				uint16_t hour = tmp_int / 3600 % 24;
-				LOG_INF("hour: %u", hour);
-
 				uint16_t min = (tmp_int / 60) % 60;
-				LOG_INF("min: %u", min);
-
 				uint16_t sec = tmp_int % 60;
-				LOG_INF("sec: %u", sec);
+				LOG_INF("ts: %u:%u:%u", hour, min, sec);
 
 				// variables for holding timestamp (ts) and datetime (dt)
 				uint8_t ts_string[64] = "";
@@ -1892,6 +1985,8 @@ void main(void)
 	glider_init();
 	// button_wait();
 
+	update_mission_status(MISSION_ONGOING);
+
 	// TODO: create check for finished missions
 	if (mission_state == MISSION_WAIT_START)
 	{
@@ -1900,8 +1995,16 @@ void main(void)
 	}
 	else if (mission_state == MISSION_ONGOING)
 	{
-		event = EVT_DIVE;
 		LOG_INF("Mission ongoing");
+		if (glider.m_state.surfaced)
+		{
+			glider.m_state.wp_cur--;
+			event = EVT_SURFACE;
+		}
+		else
+		{
+			event = EVT_DIVE;
+		}
 	}
 	else if (mission_state == MISSION_FINISHED)
 	{
@@ -1959,15 +2062,7 @@ void main(void)
 			}
 			else if (mission_state == MISSION_ONGOING)
 			{
-				if (glider.m_state.surfaced)
-				{
-					glider.m_state.wp_cur--;
-					event = EVT_SURFACE;
-				}
-				else
-				{
-					event = EVT_DIVE;
-				}
+				event = EVT_DIVE;
 			}
 			else if (mission_state == MISSION_FINISHED)
 			{
@@ -1998,7 +2093,9 @@ void main(void)
 
 			glider.m_state.wp_cur++;
 			LOG_INF("Current waypoint: %d", glider.m_state.wp_cur);
-			update_mission_status(MISSION_ONGOING);
+			// update_mission_status(MISSION_ONGOING);
+
+			publish_data_4G();
 
 			// LOG_INF("Running gps module");
 			// // button_wait();
