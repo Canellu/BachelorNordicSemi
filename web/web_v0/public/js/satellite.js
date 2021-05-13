@@ -68,7 +68,7 @@ async function sendSatelliteData() {
   satelliteInput.value = "";
 }
 
-async function populateSatelliteMessageTable() {
+function populateSatelliteMessageTable() {
   let tbody = document.querySelector("#satelliteMessageTable tbody");
   tbody.innerHTML = "";
 
@@ -112,7 +112,7 @@ async function populateSatelliteMessageTable() {
       });
     });
 
-  console.log("Getting snapshot listener...");
+  console.log("Getting satellite message snapshot listener...");
 }
 
 function toggleFlush() {

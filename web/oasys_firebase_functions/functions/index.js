@@ -181,7 +181,7 @@ exports.fromGliderToDatabase = functions
             );
         }
 
-        let gliderData = JSON.stringify({ data }).slice(1, -1);
+        let gliderData = JSON.stringify(data).slice(1, -1);
         let logDate = messageJSON.ts.slice(0, 8);
         let logTime = messageJSON.ts.slice(8);
 
