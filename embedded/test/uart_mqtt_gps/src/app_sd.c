@@ -401,7 +401,7 @@ static int read_JSON_4G(char *file_path, uint8_t *param_str, size_t file_size)
 	{
 		cursor = 0;
 	}
-	LOG_INF("cursor: %d", cursor);
+	LOG_INF("cursor: %d", (int32_t)cursor);
 
 	// For catching return values from fs_functions
 	int ret = 1;
