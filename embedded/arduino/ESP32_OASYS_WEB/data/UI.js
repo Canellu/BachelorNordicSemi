@@ -215,7 +215,7 @@ function sendMissionParams() {
   websocket.send(JSON.stringify(params));
   console.log(JSON.stringify(params));
 
-  resetParams();
+  // resetParams();
 }
 
 function resetParams() {
@@ -251,6 +251,7 @@ function freqModeToNum(mode) {
       break;
   }
 }
+
 // Disabling outer scroll while scrolling in this div
 // function addScrollLock(div, scrollSpeed = 100) {
 //   div.addEventListener(
