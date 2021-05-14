@@ -313,7 +313,7 @@ static int read_JSON(char *file_path, int json_total)
 					cJSON *line_JSON = cJSON_Parse(line);
 					if (cJSON_IsObject(line_JSON))
 					{
-						// LOG_INF("%s", log_strdup(line));
+						LOG_INF("%s", log_strdup(line));
 						k_msgq_put(&main_msg_q, &line, K_NO_WAIT);
 						counter++;
 					}
