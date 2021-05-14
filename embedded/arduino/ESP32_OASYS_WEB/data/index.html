@@ -48,7 +48,7 @@
             </a>
           </li>
           <li class="tab">
-            <a class="" href="#module" onclick="scrollToTop()">
+            <a class="active" href="#module" onclick="scrollToTop()">
               <p class="icon">
                 <svg
                   width="22"
@@ -80,7 +80,7 @@
             </a>
           </li>
           <li class="tab">
-            <a class="active" href="#config" onclick="scrollToTop()">
+            <a class="" href="#config" onclick="scrollToTop()">
               <p class="icon">
                 <svg
                   width="22"
@@ -228,6 +228,7 @@
           <a
             id="testBtnSatellite"
             class="waves-effect waves-light btn bg-dark flexCenter"
+            onclick="runTest('Satellite')"
           >
             <h6 style="margin: 0">Satellite</h6>
           </a>
@@ -238,6 +239,7 @@
           <a
             id="testBtnGPS"
             class="waves-effect waves-light btn bg-dark flexCenter"
+            onclick="runTest('GPS')"
           >
             <h6 style="margin: 0">GPS</h6>
           </a>
@@ -248,6 +250,7 @@
           <a
             id="testBtn4G"
             class="waves-effect waves-light btn bg-dark flexCenter"
+            onclick="runTest('4G')"
           >
             <h6 style="margin: 0">4G</h6>
           </a>
@@ -256,33 +259,42 @@
         <!-- testBtn Sensor -->
         <div class="col s6">
           <a
-            id="testBtn4G"
+            id="testBtnSensor"
             class="waves-effect waves-light btn bg-dark flexCenter"
+            onclick="runTest('Sensor')"
           >
             <h6 style="margin: 0">Sensor</h6>
           </a>
         </div>
 
+        <!-- divider -->
         <div class="col s12">
           <h5 class="divider"></h5>
         </div>
 
+        <!-- Fault indicator -->
         <div class="col s4">
           <h6 class="center green lighten-2 indicator flexCenter">FAULTY</h6>
         </div>
+
+        <!-- Untested indicator -->
         <div class="col s4">
           <h6 class="center bg-dark white-text indicator flexCenter">
             UNTESTED
           </h6>
         </div>
+
+        <!-- Error indicator -->
         <div class="col s4">
           <h6 class="center red lighten-2 indicator flexCenter">ERROR</h6>
         </div>
 
+        <!-- divider -->
         <div class="col s12">
           <h5 class="divider"></h5>
         </div>
 
+        <!-- Message window -->
         <div class="col s12">
           <div class="card bg-light">
             <div class="card-content">
@@ -606,9 +618,22 @@
       </div>
 
       <!-- Configure button -->
-      <div class="flexCenter" style="margin-bottom: 80px">
+      <div class="flexCenter" style="margin-bottom: 30px">
         <a class="waves-effect waves-light btn" onclick="sendMissionParams()">
           configure
+          <i class="left">
+            <img src="upload.svg" style="margin-top: 7px" />
+          </i>
+        </a>
+      </div>
+
+      <!-- End connection button -->
+      <div class="flexCenter" style="margin-bottom: 80px">
+        <a
+          class="waves-effect waves-light btn red lighten-1"
+          onclick="endConnection()"
+        >
+          disconnect
           <i class="left">
             <img src="upload.svg" style="margin-top: 7px" />
           </i>
@@ -624,5 +649,6 @@
     <script src="materialize.js"></script>
     <script src="main.js"></script>
     <script src="UI.js"></script>
+    <script src="modules.js"></script>
   </body>
 </html>
