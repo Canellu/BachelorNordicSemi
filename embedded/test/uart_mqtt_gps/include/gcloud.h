@@ -1,6 +1,7 @@
 #ifndef __MQTT_H__
 #define __MQTT_H__
 
+#include <modem/lte_lc.h>
 #include <net/mqtt.h>
 
 typedef void (*received_config_handler_t)(const struct mqtt_publish_message *message);
@@ -45,6 +46,8 @@ int gcloud_publish_state(uint8_t *data, uint32_t size, enum mqtt_qos qos);
  * 
  * @retval 0 or an error code indicating reason for failure.
  */
+int modem_configure(void);
+
 int gcloud_provision(void);
 
 int app_gcloud_init_and_connect(int retries);
