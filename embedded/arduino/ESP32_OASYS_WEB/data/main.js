@@ -30,7 +30,7 @@ let espString = "";
 let missionNumFromNrf = 0;
 let satIMEI = 0;
 let nrfIMEI = 0;
-let testStr = "";
+let moduleTestStr = ""; // value assigned by modules.js
 
 let checkValAll = true;
 
@@ -306,6 +306,10 @@ function updateMissionNum() {
   document.querySelector("#inputMissionNum").value = missionNumFromNrf + 1;
 }
 
+function modulesTestResponse(testResponseStr) {
+  enableClickEvents(testResponseStr);
+}
+
 // DUMMY DATA
 // for (let i = 0; i < 20; i++) {
 //   addFileRow(20202020 + i, i + 100);
@@ -354,8 +358,8 @@ if (!!window.EventSource) {
         updateMissionNum();
       }
 
-      if (event.data.includes(testStr)) {
-        // TODO: get error or ok msg from response test:str
+      if (event.data.includes(moduleTestStr)) {
+        modulesTestResponse(event.data);
       }
 
       lastEventId = event.lastEventId;
