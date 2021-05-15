@@ -128,8 +128,7 @@ input4GLimit.addEventListener("change", function () {
 // --------------------------------------------------------------------
 // Waypoints
 // --------------------------------------------------------------------
-
-let currentWaypointNum = document.querySelector("#currentWaypointNum");
+let waypointList = document.querySelector("#waypointList");
 let wpLatInput = document.querySelector("#wpLat");
 let wpLngInput = document.querySelector("#wpLng");
 let waypoints = [];
@@ -143,6 +142,8 @@ function addWaypoint() {
   }
   // wpLatInput.value = "";
   // wpLngInput.value = "";
+
+  waypointList.scrollTo(0, waypointList.scrollHeight);
 }
 
 // Latlng row delete
@@ -153,7 +154,6 @@ function deleteRow(e) {
 }
 
 function renderLatLngList() {
-  let waypointList = document.querySelector("#waypointList");
   waypointList.innerHTML = "";
   waypoints.forEach((coordinates, index) => {
     let row = `  
@@ -179,9 +179,6 @@ function renderLatLngList() {
 
   document.querySelector("#currentWaypointNum").innerText =
     waypoints.length + 1;
-
-  waypointList.scrollTo(0, waypointList.scrollHeight);
-  window.scrollTo(0, document.body.scrollHeight);
 }
 
 // --------------------------------------------------------------------
@@ -272,16 +269,16 @@ function freqModeToNum(mode) {
   }
 }
 
-// Disabling outer scroll while scrolling in this div
-// function addScrollLock(div, scrollSpeed = 100) {
-//   div.addEventListener(
-//     "wheel",
-//     (e) => {
-//       e.preventDefault();
-//       let scrollTo = e.wheelDelta * -(scrollSpeed / 100);
-//       div.scrollTop = scrollTo + div.scrollTop;
-//     },
-//     { passive: false }
-//   );
-// }
-// addScrollLock(fileListBody, 50);
+//Disabling outer scroll while scrolling in this div
+function addScrollLock(div, scrollSpeed = 100) {
+  div.addEventListener(
+    "wheel",
+    (e) => {
+      e.preventDefault();
+      let scrollTo = e.wheelDelta * -(scrollSpeed / 100);
+      div.scrollTop = scrollTo + div.scrollTop;
+    },
+    { passive: false }
+  );
+}
+addScrollLock(waypointList, 30);

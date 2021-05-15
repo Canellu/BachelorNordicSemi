@@ -707,6 +707,7 @@
                   <div class="col s2 numberBox">#</div>
                   <div class="col s4 tableHeader">Latitude</div>
                   <div class="col s4 tableHeader">Longitude</div>
+                  <div class="col s12 divider"></div>
                 </div>
 
                 <!-- WaypointList Body -->
@@ -714,13 +715,18 @@
                   <div
                     class="col s12"
                     id="waypointList"
-                    style="max-height: 30vh; overflow: auto; padding-top: 20px"
+                    style="
+                      height: 20vh;
+                      max-height: 20vh;
+                      overflow: auto;
+                      padding-top: 20px;
+                    "
                   ></div>
                   <div class="col s12 divider"></div>
                 </div>
 
                 <!-- Waypoint Inputs -->
-                <div class="row">
+                <div class="row" style="margin-bottom: 0">
                   <div
                     id="currentWaypointNum"
                     class="col s2 numberBox"
