@@ -650,7 +650,7 @@ static void mqtt_event_handler(struct mqtt_client *client,
 /**@brief Configures modem to provide LTE link. Blocks until link is
  * successfully established
  */
-static int modem_configure()
+int modem_configure(void)
 {
     int ret;
 
