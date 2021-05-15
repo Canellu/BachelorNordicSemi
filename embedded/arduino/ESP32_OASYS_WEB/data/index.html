@@ -421,7 +421,8 @@
                 class="center"
                 id="inputMissionNum"
                 type="number"
-                value="0"
+                min="1"
+                value="1"
                 style="
                   font-size: 2rem;
                   font-weight: 600;
@@ -674,10 +675,9 @@
                   <input
                     id="startDate"
                     type="text"
-                    class="datepicker"
+                    class="datepicker inputBox"
                     placeholder="Start date"
                     autocomplete="off"
-                    style="padding-left: 20px"
                   />
                 </div>
 
@@ -686,7 +686,7 @@
                   <input
                     id="startTime"
                     type="text"
-                    class="timepicker"
+                    class="timepicker inputBox"
                     placeholder="Start time"
                   />
                 </div>
@@ -714,7 +714,7 @@
                   <div
                     class="col s12"
                     id="waypointList"
-                    style="max-height: 30vh; overflow: auto"
+                    style="max-height: 30vh; overflow: auto; padding-top: 20px"
                   ></div>
                   <div class="col s12 divider"></div>
                 </div>
@@ -729,18 +729,10 @@
                     1
                   </div>
                   <div class="input-field col s4" style="margin: 0">
-                    <input
-                      id="wpLat"
-                      type="number"
-                      style="padding-left: 10px; height: 32px; margin: 0"
-                    />
+                    <input id="wpLat" type="number" class="inputBox" />
                   </div>
                   <div class="input-field col s4" style="margin: 0">
-                    <input
-                      id="wpLng"
-                      type="number"
-                      style="padding-left: 10px; height: 32px; margin: 0"
-                    />
+                    <input id="wpLng" type="number" class="inputBox" />
                   </div>
                   <div class="col s2">
                     <div class="smallBtn" onclick="addWaypoint()">

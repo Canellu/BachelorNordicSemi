@@ -130,46 +130,58 @@ input4GLimit.addEventListener("change", function () {
 // --------------------------------------------------------------------
 
 let currentWaypointNum = document.querySelector("#currentWaypointNum");
-let waypointListDiv = document.querySelector("#waypointList");
 let wpLatInput = document.querySelector("#wpLat");
 let wpLngInput = document.querySelector("#wpLng");
 let waypoints = [];
-let waypointNum = 1;
 function addWaypoint() {
   let lat = Number(Number(wpLatInput.value).toFixed(4));
   let lng = Number(Number(wpLngInput.value).toFixed(4));
 
   if (!(lat == "" || lng == "")) {
-    let row = `  
-    <div class="row" style="margin-bottom: 10px">
-      <div class="col s2 numberBox">${waypointNum}</div>
-      <div class="col s4">
-        <input type="number" id="latlngInputBox" value="${lat}" />
-      </div>
-      <div class="col s4">
-        <input type="number" id="latlngInputBox" value="${lng}"  />
-      </div>
-      <div class="col s2" onclick="deleteRow(this)">
-        <div class="smallBtn">
-          <img src="delete.svg" alt="" />
-        </div>
-      </div>
-    </div>
-    `;
-
-    waypointListDiv.innerHTML += row;
     waypoints.push({ lat, lng });
-    waypointNum++;
-    currentWaypointNum.innerText = waypointNum;
+    renderLatLngList();
   }
-
-  wpLatInput.value = "";
-  wpLngInput.value = "";
+  // wpLatInput.value = "";
+  // wpLngInput.value = "";
 }
 
 // Latlng row delete
 function deleteRow(e) {
+  waypoints.pop(e.parentElement.dataset.wpnum);
   e.parentElement.remove();
+  renderLatLngList();
+}
+
+function renderLatLngList() {
+  let waypointList = document.querySelector("#waypointList");
+  waypointList.innerHTML = "";
+  waypoints.forEach((coordinates, index) => {
+    let row = `  
+    <div class="row" style="margin-bottom: 10px" data-wpnum="${index}">
+      <div class="col s2 numberBox">${index + 1}</div>
+      <div class="col s4">
+        <input type="number" class="inputBox"
+        value="${coordinates.lat.toFixed(4)}" />
+      </div>
+      <div class="col s4">
+        <input type="number" class="inputBox"
+        value="${coordinates.lng.toFixed(4)}"  />
+      </div>
+      <div class="col s2" onclick="deleteRow(this)">
+        <div class="smallBtn">
+          <img src="delete.svg"/>
+        </div>
+      </div>
+    </div>
+    `;
+    waypointList.innerHTML += row;
+  });
+
+  document.querySelector("#currentWaypointNum").innerText =
+    waypoints.length + 1;
+
+  waypointList.scrollTo(0, waypointList.scrollHeight);
+  window.scrollTo(0, document.body.scrollHeight);
 }
 
 // --------------------------------------------------------------------
