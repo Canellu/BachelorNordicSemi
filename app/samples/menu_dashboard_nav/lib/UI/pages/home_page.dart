@@ -12,7 +12,7 @@ class HomePage extends StatelessWidget with NavigationStates {
 
   @override
   Widget build(BuildContext context) {
-    final device = Provider.of<List<Device>>(context);
+    final device = Provider.of<List<Device>>(context) ?? [];
     /*
     device.forEach((device) {
       /*

@@ -86,7 +86,20 @@ class _MapScreenState extends State<MapScreen> {
       lng = double.parse(coor.substring(8, 14));
       latlng.add(lat);
       latlng.add(lng);
+<<<<<<< HEAD
 
+=======
+      /*
+      print(locationMap.keys);
+      print("-----------------------------------");
+
+      print(lng);
+      print("-----------------------------------");
+//Problemet ligger i markers, den är tom
+      print(_markers);
+      print("-----------------------------------");
+      */
+>>>>>>> b7a094108ddbfcb4eae47ae512b277f0e7e475ea
 //DeviceId
       locationMap[element.deviceId] = latlng;
       //print("-----------------------------------");

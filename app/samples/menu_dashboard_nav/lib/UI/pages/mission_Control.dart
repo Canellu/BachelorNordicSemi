@@ -1,6 +1,8 @@
 import 'package:bachelor_app/models/mission.dart';
 import 'package:bachelor_app/service/database.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 class MissionTabPage extends StatefulWidget {
@@ -13,10 +15,31 @@ class MissionTabPage extends StatefulWidget {
   _MissionTabPageState createState() => _MissionTabPageState();
 }
 
-class _MissionTabPageState extends State<MissionTabPage> {
-  final formKey = GlobalKey<FormState>();
+class WayPoint {
+  final double Lat;
+  final double Long;
 
+  WayPoint(this.Lat, this.Long);
+}
+
+class _MissionTabPageState extends State<MissionTabPage> {
+  final _formKey = GlobalKey<FormState>();
+  final _latController = TextEditingController();
+  final _lngController = TextEditingController();
+
+
+<<<<<<< HEAD
   List<String> _freqSelections = ["High", "Medium", "Low", "None"];
+=======
+  List<String> _freqSelections = ["High","Medium","Low","None"];
+  List<WayPoint> wayPointList = [];
+  /*
+  List<WayPoint> wayPointList = [
+    WayPoint(1, 1),
+    WayPoint(2, 2),
+    WayPoint(3, 3),
+  ];*/
+>>>>>>> b7a094108ddbfcb4eae47ae512b277f0e7e475ea
   String _freqCvalue = "None";
   String _freqTvalue = "None";
   String _freqPvalue = "None";
@@ -33,13 +56,21 @@ class _MissionTabPageState extends State<MissionTabPage> {
     }
   }
 
+  //Clean up the controller when the widget is disposed
+  @override
+  void dispose(){
+    _latController.dispose();
+    _lngController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Container(
         padding: EdgeInsets.only(left: 30, top: 30, right: 30, bottom: 0),
         child: Form(
-          key: formKey,
+          key: _formKey,
           child: Column(
             children: <Widget>[
               Container(
@@ -126,11 +157,30 @@ class _MissionTabPageState extends State<MissionTabPage> {
               ),
               SizedBox(height: 20),
               _LoggingFrequencies(),
+              SizedBox(height: 20),
+              _buildWayPointTable(),
               ElevatedButton(
+<<<<<<< HEAD
                 child: Text('Submit'),
                 onPressed: () {
                   var createMissionID = widget.missionList.length + 1;
                   /*DatabaseService("123456","").newMission(
+=======
+                child: Text(
+                  'Submit'
+                ),
+                onPressed: () {
+                  var createMissionID = widget.missionList.length + 1;
+
+                  var wayPoint = [];
+                  wayPointList.forEach((element) {
+                    wayPoint.add("${element.Lat},${element.Long}");
+                  });
+                  //Map<String,String>
+                  print(wayPoint);
+
+                  DatabaseService("123456","").newMission(
+>>>>>>> b7a094108ddbfcb4eae47ae512b277f0e7e475ea
                       Mission(
                         missionId: "Mission $createMissionID",
                         startTime: DateFormat('yyyyMMddHHmm').format(dateTime),
@@ -140,6 +190,7 @@ class _MissionTabPageState extends State<MissionTabPage> {
                         maxD: _freqDvalue.end.round(),
                         minD: _freqDvalue.start.round(),
                         nett: _4GValue.round(),
+                        wayPoint: wayPoint,
                       )
                   );*/
                 },
@@ -151,7 +202,159 @@ class _MissionTabPageState extends State<MissionTabPage> {
     );
   }
 
-  _LoggingFrequencies() {
+  Widget _buildWayPointTable() {
+    return Card(
+      elevation: 5,
+      child: Column(
+        children: <Widget>[/*
+          Container(
+            margin: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              //border: Border.all(),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                SizedBox(
+                  width: 100,
+                  child: TextFormField(
+                    controller: _latController,
+                    decoration: InputDecoration(
+
+                        hintText: 'Enter Latitude',
+                        labelText: 'Lat',
+                    ),
+                    keyboardType: TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    inputFormatters: <TextInputFormatter>[
+                      //Only allow numbers and 4 number after decimal
+                      FilteringTextInputFormatter.allow(RegExp(r'^-?(?:-?(?:[0-9]+))?(?:.\d{0,4})'))
+                    ],
+                    validator: (value) {
+                      if(value.isEmpty || value.isEmpty) {
+                        return 'Please enter som text';
+                      }else if(double.parse(value) > 90 || double.parse(value) < -90){
+                        return 'invalid latitude';
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),*/
+          DataTable(
+            columns: const <DataColumn>[
+              DataColumn(
+                label: Text(
+                  'No.',
+                  style: TextStyle(fontStyle: FontStyle.italic),
+                ),
+              ),
+              DataColumn(
+                label: Text(
+                  'Lat',
+                  style: TextStyle(fontStyle: FontStyle.italic),
+                ),
+              ),
+              DataColumn(
+                label: Text(
+                  'Long',
+                  style: TextStyle(fontStyle: FontStyle.italic),
+                ),
+              ),
+            ],
+            rows: wayPointList
+                  .map(
+                ((element) => DataRow(
+                  cells: <DataCell>[
+                    DataCell(Text((wayPointList.indexOf(element)+1).toString())), //Extracting from Map element the value
+                    DataCell(Text((element.Lat).toString())),
+                    DataCell(Text((element.Long).toString())),
+                  ],
+                )),
+              ).toList()
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              SizedBox(
+                width: 100,
+                child: TextFormField(
+                  controller: _latController,
+                  decoration: InputDecoration(
+                      hintText: 'Enter Latitude',
+                      labelText: 'Lat'
+                  ),
+                  keyboardType: TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  inputFormatters: <TextInputFormatter>[
+                    //Only allow numbers and 4 number after decimal
+                    FilteringTextInputFormatter.allow(RegExp(r'^-?(?:-?(?:[0-9]+))?(?:.\d{0,4})'))
+                  ],
+                  validator: (value) {
+                    if(value.isEmpty || value.isEmpty) {
+                      return 'Please enter som text';
+                    }else if(double.parse(value) > 90 || double.parse(value) < -90){
+                      return 'invalid latitude';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              SizedBox(
+                width: 100,
+                child: TextFormField(
+                  controller: _lngController,
+                  decoration: InputDecoration(
+                      hintText: 'Enter Longitude',
+                      labelText: 'Long'
+                  ),
+                  keyboardType: TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  inputFormatters: <TextInputFormatter>[
+                    //Only allow numbers and 4 number after decimal
+                    FilteringTextInputFormatter.allow(RegExp(r'^-?(?:-?(?:[0-9]+))?(?:.\d{0,4})'))
+                  ],
+                  validator: (value) {
+                    if(value.isEmpty || value.isEmpty) {
+                      return 'Please enter som text';
+                    }
+                    else if(double.parse(value) > 180 || double.parse(value) < -180){
+                      return 'invalid Longitude';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              IconButton(
+                icon: Icon(Icons.add),
+                onPressed: (){
+                  if(!_formKey.currentState.validate()) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Coordinate input is wrong ! ")));
+                  }
+                  wayPointList.add(WayPoint(double.parse(_latController.text), double.parse(_lngController.text)));
+                  print("lat: ${_latController.text}, lng: ${_latController.text}");
+                  _latController.clear();
+                  _lngController.clear();
+                  //wayPointList.add(WayPoint(Lat, Long))
+                },
+              ),
+            ],
+          ),
+          SizedBox(
+            height: 20,
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _LoggingFrequencies() {
     return Card(
       elevation: 5,
       child: Column(
