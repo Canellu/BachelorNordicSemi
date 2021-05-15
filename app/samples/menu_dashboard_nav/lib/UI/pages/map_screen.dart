@@ -19,7 +19,7 @@ class _MapScreenState extends State<MapScreen> {
   Map<String, dynamic> locationMap = new Map();
   var latlng = [];
   String devId;
-  Map<MarkerId, Marker> markers = {};
+  // Map<MarkerId, Marker> markers = {};
   final Set<Marker> _markers = {};
   Completer<GoogleMapController> _controller = Completer();
 
@@ -86,15 +86,6 @@ class _MapScreenState extends State<MapScreen> {
       lng = double.parse(coor.substring(8, 14));
       latlng.add(lat);
       latlng.add(lng);
-
-      print(locationMap.keys);
-      print("-----------------------------------");
-
-      print(lng);
-      print("-----------------------------------");
-//Problemet ligger i markers, den är tom
-      print(_markers);
-      print("-----------------------------------");
 
 //DeviceId
       locationMap[element.deviceId] = latlng;

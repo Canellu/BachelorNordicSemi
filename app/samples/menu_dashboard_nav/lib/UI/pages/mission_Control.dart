@@ -16,7 +16,7 @@ class MissionTabPage extends StatefulWidget {
 class _MissionTabPageState extends State<MissionTabPage> {
   final formKey = GlobalKey<FormState>();
 
-  List<String> _freqSelections = ["High","Medium","Low","None"];
+  List<String> _freqSelections = ["High", "Medium", "Low", "None"];
   String _freqCvalue = "None";
   String _freqTvalue = "None";
   String _freqPvalue = "None";
@@ -25,7 +25,7 @@ class _MissionTabPageState extends State<MissionTabPage> {
   DateTime dateTime;
 
   String getText() {
-    if(dateTime == null) {
+    if (dateTime == null) {
       return 'Select Start date';
     } else {
       print(DateFormat('yyyyMMddHHmm').format(dateTime));
@@ -37,7 +37,7 @@ class _MissionTabPageState extends State<MissionTabPage> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Container(
-        padding: EdgeInsets.only(left: 30,top: 30,right: 30,bottom: 0),
+        padding: EdgeInsets.only(left: 30, top: 30, right: 30, bottom: 0),
         child: Form(
           key: formKey,
           child: Column(
@@ -52,9 +52,8 @@ class _MissionTabPageState extends State<MissionTabPage> {
                       children: [
                         Ink(
                           decoration: BoxDecoration(
-                            border: Border.all(),
-                            borderRadius: BorderRadius.circular(5)
-                          ),
+                              border: Border.all(),
+                              borderRadius: BorderRadius.circular(5)),
                           child: IconButton(
                             icon: Icon(Icons.calendar_today_outlined),
                             padding: EdgeInsets.zero,
@@ -81,9 +80,7 @@ class _MissionTabPageState extends State<MissionTabPage> {
                 elevation: 5,
                 child: Column(
                   children: <Widget>[
-                    Text(
-                      '4G Message Limit'
-                    ),
+                    Text('4G Message Limit'),
                     Slider(
                       value: _4GValue,
                       min: 0,
@@ -130,24 +127,21 @@ class _MissionTabPageState extends State<MissionTabPage> {
               SizedBox(height: 20),
               _LoggingFrequencies(),
               ElevatedButton(
-
-                child: Text(
-                  'Submit'
-                ),
+                child: Text('Submit'),
                 onPressed: () {
                   var createMissionID = widget.missionList.length + 1;
-                  DatabaseService("123456","").newMission(
+                  /*DatabaseService("123456","").newMission(
                       Mission(
                         missionId: "Mission $createMissionID",
                         startTime: DateFormat('yyyyMMddHHmm').format(dateTime),
-                        C: _freqCvalue,
-                        P: _freqPvalue,
-                        T: _freqTvalue,
+                        freqC: _freqCvalue,
+                        freqP: _freqPvalue,
+                        freqT: _freqTvalue,
                         maxD: _freqDvalue.end.round(),
                         minD: _freqDvalue.start.round(),
                         nett: _4GValue.round(),
                       )
-                  );
+                  );*/
                 },
               )
             ],
@@ -163,15 +157,11 @@ class _MissionTabPageState extends State<MissionTabPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          Text(
-              'Logging frequencies'
-          ),
+          Text('Logging frequencies'),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              Text(
-                  'Conductivity :'
-              ),
+              Text('Conductivity :'),
               DropdownButton(
                 isExpanded: false,
                 //dropdownColor: Colors.blue,
@@ -192,13 +182,11 @@ class _MissionTabPageState extends State<MissionTabPage> {
               ),
             ],
           ),
-          Divider(thickness: 2,indent: 35,endIndent: 35),
+          Divider(thickness: 2, indent: 35, endIndent: 35),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              Text(
-                  'Temperature :'
-              ),
+              Text('Temperature :'),
               DropdownButton(
                 isExpanded: false,
                 //dropdownColor: Colors.blue,
@@ -219,13 +207,11 @@ class _MissionTabPageState extends State<MissionTabPage> {
               ),
             ],
           ),
-          Divider(thickness: 2,indent: 35,endIndent: 35),
+          Divider(thickness: 2, indent: 35, endIndent: 35),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              Text(
-                  'Pressure :     '
-              ),
+              Text('Pressure :     '),
               DropdownButton(
                 isExpanded: false,
                 //dropdownColor: Colors.blue,
@@ -246,7 +232,7 @@ class _MissionTabPageState extends State<MissionTabPage> {
               ),
             ],
           ),
-          Divider(thickness: 2,indent: 35,endIndent: 35),
+          Divider(thickness: 2, indent: 35, endIndent: 35),
           Container(
             padding: EdgeInsets.all(20),
             child: Column(
@@ -256,8 +242,7 @@ class _MissionTabPageState extends State<MissionTabPage> {
                     padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
                     child: Text(
                       'Depth : ',
-                      style: TextStyle(
-                      ),
+                      style: TextStyle(),
                     ),
                   ),
                   SliderTheme(
@@ -271,17 +256,16 @@ class _MissionTabPageState extends State<MissionTabPage> {
                         max: 300,
                         divisions: 300,
                         labels: RangeLabels(
-                          _freqDvalue.start.round().toString(),_freqDvalue.end.round().toString()
-                        ),
+                            _freqDvalue.start.round().toString(),
+                            _freqDvalue.end.round().toString()),
                         values: _freqDvalue,
                         onChanged: (value) {
                           setState(() {
                             _freqDvalue = value;
                           });
                         },
-                  ))
-                ]
-            ),
+                      ))
+                ]),
           )
         ],
       ),
@@ -290,10 +274,10 @@ class _MissionTabPageState extends State<MissionTabPage> {
 
   Future pickDateTime(BuildContext context) async {
     final date = await pickDate(context);
-    if(date == null) return;
+    if (date == null) return;
 
     final time = await pickTime(context);
-    if(time == null) return;
+    if (time == null) return;
 
     setState(() {
       dateTime = DateTime(
@@ -314,18 +298,19 @@ class _MissionTabPageState extends State<MissionTabPage> {
       firstDate: DateTime(DateTime.now().day),
       lastDate: DateTime(DateTime.now().year + 1),
     );
-    if(newDate == null) return null;
+    if (newDate == null) return null;
     return newDate;
   }
 
   Future<TimeOfDay> pickTime(BuildContext context) async {
-    final initialTime = TimeOfDay(hour: 12, minute:0);
+    final initialTime = TimeOfDay(hour: 12, minute: 0);
     final newTime = await showTimePicker(
-        context: context,
-        initialTime: dateTime != null ? TimeOfDay(hour: dateTime.hour, minute: dateTime.minute)
-            : initialTime,
+      context: context,
+      initialTime: dateTime != null
+          ? TimeOfDay(hour: dateTime.hour, minute: dateTime.minute)
+          : initialTime,
     );
-    if(newTime == null) return null;
+    if (newTime == null) return null;
     return newTime;
   }
 }

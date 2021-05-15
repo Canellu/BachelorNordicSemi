@@ -30,12 +30,30 @@ class OneChart extends StatelessWidget {
         dataForChart = value;
       }
     });
-    return ChartCompoent(dataForChart: dataForChart,dataType: dataType,);
-    /*
     return Container(
       child: ChartCompoent(dataForChart: dataForChart,dataType: dataType,),
-    );*/
+    );
   }
+/*
+    return FutureBuilder(
+        future: DatabaseService("311910", "Mission 1").datas,
+        builder: (context, snapshot) {
+
+          if (!snapshot.hasData) return const Text("Loading....");
+          //Map dataset = new Map<String, dynamic>.from(snapshot.data);
+          var dataForChart = new Map();
+          dataset.forEach((key, value) {
+            if(key == dataType){
+              dataForChart = value;
+            }
+          });
+
+          return Container(
+            child: ChartPage(dataForChart: dataForChart,),
+          );
+        }
+    );
+  }*/
 }
 
 class ChartCompoent extends StatefulWidget {
@@ -100,7 +118,7 @@ class _ChartCompoentState extends State<ChartCompoent> {
           ),
         ),
       ),
-      animate: false,
+      animate: true,
       behaviors: [
         new charts.SlidingViewport(),
         new charts.PanAndZoomBehavior(),
@@ -126,16 +144,13 @@ class _ChartCompoentState extends State<ChartCompoent> {
     );
 
     return new Card(
-      elevation: 5,
       child: Container(
-        height: 350,
-        //padding: new EdgeInsets.fromLTRB(16, 10, 16, 20),
+        padding: new EdgeInsets.fromLTRB(16, 10, 16, 20),
         margin: new EdgeInsets.only(bottom: 20),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          //crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            SizedBox(height: 20),
+            SizedBox(height: 20,),
             new Center(
               child: new Text(
                 '${widget.dataType} data',
@@ -147,11 +162,10 @@ class _ChartCompoentState extends State<ChartCompoent> {
                 ),
               ),
             ),
-            SizedBox(height: 20),
             new Padding(
-              padding: new EdgeInsets.fromLTRB(20, 10, 20, 20),
+              padding: new EdgeInsets.all(32.0),
               child: new SizedBox(
-                height: 250.0,
+                height: 200.0,
                 child: chart,
               ),
             )
@@ -163,7 +177,9 @@ class _ChartCompoentState extends State<ChartCompoent> {
 
   @override
   Widget build(BuildContext context) {
-    return _chartWidget();
+    return Container(
+      child: _chartWidget(),
+    );
   }
 }
 

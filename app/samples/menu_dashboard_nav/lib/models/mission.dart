@@ -9,5 +9,14 @@ class Mission {
   final String startTime;
   final int nett;
 
-  Mission({this.nett, this.missionId, this.endTime, this.C, this.P, this.T, this.maxD, this.minD, this.startTime});
+  Mission(
+      {this.nett,
+      this.missionId,
+      this.endTime,
+      this.C,
+      this.P,
+      this.T,
+      this.maxD,
+      this.minD,
+      this.startTime});
 }

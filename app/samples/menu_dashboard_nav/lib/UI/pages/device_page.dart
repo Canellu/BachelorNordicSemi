@@ -11,24 +11,24 @@ import 'chart_page.dart';
 import 'mission_Control.dart';
 
 class DevicePageTab extends StatelessWidget {
-
   final Device selectedDevice;
 
   const DevicePageTab({Key key, this.selectedDevice}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-
     final gid = selectedDevice.deviceId;
 
     return StreamBuilder(
-        stream: DatabaseService(selectedDevice.deviceId,"").mission,
+        stream: DatabaseService(selectedDevice.deviceId, "").mission,
         builder: (context, snapshot) {
           if (!snapshot.hasData) return const Text("Loading....");
 
           final List<String> missionIdList = [];
           final List<DocumentSnapshot> document = snapshot.data.docs;
-          document.forEach((element) {missionIdList.add(element.id);});
+          document.forEach((element) {
+            missionIdList.add(element.id);
+          });
 
           return DefaultTabController(
             length: 2,
@@ -46,9 +46,7 @@ class DevicePageTab extends StatelessWidget {
                       gradient: LinearGradient(
                           colors: [Colors.greenAccent, Colors.blue],
                           begin: Alignment.bottomRight,
-                          end: Alignment.topLeft
-                      )
-                  ),
+                          end: Alignment.topLeft)),
                 ),
                 bottom: TabBar(
                   //indicatorPadding: EdgeInsets.all(10),
@@ -69,8 +67,8 @@ class DevicePageTab extends StatelessWidget {
               body: TabBarView(
                 physics: NeverScrollableScrollPhysics(),
                 children: <Widget>[
-                  ChartPage(gid: gid,missionList: missionIdList),
-                  MissionTabPage(gid: gid,missionList: missionIdList),
+                  ChartPage(gid: gid, missionList: missionIdList),
+                  MissionTabPage(gid: gid, missionList: missionIdList),
                   /*
                   Center(
                     child: Text('Mission Control Tab'),
@@ -79,8 +77,6 @@ class DevicePageTab extends StatelessWidget {
               ),
             ),
           );
-        }
-    );
+        });
   }
 }
-
