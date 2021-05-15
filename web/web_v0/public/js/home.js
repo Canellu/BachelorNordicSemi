@@ -15,63 +15,84 @@ async function createCard(uid, alias, sync, img) {
   switch (Math.floor(Math.random() * 4)) {
     case 0:
       batteryState = "quarter";
+      batteryColor = "#f44336";
       break;
     case 1:
       batteryState = "half";
+      batteryColor = "#ef6c00";
       break;
     case 2:
       batteryState = "three-quarters";
+      batteryColor = "#1F2937";
       break;
     case 3:
       batteryState = "full";
+      batteryColor = "#1F2937";
       break;
   }
 
   let sdCardState =
     Math.floor(Math.random() * 2) == 0 ? "sd_card" : "sd_card_alert";
+
   let healthState =
     Math.floor(Math.random() * 2) == 0 ? "check_circle" : "error";
-  let fixState = Math.floor(Math.random() * 2) == 0 ? "hidden" : "";
+
+  let colorOkError = healthState == "check_circle" ? "#1F2937" : "#f44336";
+
+  let fixState =
+    Math.floor(Math.random() * 2) == 0 ? "build_circle" : "catching_pokemon";
 
   let html = ` 
       <a href="device.html?gliderUID=${uid}">
         <div
-          class="overflow-hidden flex flex-col justify-between shadow-lg rounded-lg transform transition-all duration-200 hover:scale-95 hover:shadow-2xl"
+        class="overflow-hidden bg-light flex flex-col justify-between rounded-xl shadow-xl transform transition-all duration-200 hover:scale-95 hover:shadow-2xl w-full"
         >
           <!--  Badge -->
           <div
-            class="absolute px-3 py-1 flex justify-center items-center bg-dark top-4 left-4 rounded-lg font-semibold tracking-widest text-gray-200"
+          class="absolute px-3 py-1 flex justify-center items-center bg-gray-800 top-4 left-4 rounded-lg font-semibold tracking-widest text-gray-200 text-sm sm:text-base"
           >
           ${alias}
           </div>
+
+          <!-- Unique ID Mobile -->
+          <div
+          class="absolute top-1/4 sm:hidden flex-grow place-self-center py-1 px-5   rounded-3xl"
+          style="background-color: rgba(31, 41, 55, 0.5)"
+          >
+            <h4 class="text-xl text-light font-semibold tracking-widest">
+              ID: ${uid}
+            </h4>
+          </div>
+
+
           <!-- IMG -->
           <img
-            class="object-cover center w-full h-44 rounded-lg"
+            class="object-cover w-full h-28 sm:h-44 rounded-b-xl"
             src=${img}
             alt=""
           />
 
           <!-- Unique ID -->
-          <div class="flex-grow place-self-center mt-4">
-            <h4 class="text-xl font-bold tracking-widest">ID: ${uid}</h4>
+          <div class="hidden sm:block flex-grow place-self-center mt-4">
+            <h4 class="text-md sm:text-xl font-bold tracking-wider sm:tracking-widest">ID: ${uid}</h4>
           </div>
 
           <!--  Indicators -->
-          <div class="flex justify-evenly w-full p-4">
+          <div class="flex justify-evenly w-full p-2">
             <i
-              class="fas fa-battery-${batteryState} text-xl transform -rotate-90 scale-y-125 flex items-center text-dark"
+              class="fas fa-battery-${batteryState} text-sm sm:text-lg transform -rotate-90 scale-y-125 flex items-center text-dark" style="color: ${batteryColor}"
             ></i>
-            <span class="material-icons text-2xl text-dark">
+            <span class="material-icons text-xl sm:text-2xl text-dark">
             ${sdCardState}
             </span>
-            <span class="material-icons text-2xl text-dark">
+            <span class="material-icons text-xl sm:text-2xl text-dark" style="color: ${colorOkError}">
             ${healthState}
             </span>
-            <span class="material-icons text-2xl text-dark"> error </span>
+            <span class="material-icons text-xl sm:text-2xl text-dark"> ${fixState} </span>
           </div>
 
           <!-- Last Sync -->
-          <div class="w-full bg-dark text-light p-2 flex flex-col rounded-lg">
+          <div  class="w-full text-dark bg-gray-50 sm:bg-gray-800 sm:text-gray-50 p-2 flex flex-col rounded-t-lg">
             <p class="tracking-wide text-center text-base font-medium">
               ${fromNow}
             </p>
@@ -94,8 +115,7 @@ async function createAllCards() {
 function populateHomeMap(glider) {
   let location;
   let latlng = glider.data()["Last seen"];
-  console.log(typeof latlng);
-  console.log(latlng);
+
   if (typeof latlng != "undefined" && latlng != "") {
     let datetime = glider.data()["Last sync"];
     let alias = glider.data()["Alias"];
@@ -294,5 +314,12 @@ uploadFileListDiv.addEventListener("wheel", (e) => {
   let scrollTo = e.wheelDelta * -(50 / 100);
   uploadFileListDiv.scrollTop = scrollTo + uploadFileListDiv.scrollTop;
 });
+
+//-------------------------------------
+// Helper functions
+//-------------------------------------
+function scrollToTop() {
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
 
 createAllCards();

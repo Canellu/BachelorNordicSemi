@@ -43,50 +43,47 @@
     <link rel="shortcut icon" href="#" />
     <title>Oasys</title>
   </head>
-  <body class="bg-gray-100 font-montserrat pt-16 flex flex-col">
+  <body class="bg-gray-100 font-montserrat pt-16 sm:pt-20 flex flex-col">
     <script src="js/header.js"></script>
 
-    <main class="min-h-screen space-y-4 py-12 mx-10">
-      <!-- <div class="container m-auto rounded-shadow p-4 bg-light">
-        <iframe
-          id="mareanoMap"
-          style="border: none"
-          height="500px"
-          width="100%"
-          src="http://www.mareano.no/kart/viewer/#maps/5899"
-        ></iframe>
-      </div> -->
-
+    <main class="min-h-screen space-y-4 sm:space-y-6 mx-2 sm:mx-4">
       <!-- Map-->
-      <div class="container m-auto rounded-shadow p-4 bg-light">
+      <div
+        class="container m-auto rounded-shadow h-96 sm:h-screen p-2 sm:p-4 bg-light"
+        style="max-height: 600px"
+      >
         <div id="homeMap" class="big-card h-full"></div>
       </div>
 
       <!-- UPLOAD AND CREATE DEVICE BUTTONS -->
-      <div class="container m-auto flex space-x-4">
+      <div
+        class="container m-auto flex justify-around sm:justify-start sm:space-x-4"
+      >
         <button
-          class="w-40 activeBtnStyle px-3 h-12 rounded-shadow flex justify-around items-center space-x-4 font-semibold text-sm cursor-pointer duration-200 border bg-light text-dark ring-2 ring-transparent hover:ring-gray-300"
+          class="h-9 sm:h-11 w-36 sm:w-40 bg-light rounded-shadow text-xs sm:text-sm font-semibold px-4 flex items-center duration-300 justify-between hover:bg-gray-800 hover:text-gray-50"
+          style="white-space: nowrap"
         >
           ADD GLIDER
-          <span class="material-icons-outlined"> add </span>
+          <span class="material-icons text-xl sm:text-2xl"> add </span>
         </button>
         <button
           onclick="showModal()"
-          class="w-44 activeBtnStyle px-3 h-12 space-x-4 rounded-shadow flex justify-around items-center font-semibold text-sm cursor-pointer duration-200 border bg-light text-dark ring-2 ring-transparent hover:ring-gray-300"
+          class="h-9 sm:h-11 w-36 sm:w-44 bg-light rounded-shadow text-xs sm:text-sm font-semibold px-4 flex items-center duration-300 justify-between hover:bg-gray-800 hover:text-gray-50"
+          style="white-space: nowrap"
         >
           UPLOAD DATA
-          <span class="material-icons-outlined"> file_upload </span>
+          <span class="material-icons text-xl sm:text-2xl"> file_upload </span>
         </button>
       </div>
 
       <!-- UPLOAD MODAL -->
       <div
         id="uploadModal"
-        class="w-screen h-screen fixed top-0 left-0 z-10 bg-opacity-60 bg-gray-800 hidden"
+        class="hidden w-screen h-screen fixed top-0 left-0 z-10 bg-opacity-60 bg-gray-800"
       >
         <div
           id="uploadModalContent"
-          class="max-w-xl w-full h-full max-h-96 m-auto fixed top-40 left-1/2 transform -translate-x-1/2 bg-gray-100 rounded-shadow flex flex-col justify-center items-center p-8 space-y-4"
+          class="max-w-xl w-full m-auto h-full max-h-96 fixed top-1/2 -translate-y-1/2 left-1/2 transform -translate-x-1/2 bg-gray-100 rounded-shadow flex flex-col justify-center items-center p-8 space-y-4"
         >
           <button
             id="closeModalBtn"
@@ -125,31 +122,38 @@
           </div>
 
           <!-- BUTTON ROW -->
-          <div id="modalBtnRow" class="w-full h-10 flex">
+          <div
+            id="modalBtnRow"
+            class="w-full flex flex-col sm:flex-row justfiy-center sm:justify-between items-center space-y-4 sm:space-y-0 h-24 sm:h-10"
+          >
             <!-- Select file button -->
             <button
               onclick="uploadData()"
               id="selectZipBtn"
-              class="activeBtnStyle rounded-shadow w-52 px-2 flex justify-center items-center font-medium cursor-pointer duration-200 text-sm mr-32 bg-light text-dark hover:border-gray-800"
+              class="h-9 sm:h-10 w-44 sm:w-52 bg-light rounded-shadow text-xs sm:text-sm font-medium px-4 flex items-center duration-300 justify-center hover:bg-gray-800 hover:text-gray-50"
             >
               Select zip-file to upload
             </button>
 
             <!-- CONFIRM/CANCEL BUTTONS -->
-            <button
-              id="confirmBtn"
-              onclick="uploadToFirebase()"
-              class="activeBtnStyle rounded-shadow w-20 px-2 flex justify-center items-center font-medium cursor-pointer duration-200 bg-light border-gray-100 hover:border-gray-400 text-sm mr-3 disableBtn"
+            <div
+              class="flex w-44 sm:w-52 justify-between sm:justify-between h-9 sm:h-10"
             >
-              Confirm
-            </button>
-            <button
-              id="cancelBtn"
-              onclick="hideModal()"
-              class="activeBtnStyle rounded-shadow w-20 px-2 flex justify-center items-center font-medium cursor-pointer duration-200 bg-light border-gray-100 hover:border-gray-400 text-sm"
-            >
-              Cancel
-            </button>
+              <button
+                id="confirmBtn"
+                onclick="uploadToFirebase()"
+                class="rounded-shadow w-20 sm:w-24 px-2 sm:px-4 flex justify-center items-center font-medium cursor-pointer duration-300 bg-light hover:bg-gray-800 hover:text-gray-50 text-xs sm:text-sm disableBtn"
+              >
+                Confirm
+              </button>
+              <button
+                id="cancelBtn"
+                onclick="hideModal()"
+                class="rounded-shadow w-20 px-2 sm:w-24 sm:px-4 flex justify-center items-center font-medium cursor-pointer duration-300 bg-light hover:bg-gray-800 hover:text-gray-50 text-xs sm:text-sm"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -164,57 +168,84 @@
       <!--  GRID -->
       <div
         id="deviceGrid"
-        class="container m-auto grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-12"
+        class="container m-auto grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6"
       >
         <!-- CARD -->
         <!-- <script>
           let deviceGrid = document.querySelector("#deviceGrid");
 
-          for (let i = 0; i < 6; i++) {
+          for (let i = 0; i < 4; i++) {
             deviceGrid.innerHTML += `
             <a href="device.html?gliderUID=1234">
-              <div
-                class="overflow-hidden flex flex-col justify-between shadow-lg rounded-lg transform transition-all duration-200 hover:scale-95 hover:shadow-2xl"
-              >
-                <div
-                class="absolute px-3 py-1 flex justify-center items-center bg-gray-800 top-4 left-4 rounded-lg font-semibold tracking-widest text-gray-200"
-              >
-                G1233
-              </div>
-              <img
-                class="object-cover center w-full h-44 rounded-lg"
-                src="assets/img/jelly.jpg"
-                alt=""
-              />
-
-              <div class="flex-grow place-self-center mt-4">
-                <h4 class="text-xl font-bold tracking-widest">ID: 123420</h4>
-              </div>
-
-              <div class="flex justify-evenly w-full p-4">
-                <i
-                  class="fas fa-battery-quarter text-xl transform -rotate-90 scale-y-125 flex items-center text-dark"
-                ></i>
-                <span class="material-icons text-2xl text-dark">
-                  sd_card_alert
-                </span>
-                <span class="material-icons text-2xl text-dark">
-                  check_circle
-                </span>
-                <span class="material-icons text-2xl text-dark"> error </span>
-              </div>
-
-              <div class="w-full bg-dark text-light p-2 flex flex-col rounded-lg">
-                <p class="tracking-wide text-center text-base font-medium">
-                  10 minutes ago
-                </p>
-              </div>
+          <div
+            class="overflow-hidden bg-light flex flex-col justify-between rounded-xl shadow-xl transform transition-all duration-200 hover:scale-95 hover:shadow-2xl w-full"
+          >
+            <div
+              class="absolute px-3 py-1 flex justify-center items-center bg-gray-800 top-4 left-4 rounded-lg font-semibold tracking-widest text-gray-200 text-sm sm:text-base"
+            >
+              G1233
             </div>
-          </a>
+
+            <div
+              class="absolute top-1/4 sm:hidden flex-grow place-self-center border border-gray-50 py-1 px-3 rounded-3xl"
+            >
+              <h4 class="text-xl text-light font-semibold tracking-widest">
+                ID: 123420
+              </h4>
+            </div>
+
+            <img
+              class="object-cover w-full h-28 sm:h-44 rounded-b-xl"
+              src="assets/img/jelly.jpg"
+              alt=""
+            />
+
+            <div class="hidden sm:block flex-grow place-self-center mt-4">
+              <h4
+                class="text-md sm:text-xl font-bold tracking-wider sm:tracking-widest"
+              >
+                ID: 123420
+              </h4>
+            </div>
+
+            <div class="flex justify-evenly w-full p-2">
+              <i
+                class="fas fa-battery-quarter text-sm sm:text-lg transform -rotate-90 scale-y-125 flex items-center text-dark"
+              ></i>
+              <span class="material-icons text-xl sm:text-2xl text-dark">
+                sd_card_alert
+              </span>
+              <span class="material-icons text-xl sm:text-2xl text-dark">
+                check_circle
+              </span>
+              <span class="material-icons text-xl sm:text-2xl text-dark">
+                error
+              </span>
+            </div>
+
+            <div
+              class="w-full text-dark bg-gray-50 sm:bg-gray-800 sm:text-gray-50 p-2 flex flex-col rounded-t-lg"
+            >
+              <p
+                class="tracking-wide text-center text-sm sm:text-base font-medium"
+              >
+                10 minutes ago
+              </p>
+            </div>
+          </div>
+        </a>
             
             `;
           }
         </script> -->
+      </div>
+
+      <!-- Back to top -->
+      <div
+        class="fixed bottom-5 right-8 h-12 w-12 bg-dark rounded-full flex items-center justify-center border-2 text-light"
+        onclick="scrollToTop()"
+      >
+        <span class="material-icons text-4xl"> expand_less </span>
       </div>
     </main>
 
@@ -224,7 +255,6 @@
     <script src="js/firestore.js"></script>
     <script src="js/home.js"></script>
 
-    <!-- MAPS API with KEY -->
     <script src="js/map.js"></script>
     <script
       src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDmDtuW7lGEvkAUbXOEzuXfcCx3UChoFFc&callback=initHomeMap&libraries=&v=weekly"
