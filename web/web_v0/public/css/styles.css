@@ -89,7 +89,7 @@ input[type="radio"] {
 }
 
 .rounded-shadow {
-  @apply rounded-md shadow-md border;
+  @apply rounded-sm shadow-md;
 }
 
 .tabs {
@@ -103,12 +103,12 @@ input[type="radio"] {
 
 .big-card {
   @apply w-full rounded-lg;
-  height: 650px;
 }
-
+/*
 .headerBtn {
-  @apply h-full flex flex-col  justify-center items-center hover:bg-gray-50 hover-text-dark  transition duration-300;
+   @apply h-full flex flex-col  justify-center items-center hover:bg-gray-50 hover-text-dark  transition duration-300;
 }
+ */
 /* 
 .dropDownBtn {
   @apply h-full rounded-shadow flex items-center pl-8 hover:border-gray-400 duration-200 z-10;
@@ -289,6 +289,10 @@ input[type="radio"] {
   animation-play-state: paused;
 }
 
+.showMenu {
+  animation: scaleY 2s ease-in-out forwards;
+}
+
 @keyframes slideIn {
   0% {
     transform: translateX(120%);
@@ -305,6 +309,15 @@ input[type="radio"] {
   100% {
     transform: translateX(120%);
     opacity: 0;
+  }
+}
+
+@keyframes scaleY {
+  from {
+    transform: translateY(-50%) scaleY(0);
+  }
+  to {
+    transform: translateY(0) scaleY(1);
   }
 }
 
