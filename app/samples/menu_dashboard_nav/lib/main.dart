@@ -33,10 +33,18 @@ class HomeRun extends StatelessWidget {
   Widget build(BuildContext context) {
     return StreamProvider<List<Device>>.value(
       value: DatabaseService("","").glider,
-      child: MaterialApp(
-        //Remove the debug banner at the right top
-        debugShowCheckedModeBanner: false,
-        home: MenuDashboardLayout(),
+      child: GestureDetector(
+        onTap: (){
+          FocusScopeNode currentFocus = FocusScope.of(context);
+          if (!currentFocus.hasPrimaryFocus && currentFocus.focusedChild != null) {
+            FocusManager.instance.primaryFocus.unfocus();
+          }
+        },
+        child: MaterialApp(
+          //Remove the debug banner at the right top
+          debugShowCheckedModeBanner: false,
+          home: MenuDashboardLayout(),
+        ),
       ),
     );
   }

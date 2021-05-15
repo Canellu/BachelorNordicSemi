@@ -46,13 +46,14 @@ class DatabaseService {
 
   Future<void> newMission(Mission missionObject) async {
     return await connectCollection.doc(gid).collection("Missions").doc(missionObject.missionId).set({
+      "4G" : missionObject.nett,
       "freqC" : missionObject.C,
       "freqP" : missionObject.P,
       "freqT" : missionObject.T,
+      "WP" : missionObject.wayPoint,
       "maxD" : missionObject.maxD,
       "minD" : missionObject.minD,
       "start" : missionObject.startTime,
-      "4G" : missionObject.nett
     }).then((value) => print("New Mission Added"))
         .catchError((error) => print("Failed to add new mission : $error"));
   }
