@@ -748,7 +748,7 @@
           </div>
         </div>
 
-        <div class="col s12 m4 offset-m4 row center">
+        <div class="col s12 m8 offset-m2 xl6 offset-xl3 row center">
           <!-- Configure button -->
           <div class="col s6">
             <a
@@ -764,8 +764,10 @@
 
           <!-- End connection button -->
           <div class="col s6">
+            <!-- Modal Trigger -->
             <a
-              class="waves-effect waves-light btn red lighten-2"
+              class="waves-effect waves-light btn red lighten-2 modal-trigger"
+              href="#modalClosePage"
               onclick="endConnection()"
             >
               disconnect
@@ -773,6 +775,14 @@
                 <img src="wifi_off.svg" style="margin-top: 7px" />
               </i>
             </a>
+
+            <!-- Modal Structure -->
+            <div id="modalClosePage" class="modal">
+              <div class="modal-content">
+                <h5>Succesfully disconnected the glider.</h5>
+                <h6>You can now close the browser window.</h6>
+              </div>
+            </div>
           </div>
         </div>
       </div>

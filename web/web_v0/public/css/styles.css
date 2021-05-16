@@ -352,3 +352,7 @@ tbody tr:nth-child(odd) {
 .btn {
   @apply cursor-pointer transform hover:scale-105 hover:border-gray-800 duration-200;
 }
+
+::placeholder {
+  color: rgb(100, 100, 100);
+}

@@ -32694,6 +32694,18 @@ tbody tr:nth-child(odd) {
   transition-duration: 200ms;
 }
 
+::-moz-placeholder {
+  color: rgb(100, 100, 100);
+}
+
+:-ms-input-placeholder {
+  color: rgb(100, 100, 100);
+}
+
+::placeholder {
+  color: rgb(100, 100, 100);
+}
+
 @media (min-width: 640px){
   .sm\:container{
     width: 100%;

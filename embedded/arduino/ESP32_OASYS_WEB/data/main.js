@@ -145,7 +145,11 @@ fileListBody.addEventListener("click", () => {
 // Init materialize elements
 document.addEventListener("DOMContentLoaded", function () {
   M.Tabs.init(document.querySelectorAll(".tabs"));
-  M.Modal.init(document.querySelectorAll(".modal"));
+  M.Modal.init(document.querySelectorAll(".modal"), {
+    preventScrolling: true,
+    dismissible: false,
+    endingTop: "30%",
+  });
   M.FormSelect.init(document.querySelectorAll("select"));
   // M.Pushpin.init(document.querySelectorAll(".pushpin"), {});
   M.Datepicker.init(document.querySelectorAll(".datepicker"), {
