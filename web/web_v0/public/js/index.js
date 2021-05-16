@@ -1,6 +1,6 @@
-var toSignUp = document.querySelector("#toSignUp");
-var toLogin = document.querySelector("#toLogin");
-var cardContent = document.querySelector(".cardContent");
+let toSignUp = document.querySelector("#toSignUp");
+let toLogin = document.querySelector("#toLogin");
+let cardContent = document.querySelector("#cardContent");
 
 toSignUp.addEventListener("click", (e) => {
   e.preventDefault();
@@ -24,7 +24,7 @@ auth.onAuthStateChanged((user) => {
 });
 
 function validateLogIn(errorMsg) {
-  let errorDiv = document.querySelector("#errorMessage");
+  let errorDiv = document.querySelector("#loginErrorMessage");
   errorDiv.innerHTML = errorMsg;
   errorDiv.classList.remove("hidden");
 }

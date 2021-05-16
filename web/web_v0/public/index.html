@@ -14,120 +14,148 @@
     <!-- Firebase Firestore -->
     <script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-firestore.js"></script>
 
+    <!-- MATERIAL ICONS -->
+    <link
+      href="https://fonts.googleapis.com/css?family=Material+Icons|Material+Icons+Outlined|Material+Icons+Two+Tone|Material+Icons+Round|Material+Icons+Sharp"
+      rel="stylesheet"
+    />
+
     <link rel="stylesheet" href="styles.css" />
     <title>Oasys</title>
   </head>
-  <body class="bg-gray-100 font-montserrat">
-    <main class="flex w-screen h-screen">
-      <div class="absolute top-20 left-20">
-        <h1 class="text-4xl font-bold tracking-wider text-gray-200">OASYS</h1>
-      </div>
+  <body
+    class="bg-gray-100 font-montserrat"
+    style="
+      background: url('assets/img/jelly.jpg') center fixed;
+      background-size: cover;
+    "
+  >
+    <main class="flex items-center justify-center w-screen h-screen p-4">
+      <h1
+        class="absolute top-10 left-10 text-3xl font-bold tracking-wider text-gray-200"
+      >
+        OASYS
+      </h1>
+
       <!-- Login card-->
-      <div class="loginCard w-4/12">
+      <div class="w-full max-w-md">
         <!-- card content -->
-        <div class="cardContent">
-          <!-- front -->
-          <div class="front bg-gray-50 shadow-lg rounded-xl">
-            <h1 class="font-bold text-3xl mt-3">Login</h1>
-            <form id="loginForm" class="landingPageForm" autocomplete="off">
-              <!-- email field -->
-              <div class="my-5 w-full">
-                <label for="loginEmail" class="ml-2 text-black">Email</label>
-                <input
-                  type="email"
-                  autofocus
-                  id="loginEmail"
-                  class="w-full rounded-xl px-4 py-2 mt-3 focus:bg-white text-black bg-gray-200 focus:outline-none tracking-wider border"
-                  placeholder="Email"
-                  autocomplete="on"
-                  required
-                />
-              </div>
+        <div
+          id="cardContent"
+          class="w-full"
+          style="transition: all 0.5s ease; transform-style: preserve-3d"
+        >
+          <div
+            id="front"
+            class="w-full flex flex-col justify-center items-center bg-light rounded-md p-6"
+            style="backface-visibility: hidden"
+          >
+            <div
+              class="absolute -top-10 sm:-top-14 bg-dark h-20 w-20 sm:h-28 sm:w-28 rounded-full flex items-center justify-center"
+            >
+              <span class="material-icons text-light text-5xl sm:text-7xl">
+                person
+              </span>
+            </div>
+            <h1 class="text-xl sm:text-2xl font-semibold mt-6 sm:mt-12">
+              User Login
+            </h1>
+            <form
+              id="loginForm"
+              class="w-full flex flex-col items-center justify-center space-y-4 sm:space-y-5 mt-4 sm:mt-5"
+            >
+              <input
+                type="email"
+                autofocus
+                id="loginEmail"
+                class="w-full h-9 sm:h-11 px-2 rounded text-sm sm:text-base bg-gray-200"
+                placeholder="Email"
+                autocomplete="on"
+                required
+              />
 
-              <!-- password field -->
-              <div class="w-full">
-                <label for="loginPassword" class="ml-2 text-black"
-                  >Password</label
-                >
-                <input
-                  type="password"
-                  id="loginPassword"
-                  class="w-full rounded-xl px-4 py-2 mt-3 focus:bg-white text-black bg-gray-200 focus:outline-none tracking-wider border"
-                  placeholder="Password"
-                  required
-                />
+              <input
+                type="password"
+                id="loginPassword"
+                class="w-full h-9 sm:h-11 px-2 rounded text-sm sm:text-base bg-gray-200"
+                placeholder="Password"
+                required
+              />
 
-                <!-- Forgot pass? -->
-                <div class="flex text-sm justify-end mt-2">
-                  <a
-                    href=""
-                    class="text-gray-500 hover:text-black hover:underline p-2"
-                  >
-                    Forgot Password?
-                  </a>
-                </div>
-              </div>
-
-              <!-- Error message -->
               <div
-                id="errorMessage"
-                class="hidden text-sm text-red-600 px-4"
+                id="loginErrorMessage"
+                class="hidden w-full text-xs sm:text-base text-red-400"
               ></div>
 
-              <!-- login button -->
-              <button id="loginBtn" class="landingPageBtn">Login</button>
-              <!-- signup button -->
-              <button id="toSignUp" class="landingPageBtn text-sm">
+              <button
+                id="loginBtn"
+                class="w-full h-9 sm:h-11 rounded bg-dark text-light text-sm sm:text-base sm:tracking-wider font-semibold"
+              >
+                LOGIN
+              </button>
+              <button id="toSignUp" class="text-xs sm:text-sm underline">
                 Need Account?
               </button>
             </form>
           </div>
 
-          <!-- back-->
-          <div class="back bg-gray-00 shadow-lg rounded-xl text-gray-50">
-            <h1 class="font-bold text-3xl mt-3">Sign Up</h1>
-            <form id="signUpForm" class="landingPageForm" autocomplete="off">
-              <!-- email field -->
-              <div class="my-5 w-full">
-                <label for="signUpEmail" class="ml-2">Email</label>
-                <input
-                  type="email"
-                  autofocus
-                  id="signUpEmail"
-                  class="w-full rounded-xl px-4 py-2 mt-3 focus:bg-white text-black bg-gray-150 focus:outline-none tracking-wider border"
-                  placeholder="Email address"
-                  required
-                />
-              </div>
+          <div
+            id="back"
+            class="absolute top-0 w-full flex flex-col justify-center items-center bg-light rounded-md p-6"
+            style="backface-visibility: hidden; transform: rotateY(180deg)"
+          >
+            <div
+              class="absolute -top-10 sm:-top-14 bg-dark h-20 w-20 sm:h-28 sm:w-28 rounded-full flex items-center justify-center"
+            >
+              <span class="material-icons text-light text-5xl sm:text-7xl">
+                person_outline
+              </span>
+            </div>
+            <h1 class="text-xl sm:text-2xl font-semibold mt-6 sm:mt-12">
+              Create User
+            </h1>
+            <form
+              id="signUpForm"
+              class="w-full flex flex-col items-center justify-center space-y-4 sm:space-y-5 mt-4 sm:mt-5"
+            >
+              <input
+                disabled
+                type="email"
+                autofocus
+                id="signUpEmail"
+                class="w-full h-9 sm:h-11 px-2 rounded text-sm sm:text-base bg-gray-200"
+                placeholder="Email"
+                autocomplete="on"
+                required
+              />
 
-              <!-- password field -->
-              <div class="w-full">
-                <label for="signUpPassword" class="ml-2">Password</label>
-                <input
-                  type="password"
-                  id="signUpPassword"
-                  class="w-full rounded-xl px-4 py-2 mt-3 mb-11 focus:bg-white text-black bg-gray-150 focus:outline-none tracking-wider border"
-                  placeholder="Choose password"
-                  required
-                />
-              </div>
+              <input
+                disabled
+                type="password"
+                id="signUpPassword"
+                class="w-full h-9 sm:h-11 px-2 rounded text-sm sm:text-base bg-gray-200"
+                placeholder="Password"
+                required
+              />
 
-              <button id="signUpBtn" class="landingPageBtn">Sign Up</button>
-              <button id="toLogin" class="landingPageBtn text-sm">
-                Already have account?
+              <div
+                id="signUpErrorMessage"
+                class="hidden w-full text-xs sm:text-base text-red-400"
+              ></div>
+
+              <button
+                id="signUpBtn"
+                disabled
+                class="disabled:opacity-50 w-full h-9 sm:h-11 rounded bg-dark text-light text-sm sm:text-base sm:tracking-wider font-semibold"
+              >
+                SIGN UP
+              </button>
+              <button id="toLogin" class="text-xs sm:text-sm underline">
+                Already signed up?
               </button>
             </form>
           </div>
         </div>
-      </div>
-
-      <!-- Bbackground Jelly -->
-      <div class="w-screen h-screen bg-gray-800">
-        <img
-          class="object-cover w-full h-screen"
-          src="assets/img/jelly.jpg"
-          alt=""
-        />
       </div>
     </main>
 

@@ -12,6 +12,7 @@ module.exports = {
     extend: {
       backgroundColor: ["active"],
       ringColor: ["hover"],
+      opacity: ["disabled"],
     },
   },
   plugins: [],
