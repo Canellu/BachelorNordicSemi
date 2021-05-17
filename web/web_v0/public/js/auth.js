@@ -32,6 +32,11 @@ if (loginForm != null) {
         email,
         password
       );
+      if (credentials.user) {
+        location.replace("home.html");
+      } else {
+        validateLogIn("No user found...");
+      }
     } catch (error) {
       validateLogIn(error.message);
     }
