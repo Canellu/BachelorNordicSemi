@@ -439,6 +439,29 @@
         <div class="col s12 m8 offset-m2">
           <div class="card bg-light">
             <div class="card-content">
+              <!-- 4G Message Limit -->
+              <div class="row" style="margin-bottom: 12px">
+                <div class="flexBetween">
+                  <h6 class="col s8">4G Message Limit</h6>
+                  <div class="col s4 right-align">
+                    <input
+                      id="input4GLimit"
+                      type="number"
+                      class="center"
+                      style="
+                        width: 60px;
+                        height: 25px;
+                        font-weight: 500;
+                        margin: 0;
+                      "
+                    />
+                  </div>
+                </div>
+                <div class="sliderBox col s12" style="margin: 10px 0">
+                  <div id="slider4GLimit"></div>
+                </div>
+              </div>
+
               <!-- Min depth-->
               <div class="row" style="margin-bottom: 12px">
                 <div class="flexBetween">
@@ -484,29 +507,6 @@
                   <div id="sliderMaxDepth"></div>
                 </div>
               </div>
-
-              <!-- 4G Message Limit -->
-              <div class="row" style="margin-bottom: 12px">
-                <div class="flexBetween">
-                  <h6 class="col s8">4G Message Limit</h6>
-                  <div class="col s4 right-align">
-                    <input
-                      id="input4GLimit"
-                      type="number"
-                      class="center"
-                      style="
-                        width: 60px;
-                        height: 25px;
-                        font-weight: 500;
-                        margin: 0;
-                      "
-                    />
-                  </div>
-                </div>
-                <div class="sliderBox col s12" style="margin: 10px 0">
-                  <div id="slider4GLimit"></div>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -519,140 +519,89 @@
                 <h6 class="col s12">Logging frequencies</h6>
                 <!-- Temperature -->
                 <div
-                  class="col s12 offset-s1 m4 l3 offset-l2"
+                  class="col s12 m4 l3 offset-l2"
                   style="align-items: center"
                 >
                   <h6>Temperature</h6>
                   <p>
                     <label>
-                      <input
-                        class="with-gap"
-                        name="temperatureGroup"
-                        type="radio"
-                      />
+                      <input name="temperatureGroup" type="radio" />
                       <span class="radioText">High</span>
                     </label>
                   </p>
                   <p>
                     <label>
-                      <input
-                        checked
-                        class="with-gap"
-                        name="temperatureGroup"
-                        type="radio"
-                      />
+                      <input checked name="temperatureGroup" type="radio" />
                       <span class="radioText radioTextActive">Medium</span>
                     </label>
                   </p>
                   <p>
                     <label>
-                      <input
-                        class="with-gap"
-                        name="temperatureGroup"
-                        type="radio"
-                      />
+                      <input name="temperatureGroup" type="radio" />
                       <span class="radioText">Low</span>
                     </label>
                   </p>
                   <p>
                     <label>
-                      <input
-                        class="with-gap"
-                        name="temperatureGroup"
-                        type="radio"
-                      />
+                      <input name="temperatureGroup" type="radio" />
                       <span class="radioText">None</span>
                     </label>
                   </p>
                 </div>
                 <!-- Conductivity -->
-                <div class="col s12 offset-s1 m4 l3">
+                <div class="col s12 m4 l3">
                   <h6 style="font-size: 1.1rem; font-weight: 600">
                     Conductivity
                   </h6>
                   <p>
                     <label>
-                      <input
-                        class="with-gap"
-                        name="conductivityGroup"
-                        type="radio"
-                      />
+                      <input name="conductivityGroup" type="radio" />
                       <span class="radioText">High</span>
                     </label>
                   </p>
                   <p>
                     <label>
-                      <input
-                        checked
-                        class="with-gap"
-                        name="conductivityGroup"
-                        type="radio"
-                      />
+                      <input checked name="conductivityGroup" type="radio" />
                       <span class="radioText radioTextActive">Medium</span>
                     </label>
                   </p>
                   <p>
                     <label>
-                      <input
-                        class="with-gap"
-                        name="conductivityGroup"
-                        type="radio"
-                      />
+                      <input name="conductivityGroup" type="radio" />
                       <span class="radioText">Low</span>
                     </label>
                   </p>
                   <p>
                     <label>
-                      <input
-                        class="with-gap"
-                        name="conductivityGroup"
-                        type="radio"
-                      />
+                      <input name="conductivityGroup" type="radio" />
                       <span class="radioText">None</span>
                     </label>
                   </p>
                 </div>
                 <!-- Pressure -->
-                <div class="col s12 offset-s1 m3 l3">
+                <div class="col s12 m3 l3">
                   <h6 style="font-size: 1.1rem; font-weight: 600">Pressure</h6>
                   <p>
                     <label>
-                      <input
-                        class="with-gap"
-                        name="pressureGroup"
-                        type="radio"
-                      />
+                      <input name="pressureGroup" type="radio" />
                       <span class="radioText">High</span>
                     </label>
                   </p>
                   <p>
                     <label>
-                      <input
-                        checked
-                        class="with-gap"
-                        name="pressureGroup"
-                        type="radio"
-                      />
+                      <input checked name="pressureGroup" type="radio" />
                       <span class="radioText radioTextActive">Medium</span>
                     </label>
                   </p>
                   <p>
                     <label>
-                      <input
-                        class="with-gap"
-                        name="pressureGroup"
-                        type="radio"
-                      />
+                      <input name="pressureGroup" type="radio" />
                       <span class="radioText">Low</span>
                     </label>
                   </p>
                   <p>
                     <label>
-                      <input
-                        class="with-gap"
-                        name="pressureGroup"
-                        type="radio"
-                      />
+                      <input name="pressureGroup" type="radio" />
                       <span class="radioText">None</span>
                     </label>
                   </p>

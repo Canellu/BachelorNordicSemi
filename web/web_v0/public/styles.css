@@ -32078,8 +32078,9 @@ video {
 }
 
 .bg-light {
+  /* @apply bg-gray-50; */
   --tw-bg-opacity: 1;
-  background-color: rgba(249, 250, 251, var(--tw-bg-opacity));
+  background-color: rgba(255, 255, 255, var(--tw-bg-opacity));
 }
 
 .bg-dark {
@@ -32116,6 +32117,7 @@ iframe {
 
 ::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
 }
 
 /* Track */
@@ -32140,6 +32142,7 @@ iframe {
 .dropDownContent::-webkit-scrollbar,
 #waypointList::-webkit-scrollbar {
   width: 4px;
+  height: 4px;
 }
 
 /* Handle on hover */
@@ -32172,27 +32175,51 @@ body {
   cursor: pointer;
   font-size: 0.875rem;
   line-height: 1.25rem;
+  padding-left: 0.5rem;
 }
 
-input[type="radio"] {
+input[type="radio"] + label {
+  transition-duration: 0.2s;
+}
+
+input[type="radio"]:after {
+  width: 16.3px;
+  height: 16.3px;
+  border-radius: 16.3px;
+  top: -2px;
+  left: -1px;
+  position: relative;
+  background-color: white;
+  content: "";
+  display: inline-block;
+  visibility: visible;
+  border: 2px solid #5a5a5a;
+  transition-duration: 0.2s;
+}
+
+input[type="radio"]:checked:after {
+  width: 16.3px;
+  height: 16.3px;
+  border-radius: 16.3px;
+  top: -2px;
+  left: -1px;
+  position: relative;
+  background-color: #6bb7bf;
+  content: "";
+  display: inline-block;
+  visibility: visible;
+  border: 2px solid rgb(107, 183, 191);
+}
+
+input {
   cursor: pointer;
+  background-color: #fafafa !important;
 }
 
 .rounded-shadow {
   border-radius: 0.125rem;
   --tw-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
-}
-
-.tabs {
-  height: 2.5rem;
-  overflow: hidden;
-  position: sticky;
-  top: 5rem;
-  --tw-text-opacity: 1;
-  color: rgba(156, 163, 175, var(--tw-text-opacity));
-  z-index: 40;
-  width: 600px;
 }
 
 .tabBtn {
@@ -32307,8 +32334,9 @@ input[type="radio"] {
 }
 
 .month-item {
+  /* @apply bg-gray-50; */
   --tw-bg-opacity: 1;
-  background-color: rgba(249, 250, 251, var(--tw-bg-opacity));
+  background-color: rgba(255, 255, 255, var(--tw-bg-opacity));
   border-radius: 0.125rem;
   --tw-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
@@ -32355,22 +32383,11 @@ input[type="radio"] {
   height: 2rem;
   --tw-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
-  --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
-  --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
-  box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
-  --tw-ring-color: transparent;
-}
-
-.chartBtn:hover{
-  --tw-ring-opacity: 1;
-  --tw-ring-color: rgba(209, 213, 219, var(--tw-ring-opacity));
-}
-
-.chartBtn{
   width: 2rem;
   transition-duration: 200ms;
+  /* @apply bg-gray-50; */
   --tw-bg-opacity: 1;
-  background-color: rgba(249, 250, 251, var(--tw-bg-opacity));
+  background-color: rgba(255, 255, 255, var(--tw-bg-opacity));
   --tw-text-opacity: 1;
   color: rgba(31, 41, 55, var(--tw-text-opacity));
   min-width: 32px;
@@ -32407,21 +32424,6 @@ input[type="radio"] {
   width: 140px;
 }
 
-.chartCard {
-  border-radius: 0.375rem;
-  border-width: 1px;
-  height: 20rem;
-  overflow: hidden;
-  padding-left: 1rem;
-  padding-right: 1rem;
-  position: relative;
-  --tw-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
-  width: 100%;
-  --tw-bg-opacity: 1;
-  background-color: rgba(249, 250, 251, var(--tw-bg-opacity));
-}
-
 .chartRangeBtnFocus {
   border: 1px solid #1f2937;
   transform: scale(1.05);
@@ -32429,7 +32431,14 @@ input[type="radio"] {
 
 .activeTabBtn {
   --tw-text-opacity: 1;
-  color: rgba(31, 41, 55, var(--tw-text-opacity));
+  color: rgba(249, 250, 251, var(--tw-text-opacity));
+}
+
+@media (min-width: 1024px){
+  .activeTabBtn{
+    --tw-text-opacity: 1;
+    color: rgba(31, 41, 55, var(--tw-text-opacity));
+  }
 }
 
 .chartRangeBtn:active, .activeBtn:active, .chartBtn:active, .activeBtnStyle:active {
@@ -32440,8 +32449,9 @@ input[type="radio"] {
 }
 
 .reverseActiveBtnStyle:active {
+  /* @apply bg-gray-50; */
   --tw-bg-opacity: 1;
-  background-color: rgba(249, 250, 251, var(--tw-bg-opacity));
+  background-color: rgba(255, 255, 255, var(--tw-bg-opacity));
   --tw-text-opacity: 1;
   color: rgba(31, 41, 55, var(--tw-text-opacity));
 }
@@ -32478,25 +32488,6 @@ input[type="radio"] {
   cursor: grabbing;
 }
 
-.sliderBox:hover h1 {
-  color: #6bb7bf;
-}
-
-.sliderBox h1 {
-  transition: all 0.2s;
-  min-width: 8rem;
-}
-
-.sliderBox {
-  display: flex;
-  align-items: center;
-  padding-top: 0.75rem;
-  padding-bottom: 0.75rem;
-  padding-left: 1rem;
-  padding-right: 1rem;
-  transition-duration: 200ms;
-}
-
 .hour-item:hover, .minute-item:hover{
   --tw-bg-opacity: 1;
   background-color: rgba(229, 231, 235, var(--tw-bg-opacity));
@@ -32507,10 +32498,12 @@ input[type="radio"] {
 .hour-item, .minute-item{
   border-left-width: 2px;
   cursor: pointer;
-  font-size: 0.75rem;
-  line-height: 1rem;
+  font-weight: 500;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
+  letter-spacing: 0.025em;
 }
 
 .saveTime:focus {
@@ -32627,8 +32620,9 @@ td {
 }
 
 tbody tr:nth-child(odd) {
+  /* @apply bg-gray-50; */
   --tw-bg-opacity: 1;
-  background-color: rgba(249, 250, 251, var(--tw-bg-opacity));
+  background-color: rgba(255, 255, 255, var(--tw-bg-opacity));
 }
 
 .btn:hover{

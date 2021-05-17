@@ -7,14 +7,12 @@ let gliderPath;
 let dataMapDiv = document.getElementById("dataMap");
 let missionMapDiv = document.getElementById("missionMap");
 let homeMapDiv = document.getElementById("homeMap");
-
+let width = window.innerWidth;
+let small = 768;
 var flightPlanCoordinates;
 
 var defaultLocation = { lat: 59.769, lng: 10.654, zoom: 10 };
 function initHomeMap() {
-  let width = window.innerWidth;
-  let small = 640;
-
   homeMap = new google.maps.Map(homeMapDiv, {
     center: { lat: defaultLocation.lat, lng: defaultLocation.lng },
     zoom: defaultLocation.zoom,
@@ -45,8 +43,8 @@ function initDataMap() {
     center: { lat: defaultLocation.lat, lng: defaultLocation.lng },
     zoom: defaultLocation.zoom,
     disableDefaultUI: true,
-    mapTypeControl: true,
-    zoomControl: true,
+    mapTypeControl: width < small ? false : true,
+    zoomControl: width < small ? false : true,
     fullscreenControl: true,
   });
 }
@@ -152,8 +150,8 @@ function initMissionMap() {
     center: { lat: defaultLocation.lat, lng: defaultLocation.lng },
     zoom: defaultLocation.zoom,
     disableDefaultUI: true,
-    mapTypeControl: true,
-    zoomControl: true,
+    mapTypeControl: width < small ? false : true,
+    zoomControl: width < small ? false : true,
     fullscreenControl: true,
   });
 

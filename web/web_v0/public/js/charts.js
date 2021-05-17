@@ -172,7 +172,7 @@ function filterData(chart, type, days) {
 // **HTML NEEDS TO BE CREATED FOR ALL CHARTS BEFORE ADDING CHART FUNCTIONALITY**
 function createChartHTML(type) {
   let chartHTML = `
-      <div class="chartCard">
+      <div class="h-60 sm:h-80 w-full rounded-sm border shadow-md px-2 overflow-hidden relative bg-light m-auto">
         <div class="flex items-center w-full h-12 px-1">
           <!-- Chart header -->
           <div class="flex-grow">
@@ -307,6 +307,7 @@ function createChartContent(type, ylabel, color, stepSize) {
             scaleLabel: {
               display: true,
               labelString: ylabel,
+              lineHeight: 0.3,
             },
             ticks: {
               // beginAtZero: true,

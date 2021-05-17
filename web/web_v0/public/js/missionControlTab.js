@@ -7,20 +7,23 @@ function createSliderHTML(title, min, max) {
   document.querySelector("#previewParams").innerHTML += previewHTML;
 
   let sliderHTML = `
-    <div class="sliderBox">
-      <h1 class="font-medium text-gray-800">${title}</h1>
-      <div id="slider${type}" class="cursor-pointer w-full mx-6 relative">
-        <span class="absolute text-xs right-1">${max}</span>
-      </div>
-  
+    <div class="flex justify-between">
+      <h1 class="text-sm font-semibold text-gray-800">${title}</h1>
       <input
         type="number"
         min="0"
         step="1"
         id="input${type}"
-        class="w-16 text-md font-medium text-dark border pl-1 rounded-sm focus:outline-none"
+        class="w-16 text-md font-medium text-dark border rounded-sm text-center"
       />
-    </div>`;
+    </div>
+
+    <div class="sliderBox w-full pb-3">
+      <div id="slider${type}" class="cursor-pointer flex-grow relative">
+        <span class="absolute text-xs right-1">${max}</span>
+      </div>
+    </div>   
+    `;
 
   document.querySelector("#sliders").innerHTML += sliderHTML;
 }
@@ -66,8 +69,8 @@ let sliderList = [
   // { title: "Conductivity", min: 0, max: 20, start: 0 },
   // { title: "Pressure", min: 0, max: 20, start: 0 },
   // { title: "Temperature", min: 0, max: 20, start: 0 },
-  { title: "Min Depth", min: 0, max: 300, start: 0 },
-  { title: "Max Depth", min: 0, max: 300, start: 0 },
+  { title: "Min Depth", min: 0, max: 100, start: 50 },
+  { title: "Max Depth", min: 0, max: 300, start: 150 },
 ];
 
 sliderList.forEach((obj) => {
@@ -77,36 +80,68 @@ sliderList.forEach((obj) => {
   createSlider(obj.title, obj.min, obj.max, obj.start);
 });
 let max4GMsg = 100;
-createSlider("4GData", 0, max4GMsg, 0);
+createSlider("4GData", 0, max4GMsg, 50);
 document.querySelector("#messageMaxLimit").innerText = max4GMsg;
 
 // *********************** RADIO BUTTONS *******************************
 let tempGroupBtns = document.querySelectorAll("input[name=temperatureGroup]");
 let condGroupBtns = document.querySelectorAll("input[name=conductivityGroup]");
 let presGroupBtns = document.querySelectorAll("input[name=pressureGroup]");
+let defaultRadios = document.querySelectorAll(
+  "input[type=radio] + label[for*=None]"
+);
 
-function setPreviewRadioVal() {
-  tempGroupBtns.forEach((btn) => {
-    if (btn.checked) {
-      document.querySelector("#previewTemperature").innerText =
-        btn.nextElementSibling.innerText;
-    }
-  });
+defaultRadios.forEach((btn) => {
+  btn.click();
+});
 
-  condGroupBtns.forEach((btn) => {
-    if (btn.checked) {
-      document.querySelector("#previewConductivity").innerText =
-        btn.nextElementSibling.innerText;
-    }
+let radioBtns = document.querySelectorAll("input[type=radio]");
+radioBtns.forEach((btn) => {
+  btn.addEventListener("change", (e) => {
+    changeRadioBtnStyle(e.target);
   });
+});
 
-  presGroupBtns.forEach((btn) => {
-    if (btn.checked) {
-      document.querySelector("#previewPressure").innerText =
-        btn.nextElementSibling.innerText;
-    }
-  });
+function changeRadioBtnStyle(btn, type, check) {
+  if (check) {
+    btn.nextElementSibling.style.color = "#6BB7BF";
+    btn.nextElementSibling.style.fontWeight = "600";
+    btn.nextElementSibling.style.letterSpacing = "1px";
+
+    let previewType = document.querySelector(`#preview${type}`);
+    previewType !== null
+      ? (previewType.innerText = btn.nextElementSibling.innerText)
+      : "";
+  } else {
+    btn.nextElementSibling.style.color = "black";
+    btn.nextElementSibling.style.fontWeight = "normal";
+    btn.nextElementSibling.style.letterSpacing = "0px";
+  }
 }
+
+tempGroupBtns.forEach((btn) => {
+  btn.addEventListener("change", (e) => {
+    tempGroupBtns.forEach((btn) => {
+      changeRadioBtnStyle(btn, "Temperature", btn.checked);
+    });
+  });
+});
+
+condGroupBtns.forEach((btn) => {
+  btn.addEventListener("change", (e) => {
+    condGroupBtns.forEach((btn) => {
+      changeRadioBtnStyle(btn, "Conductivity", btn.checked);
+    });
+  });
+});
+
+presGroupBtns.forEach((btn) => {
+  btn.addEventListener("change", (e) => {
+    presGroupBtns.forEach((btn) => {
+      changeRadioBtnStyle(btn, "Pressure", btn.checked);
+    });
+  });
+});
 
 // *********************** WAYPOINTS ***********************************
 
@@ -122,7 +157,10 @@ function resetInput() {
 function addWaypoint() {
   if (latInput.value != "" && lngInput.value != "") {
     let path = missionWaypoints.getPath();
-    let latLng = new google.maps.LatLng(latInput.value, lngInput.value);
+    let latLng = new google.maps.LatLng(
+      Number(latInput.value).toFixed(4),
+      Number(lngInput.value).toFixed(4)
+    );
     path.push(latLng);
     latInput.value = "";
     lngInput.value = "";
@@ -161,6 +199,7 @@ function renderWaypointList() {
   missionWaypoints.getPath().forEach((waypoint, index) => {
     let lat = waypoint.lat();
     let lng = waypoint.lng();
+    console.log({ lat, lng });
     let bg = "";
     if (isEditMode) {
       bg = "bg-white";
@@ -207,10 +246,9 @@ editWaypointsBtn.addEventListener("click", () => {
   let waypointListInputs = document.querySelectorAll(".waypoint-item input");
 
   if (editWaypointsBtn.innerText == "edit") {
-    // Remove readonly and whiten bg
+    // Remove readonly
     waypointListInputs.forEach((input) => {
       input.removeAttribute("readonly");
-      input.style.backgroundColor = "white";
     });
 
     isEditMode = 1;
@@ -223,10 +261,9 @@ editWaypointsBtn.addEventListener("click", () => {
     isEditMode = 0;
     editWaypointsBtn.innerText = "edit";
 
-    // Set input readonly and "remove" bg
+    // Set input readonly
     waypointListInputs.forEach((input) => {
       input.setAttribute("readonly", "");
-      input.style.backgroundColor = "#F9FAFB";
     });
 
     let path = missionWaypoints.getPath();
@@ -264,16 +301,33 @@ let sliderPreviews = document.querySelectorAll("#previewParams [id^=preview]");
 
 // --------- RESET BUTTON ---------------
 resetMissionParamsBtn.addEventListener("click", () => {
-  // Reset sliders inside ParamsDiv to 0
+  // Reset sliders to 0
   document.querySelectorAll("#sliders [id^=slider]").forEach((slider) => {
     slider.noUiSlider.set(0);
   });
-  // Reset 4G message limit slider
-  document.querySelector("#slider4GData").noUiSlider.set(0);
 
   // Reset sliderpreviews to 0
-  sliderPreviews.forEach((preview) => {
-    preview.innerText = "0";
+  sliderPreviews.forEach((preview, index) => {
+    if (index > 2) preview.innerText = "0";
+  });
+
+  // Reset radio btns
+  document.querySelectorAll("input[type=radio]").forEach((radioBtn) => {
+    let defaultRadio = radioBtn.id.includes("None");
+    switch (radioBtn.name.replace("Group", "")) {
+      case "temperature":
+        defaultRadio ? (radioBtn.checked = true) : (radioBtn.checked = false);
+        changeRadioBtnStyle(radioBtn, "Temperature", defaultRadio);
+        break;
+      case "conductivity":
+        defaultRadio ? (radioBtn.checked = true) : (radioBtn.checked = false);
+        changeRadioBtnStyle(radioBtn, "Conductivity", defaultRadio);
+        break;
+      case "pressure":
+        defaultRadio ? (radioBtn.checked = true) : (radioBtn.checked = false);
+        changeRadioBtnStyle(radioBtn, "Pressure", defaultRadio);
+        break;
+    }
   });
 
   // // Reset datetimes to blank

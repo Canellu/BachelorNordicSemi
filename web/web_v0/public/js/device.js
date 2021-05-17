@@ -223,10 +223,10 @@ async function listMissions() {
           }
         }
 
-        console.log(
-          `Creating mission-item: %c${missionDoc.id}`,
-          "color: teal; font-weight: bold; letter-spacing: 2px;"
-        );
+        // console.log(
+        //   `Creating mission-item: %c${missionDoc.id}`,
+        //   "color: teal; font-weight: bold; letter-spacing: 2px;"
+        // );
       });
     });
   console.log("Got Missions-snapshot listener...");
@@ -314,6 +314,7 @@ async function getMissionData(missionName) {
 
     coordinates.push({ t: t, lat: lat, lng: lng });
   }
+
   // add coordinates to dataObj
   dataObj["coordinates"] = coordinates;
 

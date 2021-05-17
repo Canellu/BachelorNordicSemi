@@ -4,10 +4,14 @@ let satelliteConsole = document.querySelector("#consoleText");
 
 function showSatelliteModal() {
   satelliteModal.classList.remove("hidden");
+  document.body.style.overflow = "hidden";
+  document.body.style.height = "100%";
 }
 
 function hideSatelliteModal() {
   satelliteModal.classList.add("hidden");
+  document.body.style.overflow = "auto";
+  document.body.style.height = "auto";
 }
 
 function ascii_to_hexa(str) {
@@ -100,9 +104,12 @@ function populateSatelliteMessageTable() {
             </td>
           </tr>`;
 
-          let tmpContent = tbody.innerHTML;
-          tbody.innerHTML = row;
-          tbody.innerHTML += tmpContent;
+          // Reverse descending table, newest ato top
+          // let tmpContent = tbody.innerHTML;
+          // tbody.innerHTML = row;
+          // tbody.innerHTML += tmpContent;
+
+          tbody.innerHTML += row;
         }
 
         if (change.type === "removed") {
