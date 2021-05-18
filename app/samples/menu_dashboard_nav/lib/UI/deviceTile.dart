@@ -1,6 +1,7 @@
 import 'package:bachelor_app/UI/pages/device_page.dart';
 import 'package:bachelor_app/models/device.dart';
 import 'package:flutter/material.dart';
+import 'package:hexcolor/hexcolor.dart';
 
 class DeviceTile extends StatelessWidget {
 
@@ -12,17 +13,24 @@ class DeviceTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(top: 10),
+      padding: EdgeInsets.only(top: 5),
       child: Card(
         //margin: EdgeInsets.fromLTRB(20, 6, 20, 0),
         child: ListTile(
           leading: CircleAvatar(
-            radius: 20,
+            child: Text(
+              '${oneDevice.alias}',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            radius: 25,
             //show health status, need to change the dummy data after
-            backgroundColor: Colors.lightGreen,
+            backgroundColor: HexColor('#1f2937'),
           ),
           contentPadding: EdgeInsets.fromLTRB(20,5,0,0),
-          title: Text('Alias: ' + oneDevice.alias),
+          title: Text('ID: ' + oneDevice.deviceId),
           subtitle: Text('Last sync: ' + oneDevice.lastSync + "\n" +
               'Added: ' + oneDevice.added),
           isThreeLine: true,

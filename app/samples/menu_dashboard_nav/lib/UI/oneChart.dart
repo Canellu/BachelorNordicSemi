@@ -1,6 +1,8 @@
 import 'dart:math';
 
 import 'package:bachelor_app/service/database.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:charts_flutter/src/text_style.dart' as ChartStyle;
@@ -25,35 +27,18 @@ class OneChart extends StatelessWidget {
 
   Widget build(BuildContext context) {
     var dataForChart = new Map();
+
     dataset.forEach((key, value) {
       if(key == dataType){
         dataForChart = value;
       }
     });
+    return ChartCompoent(dataForChart: dataForChart,dataType: dataType,);
+    /*
     return Container(
       child: ChartCompoent(dataForChart: dataForChart,dataType: dataType,),
-    );
+    );*/
   }
-/*
-    return FutureBuilder(
-        future: DatabaseService("311910", "Mission 1").datas,
-        builder: (context, snapshot) {
-
-          if (!snapshot.hasData) return const Text("Loading....");
-          //Map dataset = new Map<String, dynamic>.from(snapshot.data);
-          var dataForChart = new Map();
-          dataset.forEach((key, value) {
-            if(key == dataType){
-              dataForChart = value;
-            }
-          });
-
-          return Container(
-            child: ChartPage(dataForChart: dataForChart,),
-          );
-        }
-    );
-  }*/
 }
 
 class ChartCompoent extends StatefulWidget {
@@ -78,10 +63,19 @@ class TimeSeriesSales {
 final _selectPointData = [];
 
 class _ChartCompoentState extends State<ChartCompoent> {
+
   // Line chart
   Widget _chartWidget() {
-
+    var label;
     final List<TimeSeriesSales> serial1data = [];
+
+    if(widget.dataType == "C") {
+      label = "CONDUCTIVITY";
+    } else if(widget.dataType == "T") {
+      label = "TEMPERATURE";
+    } else {
+      label = "PRESSURE";
+    }
 
     widget.dataForChart.forEach((key, value) {
       serial1data.add(
@@ -118,7 +112,7 @@ class _ChartCompoentState extends State<ChartCompoent> {
           ),
         ),
       ),
-      animate: true,
+      animate: false,
       behaviors: [
         new charts.SlidingViewport(),
         new charts.PanAndZoomBehavior(),
@@ -143,33 +137,51 @@ class _ChartCompoentState extends State<ChartCompoent> {
       ],
     );
 
-    return new Card(
-      child: Container(
-        padding: new EdgeInsets.fromLTRB(16, 10, 16, 20),
-        margin: new EdgeInsets.only(bottom: 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            SizedBox(height: 20,),
-            new Center(
-              child: new Text(
-                '${widget.dataType} data',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Color.fromRGBO(0, 0, 0, 1.0), //opacity：不透明度
-                  fontFamily: 'PingFangBold',
-                  fontSize: 15.0,
+    return Container(
+      margin: EdgeInsets.fromLTRB(0, 0, 0, 10),
+      height: MediaQuery.of(context).size.height /2 + 70,
+      child: new Card(
+        elevation: 5,
+        child: Container(
+          //height: MediaQuery.of(context).size.height /2 + 20,
+          //padding: new EdgeInsets.fromLTRB(16, 10, 16, 20),
+          margin: new EdgeInsets.only(bottom: 20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            //crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              //SizedBox(height: 20),
+              new Center(
+                child: new Text(
+                  '$label',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Color.fromRGBO(0, 0, 0, 1.0), //opacity：不透明度
+                    fontFamily: 'PingFangBold',
+                    fontSize: 15.0,
+                  ),
                 ),
               ),
-            ),
-            new Padding(
-              padding: new EdgeInsets.all(32.0),
-              child: new SizedBox(
-                height: 200.0,
-                child: chart,
-              ),
-            )
-          ],
+              //SizedBox(height: 20),
+              new Padding(
+                padding: new EdgeInsets.fromLTRB(20, 10, 20, 20),
+                child: new Container(
+                  height: 250.0,
+                  child: chart,
+                ),
+                /*
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: new Container(
+                    width: 500,
+                    height: 250.0,
+                    child: chart,
+                  ),
+                ),
+                 */
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -177,9 +189,7 @@ class _ChartCompoentState extends State<ChartCompoent> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: _chartWidget(),
-    );
+    return _chartWidget();
   }
 }
 

@@ -1,8 +1,10 @@
+import 'package:bachelor_app/UI/dialog.dart';
 import 'package:bachelor_app/models/mission.dart';
 import 'package:bachelor_app/service/database.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hexcolor/hexcolor.dart';
 import 'package:intl/intl.dart';
 
 class MissionTabPage extends StatefulWidget {
@@ -16,10 +18,10 @@ class MissionTabPage extends StatefulWidget {
 }
 
 class WayPoint {
-  final double Lat;
-  final double Long;
+  double lat;
+  final double lng;
 
-  WayPoint(this.Lat, this.Long);
+  WayPoint(@required this.lat, @required this.lng);
 }
 
 class _MissionTabPageState extends State<MissionTabPage> {
@@ -28,27 +30,24 @@ class _MissionTabPageState extends State<MissionTabPage> {
   final _lngController = TextEditingController();
 
 
-<<<<<<< HEAD
-  List<String> _freqSelections = ["High", "Medium", "Low", "None"];
-=======
   List<String> _freqSelections = ["High","Medium","Low","None"];
-  List<WayPoint> wayPointList = [];
-  /*
   List<WayPoint> wayPointList = [
-    WayPoint(1, 1),
-    WayPoint(2, 2),
-    WayPoint(3, 3),
-  ];*/
->>>>>>> b7a094108ddbfcb4eae47ae512b277f0e7e475ea
+    WayPoint(20, 10),
+    WayPoint(34, 54),
+    WayPoint(58, 36)
+  ];
+  List<WayPoint> selected = [];
+  int selectedRowIndex;
+  WayPoint selectedWP;
   String _freqCvalue = "None";
   String _freqTvalue = "None";
   String _freqPvalue = "None";
-  RangeValues _freqDvalue = RangeValues(0, 300);
-  double _4GValue = 0;
+  RangeValues _freqDvalue = RangeValues(0, 200);
+  double _4GValue = 30;
   DateTime dateTime;
 
   String getText() {
-    if (dateTime == null) {
+    if(dateTime == null) {
       return 'Select Start date';
     } else {
       print(DateFormat('yyyyMMddHHmm').format(dateTime));
@@ -68,7 +67,8 @@ class _MissionTabPageState extends State<MissionTabPage> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Container(
-        padding: EdgeInsets.only(left: 30, top: 30, right: 30, bottom: 0),
+        color: HexColor("F3F4F6"),
+        padding: EdgeInsets.only(left: 25,top: 30,right: 25,bottom: 0),
         child: Form(
           key: _formKey,
           child: Column(
@@ -83,8 +83,9 @@ class _MissionTabPageState extends State<MissionTabPage> {
                       children: [
                         Ink(
                           decoration: BoxDecoration(
-                              border: Border.all(),
-                              borderRadius: BorderRadius.circular(5)),
+                            border: Border.all(),
+                            borderRadius: BorderRadius.circular(5)
+                          ),
                           child: IconButton(
                             icon: Icon(Icons.calendar_today_outlined),
                             padding: EdgeInsets.zero,
@@ -111,7 +112,9 @@ class _MissionTabPageState extends State<MissionTabPage> {
                 elevation: 5,
                 child: Column(
                   children: <Widget>[
-                    Text('4G Message Limit'),
+                    Text(
+                      '4G Message Limit'
+                    ),
                     Slider(
                       value: _4GValue,
                       min: 0,
@@ -160,12 +163,6 @@ class _MissionTabPageState extends State<MissionTabPage> {
               SizedBox(height: 20),
               _buildWayPointTable(),
               ElevatedButton(
-<<<<<<< HEAD
-                child: Text('Submit'),
-                onPressed: () {
-                  var createMissionID = widget.missionList.length + 1;
-                  /*DatabaseService("123456","").newMission(
-=======
                 child: Text(
                   'Submit'
                 ),
@@ -174,25 +171,22 @@ class _MissionTabPageState extends State<MissionTabPage> {
 
                   var wayPoint = [];
                   wayPointList.forEach((element) {
-                    wayPoint.add("${element.Lat},${element.Long}");
+                    wayPoint.add("${element.lat},${element.lng}");
                   });
-                  //Map<String,String>
-                  print(wayPoint);
 
                   DatabaseService("123456","").newMission(
->>>>>>> b7a094108ddbfcb4eae47ae512b277f0e7e475ea
                       Mission(
                         missionId: "Mission $createMissionID",
                         startTime: DateFormat('yyyyMMddHHmm').format(dateTime),
-                        freqC: _freqCvalue,
-                        freqP: _freqPvalue,
-                        freqT: _freqTvalue,
+                        C: _freqCvalue,
+                        P: _freqPvalue,
+                        T: _freqTvalue,
                         maxD: _freqDvalue.end.round(),
                         minD: _freqDvalue.start.round(),
                         nett: _4GValue.round(),
                         wayPoint: wayPoint,
                       )
-                  );*/
+                  );
                 },
               )
             ],
@@ -269,10 +263,40 @@ class _MissionTabPageState extends State<MissionTabPage> {
             rows: wayPointList
                   .map(
                 ((element) => DataRow(
+                  onSelectChanged: (select) {
+                    onSelectedRow(select, element);
+                  },
+                  /*
+                  selected: element == selectedWP,
+                  onSelectChanged: (row) {
+                    //onSelectedRow(row, element);
+                    setState(() {
+                      selectedWP = element;
+                      selectedRowIndex = wayPointList.indexOf(element);
+                    });
+                    print(wayPointList.indexOf(element));
+                    print("selected -- lat: ${selectedWP.lat}, lng: ${selectedWP.lng}");
+                    print("element -- lat: ${element.lat}, lng: ${element.lng}");
+                    //print(wayPointList.indexOf(row);)
+                  },*/
                   cells: <DataCell>[
-                    DataCell(Text((wayPointList.indexOf(element)+1).toString())), //Extracting from Map element the value
-                    DataCell(Text((element.Lat).toString())),
-                    DataCell(Text((element.Long).toString())),
+                    DataCell(
+                        Text((wayPointList.indexOf(element)+1).toString())
+                    ), //Extracting from Map element the value
+                    DataCell(
+                        Text("${(element.lat).toString()} "),
+                      showEditIcon: true,
+                      onTap: () {
+                          editLat((element.lat).toString(),wayPointList.indexOf(element));
+                      }
+                    ),
+                    DataCell(
+                        Text("${(element.lng).toString()} "),
+                        showEditIcon: true,
+                        onTap: () {
+                          editLat((element.lng).toString(),wayPointList.indexOf(element));
+                        }
+                    ),
                   ],
                 )),
               ).toList()
@@ -335,12 +359,25 @@ class _MissionTabPageState extends State<MissionTabPage> {
                 icon: Icon(Icons.add),
                 onPressed: (){
                   if(!_formKey.currentState.validate()) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Coordinate input is wrong ! ")));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                            content: Text(
+                                "Coordinate input is wrong ! "
+                            )
+                        )
+                    );
+                  } else {
+                    setState(() {
+                      wayPointList.add(
+                          WayPoint(
+                              double.parse(_latController.text),
+                              double.parse(_lngController.text)
+                          )
+                      );
+                    });
+                    _latController.clear();
+                    _lngController.clear();
                   }
-                  wayPointList.add(WayPoint(double.parse(_latController.text), double.parse(_lngController.text)));
-                  print("lat: ${_latController.text}, lng: ${_latController.text}");
-                  _latController.clear();
-                  _lngController.clear();
                   //wayPointList.add(WayPoint(Lat, Long))
                 },
               ),
@@ -354,17 +391,22 @@ class _MissionTabPageState extends State<MissionTabPage> {
     );
   }
 
+  //--------Frequencices Card Widget---------------
   Widget _LoggingFrequencies() {
     return Card(
       elevation: 5,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          Text('Logging frequencies'),
+          Text(
+              'Logging frequencies'
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              Text('Conductivity :'),
+              Text(
+                  'Conductivity :'
+              ),
               DropdownButton(
                 isExpanded: false,
                 //dropdownColor: Colors.blue,
@@ -385,11 +427,13 @@ class _MissionTabPageState extends State<MissionTabPage> {
               ),
             ],
           ),
-          Divider(thickness: 2, indent: 35, endIndent: 35),
+          Divider(thickness: 2,indent: 35,endIndent: 35),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              Text('Temperature :'),
+              Text(
+                  'Temperature :'
+              ),
               DropdownButton(
                 isExpanded: false,
                 //dropdownColor: Colors.blue,
@@ -410,11 +454,13 @@ class _MissionTabPageState extends State<MissionTabPage> {
               ),
             ],
           ),
-          Divider(thickness: 2, indent: 35, endIndent: 35),
+          Divider(thickness: 2,indent: 35,endIndent: 35),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              Text('Pressure :     '),
+              Text(
+                  'Pressure :     '
+              ),
               DropdownButton(
                 isExpanded: false,
                 //dropdownColor: Colors.blue,
@@ -435,7 +481,7 @@ class _MissionTabPageState extends State<MissionTabPage> {
               ),
             ],
           ),
-          Divider(thickness: 2, indent: 35, endIndent: 35),
+          Divider(thickness: 2,indent: 35,endIndent: 35),
           Container(
             padding: EdgeInsets.all(20),
             child: Column(
@@ -445,7 +491,8 @@ class _MissionTabPageState extends State<MissionTabPage> {
                     padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
                     child: Text(
                       'Depth : ',
-                      style: TextStyle(),
+                      style: TextStyle(
+                      ),
                     ),
                   ),
                   SliderTheme(
@@ -459,16 +506,17 @@ class _MissionTabPageState extends State<MissionTabPage> {
                         max: 300,
                         divisions: 300,
                         labels: RangeLabels(
-                            _freqDvalue.start.round().toString(),
-                            _freqDvalue.end.round().toString()),
+                          _freqDvalue.start.round().toString(),_freqDvalue.end.round().toString()
+                        ),
                         values: _freqDvalue,
                         onChanged: (value) {
                           setState(() {
                             _freqDvalue = value;
                           });
                         },
-                      ))
-                ]),
+                  ))
+                ]
+            ),
           )
         ],
       ),
@@ -477,10 +525,10 @@ class _MissionTabPageState extends State<MissionTabPage> {
 
   Future pickDateTime(BuildContext context) async {
     final date = await pickDate(context);
-    if (date == null) return;
+    if(date == null) return;
 
     final time = await pickTime(context);
-    if (time == null) return;
+    if(time == null) return;
 
     setState(() {
       dateTime = DateTime(
@@ -501,19 +549,52 @@ class _MissionTabPageState extends State<MissionTabPage> {
       firstDate: DateTime(DateTime.now().day),
       lastDate: DateTime(DateTime.now().year + 1),
     );
-    if (newDate == null) return null;
+    if(newDate == null) return null;
     return newDate;
   }
 
   Future<TimeOfDay> pickTime(BuildContext context) async {
-    final initialTime = TimeOfDay(hour: 12, minute: 0);
+    final initialTime = TimeOfDay(hour: 12, minute:0);
     final newTime = await showTimePicker(
-      context: context,
-      initialTime: dateTime != null
-          ? TimeOfDay(hour: dateTime.hour, minute: dateTime.minute)
-          : initialTime,
+        context: context,
+        initialTime: dateTime != null ? TimeOfDay(hour: dateTime.hour, minute: dateTime.minute)
+            : initialTime,
     );
-    if (newTime == null) return null;
+    if(newTime == null) return null;
     return newTime;
+  }
+
+  void editLat(String latValue, int index) async {
+    final latEditText = await showTextDialog(
+      context,
+      title: 'Change Latitude',
+      value: latValue,
+    );
+
+    setState(() {
+      if(latEditText != null) {
+        wayPointList[index].lat = double.parse(latEditText);
+      }
+    });
+  }
+
+  void editLng(String lngValue, int index) async {
+    final lngEditText = await showTextDialog(
+      context,
+      title: 'Change Longitude',
+      value: lngValue,
+    );
+
+    setState(() {
+      if(lngEditText != null) {
+        wayPointList[index].lat = double.parse(lngEditText);
+      }
+    });
+  }
+
+  onSelectedRow(bool selected, WayPoint wp) {
+    if(selected) {
+      selectedWP = wp;
+    }
   }
 }

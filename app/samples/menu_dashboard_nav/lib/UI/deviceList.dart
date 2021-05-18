@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'deviceTile.dart';
-
+/*
 class DeviceList extends StatefulWidget {
   @override
   _DeviceListState createState() => _DeviceListState();
@@ -27,4 +27,4 @@ class _DeviceListState extends State<DeviceList> {
       },
     );
   }
-}
+}*/
