@@ -31,13 +31,8 @@ class _MissionTabPageState extends State<MissionTabPage> {
 
 
   List<String> _freqSelections = ["High","Medium","Low","None"];
-  List<WayPoint> wayPointList = [
-    WayPoint(20, 10),
-    WayPoint(34, 54),
-    WayPoint(58, 36)
-  ];
-  List<WayPoint> selected = [];
-  int selectedRowIndex;
+  List<WayPoint> wayPointList = [];
+  List<WayPoint> selectedTableList = [];
   WayPoint selectedWP;
   String _freqCvalue = "None";
   String _freqTvalue = "None";
@@ -167,26 +162,37 @@ class _MissionTabPageState extends State<MissionTabPage> {
                   'Submit'
                 ),
                 onPressed: () {
-                  var createMissionID = widget.missionList.length + 1;
+                  var submitStatus = submitCheck();
+                  if(submitStatus != null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                            content: Text(
+                                submitStatus
+                            )
+                        )
+                    );
+                  } else {
+                    var createMissionID = widget.missionList.length + 1;
 
-                  var wayPoint = [];
-                  wayPointList.forEach((element) {
-                    wayPoint.add("${element.lat},${element.lng}");
-                  });
+                    var wayPoint = [];
+                    wayPointList.forEach((element) {
+                      wayPoint.add("${element.lat},${element.lng}");
+                    });
 
-                  DatabaseService("123456","").newMission(
-                      Mission(
-                        missionId: "Mission $createMissionID",
-                        startTime: DateFormat('yyyyMMddHHmm').format(dateTime),
-                        C: _freqCvalue,
-                        P: _freqPvalue,
-                        T: _freqTvalue,
-                        maxD: _freqDvalue.end.round(),
-                        minD: _freqDvalue.start.round(),
-                        nett: _4GValue.round(),
-                        wayPoint: wayPoint,
-                      )
-                  );
+                    DatabaseService("123456","").newMission(
+                        Mission(
+                          missionId: "Mission $createMissionID",
+                          startTime: DateFormat('yyyyMMddHHmm').format(dateTime),
+                          C: _freqCvalue,
+                          P: _freqPvalue,
+                          T: _freqTvalue,
+                          maxD: _freqDvalue.end.round(),
+                          minD: _freqDvalue.start.round(),
+                          nett: _4GValue.round(),
+                          wayPoint: wayPoint,
+                        )
+                    );
+                  }
                 },
               )
             ],
@@ -204,7 +210,7 @@ class _MissionTabPageState extends State<MissionTabPage> {
           Container(
             margin: EdgeInsets.all(20),
             decoration: BoxDecoration(
-              //border: Border.all(),
+              //border: Border.all(),it
               borderRadius: BorderRadius.circular(10),
             ),
             child: Column(
@@ -263,22 +269,16 @@ class _MissionTabPageState extends State<MissionTabPage> {
             rows: wayPointList
                   .map(
                 ((element) => DataRow(
+                  selected: showSelectRow(element),
                   onSelectChanged: (select) {
-                    onSelectedRow(select, element);
-                  },
-                  /*
-                  selected: element == selectedWP,
-                  onSelectChanged: (row) {
-                    //onSelectedRow(row, element);
                     setState(() {
-                      selectedWP = element;
-                      selectedRowIndex = wayPointList.indexOf(element);
+                      if(select) {
+                        selectedTableList.add(element);
+                      } else {
+                        selectedTableList.remove(element);
+                      }
                     });
-                    print(wayPointList.indexOf(element));
-                    print("selected -- lat: ${selectedWP.lat}, lng: ${selectedWP.lng}");
-                    print("element -- lat: ${element.lat}, lng: ${element.lng}");
-                    //print(wayPointList.indexOf(row);)
-                  },*/
+                  },
                   cells: <DataCell>[
                     DataCell(
                         Text((wayPointList.indexOf(element)+1).toString())
@@ -294,7 +294,7 @@ class _MissionTabPageState extends State<MissionTabPage> {
                         Text("${(element.lng).toString()} "),
                         showEditIcon: true,
                         onTap: () {
-                          editLat((element.lng).toString(),wayPointList.indexOf(element));
+                          editLng((element.lng).toString(),wayPointList.indexOf(element));
                         }
                     ),
                   ],
@@ -569,6 +569,7 @@ class _MissionTabPageState extends State<MissionTabPage> {
       context,
       title: 'Change Latitude',
       value: latValue,
+      latOrLng: 'lat',
     );
 
     setState(() {
@@ -583,6 +584,7 @@ class _MissionTabPageState extends State<MissionTabPage> {
       context,
       title: 'Change Longitude',
       value: lngValue,
+      latOrLng: 'lng',
     );
 
     setState(() {
@@ -592,9 +594,24 @@ class _MissionTabPageState extends State<MissionTabPage> {
     });
   }
 
-  onSelectedRow(bool selected, WayPoint wp) {
-    if(selected) {
-      selectedWP = wp;
+  bool showSelectRow(WayPoint wp) {
+    if(selectedTableList.length != 1) {
+      return selectedTableList.contains(wp);
+    } else {
+      selectedWP = selectedTableList[0];
+      return wp == selectedWP;
     }
+  }
+
+  String submitCheck() {
+    if(wayPointList.isEmpty) {
+      return 'Enter some way point for new mission ! ';
+    } else if (dateTime == null) {
+      return 'Select a date to start';
+    } else if (_4GValue.round() == 0 || _freqDvalue.end.round() == 0 ||
+        _freqDvalue.start.round() == 0){
+      return 'Check frequence again, they cannot be 0';
+    }
+    return null;
   }
 }

@@ -4,18 +4,19 @@ import 'package:flutter/services.dart';
 Future<T> showTextDialog<T>(
   BuildContext context, {
     String title,
-      String value,
+      String value, String latOrLng,
 }) =>
      showDialog
        (context: context,
-         builder: (context) => DialogWidget(title:title,value:value),
+         builder: (context) => DialogWidget(title:title,value:value,latOrLng:latOrLng),
      );
 
 class DialogWidget extends StatefulWidget {
   final String title;
   final String value;
+  final String latOrLng;
 
-  const DialogWidget({Key key, this.title, this.value}) : super(key: key);
+  const DialogWidget({Key key, this.title, this.value, this.latOrLng}) : super(key: key);
 
   @override
   _DialogWidgetState createState() => _DialogWidgetState();
@@ -54,8 +55,10 @@ class _DialogWidgetState extends State<DialogWidget> {
           validator: (value) {
             if(value.isEmpty || value.isEmpty) {
               return 'Please enter som text';
-            }else if(double.parse(value) > 90 || double.parse(value) < -90){
-              return 'invalid value';
+            }else if(widget.latOrLng == 'lng' && (double.parse(value) > 180 || double.parse(value) < -180)){
+              return 'invalid lat value';
+            }else if(widget.latOrLng == 'lat' && (double.parse(value) > 90 || double.parse(value) < -90)){
+              return 'invalid lng value';
             }
             return null;
           },

@@ -6,6 +6,7 @@ import 'package:hexcolor/hexcolor.dart';
 import 'package:provider/provider.dart';
 import '../deviceTile.dart';
 import 'map_screen.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class HomePage extends StatelessWidget with NavigationStates {
   final Function onMenuTap;

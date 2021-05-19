@@ -7,6 +7,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:async';
 import 'package:bachelor_app/models/device.dart';
 import 'full_map_page.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class MapScreen extends StatefulWidget {
   MapScreen(this.devices);
@@ -16,95 +17,56 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
-  double lat;
-  double lng;
-  Map<String, dynamic> locationMap = new Map();
-  var latlng = [];
-  String devId;
-  Map<MarkerId, Marker> markers = {};
-  final Set<Marker> _markers = {};
   Completer<GoogleMapController> _googleMapControllerCompleter = Completer();
+  Map<MarkerId, Marker> _mapMakers = {};
+  BitmapDescriptor customIcon;
+  int count = 1;
+
+  var lat ;
+  var lng ;
+
 
   @override
   void initState() {
     super.initState();
+    BitmapDescriptor.fromAssetImage(ImageConfiguration(size: Size(1, 1)),
+        'assets/images/Glider.jpg')
+        .then((d) {
+      customIcon = d;
+    });
   }
 
   void _onMapCreated(GoogleMapController controller) {
     _googleMapControllerCompleter.complete(controller);
-
-    locationMap.forEach((key, value) {
-      _markers.add(
-        Marker(
-          markerId: MarkerId(key[0]),
-          position: LatLng(value[0], value[1]),
-          infoWindow: InfoWindow(title: '$key'),
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-        ),
-      );
-
-      _markers.add(
-        Marker(
-          markerId: MarkerId(key[1]),
-          position: LatLng(value[2], value[3]),
-          infoWindow: InfoWindow(title: '$key'),
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-        ),
-      );
-
-      _markers.add(
-        Marker(
-          markerId: MarkerId(key[2]),
-          position: LatLng(value[4], value[5]),
-          infoWindow: InfoWindow(title: '$key'),
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-        ),
-      );
-
-      _markers.add(
-        Marker(
-          markerId: MarkerId(key[3]),
-          position: LatLng(value[6], value[7]),
-          infoWindow: InfoWindow(title: '$key'),
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-        ),
-      );
-      setState(() {});
-    });
   }
 
-
-  @override
-  Widget build(BuildContext context) {
-//Data processing for maps
+  void _createMarkerAndLine() {
     widget.devices.forEach((element) {
-      //final List<String> dataPart = element.lastSeen.split(",");
+
       final dataPart = element.lastSeen.split(",");
       final newDataPart = dataPart.toString();
       final regex = new RegExp(r'[a-z : \[\]]');
 
-//removes the "lat:"" and "lng:"" characters
+      //removes the "lat:"" and "lng:"" characters
       final String coor = newDataPart.replaceAll(regex, '');
       lat = double.parse(coor.substring(0, 7));
       lng = double.parse(coor.substring(8, 14));
-      latlng.add(lat);
-      latlng.add(lng);
-      /*
-      print(locationMap.keys);
-      print("-----------------------------------");
 
-      print(lng);
-      print("-----------------------------------");
-//Problemet ligger i markers, den är tom
-      print(_markers);
-      print("-----------------------------------");
-      */
-//DeviceId
-      locationMap[element.deviceId] = latlng;
-      //print("-----------------------------------");
-      // print(locationMap.values);
+      MarkerId markerId =MarkerId(element.deviceId.toString());
+      Marker marker = Marker(
+        markerId: markerId,
+        position: LatLng(lat,lng),
+        infoWindow: InfoWindow(title: element.alias),
+        //icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+        icon: customIcon,
+      );
+
+      _mapMakers[markerId] = marker;
     });
+  }
 
+  @override
+  Widget build(BuildContext context) {
     _updateUserMarkerAndCamera(double lat, double lng) async {
       final GoogleMapController controller =
       await _googleMapControllerCompleter.future;
@@ -117,8 +79,9 @@ class _MapScreenState extends State<MapScreen> {
           ),
         ),
       );
-      //and some other logics
     }
+
+    _createMarkerAndLine();
 
     return MaterialApp(
       //Remove the debug banner at the right top
@@ -151,7 +114,7 @@ class _MapScreenState extends State<MapScreen> {
                       ),
                     ].toSet(),
                     onMapCreated: _onMapCreated,
-                    markers: _markers,
+                    markers: Set.of(_mapMakers.values),
                     //Set<Marker>.of(markers.values),
                     initialCameraPosition: CameraPosition(
                       target: LatLng(lat, lng),
@@ -179,7 +142,8 @@ class _MapScreenState extends State<MapScreen> {
                             onPressed: () => Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => MapFullPage(lat: lat, lng: lng),
+                                builder: (context) =>
+                                    MapFullPage(mapMakers: _mapMakers,navigateFrom: "home",),
                               ),
                             ),
                           ),
