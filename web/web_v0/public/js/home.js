@@ -1,4 +1,12 @@
-userStateListener();
+auth.onAuthStateChanged((user) => {
+  if (user) {
+    console.log("Is logged in!");
+  } else {
+    // User is logged out
+    console.log("Is logged out!");
+    location.replace("index.html");
+  }
+});
 
 // ****************** CARD-GRID SECTION ******************
 async function createCard(uid, alias, sync, img) {

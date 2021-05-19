@@ -63,7 +63,7 @@ function addMarker(location, icon, index, map) {
 function addHomeMarkers(location, alias) {
   var markerIcon = {
     url: "assets/svg/Glider.svg",
-    labelOrigin: new google.maps.Point(40, 10),
+    labelOrigin: new google.maps.Point(40, -10),
   };
 
   new google.maps.Marker({
@@ -72,9 +72,10 @@ function addHomeMarkers(location, alias) {
     animation: google.maps.Animation.DROP,
     label: {
       text: alias,
-      color: "#CA4955",
+      color: "#CA561F",
       fontSize: "20px",
       fontWeight: "bold",
+      infoWindow: `<p style="background: red; width: 30px; height: 30px;"> Hello </p>`,
     },
     icon: markerIcon,
     title: location.t,
