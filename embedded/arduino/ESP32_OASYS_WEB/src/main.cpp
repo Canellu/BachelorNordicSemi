@@ -114,6 +114,7 @@ void handleWebSocketMessage(AsyncWebSocket *server,
       }
       else if (strstr((char *)data, "test:sat") != NULL)
       {
+        Serial.println("test sat msg received");
         test_sat = true;
       }
       data[len] = 0;
@@ -273,12 +274,13 @@ void wifiBegin()
   initWebSocket();
   flushSerial();
 
-  events.onConnect([](AsyncEventSourceClient *client) {
-    if (client->lastId())
-    {
-      Serial.printf("Client reconnected! Last message ID that it gat is: %u\n", client->lastId());
-    }
-  });
+  events.onConnect([](AsyncEventSourceClient *client)
+                   {
+                     if (client->lastId())
+                     {
+                       Serial.printf("Client reconnected! Last message ID that it gat is: %u\n", client->lastId());
+                     }
+                   });
   webServer.addHandler(&events);
 }
 
@@ -363,10 +365,13 @@ void loop()
 
     if (test_sat)
     {
+      Serial.println("Running sat test");
       static int signal = -1;
       static boolean test_ok = false;
       static int max_tries = 3;
       static int tries = 0;
+
+      Serial2.print("AT+CSQ\r");
 
       while (tries < max_tries)
       {
@@ -376,17 +381,20 @@ void loop()
           char c = Serial2.read();
           if (c == '\r')
           {
+            Serial.println("Received response: ");
             Serial.println(rx_sat);
 
             if (strstr((char *)rx_sat, "OK") != NULL)
             {
               if (signal > 0)
               {
+                Serial.println("Received signal");
                 test_ok = true;
                 break;
               }
               else
               {
+                Serial.println("Sending AT command");
                 Serial2.print("AT+CSQ\r");
                 tries++;
                 delay(10000);
@@ -394,13 +402,15 @@ void loop()
             }
             else if (strcmp(rx_sat, "ERROR") == 0)
             {
+              Serial.println("Received ERROR");
               break;
             }
             else if (strcmp(rx_sat, "AT+CSQ\r") != 0 && strlen(rx_sat) != 0)
             {
-
               static char *eptr;
               signal = strtol(rx_sat + 5, &eptr, 10);
+              Serial.println("Signal val: ");
+              Serial.println(signal);
             }
 
             memset(rx_sat, 0, sizeof(rx_sat));
@@ -421,6 +431,8 @@ void loop()
       {
         events.send("test:sat,ERROR", NULL, millis());
       }
+      memset(rx_sat, 0, sizeof(rx_sat));
+      arr_sat = 0;
 
       test_sat = false;
     }

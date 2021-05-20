@@ -914,10 +914,10 @@ static int test_module(uint8_t *module_str)
 			}
 		}
 
-		ret = app_gcloud_disconnect(retry_max);
-		if (ret != 0)
+		test = app_gcloud_disconnect(retry_max);
+		if (test != 0)
 		{
-			LOG_ERR("Disconnect unsuccessful: %d", ret);
+			LOG_ERR("Disconnect unsuccessful: %d", test);
 			ret = -1;
 		}
 	}
@@ -1349,7 +1349,7 @@ static int sat_sbd_session()
 
 	test = strtok_r(sat_response, ",", &saveptr); // TODO: check param 1, was always zero under testing
 	LOG_INF("test: %s", log_strdup(test));
-	sbd_response[i++] = strtol(test, &eptr, 10);
+	sbd_response[i++] = strtol(test + 6, &eptr, 10);
 	// LOG_INF("param %d: %d", i, sbd_response[0]);
 	// splitting up parameters
 	while ((test = strtok_r(NULL, ",", &saveptr)) != NULL)
@@ -1777,7 +1777,7 @@ static int gps_module()
 	// button_wait();
 	printk("\ngps test start");
 
-	ret = app_gps(&gps_data, 120 * 1000, 500);
+	ret = app_gps(&gps_data, 150 * 1000, 500);
 
 	if (ret == 0)
 	{
@@ -1931,19 +1931,19 @@ static int satellite_module()
 	printk("\n\npress button 1 to start satellite test\n\n");
 	// button_wait();
 
-	static int ret = 0;
-	static int cnt = 0;
-	static int cnt2 = 0;
-	static int max_retries_ESP = 3;
-	static int max_retries = 2;
+	int ret = 0;
+	int cnt = 0;
+	int cnt2 = 0;
+	int max_retries_ESP = 3;
+	int max_retries = 10;
 
 	static uint8_t sat_response[128] = "";
 	static uint8_t sat_payload[64] = "";
 
-	static bool sat_start = false;
-	static int signal = 0;
-	static bool msg_rdy = false;
-	static bool msg_sent = false;
+	bool sat_start = false;
+	int signal = 0;
+	bool msg_rdy = false;
+	bool msg_sent = false;
 
 	// start uart
 	uart_start(UART_2);
