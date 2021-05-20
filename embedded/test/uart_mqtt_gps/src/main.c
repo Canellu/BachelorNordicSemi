@@ -133,7 +133,6 @@ struct k_msgq gcloud_msg_q;
 static uint8_t gcloud_msgq_buffer[2 * 512];
 static uint8_t gcloud_msg[512];
 
-static bool mission_params_wifi = false;
 static bool data_available_to_send = false;
 static bool gcloud_init_complete = false;
 
@@ -850,20 +849,41 @@ static int test_module(uint8_t *module_str)
 	}
 	else if (strstr(module_str, "4G") != NULL)
 	{
-		test = modem_configure();
-		// lte off
-		if (test == 0)
+		if (!gcloud_init_complete)
 		{
-			test = lte_lc_offline();
-		}
+			test = modem_configure();
+			// lte off
+			if (test == 0)
+			{
+				test = lte_lc_offline();
+			}
 
-		if (test == 0)
-		{
-			ret = 0;
+			if (test == 0)
+			{
+				ret = 0;
+			}
+			else
+			{
+				ret = -1;
+			}
 		}
 		else
 		{
-			ret = -1;
+			test = modem_reconnect();
+			// lte off
+			if (test == 0)
+			{
+				test = lte_lc_offline();
+			}
+
+			if (test == 0)
+			{
+				ret = 0;
+			}
+			else
+			{
+				ret = -1;
+			}
 		}
 	}
 	else if (strstr(module_str, "sensor") != NULL)
@@ -898,6 +918,10 @@ static int test_module(uint8_t *module_str)
 		{
 			ret = -1;
 		}
+	}
+	else
+	{
+		LOG_ERR("Unknown test module");
 	}
 	LOG_INF("Test result: %d", ret);
 
@@ -1684,7 +1708,6 @@ static int wifi_module()
 				if (ret == 0)
 				{
 					mission_state = MISSION_WAIT_START;
-					mission_params_wifi = true;
 					glider.m_state.m_database = 0;
 					LOG_INF("Received new mission parameters");
 				}
@@ -2089,6 +2112,7 @@ void main(void)
 	static int ret = 0;
 	static int wifi_on = 0;
 
+	// default time if there are no other sources for fetching time
 	static int64_t unix_time_start = 1620810897;
 	time_UTC = gmtime(&unix_time_start);
 
