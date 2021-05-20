@@ -1,64 +1,36 @@
 {
   "project_info": {
-    "project_number": "40698568655",
-    "project_id": "nordicoasys",
-    "storage_bucket": "nordicoasys.appspot.com"
+    "project_number": "897647055265",
+    "project_id": "oasys-2d5b2",
+    "storage_bucket": "oasys-2d5b2.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:40698568655:android:30287d3a0ad48d05c4fcba",
+        "mobilesdk_app_id": "1:897647055265:android:c3d4241f21303a61b63be0",
         "android_client_info": {
           "package_name": "com.example.bachelor_app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "897647055265-vnf3u88rlbcr3t49ilrq0nf606vcfaa8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyAiizm1pcxv3puLaMFfjABL2IZ3NMrw2NE"
+          "current_key": "AIzaSyDrEEU7aI5tVxrv7H-JC6Po51Gh7ryoEeo"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:40698568655:android:b5b5b8b4b713a930c4fcba",
-        "android_client_info": {
-          "package_name": "com.example.flutter_first_test"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyAiizm1pcxv3puLaMFfjABL2IZ3NMrw2NE"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:40698568655:android:a149f77ed7528b26c4fcba",
-        "android_client_info": {
-          "package_name": "com.example.oasys_app"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyAiizm1pcxv3puLaMFfjABL2IZ3NMrw2NE"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "897647055265-vnf3u88rlbcr3t49ilrq0nf606vcfaa8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

@@ -53,8 +53,14 @@ class _DialogWidgetState extends State<DialogWidget> {
             FilteringTextInputFormatter.allow(RegExp(r'^-?(?:-?(?:[0-9]+))?(?:.\d{0,4})'))
           ],
           validator: (value) {
+            bool isNumeric(String value) {
+              return double.tryParse(value) != null;
+            }
+
             if(value.isEmpty || value.isEmpty) {
               return 'Please enter som text';
+            }else if(!isNumeric(value)) {
+              return 'Invalid : contains letter';
             }else if(widget.latOrLng == 'lng' && (double.parse(value) > 180 || double.parse(value) < -180)){
               return 'invalid lat value';
             }else if(widget.latOrLng == 'lat' && (double.parse(value) > 90 || double.parse(value) < -90)){

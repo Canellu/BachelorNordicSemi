@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:bachelor_app/models/device.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:async';
 import 'package:bachelor_app/UI/deviceList.dart';
@@ -28,6 +29,25 @@ class MapFullPage extends StatefulWidget {
 class _MapFullPageState extends State<MapFullPage> {
   Completer<GoogleMapController> _googleMapControllerCompleter = Completer();
   String title;
+
+  @override
+  void initState(){
+    super.initState();
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeRight,
+      DeviceOrientation.landscapeLeft,
+      //DeviceOrientation.portraitUp,
+      //DeviceOrientation.portraitDown,
+    ]);
+  }
+
+  dispose(){
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+    super.dispose();
+  }
 
   void _onMapCreated(GoogleMapController controller) {
     _googleMapControllerCompleter.complete(controller);
@@ -60,7 +80,7 @@ class _MapFullPageState extends State<MapFullPage> {
     return MaterialApp(
       //Remove the debug banner at the right top
       debugShowCheckedModeBanner: false,
-      home: Scaffold(
+      home: Scaffold(/*
         appBar: AppBar(
           elevation: 20,
           title: Text(
@@ -82,7 +102,7 @@ class _MapFullPageState extends State<MapFullPage> {
               color: const Color.fromRGBO(31, 41, 55, 1),
             ),
           ),
-        ),
+        ),*/
         body: Container(
           height: MediaQuery.of(context).size.height,
           width: MediaQuery.of(context).size.width,
@@ -90,10 +110,11 @@ class _MapFullPageState extends State<MapFullPage> {
             children: <Widget>[
               _showMap(),
               Padding(
-                padding: EdgeInsets.all(20),
+                padding: EdgeInsets.all(30),
                 child: Align(
                   alignment: Alignment.topRight,
                   child: FloatingActionButton(
+                      heroTag: "btn1",
                       materialTapTargetSize: MaterialTapTargetSize.padded,
                       backgroundColor: Colors.white,
                       child: Icon(
@@ -103,6 +124,26 @@ class _MapFullPageState extends State<MapFullPage> {
                       ),
                       onPressed: () {
                         _updateUserMarkerAndCamera();
+                      }
+                  ),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.all(30),
+                child: Align(
+                  alignment: Alignment.topLeft,
+                  child: FloatingActionButton(
+                      heroTag: "btn2",
+                      materialTapTargetSize: MaterialTapTargetSize.padded,
+                      backgroundColor: Colors.white,
+                      child: Icon(
+                        Icons.arrow_back,
+                        color: Colors.black,
+                        size: 25,
+                      ),
+                      onPressed: () {
+                        dispose();
+                        Navigator.of(context).pop();
                       }
                   ),
                 ),

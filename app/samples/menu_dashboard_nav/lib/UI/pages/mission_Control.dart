@@ -37,9 +37,21 @@ class _MissionTabPageState extends State<MissionTabPage> {
   String _freqCvalue = "None";
   String _freqTvalue = "None";
   String _freqPvalue = "None";
-  RangeValues _freqDvalue = RangeValues(0, 200);
+  RangeValues _freqDvalue = RangeValues(40, 200);
   double _4GValue = 30;
   DateTime dateTime;
+  bool tabelSelect = false;
+
+  void defaltValue(){
+    _freqCvalue = "None";
+    _freqTvalue = "None";
+    _freqPvalue = "None";
+    _freqDvalue = RangeValues(40, 200);
+    _4GValue = 30;
+    dateTime = null;
+    wayPointList.clear();
+    selectedTableList.clear();
+  }
 
   String getText() {
     if(dateTime == null) {
@@ -62,35 +74,49 @@ class _MissionTabPageState extends State<MissionTabPage> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Container(
+        width: MediaQuery.of(context).size.width,
         color: HexColor("F3F4F6"),
-        padding: EdgeInsets.only(left: 25,top: 30,right: 25,bottom: 0),
+        padding: EdgeInsets.only(left: 5,top: 30,right: 5,bottom: 0),
         child: Form(
           key: _formKey,
           child: Column(
             children: <Widget>[
               Container(
+                width: MediaQuery.of(context).size.width -50,
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
                   //crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Text('Start dive at : '),
+                    SizedBox(height: 20,),
+                    Text(
+                        'Start dive at : ',
+                      style: TextStyle(
+                        letterSpacing: 2,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    SizedBox(height: 5,),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      //crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Ink(
-                          decoration: BoxDecoration(
-                            border: Border.all(),
-                            borderRadius: BorderRadius.circular(5)
-                          ),
-                          child: IconButton(
-                            icon: Icon(Icons.calendar_today_outlined),
-                            padding: EdgeInsets.zero,
-                            onPressed: () => pickDateTime(context),
-                          ),
+                        FloatingActionButton(
+                            materialTapTargetSize: MaterialTapTargetSize.padded,
+                            backgroundColor: HexColor('#1f2937'),
+                            child: Icon(
+                              Icons.calendar_today_outlined,
+                              color: Colors.white,
+                              size: 25,
+                            ),
+                            onPressed: () => pickDateTime(context)
                         ),
-                        Container(
-                          width: 200,
+
+                        SizedBox(width: 10,),
+                        Expanded(
                           //padding: const EdgeInsets.all(20.0),
                           child: TextField(
+                            textAlign: TextAlign.justify,
                             decoration: InputDecoration(
                               hintText: getText(),
                             ),
@@ -104,12 +130,22 @@ class _MissionTabPageState extends State<MissionTabPage> {
               ),
               SizedBox(height: 20),
               Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
                 elevation: 5,
                 child: Column(
                   children: <Widget>[
+                    SizedBox(height: 20,),
                     Text(
-                      '4G Message Limit'
+                      '4G Message Limit',
+                      style: TextStyle(
+                        letterSpacing: 2,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
+                    SizedBox(height: 5,),
                     Slider(
                       value: _4GValue,
                       min: 0,
@@ -122,50 +158,36 @@ class _MissionTabPageState extends State<MissionTabPage> {
                         });
                       },
                     ),
-                    /*
-                    Row(
-                      children: [
-                        Slider(
-                          value: _currentSliderValue,
-                          min: 0,
-                          max: 100,
-                          divisions: 100,
-                          label: _currentSliderValue.round().toString(),
-                          onChanged: (double value) {
-                            setState(() {
-                              _currentSliderValue = value;
-                            });
-                          },
-                        ),
-                        Expanded(
-                          child: TextField(
-
-                          ),
-                        )
-                        /*
-                  TextFormField(
-                    decoration: InputDecoration(
-                      hintText: 'Something'
-                    ),
-                  )*/
-                      ],
-                    ),*/
+                    SizedBox(height: 10,),
                   ],
                 ),
               ),
               SizedBox(height: 20),
-              _LoggingFrequencies(),
+              //_buildWayPointTable(),
+              _loggWayPoint(),
               SizedBox(height: 20),
-              _buildWayPointTable(),
+              _LoggingFrequencies(),
+              SizedBox(height: 20,),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  primary: HexColor('#1f2937'),
+                  elevation: 5,
+                  //shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  //side: BorderSide(color: Colors.black),
+                ),
                 child: Text(
-                  'Submit'
+                  'Submit',
+                  style: TextStyle(
+                    fontSize: 16,
+                    letterSpacing: 2
+                  ),
                 ),
                 onPressed: () {
                   var submitStatus = submitCheck();
                   if(submitStatus != null) {
                     ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
+                          backgroundColor: Colors.red,
                             content: Text(
                                 submitStatus
                             )
@@ -179,7 +201,7 @@ class _MissionTabPageState extends State<MissionTabPage> {
                       wayPoint.add("${element.lat},${element.lng}");
                     });
 
-                    DatabaseService("123456","").newMission(
+                    DatabaseService(widget.gid,"").newMission(
                         Mission(
                           missionId: "Mission $createMissionID",
                           startTime: DateFormat('yyyyMMddHHmm').format(dateTime),
@@ -192,9 +214,21 @@ class _MissionTabPageState extends State<MissionTabPage> {
                           wayPoint: wayPoint,
                         )
                     );
+
+                    defaltValue();
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                            backgroundColor: Colors.green,
+                            content: Text(
+                                'Mission Created ! '
+                            )
+                        )
+                    );
                   }
                 },
-              )
+              ),
+              SizedBox(height: 20,),
             ],
           ),
         ),
@@ -202,210 +236,276 @@ class _MissionTabPageState extends State<MissionTabPage> {
     );
   }
 
-  Widget _buildWayPointTable() {
-    return Card(
-      elevation: 5,
-      child: Column(
-        children: <Widget>[/*
-          Container(
-            margin: EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              //border: Border.all(),it
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                SizedBox(
-                  width: 100,
-                  child: TextFormField(
-                    controller: _latController,
-                    decoration: InputDecoration(
 
-                        hintText: 'Enter Latitude',
-                        labelText: 'Lat',
-                    ),
-                    keyboardType: TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    inputFormatters: <TextInputFormatter>[
-                      //Only allow numbers and 4 number after decimal
-                      FilteringTextInputFormatter.allow(RegExp(r'^-?(?:-?(?:[0-9]+))?(?:.\d{0,4})'))
-                    ],
-                    validator: (value) {
-                      if(value.isEmpty || value.isEmpty) {
-                        return 'Please enter som text';
-                      }else if(double.parse(value) > 90 || double.parse(value) < -90){
-                        return 'invalid latitude';
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-              ],
+  Widget _loggWayPoint() {
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      elevation: 5,
+      child: Container(
+        width: MediaQuery.of(context).size.width,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            SizedBox(height: 20,),
+            Text(
+              'Logging waypoint',
+              style: TextStyle(
+                fontSize: 16,
+                letterSpacing: 2,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),*/
-          DataTable(
-            columns: const <DataColumn>[
-              DataColumn(
-                label: Text(
-                  'No.',
-                  style: TextStyle(fontStyle: FontStyle.italic),
+            SizedBox(
+              width: MediaQuery.of(context).size.width-100,
+              child: TextFormField(
+                controller: _latController,
+                decoration: InputDecoration(
+                    hintText: 'Enter Latitude',
+                    labelText: 'Lat'
                 ),
-              ),
-              DataColumn(
-                label: Text(
-                  'Lat',
-                  style: TextStyle(fontStyle: FontStyle.italic),
+                keyboardType: TextInputType.numberWithOptions(
+                  decimal: true,
                 ),
-              ),
-              DataColumn(
-                label: Text(
-                  'Long',
-                  style: TextStyle(fontStyle: FontStyle.italic),
-                ),
-              ),
-            ],
-            rows: wayPointList
-                  .map(
-                ((element) => DataRow(
-                  selected: showSelectRow(element),
-                  onSelectChanged: (select) {
-                    setState(() {
-                      if(select) {
-                        selectedTableList.add(element);
-                      } else {
-                        selectedTableList.remove(element);
-                      }
-                    });
-                  },
-                  cells: <DataCell>[
-                    DataCell(
-                        Text((wayPointList.indexOf(element)+1).toString())
-                    ), //Extracting from Map element the value
-                    DataCell(
-                        Text("${(element.lat).toString()} "),
-                      showEditIcon: true,
-                      onTap: () {
-                          editLat((element.lat).toString(),wayPointList.indexOf(element));
-                      }
-                    ),
-                    DataCell(
-                        Text("${(element.lng).toString()} "),
-                        showEditIcon: true,
-                        onTap: () {
-                          editLng((element.lng).toString(),wayPointList.indexOf(element));
-                        }
-                    ),
-                  ],
-                )),
-              ).toList()
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              SizedBox(
-                width: 100,
-                child: TextFormField(
-                  controller: _latController,
-                  decoration: InputDecoration(
-                      hintText: 'Enter Latitude',
-                      labelText: 'Lat'
-                  ),
-                  keyboardType: TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  inputFormatters: <TextInputFormatter>[
-                    //Only allow numbers and 4 number after decimal
-                    FilteringTextInputFormatter.allow(RegExp(r'^-?(?:-?(?:[0-9]+))?(?:.\d{0,4})'))
-                  ],
-                  validator: (value) {
-                    if(value.isEmpty || value.isEmpty) {
-                      return 'Please enter som text';
-                    }else if(double.parse(value) > 90 || double.parse(value) < -90){
-                      return 'invalid latitude';
-                    }
-                    return null;
-                  },
-                ),
-              ),
-              SizedBox(
-                width: 100,
-                child: TextFormField(
-                  controller: _lngController,
-                  decoration: InputDecoration(
-                      hintText: 'Enter Longitude',
-                      labelText: 'Long'
-                  ),
-                  keyboardType: TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  inputFormatters: <TextInputFormatter>[
-                    //Only allow numbers and 4 number after decimal
-                    FilteringTextInputFormatter.allow(RegExp(r'^-?(?:-?(?:[0-9]+))?(?:.\d{0,4})'))
-                  ],
-                  validator: (value) {
-                    if(value.isEmpty || value.isEmpty) {
-                      return 'Please enter som text';
-                    }
-                    else if(double.parse(value) > 180 || double.parse(value) < -180){
-                      return 'invalid Longitude';
-                    }
-                    return null;
-                  },
-                ),
-              ),
-              IconButton(
-                icon: Icon(Icons.add),
-                onPressed: (){
-                  if(!_formKey.currentState.validate()) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                            content: Text(
-                                "Coordinate input is wrong ! "
-                            )
-                        )
-                    );
-                  } else {
-                    setState(() {
-                      wayPointList.add(
-                          WayPoint(
-                              double.parse(_latController.text),
-                              double.parse(_lngController.text)
-                          )
-                      );
-                    });
-                    _latController.clear();
-                    _lngController.clear();
+                inputFormatters: <TextInputFormatter>[
+                  //Only allow numbers and 4 number after decimal
+                  FilteringTextInputFormatter.allow(RegExp(r'^-?(?:-?(?:[0-9]+))?(?:.\d{0,4})'))
+                ],
+                validator: (value) {
+                  bool isNumeric(String value) {
+                    return double.tryParse(value) != null;
                   }
-                  //wayPointList.add(WayPoint(Lat, Long))
+
+                  if(value.isEmpty || value.isEmpty) {
+                    return 'Please enter som text';
+                  }else if(!isNumeric(value)) {
+                    return 'Invalid : contains letter';
+                  } else  if(double.parse(value) > 90 || double.parse(value) < -90) {
+                    return 'Tips : Invalid latitude';
+                  }
+                  return null;
                 },
               ),
-            ],
-          ),
-          SizedBox(
-            height: 20,
-          )
-        ],
+            ),
+            SizedBox(
+              width: MediaQuery.of(context).size.width-100,
+              child: TextFormField(
+                controller: _lngController,
+                decoration: InputDecoration(
+                    hintText: 'Enter Longitude',
+                    labelText: 'Long'
+                ),
+                keyboardType: TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                inputFormatters: <TextInputFormatter>[
+                  //Only allow numbers and 4 number after decimal
+                  FilteringTextInputFormatter.allow(RegExp(r'^-?(?:-?(?:[0-9]+))?(?:.\d{0,4})'))
+                ],
+                validator: (value) {
+                  bool isNumeric(String value) {
+                    return double.tryParse(value) != null;
+                  }
+
+                  if(value.isEmpty || value.isEmpty) {
+                    return 'Please enter som text';
+                  }else if(!isNumeric(value)) {
+                    return 'Invalid : contains letter';
+                  } else  if(double.parse(value) > 180 || double.parse(value) < -180) {
+                    return 'Invalid : Invalid number';
+                  }
+                  return null;
+                },
+              ),
+            ),
+            SizedBox(height: 10,),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                primary: HexColor('#1f2937'),
+                elevation: 5,
+                //shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                //side: BorderSide(color: Colors.black),
+              ),
+              child: Text(
+                'Add',
+                style: TextStyle(
+                  color: Colors.white,
+                  letterSpacing: 2
+                ),
+              ),
+              onPressed: (){
+                if(!_formKey.currentState.validate()) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                          backgroundColor: Colors.red,
+                          content: Text(
+                              "Coordinate input is wrong !"
+                          )
+                      )
+                  );
+                } else {
+                  setState(() {
+                    wayPointList.add(
+                        WayPoint(
+                            double.parse(_latController.text),
+                            double.parse(_lngController.text)
+                        )
+                    );
+                  });
+                  _latController.clear();
+                  _lngController.clear();
+                }
+                //wayPointList.add(WayPoint(Lat, Long))
+              },
+            ),
+            _buildWayPointTable(),
+          ],
+        ),
       ),
     );
+  }
+
+  Widget _buildWayPointTable() {
+    if(wayPointList.isNotEmpty) {
+      return Container(
+        width: MediaQuery.of(context).size.width-40,
+        child: Column(
+          //crossAxisAlignment: CrossAxisAlignment.stretch,
+          //mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            Divider(thickness: 2,),
+            SizedBox(height: 20,),
+            DataTable(
+                columns: const <DataColumn>[
+                  DataColumn(
+                    label: Text(
+                      'No.',
+                      style: TextStyle(
+                        fontStyle: FontStyle.italic,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                  DataColumn(
+                    label: Text(
+                      'Lat',
+                      style: TextStyle(fontStyle: FontStyle.italic, fontSize: 16,),
+                    ),
+                  ),
+                  DataColumn(
+                    label: Text(
+                      'Long',
+                      style: TextStyle(fontStyle: FontStyle.italic, fontSize: 16,),
+                    ),
+                  ),
+                ],
+                rows: wayPointList
+                    .map(
+                  ((element) => DataRow(
+                    selected: showSelectRow(element),
+                    onSelectChanged: (select) {
+                      setState(() {
+                        if(select) {
+                          selectedTableList.add(element);
+                        } else {
+                          selectedTableList.remove(element);
+                        }
+                      });
+                    },
+                    cells: <DataCell>[
+                      DataCell(
+                          Text((wayPointList.indexOf(element)+1).toString())
+                      ), //Extracting from Map element the value
+                      DataCell(
+                          Text("${(element.lat).toString()} "),
+                          showEditIcon: true,
+                          onTap: () {
+                            editLat((element.lat).toString(),wayPointList.indexOf(element));
+                          }
+                      ),
+                      DataCell(
+                          Text("${(element.lng).toString()} "),
+                          showEditIcon: true,
+                          onTap: () {
+                            editLng((element.lng).toString(),wayPointList.indexOf(element));
+                          }
+                      ),
+                    ],
+                  )),
+                ).toList()
+            ),
+            _deleteTable(),
+          ],
+        ),
+      );
+    } else {
+      return SizedBox(height: 20,);
+    }
+  }
+
+  Widget _deleteTable() {
+    if(selectedTableList.isNotEmpty) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(0, 20, 0, 20),
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            primary: Colors.red,
+            elevation: 5,
+            //shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            //side: BorderSide(color: Colors.black),
+          ),
+          child: Text(
+            'DELETE',
+            style: TextStyle(
+                color: Colors.white,
+                letterSpacing: 2
+            ),
+          ),
+          onPressed: () {
+            setState(() {
+              selectedTableList.forEach((wp) {
+                if(wayPointList.contains(wp)){
+                  wayPointList.remove(wp);
+                }
+              });
+            });
+          },
+        ),
+      );
+    }else{
+      return SizedBox(height: 20,);
+    }
   }
 
   //--------Frequencices Card Widget---------------
   Widget _LoggingFrequencies() {
     return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
       elevation: 5,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
+          SizedBox(height: 20,),
           Text(
-              'Logging frequencies'
+              'Logging frequencies',
+            style: TextStyle(
+              fontSize: 16,
+              letterSpacing: 2,
+              fontWeight: FontWeight.bold,
+            ),
           ),
+          SizedBox(height: 20,),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               Text(
-                  'Conductivity :'
+                  'Conductivity :',
+                style: TextStyle(
+                  fontSize: 15,
+                ),
               ),
               DropdownButton(
                 isExpanded: false,
@@ -432,7 +532,10 @@ class _MissionTabPageState extends State<MissionTabPage> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               Text(
-                  'Temperature :'
+                  'Temperature :',
+                style: TextStyle(
+                  fontSize: 15,
+                ),
               ),
               DropdownButton(
                 isExpanded: false,
@@ -459,7 +562,10 @@ class _MissionTabPageState extends State<MissionTabPage> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               Text(
-                  'Pressure :     '
+                  'Pressure :     ',
+                style: TextStyle(
+                  fontSize: 15,
+                ),
               ),
               DropdownButton(
                 isExpanded: false,
@@ -492,6 +598,7 @@ class _MissionTabPageState extends State<MissionTabPage> {
                     child: Text(
                       'Depth : ',
                       style: TextStyle(
+                        fontSize: 15,
                       ),
                     ),
                   ),

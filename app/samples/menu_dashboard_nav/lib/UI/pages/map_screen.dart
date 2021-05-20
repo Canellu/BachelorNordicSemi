@@ -43,25 +43,27 @@ class _MapScreenState extends State<MapScreen> {
   void _createMarkerAndLine() {
     widget.devices.forEach((element) {
 
-      final dataPart = element.lastSeen.split(",");
-      final newDataPart = dataPart.toString();
-      final regex = new RegExp(r'[a-z : \[\]]');
+      if(element.lastSeen != null) {
+        final dataPart = element.lastSeen.split(",");
+        final newDataPart = dataPart.toString();
+        final regex = new RegExp(r'[a-z : \[\]]');
 
-      //removes the "lat:"" and "lng:"" characters
-      final String coor = newDataPart.replaceAll(regex, '');
-      lat = double.parse(coor.substring(0, 7));
-      lng = double.parse(coor.substring(8, 14));
+        //removes the "lat:"" and "lng:"" characters
+        final String coor = newDataPart.replaceAll(regex, '');
+        lat = double.parse(coor.substring(0, 7));
+        lng = double.parse(coor.substring(8, 14));
 
-      MarkerId markerId =MarkerId(element.deviceId.toString());
-      Marker marker = Marker(
-        markerId: markerId,
-        position: LatLng(lat,lng),
-        infoWindow: InfoWindow(title: element.alias),
-        //icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-        icon: customIcon,
-      );
+        MarkerId markerId =MarkerId(element.deviceId.toString());
+        Marker marker = Marker(
+          markerId: markerId,
+          position: LatLng(lat,lng),
+          infoWindow: InfoWindow(title: element.alias),
+          //icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+          icon: customIcon,
+        );
 
-      _mapMakers[markerId] = marker;
+        _mapMakers[markerId] = marker;
+      }
     });
   }
 
@@ -119,7 +121,7 @@ class _MapScreenState extends State<MapScreen> {
                     initialCameraPosition: CameraPosition(
                       target: LatLng(lat, lng),
                       //(59.785604271197464, 10.435280266881726),
-                      zoom: 5.0,
+                      zoom: 10.0,
                     ),
                   ),
                   Padding(

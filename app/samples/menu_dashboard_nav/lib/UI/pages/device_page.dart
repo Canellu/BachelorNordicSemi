@@ -35,6 +35,11 @@ class _DevicePageTabState extends State<DevicePageTab> with TickerProviderStateM
       if (_tabController.indexIsChanging) {
         FocusScope.of(context).requestFocus(new FocusNode());
       }
+
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+      ]);
     });
   }
 

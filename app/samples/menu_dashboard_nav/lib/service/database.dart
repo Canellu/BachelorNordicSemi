@@ -23,7 +23,7 @@ class DatabaseService {
           alias: doc.data()['Alias'] ?? 'not found',
           lastSync: doc.data()['Last sync'] ?? 'not found',
           deviceId: doc.id ?? "not found",
-          lastSeen: doc.data()['Last seen'] ?? 'not found'
+          lastSeen: doc.data()['Last seen'] ?? null
       );
     }).toList();
   }

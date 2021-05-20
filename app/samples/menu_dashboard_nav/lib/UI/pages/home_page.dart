@@ -2,6 +2,7 @@ import 'package:bachelor_app/bloc/nav_bloc/navigation_bloc.dart';
 import 'package:bachelor_app/models/device.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:provider/provider.dart';
 import '../deviceTile.dart';
@@ -15,6 +16,7 @@ class HomePage extends StatelessWidget with NavigationStates {
 
   @override
   Widget build(BuildContext context) {
+    setOrientation();
     final device = Provider.of<List<Device>>(context) ?? [];
     return Scaffold(
       appBar: AppBar(
@@ -146,6 +148,7 @@ class HomePage extends StatelessWidget with NavigationStates {
             ),
             Container(
               height: MediaQuery.of(context).size.height/2,
+              width: MediaQuery.of(context).size.width,
               padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
               child: ListView.builder(
                 //Needed shrinkWarp and physics for listView can be use in SingleChildScroll
@@ -225,5 +228,12 @@ class HomePage extends StatelessWidget with NavigationStates {
         ),
       ),
     );*/
+  }
+
+  void setOrientation() {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
   }
 }

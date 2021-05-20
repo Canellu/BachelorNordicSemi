@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart' as prefix;
+import 'package:flutter/services.dart';
 import 'package:hexcolor/hexcolor.dart';
 
 import '../missionRouteMap.dart';
@@ -34,6 +35,24 @@ class _ChartPageState extends State<ChartPage> {
   String cardType = "chart";
   Map dataset;
 
+  @override
+  void initState(){
+    super.initState();
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+  }
+
+  @override
+  dispose(){
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+    super.dispose();
+  }
+
   changeType({String newChartType, String newCardType}) {
     setState(() {
       if(newChartType != null) {
@@ -54,7 +73,10 @@ class _ChartPageState extends State<ChartPage> {
   @override
   Widget build(BuildContext context) {
     List<String> _missions = widget.missionList;
+    String defalutSelect = _missions.isEmpty ? 'No mission': _missions.first;
     return Container(
+      height: MediaQuery.of(context).size.height,
+      width: MediaQuery.of(context).size.width,
       color: HexColor("F3F4F6"),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -94,13 +116,14 @@ class _ChartPageState extends State<ChartPage> {
                       underline: SizedBox(),
                       hint: Center(
                         child: Text(
-                          'Mission 1',
+                          defalutSelect,
                         ),
                       ),
                     ),
                   ),
                 ),
                 //RaisedButton(onPressed: (){}),
+                /*
                 TextButton(
                   onPressed: () {},
                   child: Text(
@@ -109,7 +132,7 @@ class _ChartPageState extends State<ChartPage> {
                       color: Colors.black45,
                     ),
                   ),
-                )
+                )*/
               ],
             ),
           ),
@@ -130,8 +153,11 @@ class _ChartPageState extends State<ChartPage> {
                         child: OneChart(dataType: dataType,dataset: dataset),
                       ),*/
                       Container(
+                          width: MediaQuery.of(context).size.width,
+                          height: MediaQuery.of(context).size.height/1.6,
                           child: _showCard()
                       ),
+                      //SizedBox(height: 5,),
                       Row(
                         //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: <Widget>[
@@ -208,7 +234,7 @@ class _ChartPageState extends State<ChartPage> {
                             },
                           ),
                           Padding(
-                            padding: const EdgeInsets.fromLTRB(40, 0, 0, 0),
+                            padding: const EdgeInsets.fromLTRB(40, 0, 20, 0),
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                 //primary: Colors.white,

@@ -67,14 +67,19 @@ class _ChartCompoentState extends State<ChartCompoent> {
   // Line chart
   Widget _chartWidget() {
     var label;
+    var lineColor;
     final List<TimeSeriesSales> serial1data = [];
+
 
     if(widget.dataType == "C") {
       label = "CONDUCTIVITY";
+      lineColor = charts.MaterialPalette.teal.shadeDefault;
     } else if(widget.dataType == "T") {
       label = "TEMPERATURE";
+      lineColor = charts.MaterialPalette.deepOrange.shadeDefault;
     } else {
       label = "PRESSURE";
+      lineColor = charts.MaterialPalette.blue.shadeDefault;
     }
 
     widget.dataForChart.forEach((key, value) {
@@ -86,7 +91,7 @@ class _ChartCompoentState extends State<ChartCompoent> {
     List<charts.Series<TimeSeriesSales, DateTime>> seriesList = [
       new charts.Series<TimeSeriesSales, DateTime>(
         id: 'Glider Data',
-        colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
+        colorFn: (_, __) => lineColor,
         data: serial1data,
         domainFn: (TimeSeriesSales sales, _) => sales.time,
         measureFn: (TimeSeriesSales sales, _) => sales.value,
@@ -113,6 +118,7 @@ class _ChartCompoentState extends State<ChartCompoent> {
         ),
       ),
       animate: false,
+        defaultRenderer: new charts.LineRendererConfig(includePoints: true),
       behaviors: [
         new charts.SlidingViewport(),
         new charts.PanAndZoomBehavior(),
@@ -156,9 +162,11 @@ class _ChartCompoentState extends State<ChartCompoent> {
                   '$label',
                   textAlign: TextAlign.center,
                   style: TextStyle(
+                    //wordSpacing: 30,
+                    fontWeight: FontWeight.bold,
                     color: Color.fromRGBO(0, 0, 0, 1.0), //opacity：不透明度
                     fontFamily: 'PingFangBold',
-                    fontSize: 15.0,
+                    fontSize: 16.0,
                   ),
                 ),
               ),
@@ -166,7 +174,8 @@ class _ChartCompoentState extends State<ChartCompoent> {
               new Padding(
                 padding: new EdgeInsets.fromLTRB(20, 10, 20, 20),
                 child: new Container(
-                  height: 250.0,
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height/2.7,
                   child: chart,
                 ),
                 /*

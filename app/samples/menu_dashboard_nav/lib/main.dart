@@ -18,9 +18,9 @@ Future<void> main() async {
     //systemNavigationBarDividerColor: null,
     statusBarColor: Colors.transparent,
     //systemNavigationBarIconBrightness: Brightness.light,
-    statusBarBrightness: Brightness.light,
+    statusBarBrightness: Brightness.dark,
     // To make Status bar icons color white in Android devices.
-    statusBarIconBrightness: Brightness.light,
+    statusBarIconBrightness: Brightness.dark,
     /*
     statusBarColor: Colors.transparent,
     statusBarBrightness: Brightness.light,
