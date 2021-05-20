@@ -677,7 +677,7 @@ int modem_configure(void)
     return ret;
 }
 
-static int modem_reconnect()
+int modem_reconnect(void)
 {
     int ret;
 
@@ -789,6 +789,13 @@ int app_gcloud_reconnect(int retries)
     if (ret)
     {
         LOG_ERR("Unable to configure modem");
+        return ret;
+    }
+
+    ret = gcloud_provision();
+    if (ret != 0)
+    {
+        LOG_ERR("Provisioning failed, error: %d\n", ret);
         return ret;
     }
 

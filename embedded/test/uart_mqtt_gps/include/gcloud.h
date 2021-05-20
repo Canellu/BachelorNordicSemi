@@ -48,6 +48,8 @@ int gcloud_publish_state(uint8_t *data, uint32_t size, enum mqtt_qos qos);
  */
 int modem_configure(void);
 
+int modem_reconnect(void);
+
 int gcloud_provision(void);
 
 int app_gcloud_init_and_connect(int retries);
