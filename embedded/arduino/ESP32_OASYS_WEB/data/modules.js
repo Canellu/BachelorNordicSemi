@@ -33,6 +33,7 @@ function disableClickEvents(moduleType) {
 
   // Disabling module buttons, adding animation, changing texts
   testBtns.forEach((testBtn) => {
+    console.log(moduleType);
     if (testBtn.id == `testBtn${moduleType}`) {
       testBtn.innerText = "TESTING MODULE";
       testBtn.dataset.testStatus = "tested";
