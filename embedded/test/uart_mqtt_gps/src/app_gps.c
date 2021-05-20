@@ -72,12 +72,13 @@ static bool init_complete = false;
 
 static int setup_modem(void)
 {
+	int ret = 0;
 	for (int i = 0; i < ARRAY_SIZE(at_commands); i++)
 	{
-
-		if (at_cmd_write(at_commands[i], NULL, 0, NULL) != 0)
+		ret = at_cmd_write(at_commands[i], NULL, 0, NULL);
+		if (ret != 0)
 		{
-			LOG_ERR("Unable to execute AT command gps start");
+			LOG_ERR("Unable to execute AT command gps start, err: %d", ret);
 			return -1;
 		}
 	}
@@ -256,10 +257,10 @@ static int gps_reinit()
 	int ret;
 
 	ret = setup_modem();
-	if (ret != 0)
-	{
-		return ret;
-	}
+	// if (ret != 0)
+	// {
+	// 	return ret;
+	// }
 	ret = gnss_ctrl(GNSS_RESTART);
 	if (ret != 0)
 	{
@@ -458,7 +459,7 @@ static int gnss_data_to_JSON(void *gps_str, nrf_gnss_data_frame_t *pvt_data)
 	strcat(date_string, tmp_str);
 
 	// adding timestamp to JSON
-	snprintf(tmp_str, sizeof(tmp_str), "%02u:", pvt_data->pvt.datetime.hour);
+	snprintf(tmp_str, sizeof(tmp_str), "%02u:", pvt_data->pvt.datetime.hour + 2);
 	strcat(ts_string, tmp_str);
 	snprintf(tmp_str, sizeof(tmp_str), "%02u:", pvt_data->pvt.datetime.minute);
 	strcat(ts_string, tmp_str);
