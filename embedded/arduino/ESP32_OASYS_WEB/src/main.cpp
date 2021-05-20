@@ -367,7 +367,7 @@ void loop()
     {
       Serial.println("Running sat test");
       static int signal = -1;
-      static boolean test_ok = false;
+      static boolean test_ok = true;
       static int max_tries = 3;
       static int tries = 0;
 
@@ -375,7 +375,6 @@ void loop()
 
       while (tries < max_tries)
       {
-
         if (Serial2.available() > 0) // satellite
         {
           char c = Serial2.read();
@@ -403,6 +402,7 @@ void loop()
             else if (strcmp(rx_sat, "ERROR") == 0)
             {
               Serial.println("Received ERROR");
+              test_ok = false;
               break;
             }
             else if (strcmp(rx_sat, "AT+CSQ\r") != 0 && strlen(rx_sat) != 0)
