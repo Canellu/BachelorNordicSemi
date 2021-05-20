@@ -364,13 +364,12 @@ void loop()
     if (test_sat)
     {
       static int signal = -1;
-      static boolean test_ok = false;
+      static boolean test_ok = true;
       static int max_tries = 3;
       static int tries = 0;
 
       while (tries < max_tries)
       {
-
         if (Serial2.available() > 0) // satellite
         {
           char c = Serial2.read();
@@ -382,7 +381,6 @@ void loop()
             {
               if (signal > 0)
               {
-                test_ok = true;
                 break;
               }
               else
@@ -394,6 +392,7 @@ void loop()
             }
             else if (strcmp(rx_sat, "ERROR") == 0)
             {
+              test_ok = false;
               break;
             }
             else if (strcmp(rx_sat, "AT+CSQ\r") != 0 && strlen(rx_sat) != 0)
