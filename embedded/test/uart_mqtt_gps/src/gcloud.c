@@ -792,13 +792,6 @@ int app_gcloud_reconnect(int retries)
         return ret;
     }
 
-    ret = gcloud_provision();
-    if (ret != 0)
-    {
-        LOG_ERR("Provisioning failed, error: %d\n", ret);
-        return ret;
-    }
-
     // synchronize time
     date_time_update_async(date_time_handler);
     k_sem_take(&date_time_ok, K_FOREVER);

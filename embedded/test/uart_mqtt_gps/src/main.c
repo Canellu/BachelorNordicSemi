@@ -833,6 +833,10 @@ static int test_module(uint8_t *module_str)
 	int retries = 0;
 	int retry_max = 3;
 
+	int64_t start_time = 0;
+	int64_t current_time = 0;
+	int64_t timeout = 20 * 1000; // 5 minutes
+
 	if (strstr(module_str, "gps") != NULL)
 	{
 		static glider_gps_data_t gps_data;
@@ -851,39 +855,70 @@ static int test_module(uint8_t *module_str)
 	{
 		if (!gcloud_init_complete)
 		{
-			test = modem_configure();
-			// lte off
-			if (test == 0)
+			test = app_gcloud_init_and_connect(retry_max);
+			if (test != 0)
 			{
-				test = lte_lc_offline();
-			}
-
-			if (test == 0)
-			{
-				ret = 0;
+				LOG_INF("Unable to connect to gcloud");
+				ret = -1;
 			}
 			else
 			{
-				ret = -1;
+				gcloud_init_complete = true;
+				ret = 0;
 			}
 		}
+		// reconnect
 		else
 		{
-			test = modem_reconnect();
-			// lte off
-			if (test == 0)
+			test = app_gcloud_reconnect(retry_max);
+			if (test != 0)
 			{
-				test = lte_lc_offline();
-			}
-
-			if (test == 0)
-			{
-				ret = 0;
+				LOG_INF("Unable to connect to gcloud");
+				ret = -1;
 			}
 			else
 			{
-				ret = -1;
+				ret = 0;
 			}
+		}
+
+		if (ret == 0)
+		{
+			start_time = k_uptime_get();
+			memset(gcloud_msg, 0, sizeof(gcloud_msg));
+
+			while (current_time <= timeout)
+			{
+				// button_wait();
+				current_time = k_uptime_get() - start_time;
+
+				// gcloud function
+				ret = app_gcloud();
+				if (ret != 0)
+				{
+					LOG_ERR("Error in running MQTT loop, exiting module");
+					ret = app_gcloud_disconnect(retry_max);
+					ret = -1;
+					break;
+				}
+
+				// fetch message from gcloud
+				k_msgq_get(&gcloud_msg_q, &gcloud_msg, K_NO_WAIT);
+				LOG_INF("gcloud string: %s", log_strdup(gcloud_msg));
+
+				if (strlen(gcloud_msg) != 0)
+				{
+					ret = 0;
+					break;
+				}
+			}
+		}
+
+		ret = app_gcloud_disconnect(retry_max);
+		if (ret != 0)
+		{
+			LOG_ERR("Disconnect unsuccessful: %d", ret);
+			ret = -1;
 		}
 	}
 	else if (strstr(module_str, "sensor") != NULL)
@@ -1938,7 +1973,6 @@ static int satellite_module()
 			if (signal)
 			{ // if signal found
 				LOG_INF("got signal");
-				break;
 
 				if (!msg_rdy)
 				{
