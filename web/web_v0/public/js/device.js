@@ -315,17 +315,19 @@ async function getMissionData(missionName) {
     }
   });
 
-  // parsing of lat, lng before added to dataObj
-  for (let i = 0; i < dataCoordinatesRaw.lat.length; i++) {
-    let t = dataCoordinatesRaw.lat[i].t;
-    let lat = parseFloat(dataCoordinatesRaw.lat[i].y);
-    let lng = parseFloat(dataCoordinatesRaw.lng[i].y);
+  if (Object.entries(dataCoordinatesRaw).length !== 0) {
+    // parsing of lat, lng before added to dataObj
+    for (let i = 0; i < dataCoordinatesRaw.lat.length; i++) {
+      let t = dataCoordinatesRaw.lat[i].t;
+      let lat = parseFloat(dataCoordinatesRaw.lat[i].y);
+      let lng = parseFloat(dataCoordinatesRaw.lng[i].y);
 
-    coordinates.push({ t: t, lat: lat, lng: lng });
+      coordinates.push({ t: t, lat: lat, lng: lng });
+    }
+    dataObj["coordinates"] = coordinates;
   }
 
   // add coordinates to dataObj
-  dataObj["coordinates"] = coordinates;
 
   return dataObj;
 }
@@ -351,7 +353,9 @@ function updateDataUI(data) {
       chartObj.chart.update();
       chartObj.chart.resetZoom();
     });
-    addDataMarkers(data.coordinates, dataMap);
+    if (data.coordinates != []) {
+      addDataMarkers(data.coordinates, dataMap);
+    }
   } else {
     clearMapMarkers();
     charts.forEach((chartObj) => {

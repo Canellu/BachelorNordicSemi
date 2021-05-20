@@ -84,9 +84,11 @@ function addHomeMarkers(location, alias) {
 
 function clearMapMarkers() {
   // Loop through markers and remove them from map.
-  markers.forEach((marker) => {
-    marker.setMap(null);
-  });
+  if (markers.length != 0) {
+    markers.forEach((marker) => {
+      marker.setMap(null);
+    });
+  }
 
   if (gliderPath) gliderPath.setMap(null);
 
