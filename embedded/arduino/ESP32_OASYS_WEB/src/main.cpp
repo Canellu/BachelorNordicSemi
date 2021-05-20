@@ -32,6 +32,7 @@ AsyncEventSource events("/events");
 
 // Satellite
 boolean on_sat = false;
+boolean test_sat = false;
 
 // UART
 #define RXnrf 13
@@ -110,6 +111,10 @@ void handleWebSocketMessage(AsyncWebSocket *server,
       {
         Serial.println("Wifi ending...");
         wifiEnd();
+      }
+      else if (strstr((char *)data, "test:sat") != NULL)
+      {
+        test_sat = true;
       }
       data[len] = 0;
       Serial.printf("%s\n", (char *)data);
@@ -268,13 +273,12 @@ void wifiBegin()
   initWebSocket();
   flushSerial();
 
-  events.onConnect([](AsyncEventSourceClient *client)
-                   {
-                     if (client->lastId())
-                     {
-                       Serial.printf("Client reconnected! Last message ID that it gat is: %u\n", client->lastId());
-                     }
-                   });
+  events.onConnect([](AsyncEventSourceClient *client) {
+    if (client->lastId())
+    {
+      Serial.printf("Client reconnected! Last message ID that it gat is: %u\n", client->lastId());
+    }
+  });
   webServer.addHandler(&events);
 }
 
@@ -355,6 +359,70 @@ void loop()
       {
         rx_nrf[arr_nrf++] = c;
       }
+    }
+
+    if (test_sat)
+    {
+      static int signal = -1;
+      static boolean test_ok = false;
+      static int max_tries = 3;
+      static int tries = 0;
+
+      while (tries < max_tries)
+      {
+
+        if (Serial2.available() > 0) // satellite
+        {
+          char c = Serial2.read();
+          if (c == '\r')
+          {
+            Serial.println(rx_sat);
+
+            if (strstr((char *)rx_sat, "OK") != NULL)
+            {
+              if (signal > 0)
+              {
+                test_ok = true;
+                break;
+              }
+              else
+              {
+                Serial2.print("AT+CSQ\r");
+                tries++;
+                delay(10000);
+              }
+            }
+            else if (strcmp(rx_sat, "ERROR") == 0)
+            {
+              break;
+            }
+            else if (strcmp(rx_sat, "AT+CSQ\r") != 0 && strlen(rx_sat) != 0)
+            {
+
+              static char *eptr;
+              signal = strtol(rx_sat + 5, &eptr, 10);
+            }
+
+            memset(rx_sat, 0, sizeof(rx_sat));
+            arr_sat = 0;
+          }
+          else
+          {
+            rx_sat[arr_sat++] = c;
+          }
+        }
+      }
+
+      if (test_ok)
+      {
+        events.send("test:sat,OK", NULL, millis());
+      }
+      else
+      {
+        events.send("test:sat,ERROR", NULL, millis());
+      }
+
+      test_sat = false;
     }
   }
   else if (on_sat)

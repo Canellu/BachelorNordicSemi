@@ -76,7 +76,7 @@ function enableClickEvents(responseMsg) {
         : (testBtn.style.backgroundColor = "#E57373"); // Red
       document.querySelector(
         "#messageWindow"
-      ).innerHTML = `Module <i style="font-weight: bold;">${moduleType}</i> is done testing. Status: ${statusCode}`;
+      ).innerHTML = `Module <i style="font-weight: bold;">${moduleName}</i> is done testing. Status: ${statusCode}`;
     } else {
       testBtn.classList.remove("disabled");
     }
