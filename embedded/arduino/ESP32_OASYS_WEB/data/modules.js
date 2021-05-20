@@ -40,9 +40,16 @@ function disableClickEvents(moduleType) {
       testBtn.classList.add("activeTest");
 
       currentBtnText = testBtn.innerText;
-      document.querySelector(
-        "#messageWindow"
-      ).innerHTML = `Module <i style="font-weight: bold;">${moduleType}</i> is currently being tested. This could take up to a few minutes...`;
+      
+      if(moduleType == "4G") {
+        document.querySelector(
+          "#messageWindow"
+        ).innerHTML = `Module <i style="font-weight: bold;">${moduleType}</i> is currently being tested. This could take up to 15 minutes...`;
+      } else {
+        document.querySelector(
+          "#messageWindow"
+        ).innerHTML = `Module <i style="font-weight: bold;">${moduleType}</i> is currently being tested. This could take up to a few minutes...`;
+      }
     } else {
       testBtn.dataset.testStatus == "tested"
         ? (testBtn.style.pointerEvents = "none")
