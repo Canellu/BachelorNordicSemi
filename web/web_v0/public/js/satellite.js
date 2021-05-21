@@ -50,6 +50,7 @@ async function sendSatelliteData() {
 
   const options = {
     method: "POST",
+    headers: { Accept: "text/plain" },
     mode: "no-cors",
   };
 
