@@ -116,11 +116,12 @@ class HomePage extends StatelessWidget with NavigationStates {
         ),
       ),
       body: Container(
+        height: MediaQuery.of(context).size.height,
         color: HexColor("F3F4F6"),
         //padding: const EdgeInsets.only(left: 16, right: 16, top: 48),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             SizedBox(height: 5),
@@ -140,16 +141,21 @@ class HomePage extends StatelessWidget with NavigationStates {
             /* The down-half of the screen)*/
             //SizedBox(height: 10),
             Padding(
-              padding: EdgeInsets.only(left: 15),
+              padding: EdgeInsets.fromLTRB(15, 5, 0, 5),
               child: Text(
                 "Active devices",
-                style: TextStyle(color: HexColor('#1f2937'), fontSize: 20),
+                style: TextStyle(
+                    color: HexColor('#1f2937'),
+                    fontSize: 20,
+                  letterSpacing: 2,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             Container(
-              height: MediaQuery.of(context).size.height/2,
+              height: MediaQuery.of(context).size.height/1.8,
               width: MediaQuery.of(context).size.width,
-              padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+              padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
               child: ListView.builder(
                 //Needed shrinkWarp and physics for listView can be use in SingleChildScroll
                 shrinkWrap: true,

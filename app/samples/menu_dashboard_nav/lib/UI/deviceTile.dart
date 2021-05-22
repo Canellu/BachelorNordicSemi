@@ -31,8 +31,7 @@ class DeviceTile extends StatelessWidget {
           ),
           contentPadding: EdgeInsets.fromLTRB(20,5,0,0),
           title: Text('ID: ' + oneDevice.deviceId),
-          subtitle: Text('Last sync: ' + oneDevice.lastSync + "\n" +
-              'Added: ' + oneDevice.added),
+          subtitle: Text('Last sync: ' + oneDevice.lastSync),
           isThreeLine: true,
           onTap: (){
             Navigator.push(

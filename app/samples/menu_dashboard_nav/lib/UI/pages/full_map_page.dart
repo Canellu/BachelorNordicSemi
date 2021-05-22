@@ -30,25 +30,6 @@ class _MapFullPageState extends State<MapFullPage> {
   Completer<GoogleMapController> _googleMapControllerCompleter = Completer();
   String title;
 
-  @override
-  void initState(){
-    super.initState();
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.landscapeRight,
-      DeviceOrientation.landscapeLeft,
-      //DeviceOrientation.portraitUp,
-      //DeviceOrientation.portraitDown,
-    ]);
-  }
-
-  dispose(){
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
-    super.dispose();
-  }
-
   void _onMapCreated(GoogleMapController controller) {
     _googleMapControllerCompleter.complete(controller);
   }
@@ -142,7 +123,6 @@ class _MapFullPageState extends State<MapFullPage> {
                         size: 25,
                       ),
                       onPressed: () {
-                        dispose();
                         Navigator.of(context).pop();
                       }
                   ),

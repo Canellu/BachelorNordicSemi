@@ -105,7 +105,7 @@ class _MapScreenState extends State<MapScreen> {
               //Both height works, but need to see which one work best on real machine
               //height: MediaQuery.of(context).size.height / 3.8,
               //height: 200,
-              height: MediaQuery.of(context).size.height / 3.2,
+              height: MediaQuery.of(context).size.height / 3.5,
               width: MediaQuery.of(context).size.width,
               child: new Stack(
                 children: <Widget>[

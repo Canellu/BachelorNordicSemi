@@ -19,7 +19,7 @@ class MissionTabPage extends StatefulWidget {
 
 class WayPoint {
   double lat;
-  final double lng;
+  double lng;
 
   WayPoint(@required this.lat, @required this.lng);
 }
@@ -176,7 +176,7 @@ class _MissionTabPageState extends State<MissionTabPage> {
                   //side: BorderSide(color: Colors.black),
                 ),
                 child: Text(
-                  'Submit',
+                  'Send',
                   style: TextStyle(
                     fontSize: 16,
                     letterSpacing: 2
@@ -696,7 +696,7 @@ class _MissionTabPageState extends State<MissionTabPage> {
 
     setState(() {
       if(lngEditText != null) {
-        wayPointList[index].lat = double.parse(lngEditText);
+        wayPointList[index].lng = double.parse(lngEditText);
       }
     });
   }
