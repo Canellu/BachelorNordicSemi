@@ -240,6 +240,7 @@ void initAP()
 
   // Setting ESP as Access Point (AP)
   // Remove the password parameter for AP to be open
+  WiFi.enableAP(true);
   WiFi.softAP(ssid, password);
 
   IPAddress IP = WiFi.softAPIP();
