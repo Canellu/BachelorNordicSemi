@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "897647055265",
+    "project_id": "oasys-2d5b2",
+    "storage_bucket": "oasys-2d5b2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:897647055265:android:c3d4241f21303a61b63be0",
+        "android_client_info": {
+          "package_name": "com.example.bachelor_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "897647055265-vnf3u88rlbcr3t49ilrq0nf606vcfaa8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDrEEU7aI5tVxrv7H-JC6Po51Gh7ryoEeo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "897647055265-vnf3u88rlbcr3t49ilrq0nf606vcfaa8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
