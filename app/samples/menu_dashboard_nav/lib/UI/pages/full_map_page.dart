@@ -1,19 +1,7 @@
-import 'dart:io';
-
-import 'package:bachelor_app/models/device.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:async';
-import 'package:bachelor_app/UI/deviceList.dart';
-import 'package:bachelor_app/service/database.dart';
-import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'dart:async';
-import 'map_screen.dart';
 
-//import 'database.dart';
 
 class MapFullPage extends StatefulWidget {
   final Map<MarkerId, Marker> mapMakers;
@@ -34,6 +22,7 @@ class _MapFullPageState extends State<MapFullPage> {
     _googleMapControllerCompleter.complete(controller);
   }
 
+  //Make map back to initial position
   _updateUserMarkerAndCamera() async {
     final GoogleMapController controller =
     await _googleMapControllerCompleter.future;
@@ -61,29 +50,7 @@ class _MapFullPageState extends State<MapFullPage> {
     return MaterialApp(
       //Remove the debug banner at the right top
       debugShowCheckedModeBanner: false,
-      home: Scaffold(/*
-        appBar: AppBar(
-          elevation: 20,
-          title: Text(
-            titleForPage(),
-            style: TextStyle(
-              letterSpacing: 3,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          centerTitle: true,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back_rounded),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-          flexibleSpace: Container(
-            decoration: BoxDecoration(
-              color: const Color.fromRGBO(31, 41, 55, 1),
-            ),
-          ),
-        ),*/
+      home: Scaffold(
         body: Container(
           height: MediaQuery.of(context).size.height,
           width: MediaQuery.of(context).size.width,
@@ -135,7 +102,9 @@ class _MapFullPageState extends State<MapFullPage> {
     );
   }
 
+  //Display different markers according to the pre-page
   Widget _showMap(){
+    //If it is home page map want to display in full map
     if(widget.navigateFrom == 'home') {
       return GoogleMap(
         onMapCreated: _onMapCreated,
@@ -146,6 +115,7 @@ class _MapFullPageState extends State<MapFullPage> {
         ),
       );
     }else {
+      //If it is mission route want to display in full map
       return GoogleMap(
         onMapCreated: _onMapCreated,
         markers: Set.of(widget.mapMakers.values),

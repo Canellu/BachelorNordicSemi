@@ -1,29 +1,23 @@
-//import 'dart:js';
-
-import 'package:bachelor_app/UI/pages/home_page.dart';
 import 'package:bachelor_app/models/device.dart';
-import 'package:bachelor_app/models/mission.dart';
 import 'package:bachelor_app/service/database.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 
 import 'chart_page.dart';
 import 'loadingPage.dart';
 import 'mission_Control.dart';
 
-class DevicePageTab extends StatefulWidget {
+class DevicePage extends StatefulWidget {
   final Device selectedDevice;
 
-  const DevicePageTab({Key key, this.selectedDevice}) : super(key: key);
+  const DevicePage({Key key, this.selectedDevice}) : super(key: key);
 
   @override
-  _DevicePageTabState createState() => _DevicePageTabState();
+  _DevicePageState createState() => _DevicePageState();
 }
 
-class _DevicePageTabState extends State<DevicePageTab> with TickerProviderStateMixin {
+class _DevicePageState extends State<DevicePage> with TickerProviderStateMixin {
   TabController _tabController;
 
   @override
@@ -36,6 +30,7 @@ class _DevicePageTabState extends State<DevicePageTab> with TickerProviderStateM
         FocusScope.of(context).requestFocus(new FocusNode());
       }
 
+      //Only allow vertical version orientation
       SystemChrome.setPreferredOrientations([
         DeviceOrientation.portraitUp,
         DeviceOrientation.portraitDown,
@@ -47,6 +42,7 @@ class _DevicePageTabState extends State<DevicePageTab> with TickerProviderStateM
   Widget build(BuildContext context) {
     final gid = widget.selectedDevice.deviceId;
 
+    //Using real time streamBuilder to get Mission list from firestore
     return StreamBuilder(
         stream: DatabaseService(gid,"").mission,
         builder: (context, snapshot) {
@@ -69,18 +65,11 @@ class _DevicePageTabState extends State<DevicePageTab> with TickerProviderStateM
               elevation: 10,
               flexibleSpace: Container(
                 decoration: BoxDecoration(
-                  /*
-                    gradient: LinearGradient(
-                        colors: [Colors.greenAccent, Colors.blue],
-                        begin: Alignment.bottomRight,
-                        end: Alignment.topLeft
-                    )*/
                   color: const Color.fromRGBO(31, 41, 55, 1),
                 ),
               ),
               bottom: TabBar(
                 controller: _tabController,
-                //indicatorPadding: EdgeInsets.all(10),
                 indicatorColor: Colors.white,
                 indicatorWeight: 5,
                 tabs: <Widget>[
@@ -98,6 +87,8 @@ class _DevicePageTabState extends State<DevicePageTab> with TickerProviderStateM
             body: TabBarView(
               controller: _tabController,
               physics: NeverScrollableScrollPhysics(),
+              //Navigtors to Data-Tab and Mission control-tab
+              //parse current selected glider id and mission to new page/tab
               children: <Widget>[
                 ChartPage(gid: gid,missionList: missionIdList),
                 MissionTabPage(gid: gid,missionList: missionIdList),

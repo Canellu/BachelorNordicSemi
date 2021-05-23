@@ -1,15 +1,13 @@
-import 'package:bachelor_app/UI/oneChart.dart';
+import 'package:bachelor_app/UI/compoment/oneChart.dart';
 import 'package:bachelor_app/service/database.dart';
-import 'package:charts_flutter/flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart' as prefix;
 import 'package:flutter/services.dart';
 import 'package:hexcolor/hexcolor.dart';
 
-import '../missionRouteMap.dart';
+import '../compoment/missionRouteMap.dart';
 import 'loadingPage.dart';
 
 
@@ -53,6 +51,7 @@ class _ChartPageState extends State<ChartPage> {
     super.dispose();
   }
 
+  //Change chart when different button onClick
   changeType({String newChartType, String newCardType}) {
     setState(() {
       if(newChartType != null) {
@@ -62,6 +61,7 @@ class _ChartPageState extends State<ChartPage> {
     });
   }
 
+  //Initial button-onPress check
   initButtonBool() {
     pressP = false;
     pressT = false;
@@ -72,7 +72,9 @@ class _ChartPageState extends State<ChartPage> {
 
   @override
   Widget build(BuildContext context) {
+    //Get the mission list
     List<String> _missions = widget.missionList;
+    //Drop down button display 'No mission' message if no mission found
     String defalutSelect = _missions.isEmpty ? 'No mission': _missions.first;
     return Container(
       height: MediaQuery.of(context).size.height,
@@ -85,7 +87,6 @@ class _ChartPageState extends State<ChartPage> {
             padding: const EdgeInsets.fromLTRB(30, 0, 120, 0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              //crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Expanded(
                   child: Container(
@@ -122,20 +123,10 @@ class _ChartPageState extends State<ChartPage> {
                     ),
                   ),
                 ),
-                //RaisedButton(onPressed: (){}),
-                /*
-                TextButton(
-                  onPressed: () {},
-                  child: Text(
-                    'Detail info',
-                    style: prefix.TextStyle(
-                      color: Colors.black45,
-                    ),
-                  ),
-                )*/
               ],
             ),
           ),
+          //Using futureBilder to get data from firestore
           FutureBuilder(
               future: DatabaseService(widget.gid, selectedMission ?? "Mission 1").datas,
               builder: (context, snapshot) {
@@ -144,22 +135,14 @@ class _ChartPageState extends State<ChartPage> {
                 }else {
                   dataset = new Map<String,dynamic>.from(snapshot.data);
                   return Column(
-                    children: [/*
-                      Container(
-                        child:  ShowRouteMap(dataset: dataset),
-                      ),
-                      Container(
-                        padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                        child: OneChart(dataType: dataType,dataset: dataset),
-                      ),*/
+                    children: [
                       Container(
                           width: MediaQuery.of(context).size.width,
                           height: MediaQuery.of(context).size.height/1.6,
+                          //Display chart or mission route according to the button on-press
                           child: _showCard()
                       ),
-                      //SizedBox(height: 5,),
                       Row(
-                        //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: <Widget>[
                           Padding(
                             padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
@@ -167,8 +150,6 @@ class _ChartPageState extends State<ChartPage> {
                               style: ElevatedButton.styleFrom(
                                 primary: pressC ? HexColor('#1f2937') : Colors.white,
                                 elevation: 5,
-                                //shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                                //side: BorderSide(color: Colors.black),
                               ),
                               child: Text(
                                 'Chart C',
@@ -184,7 +165,6 @@ class _ChartPageState extends State<ChartPage> {
                                   }
                                 });
                                 changeType(newChartType:"C",newCardType: "chart");
-                                //changeDataSet();
                               },
                             ),
                           ),
@@ -192,7 +172,6 @@ class _ChartPageState extends State<ChartPage> {
                             style: ElevatedButton.styleFrom(
                               primary: pressT ? HexColor('#1f2937') : Colors.white,
                               elevation: 5,
-                              //shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                             ),
                             child: Text(
                               'Chart T',
@@ -212,10 +191,8 @@ class _ChartPageState extends State<ChartPage> {
                           ),
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              //primary: Colors.white,
                               primary: pressP ? HexColor('#1f2937') : Colors.white,
                               elevation: 5,
-                              //shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                             ),
                             child: Text(
                               'Chart P',
@@ -237,9 +214,7 @@ class _ChartPageState extends State<ChartPage> {
                             padding: const EdgeInsets.fromLTRB(40, 0, 20, 0),
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                //primary: Colors.white,
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                                //side: BorderSide(color: Colors.black),
                                 onPrimary: Colors.black45,
                                 elevation: 5,
                                 primary: pressMap ? HexColor('#1f2937') : Colors.white,
@@ -273,6 +248,7 @@ class _ChartPageState extends State<ChartPage> {
     );
   }
 
+  //Check which button is on-pressed, and determine what should be displayed
   Widget _showCard(){
     if(cardType == "chart" ) {
       return OneChart(dataType: dataType,dataset: dataset);

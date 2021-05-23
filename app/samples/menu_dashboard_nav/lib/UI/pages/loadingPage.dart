@@ -1,9 +1,7 @@
-import 'dart:async';
-
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter/material.dart';
 
-
+//------------Loading page-----------
 class Loading extends StatelessWidget {
 
   @override
@@ -34,6 +32,7 @@ class Loading extends StatelessWidget {
   }
 }
 
+//-----------Error Message Box--------------
 class ErrorLoading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

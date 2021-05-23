@@ -1,7 +1,6 @@
-import 'package:bachelor_app/UI/dialog.dart';
+import 'package:bachelor_app/UI/compoment/dialog.dart';
 import 'package:bachelor_app/models/mission.dart';
 import 'package:bachelor_app/service/database.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hexcolor/hexcolor.dart';
@@ -53,6 +52,7 @@ class _MissionTabPageState extends State<MissionTabPage> {
     selectedTableList.clear();
   }
 
+  //Get start date
   String getText() {
     if(dateTime == null) {
       return 'Select Start date';
@@ -62,7 +62,7 @@ class _MissionTabPageState extends State<MissionTabPage> {
     }
   }
 
-  //Clean up the controller when the widget is disposed
+  //Clean up the input-controller when the widget is disposed
   @override
   void dispose(){
     _latController.dispose();
@@ -85,7 +85,6 @@ class _MissionTabPageState extends State<MissionTabPage> {
                 width: MediaQuery.of(context).size.width -50,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
-                  //crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     SizedBox(height: 20,),
                     Text(
@@ -98,8 +97,6 @@ class _MissionTabPageState extends State<MissionTabPage> {
                     ),
                     SizedBox(height: 5,),
                     Row(
-                      //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      //crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         FloatingActionButton(
                             materialTapTargetSize: MaterialTapTargetSize.padded,
@@ -114,7 +111,6 @@ class _MissionTabPageState extends State<MissionTabPage> {
 
                         SizedBox(width: 10,),
                         Expanded(
-                          //padding: const EdgeInsets.all(20.0),
                           child: TextField(
                             textAlign: TextAlign.justify,
                             decoration: InputDecoration(
@@ -163,17 +159,16 @@ class _MissionTabPageState extends State<MissionTabPage> {
                 ),
               ),
               SizedBox(height: 20),
-              //_buildWayPointTable(),
+              //build WayPoint widget
               _loggWayPoint(),
               SizedBox(height: 20),
+              //build frequencies widget
               _LoggingFrequencies(),
               SizedBox(height: 20,),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   primary: HexColor('#1f2937'),
                   elevation: 5,
-                  //shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                  //side: BorderSide(color: Colors.black),
                 ),
                 child: Text(
                   'Send',
@@ -183,7 +178,9 @@ class _MissionTabPageState extends State<MissionTabPage> {
                   ),
                 ),
                 onPressed: () {
+                  //Check if the mission are ok to send
                   var submitStatus = submitCheck();
+                  //If something wrong, show error message at bottom
                   if(submitStatus != null) {
                     ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
@@ -194,6 +191,7 @@ class _MissionTabPageState extends State<MissionTabPage> {
                         )
                     );
                   } else {
+                    //Send new mission to firestore
                     var createMissionID = widget.missionList.length + 1;
 
                     var wayPoint = [];
@@ -217,6 +215,7 @@ class _MissionTabPageState extends State<MissionTabPage> {
 
                     defaltValue();
 
+                    //Show success message after mission created
                     ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                             backgroundColor: Colors.green,
@@ -236,7 +235,7 @@ class _MissionTabPageState extends State<MissionTabPage> {
     );
   }
 
-
+//-----------WayPoint widget---------
   Widget _loggWayPoint() {
     return Card(
       shape: RoundedRectangleBorder(
@@ -268,10 +267,12 @@ class _MissionTabPageState extends State<MissionTabPage> {
                 keyboardType: TextInputType.numberWithOptions(
                   decimal: true,
                 ),
+                //Input regex for lat
                 inputFormatters: <TextInputFormatter>[
                   //Only allow numbers and 4 number after decimal
                   FilteringTextInputFormatter.allow(RegExp(r'^-?(?:-?(?:[0-9]+))?(?:.\d{0,4})'))
                 ],
+                //Input validation for lat
                 validator: (value) {
                   bool isNumeric(String value) {
                     return double.tryParse(value) != null;
@@ -299,10 +300,12 @@ class _MissionTabPageState extends State<MissionTabPage> {
                 keyboardType: TextInputType.numberWithOptions(
                   decimal: true,
                 ),
+                //Input regex for lng
                 inputFormatters: <TextInputFormatter>[
                   //Only allow numbers and 4 number after decimal
                   FilteringTextInputFormatter.allow(RegExp(r'^-?(?:-?(?:[0-9]+))?(?:.\d{0,4})'))
                 ],
+                //Input validation for lng
                 validator: (value) {
                   bool isNumeric(String value) {
                     return double.tryParse(value) != null;
@@ -334,7 +337,9 @@ class _MissionTabPageState extends State<MissionTabPage> {
                   letterSpacing: 2
                 ),
               ),
+              //Check input for lat and lng
               onPressed: (){
+                //Input is not valid, show error message at bottom
                 if(!_formKey.currentState.validate()) {
                   ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
@@ -345,6 +350,7 @@ class _MissionTabPageState extends State<MissionTabPage> {
                       )
                   );
                 } else {
+                  //Input is valid, add to the way point list
                   setState(() {
                     wayPointList.add(
                         WayPoint(
@@ -359,6 +365,7 @@ class _MissionTabPageState extends State<MissionTabPage> {
                 //wayPointList.add(WayPoint(Lat, Long))
               },
             ),
+            //Build data table to show all waypoints
             _buildWayPointTable(),
           ],
         ),
@@ -366,13 +373,13 @@ class _MissionTabPageState extends State<MissionTabPage> {
     );
   }
 
+  //-----------Data table for waypoint----------
   Widget _buildWayPointTable() {
+    //Build data-table if waypoint list is not empty
     if(wayPointList.isNotEmpty) {
       return Container(
         width: MediaQuery.of(context).size.width-40,
         child: Column(
-          //crossAxisAlignment: CrossAxisAlignment.stretch,
-          //mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
             Divider(thickness: 2,),
             SizedBox(height: 20,),
@@ -416,9 +423,10 @@ class _MissionTabPageState extends State<MissionTabPage> {
                     cells: <DataCell>[
                       DataCell(
                           Text((wayPointList.indexOf(element)+1).toString())
-                      ), //Extracting from Map element the value
+                      ),
                       DataCell(
                           Text("${(element.lat).toString()} "),
+                          //Edit lat
                           showEditIcon: true,
                           onTap: () {
                             editLat((element.lat).toString(),wayPointList.indexOf(element));
@@ -426,6 +434,7 @@ class _MissionTabPageState extends State<MissionTabPage> {
                       ),
                       DataCell(
                           Text("${(element.lng).toString()} "),
+                          //Edit lng
                           showEditIcon: true,
                           onTap: () {
                             editLng((element.lng).toString(),wayPointList.indexOf(element));
@@ -435,6 +444,7 @@ class _MissionTabPageState extends State<MissionTabPage> {
                   )),
                 ).toList()
             ),
+            //Show delete button
             _deleteTable(),
           ],
         ),
@@ -444,7 +454,9 @@ class _MissionTabPageState extends State<MissionTabPage> {
     }
   }
 
+  //-----------Delete button and function ------------
   Widget _deleteTable() {
+    //Check if data row has selected
     if(selectedTableList.isNotEmpty) {
       return Padding(
         padding: const EdgeInsets.fromLTRB(0, 20, 0, 20),
@@ -509,7 +521,6 @@ class _MissionTabPageState extends State<MissionTabPage> {
               ),
               DropdownButton(
                 isExpanded: false,
-                //dropdownColor: Colors.blue,
                 elevation: 10,
                 value: _freqCvalue,
                 onChanged: (String newValue) {
@@ -539,7 +550,6 @@ class _MissionTabPageState extends State<MissionTabPage> {
               ),
               DropdownButton(
                 isExpanded: false,
-                //dropdownColor: Colors.blue,
                 elevation: 10,
                 value: _freqTvalue,
                 onChanged: (String newValue) {
@@ -569,7 +579,6 @@ class _MissionTabPageState extends State<MissionTabPage> {
               ),
               DropdownButton(
                 isExpanded: false,
-                //dropdownColor: Colors.blue,
                 elevation: 10,
                 value: _freqPvalue,
                 onChanged: (String newValue) {
@@ -630,6 +639,7 @@ class _MissionTabPageState extends State<MissionTabPage> {
     );
   }
 
+  //----------Display Calender for select date and time----------
   Future pickDateTime(BuildContext context) async {
     final date = await pickDate(context);
     if(date == null) return;
@@ -671,6 +681,7 @@ class _MissionTabPageState extends State<MissionTabPage> {
     return newTime;
   }
 
+  //Open dialog to edit lat ot lng
   void editLat(String latValue, int index) async {
     final latEditText = await showTextDialog(
       context,
@@ -701,6 +712,7 @@ class _MissionTabPageState extends State<MissionTabPage> {
     });
   }
 
+  //Check if row have been selected
   bool showSelectRow(WayPoint wp) {
     if(selectedTableList.length != 1) {
       return selectedTableList.contains(wp);
@@ -710,6 +722,7 @@ class _MissionTabPageState extends State<MissionTabPage> {
     }
   }
 
+  //Check if there are any empty input
   String submitCheck() {
     if(wayPointList.isEmpty) {
       return 'Enter some way point for new mission ! ';

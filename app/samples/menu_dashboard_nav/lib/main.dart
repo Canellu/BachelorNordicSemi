@@ -1,4 +1,5 @@
-import 'package:bachelor_app/menu_dashboard_layout/menu_dashboard_layout.dart';
+
+import 'package:bachelor_app/UI/pages/home_page.dart';
 import 'package:bachelor_app/service/database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,20 +13,13 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   runApp(MyApp());
+
   //Set status bar transparent
   SystemUiOverlayStyle systemUiOverlayStyle = SystemUiOverlayStyle(
-    //systemNavigationBarColor: Color(0xFF000000),
-    //systemNavigationBarDividerColor: null,
     statusBarColor: Colors.transparent,
-    //systemNavigationBarIconBrightness: Brightness.light,
     statusBarBrightness: Brightness.dark,
-    // To make Status bar icons color white in Android devices.
     statusBarIconBrightness: Brightness.dark,
-    /*
-    statusBarColor: Colors.transparent,
-    statusBarBrightness: Brightness.light,
-    statusBarIconBrightness: Brightness.light,
-    //statusBarIconBrightness: Brightness.dark,*/
+
   );
   SystemChrome.setSystemUIOverlayStyle(systemUiOverlayStyle);
 }
@@ -41,20 +35,13 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       builder: (BuildContext context, Widget widget) {
-        /*
-        Widget error = Text('...rendering error...');
-        if(widget is Scaffold || widget is Navigator)
-          error = Scaffold(body: Center(child: error,));
-          ErrorWidget.builder =
-              (FlutterErrorDetails errorDetails) => error;
-          return widget;*/
+       //Display error page when widget build failed
         ErrorWidget.builder = (FlutterErrorDetails errorDetails) {
           return ErrorLoading();
         };
         return widget;
       },
       home: HomeRun(),
-      /*MenuDashboardLayout()*/
     );
   }
 }
@@ -65,6 +52,7 @@ class HomeRun extends StatelessWidget {
     return StreamProvider<List<Device>>.value(
       value: DatabaseService("","").glider,
       child: GestureDetector(
+        //close keyboard when click outside keyboard area
         onTap: (){
           FocusScopeNode currentFocus = FocusScope.of(context);
           if (!currentFocus.hasPrimaryFocus && currentFocus.focusedChild != null) {
@@ -74,7 +62,7 @@ class HomeRun extends StatelessWidget {
         child: MaterialApp(
           //Remove the debug banner at the right top
           debugShowCheckedModeBanner: false,
-          home: MenuDashboardLayout(),
+          home: HomePage(),
         ),
       ),
     );

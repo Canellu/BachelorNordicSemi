@@ -5,7 +5,6 @@ import 'package:bachelor_app/models/device.dart';
 import 'package:bachelor_app/models/mission.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 class DatabaseService {
   final CollectionReference connectCollection = FirebaseFirestore.instance.collection('Gliders');
@@ -28,22 +27,7 @@ class DatabaseService {
     }).toList();
   }
 
-/*
-  List<Mission> _missionListFromSnapshot(QuerySnapshot snapshot) {
-    return snapshot.docs.map((doc){
-      return Mission(
-        endTime: doc.data()['end'] ?? 'not end yet',
-        freqC: doc.data()['freqC'] ?? 'not found',
-        freqP: doc.data()['freqP'] ?? 'not found',
-        freqT: doc.data()['freqT'] ?? 'not found',
-        minD: doc.data()['minD'] ?? 'not found',
-        maxD: doc.data()['maxD'] ?? 'not found',
-        startTime: doc.data()['start'] ?? 'not found',
-        missionId: doc.id ?? 'not found',
-      );
-    }).toList();
-  }*/
-
+  //Create new mission to firestore
   Future<void> newMission(Mission missionObject) async {
     return await connectCollection.doc(gid).collection("Missions").doc(missionObject.missionId).set({
       "4G" : missionObject.nett,
@@ -58,31 +42,17 @@ class DatabaseService {
         .catchError((error) => print("Failed to add new mission : $error"));
   }
 
-  //get stream
+  //get glider stream
   Stream<List<Device>> get glider {
     return connectCollection.snapshots()
         .map(_deviceListFromSnapshot);
   }
-/*
-  //get missions doc from database
-  Stream<List<Mission>> get mission {
-    return connectCollection.doc("311910").collection("Missions").snapshots()
-        .map(_missionListFromSnapshot);
-  }*/
+
+  //get mission stream
   Stream<QuerySnapshot> get mission {
     return connectCollection.doc(gid).collection("Missions").snapshots();
   }
 
-/*
-  Map<String,dynamic> preProcessData(QuerySnapshot snapshot) {
-    var dataset = testData;
-  }
-
-  Future<QuerySnapshot> get testData async {
-    return await connectCollection.doc(gid).collection("Missions")
-        .doc(mid).collection("Data").get();
-  }
-*/
   //get data for selected mission, and preprocess it
   Future<Map<String, dynamic>> get datas async {
     var missionData = await connectCollection.doc(gid).collection("Missions")

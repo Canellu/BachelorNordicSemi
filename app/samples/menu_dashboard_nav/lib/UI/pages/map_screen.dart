@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +5,6 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:async';
 import 'package:bachelor_app/models/device.dart';
 import 'full_map_page.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 class MapScreen extends StatefulWidget {
   MapScreen(this.devices);
@@ -29,6 +26,7 @@ class _MapScreenState extends State<MapScreen> {
   @override
   void initState() {
     super.initState();
+    //Custom marker picture
     BitmapDescriptor.fromAssetImage(ImageConfiguration(size: Size(1, 1)),
         'assets/images/Glider.jpg')
         .then((d) {
@@ -40,7 +38,8 @@ class _MapScreenState extends State<MapScreen> {
     _googleMapControllerCompleter.complete(controller);
   }
 
-  void _createMarkerAndLine() {
+  //Create markers
+  void _createMarker() {
     widget.devices.forEach((element) {
 
       if(element.lastSeen != null) {
@@ -58,7 +57,6 @@ class _MapScreenState extends State<MapScreen> {
           markerId: markerId,
           position: LatLng(lat,lng),
           infoWindow: InfoWindow(title: element.alias),
-          //icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
           icon: customIcon,
         );
 
@@ -67,6 +65,7 @@ class _MapScreenState extends State<MapScreen> {
     });
   }
 
+  //Make map back to initial position
   @override
   Widget build(BuildContext context) {
     _updateUserMarkerAndCamera(double lat, double lng) async {
@@ -83,7 +82,7 @@ class _MapScreenState extends State<MapScreen> {
       );
     }
 
-    _createMarkerAndLine();
+    _createMarker();
 
     return MaterialApp(
       //Remove the debug banner at the right top
@@ -102,14 +101,12 @@ class _MapScreenState extends State<MapScreen> {
                 ],
               ),
               margin: EdgeInsets.all(5),
-              //Both height works, but need to see which one work best on real machine
-              //height: MediaQuery.of(context).size.height / 3.8,
-              //height: 200,
               height: MediaQuery.of(context).size.height / 3.5,
               width: MediaQuery.of(context).size.width,
               child: new Stack(
                 children: <Widget>[
                   GoogleMap(
+                    //For moving map function can works in a scroll page
                     gestureRecognizers: < Factory < OneSequenceGestureRecognizer >> [
                       new Factory < OneSequenceGestureRecognizer > (
                             () => new EagerGestureRecognizer(),
@@ -117,10 +114,8 @@ class _MapScreenState extends State<MapScreen> {
                     ].toSet(),
                     onMapCreated: _onMapCreated,
                     markers: Set.of(_mapMakers.values),
-                    //Set<Marker>.of(markers.values),
                     initialCameraPosition: CameraPosition(
                       target: LatLng(lat, lng),
-                      //(59.785604271197464, 10.435280266881726),
                       zoom: 10.0,
                     ),
                   ),
@@ -141,6 +136,7 @@ class _MapScreenState extends State<MapScreen> {
                               color: Colors.black,
                               size: 25,
                             ),
+                            //Navigate to Full map page, parse the LatLng list to display same marker
                             onPressed: () => Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -160,6 +156,7 @@ class _MapScreenState extends State<MapScreen> {
                               color: Colors.black,
                               size: 25,
                             ),
+                            //Back to initial position
                             onPressed: () {
                               _updateUserMarkerAndCamera(lat,lng);
                             }
