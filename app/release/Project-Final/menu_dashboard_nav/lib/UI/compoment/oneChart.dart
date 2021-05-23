@@ -59,13 +59,13 @@ class _ChartCompoentState extends State<ChartCompoent> {
 
     if(widget.dataType == "C") {
       label = "CONDUCTIVITY";
-      lineColor = charts.MaterialPalette.teal.shadeDefault;
+      lineColor = charts.ColorUtil.fromDartColor(Color(0x80FF6C3A));
     } else if(widget.dataType == "T") {
       label = "TEMPERATURE";
-      lineColor = charts.MaterialPalette.deepOrange.shadeDefault;
+      lineColor = charts.ColorUtil.fromDartColor(Color(0x8088AFCC));
     } else {
       label = "PRESSURE";
-      lineColor = charts.MaterialPalette.blue.shadeDefault;
+      lineColor = charts.ColorUtil.fromDartColor(Color(0x80F5BA61));
     }
 
     widget.dataForChart.forEach((key, value) {
