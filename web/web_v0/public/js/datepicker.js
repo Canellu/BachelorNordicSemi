@@ -124,14 +124,18 @@ async function applySelection() {
         .get();
 
       let sensorDocs = sensorData.docs;
-      missionStartDate = parseInt(sensorDocs[0].id.replaceAll("-", ""));
-      missionEndDate = parseInt(
-        sensorDocs[sensorDocs.length - 1].id.replaceAll("-", "")
-      );
 
-      if (!(endDate < missionStartDate) && !(missionEndDate < startDate)) {
-        missionList.push(mission.id);
+      if (sensorDocs.length != 0) {
+        missionStartDate = parseInt(sensorDocs[0].id.replaceAll("-", ""));
+        missionEndDate = parseInt(
+          sensorDocs[sensorDocs.length - 1].id.replaceAll("-", "")
+        );
+
+        if (!(endDate < missionStartDate) && !(missionEndDate < startDate)) {
+          missionList.push(mission.id);
+        }
       }
+
       count++;
       if (count == missions.size) {
         if (missionList.length) {
