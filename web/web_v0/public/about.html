@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Firebase CORE -->
+    <script src="https://www.gstatic.com/firebasejs/8.5.0/firebase-app.js"></script>
+
+    <!-- Firebase Firestore -->
+    <script src="https://www.gstatic.com/firebasejs/8.5.0/firebase-firestore.js"></script>
+
+    <!-- Firebase Authentication -->
+    <script src="https://www.gstatic.com/firebasejs/8.5.0/firebase-auth.js"></script>
+
+    <!-- MATERIAL ICONS -->
+    <link
+      href="https://fonts.googleapis.com/css?family=Material+Icons|Material+Icons+Outlined|Material+Icons+Two+Tone|Material+Icons+Round|Material+Icons+Sharp"
+      rel="stylesheet"
+    />
+
+    <!--  CUSTOM CSS -->
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="shortcut icon" href="#" />
+    <title>Oasys</title>
+  </head>
+  <body class="bg-gray-100 font-montserrat lg:pt-20">
+    <script src="js/header.js"></script>
+
+    <main class="min-h-screen space-y-4 sm:space-y-6 m-4 pb-20">
+
+      <div class="flex">
+        
+      </div>
+      <!-- About OASYS -->
+      <div
+        class="container rounded-shadow m-auto w-full px-6 py-8 sm:py-16 bg-light flex flex-col items-center space-y-4"
+      >
+        <img
+          src="assets/img/OASYS_dark.jpg"
+          class="w-44 sm:w-80 rounded-full mb-10"
+        />
+        <h1
+          class="w-full flex justify-center text-xl sm:text-4xl font-semibold tracking-wide py-2 sm:py-2"
+        >
+          OASYS
+        </h1>
+
+        <p class="sm:px-20 leading-relaxed font-medium text-sm sm:text-lg">
+          One of the barriers towards a better understanding and sustainable
+          development of marine related economic activity is the high cost
+          associated with ocean observing systems. Autonomous robotic systems
+          are steadily revolutionizing the way we obtain data and interact with
+          the ocean. However most of existing autonomous systems still require
+          the involvement of manned missions in the deployment/recovery phases
+          which represents a high percentage of the total operational costs.
+        </p>
+
+        <img
+          src="https://firebasestorage.googleapis.com/v0/b/oasys-2d5b2.appspot.com/o/OASYS-project-concept.png?alt=media&token=e3f225f3-b5dd-4241-a29e-97c718634075"
+          alt=""
+          
+        />
+        <p class="pb-4">OASYS project concept</pclass>
+
+        <p class="sm:px-20 leading-relaxed font-medium text-sm sm:text-lg">
+          The OASYS project will develop and demonstrate an innovative type of
+          fully automated Ocean-Air coordinated robotic operation that has the
+          potential for drastically reducing the cost of ocean observing
+          systems. The project proposes the development of a swarm of low cost
+          Micro Underwater Gliders (MUGs) that can operate autonomously with the
+          support of Unmanned Aerial Vehicles (UAVs) and Unmanned Surface
+          Vessels (USVs) for deployment, recovery, battery charging, and
+          communication relay. The system reduces human intervention to the
+          minimum, revolutionizing the affordability of a broad range of
+          surveillance and data collection operations.
+        </p>
+      </div>
+      <!-- About WebApp -->
+      <div
+        class="container rounded-shadow m-auto w-full px-6 py-8 sm:py-16 bg-light flex flex-col justify-center space-y-4"
+      >
+        <h1
+          class="w-full flex justify-center text-lg sm:text-2xl font-semibold tracking-wide py-2 sm:py-4"
+        >
+          Web application
+        </h1>
+        <p class="sm:px-20 leading-relaxed font-medium text-sm sm:text-base">
+          This web application is a prototype for OASYS research project made by
+          Bachelor students at <i>Oslo Metropolitan University</i> .
+        </p>
+        <p class="sm:px-20 leading-relaxed font-medium text-sm sm:text-base">
+          On the website you are able to see information about the connected
+          underwater gliders. You can also communicate with the gliders by
+          sending mission parameters and satellite messages.
+        </p>
+      </div>
+    </main>
+
+    <script src="js/footer.js"></script>
+    <script src="js/firebase.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+      userStateListener();
+    </script>
+    <script src="js/firestore.js"></script>
+  </body>
+</html>

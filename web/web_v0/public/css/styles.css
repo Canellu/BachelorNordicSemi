@@ -1,0 +1,344 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@layer utilities {
+  .bg-light {
+    /* @apply bg-gray-50; */
+    @apply bg-white;
+  }
+  .bg-dark {
+    @apply bg-gray-800;
+  }
+  .text-light {
+    @apply text-gray-50;
+  }
+  .text-dark {
+    @apply text-gray-800;
+  }
+  .hover-text-dark {
+    @apply hover:text-gray-800;
+  }
+}
+
+iframe {
+  overflow: hidden;
+}
+
+#waypoints input::-webkit-outer-spin-button,
+#waypoints input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 20px;
+}
+
+#previewBox::-webkit-scrollbar-thumb {
+  background: #c0c1c3;
+  border-radius: 20px;
+}
+#previewBox::-webkit-scrollbar,
+.dropDownContent::-webkit-scrollbar,
+#waypointList::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.hideScrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hideScrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+*:focus {
+  outline: none !important;
+}
+
+body {
+  user-select: none;
+}
+
+#radioButtonsBox label {
+  @apply text-sm cursor-pointer pl-2;
+}
+
+input[type="radio"] + label {
+  transition-duration: 0.2s;
+}
+
+input[type="radio"]:after {
+  width: 16.3px;
+  height: 16.3px;
+  border-radius: 16.3px;
+  top: -2px;
+  left: -1px;
+  position: relative;
+  background-color: white;
+  content: "";
+  display: inline-block;
+  visibility: visible;
+  border: 2px solid #5a5a5a;
+  transition-duration: 0.2s;
+}
+
+input[type="radio"]:checked:after {
+  width: 16.3px;
+  height: 16.3px;
+  border-radius: 16.3px;
+  top: -2px;
+  left: -1px;
+  position: relative;
+  background-color: #6bb7bf;
+  content: "";
+  display: inline-block;
+  visibility: visible;
+  border: 2px solid rgb(107, 183, 191);
+}
+
+input {
+  cursor: pointer;
+  background-color: #fafafa !important;
+}
+
+.rounded-shadow {
+  @apply rounded-sm shadow-md;
+}
+
+.tabBtn {
+  @apply h-full w-full flex justify-center items-center focus:outline-none font-semibold text-sm tracking-wider;
+}
+
+.big-card {
+  @apply w-full rounded-lg;
+}
+/*
+.headerBtn {
+   @apply h-full flex flex-col  justify-center items-center hover:bg-gray-50 hover-text-dark  transition duration-300;
+}
+ */
+/* 
+.dropDownBtn {
+  @apply h-full rounded-shadow flex items-center pl-8 hover:border-gray-400 duration-200 z-10;
+} */
+
+.mission {
+  @apply p-4 tracking-wider text-sm  border-l-4 border-gray-200 hover:border-gray-800 hover:bg-gray-200 duration-200;
+}
+
+.card {
+  @apply h-80 overflow-hidden flex flex-col justify-between shadow-lg rounded-lg transform transition-all duration-200 ease-in hover:scale-105 hover:shadow-2xl;
+
+  min-width: 244px;
+}
+
+/* DATEPICKER POPUP */
+.litepicker {
+  z-index: 30 !important;
+}
+
+.container__main {
+  @apply mt-2;
+}
+.month-item {
+  @apply bg-light rounded-shadow;
+}
+.day-item:hover {
+  @apply bg-gray-200;
+  color: #1f2937 !important;
+  box-shadow: inset 0 0 0 1px #1f2937 !important;
+}
+.day-item.is-start-date,
+.day-item.is-end-date {
+  background-color: #6e7082 !important;
+  color: #f9fafc !important;
+}
+
+.day-item.is-in-range {
+  background-color: #6bb7bf !important;
+  color: black !important;
+}
+
+.button-next-month:hover > svg,
+.button-previous-month:hover > svg {
+  fill: #1f2937 !important;
+}
+
+/* LOGIN stuff */
+
+.flipCard {
+  transform: rotateY(180deg);
+}
+
+/*  Chart stuff */
+
+.chartBtn {
+  @apply w-8 h-8 rounded-sm shadow-sm flex justify-center items-center cursor-pointer duration-200 border bg-light text-dark;
+
+  min-width: 32px;
+}
+
+.chartDropElement {
+  @apply flex items-center w-full px-4 h-8 text-left border-l-2 hover:border-gray-800 hover:bg-gray-200;
+}
+
+.rangeContent {
+  @apply border shadow-md rounded-md absolute max-h-56 overflow-auto;
+  top: 35px;
+  right: -1px;
+  width: 140px;
+}
+
+.chartRangeBtnFocus {
+  border: 1px solid #1f2937;
+  transform: scale(1.05);
+}
+
+.activeTabBtn {
+  @apply text-light lg:text-gray-800;
+}
+
+.chartRangeBtn:active,
+.activeBtn:active,
+.chartBtn:active,
+.activeBtnStyle:active {
+  @apply bg-dark text-light;
+}
+
+.reverseActiveBtnStyle:active {
+  @apply bg-light text-dark;
+}
+
+.disableBtn {
+  @apply pointer-events-none shadow-none bg-gray-200 text-gray-400 border-gray-200;
+}
+
+.noUi-handle {
+  cursor: pointer;
+  box-shadow: none;
+}
+
+.noUi-connect {
+  background-color: #6bb7bf;
+}
+
+.noUi-handle:focus {
+  outline: none;
+  border-color: #8f8f8f;
+}
+
+.noUi-handle:active {
+  transform: scale(0.95);
+  cursor: grabbing;
+}
+
+.hour-item,
+.minute-item {
+  @apply border-l-2 hover:border-gray-800 hover:bg-gray-200 py-2 text-sm cursor-pointer tracking-wide font-medium;
+}
+
+.saveTime:focus {
+  background-color: #1f2937 !important;
+  border-color: white !important;
+  color: white !important;
+}
+
+.redBorder {
+  border: 1px solid red;
+}
+
+.uploadSuccess {
+  animation: slideIn 5s ease-in-out forwards;
+  animation-play-state: paused;
+}
+
+.showMenu {
+  animation: scaleY 2s ease-in-out forwards;
+}
+
+@keyframes slideIn {
+  0% {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+  10% {
+    transform: translateX(0%);
+    opacity: 1;
+  }
+  90% {
+    transform: translateX(0%);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+}
+
+@keyframes scaleY {
+  from {
+    transform: translateY(-50%) scaleY(0);
+  }
+  to {
+    transform: translateY(0) scaleY(1);
+  }
+}
+
+th,
+td,
+table {
+  @apply px-4 py-2 border;
+}
+
+th {
+  @apply font-medium;
+}
+
+td {
+  @apply text-sm;
+}
+
+#satelliteMessageTable td:last-child,
+#satelliteMessageTable td:first-child,
+#satelliteMessageTable td:nth-child(2) {
+  text-align: center;
+}
+
+#satelliteErrorTable td:first-child {
+  text-align: center;
+}
+
+tbody tr:nth-child(odd) {
+  @apply bg-light;
+}
+
+.btn {
+  @apply cursor-pointer transform hover:scale-105 hover:border-gray-800 duration-200;
+}
+
+::placeholder {
+  color: rgb(100, 100, 100);
+}

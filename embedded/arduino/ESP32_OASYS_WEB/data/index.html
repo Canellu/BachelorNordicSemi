@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" href="materialize.css" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="nouislider.min.css" />
+    <link rel="icon" type="image/png" href="Glider.png" />
+
+    <title>OASYS</title>
+  </head>
+
+  <body style="background: #f3f4f6" onload="adjustCheckboxesPosition()">
+    <nav>
+      <div class="nav-wrapper bg-dark">
+        <div class="container">
+          <div
+            href=""
+            class="center brand-logo white-text text-darken-3"
+            style="font-size: 24px; font-weight: 700"
+          >
+            OASYS
+          </div>
+        </div>
+      </div>
+    </nav>
+    <!-- TAB SELECTOR [info] [cli] [file] [config] -->
+    <div class="tabSelectorBottom bg-dark">
+      <div class="container">
+        <ul class="tabs tabs-fixed-width bg-dark">
+          <li class="tab">
+            <a class="active" href="#info" onclick="scrollToTop()">
+              <p class="icon">
+                <svg
+                  width="22"
+                  height="22"
+                  fill="currentColor"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412l-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"
+                  />
+                </svg>
+              </p>
+            </a>
+          </li>
+          <li class="tab">
+            <a class="" href="#module" onclick="scrollToTop()">
+              <p class="icon">
+                <svg
+                  width="22"
+                  height="22"
+                  fill="currentColor"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    d="M0 3a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3zm9.5 5.5h-3a.5.5 0 0 0 0 1h3a.5.5 0 0 0 0-1zm-6.354-.354a.5.5 0 1 0 .708.708l2-2a.5.5 0 0 0 0-.708l-2-2a.5.5 0 1 0-.708.708L4.793 6.5 3.146 8.146z"
+                  />
+                </svg>
+              </p>
+            </a>
+          </li>
+          <li class="tab">
+            <a class="" href="#files" onclick="scrollToTop()">
+              <p class="icon">
+                <svg
+                  width="22"
+                  height="22"
+                  fill="currentColor"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    d="M9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31L.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3zm-8.322.12C1.72 3.042 1.95 3 2.19 3h5.396l-.707-.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981l.006.139z"
+                  />
+                </svg>
+              </p>
+            </a>
+          </li>
+          <li class="tab">
+            <a class="" href="#config" onclick="scrollToTop()">
+              <p class="icon">
+                <svg
+                  width="22"
+                  height="22"
+                  fill="currentColor"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"
+                  />
+                </svg>
+              </p>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <!-- INFO TAB -->
+    <div class="container mtop" id="info" style="padding-bottom: 50px">
+      <div class="row">
+        <!-- Glider Info -->
+        <div class="col s12">
+          <div class="card bg-light">
+            <div class="card-image flexCenter">
+              <img src="OASYS_dark.jpg" id="infoImg" class="mtop" />
+            </div>
+            <div class="card-content">
+              <div class="card-title">Glider info</div>
+              <div class="row" style="letter-spacing: 0.5px">
+                <p class="col s12">
+                  nrf IMEI:
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+                    id="nrfIMEI"
+                    >8518989151</span
+                  >
+                </p>
+                <p class="col s12">
+                  Satellite IMEI: &nbsp;
+                  <span id="satIMEI">123456395828492</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Modules Info -->
+        <div class="col s12">
+          <div class="card bg-light">
+            <div class="card-content">
+              <div class="card-title row">
+                <div class="col s12">
+                  <svg
+                    width="22"
+                    height="22"
+                    fill="#1F2937"
+                    viewBox="0 -1 16 16"
+                  >
+                    <path
+                      d="M0 3a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3zm9.5 5.5h-3a.5.5 0 0 0 0 1h3a.5.5 0 0 0 0-1zm-6.354-.354a.5.5 0 1 0 .708.708l2-2a.5.5 0 0 0 0-.708l-2-2a.5.5 0 1 0-.708.708L4.793 6.5 3.146 8.146z"
+                    />
+                  </svg>
+                  <span style="margin-left: 8px">Modules</span>
+                </div>
+              </div>
+              <p>
+                You can test individual modules for their current health status.
+                Tap/Click on a button to start a test. It may take a minute or
+                two for results to show.
+
+                <span
+                  class="green-text text-lighten-1"
+                  style="font-weight: bold; font-size: 1.1rem"
+                  >Green</span
+                >
+                signifies that module is healthy.
+
+                <span
+                  class="red-text text-lighten-1"
+                  style="font-weight: bold; font-size: 1.1rem"
+                  >Red</span
+                >
+                signifies that a module has an error.
+              </p>
+            </div>
+          </div>
+        </div>
+        <!-- Files Info -->
+        <div class="col s12">
+          <div class="card bg-light">
+            <div class="card-content">
+              <div class="card-title row">
+                <div class="col s12">
+                  <svg
+                    width="22"
+                    height="22"
+                    fill="#1F2937"
+                    viewBox="0 -1 16 16"
+                  >
+                    <path
+                      d="M9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31L.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3zm-8.322.12C1.72 3.042 1.95 3 2.19 3h5.396l-.707-.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981l.006.139z"
+                    />
+                  </svg>
+
+                  <span style="margin-left: 8px">Files</span>
+                </div>
+              </div>
+              <p>
+                You can select and download data stored in glider SD-card as
+                .zip-files Downloading data can take up to several minutes. Do
+                not refresh the page while it is downloading. The progress is
+                reset in doing so.
+              </p>
+            </div>
+          </div>
+        </div>
+        <!-- Config Info -->
+        <div class="col s12">
+          <div class="card bg-light">
+            <div class="card-content">
+              <div class="card-title row">
+                <div class="col s12">
+                  <svg
+                    width="22"
+                    height="22"
+                    fill="#1F2937"
+                    viewBox="0 0 16 16"
+                  >
+                    <path
+                      d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"
+                    />
+                  </svg>
+                  <span style="margin-left: 8px">Configurations</span>
+                </div>
+              </div>
+              <p>
+                Send the glider out on a mission with configured parameters.<br /><br />
+                <span style="font-weight: bold; font-size: 1.2rem">
+                  Important! <br />
+                </span>
+                <span style="font-style: italic"
+                  >For the glider to start a mission after sending configured
+                  parameters through this application, you
+                </span>
+                <span style="font-weight: bold">MUST</span> click on the
+                disconnect button
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODULES TAB -->
+    <div class="container mtop" id="module" style="padding-bottom: 50px">
+      <div class="row">
+        <!-- Title -->
+        <div class="col s12">
+          <h5 class="center">MODULES</h5>
+        </div>
+        <!-- testBtn Satellite -->
+        <div class="col s6">
+          <a
+            id="testBtnSatellite"
+            class="waves-effect waves-light btn bg-dark flexCenter"
+            onclick="runTest('Satellite')"
+          >
+            <h6 style="margin: 0">Satellite</h6>
+          </a>
+        </div>
+
+        <!-- testBtn GPS -->
+        <div class="col s6">
+          <a
+            id="testBtnGPS"
+            class="waves-effect waves-light btn bg-dark flexCenter"
+            onclick="runTest('GPS')"
+          >
+            <h6 style="margin: 0">GPS</h6>
+          </a>
+        </div>
+
+        <!-- testBtn 4G -->
+        <div class="col s6">
+          <a
+            id="testBtn4G"
+            class="waves-effect waves-light btn bg-dark flexCenter"
+            onclick="runTest('4G')"
+          >
+            <h6 style="margin: 0">4G</h6>
+          </a>
+        </div>
+
+        <!-- testBtn Sensor -->
+        <div class="col s6">
+          <a
+            id="testBtnSensor"
+            class="waves-effect waves-light btn bg-dark flexCenter"
+            onclick="runTest('Sensor')"
+          >
+            <h6 style="margin: 0">Sensor</h6>
+          </a>
+        </div>
+
+        <!-- divider -->
+        <div class="col s12">
+          <h5 class="divider"></h5>
+        </div>
+
+        <!-- Fault indicator -->
+        <div class="col s4">
+          <h6 class="center green lighten-2 indicator flexCenter">HEALTHY</h6>
+        </div>
+
+        <!-- Untested indicator -->
+        <div class="col s4">
+          <h6 class="center bg-dark white-text indicator flexCenter">
+            UNTESTED
+          </h6>
+        </div>
+
+        <!-- Error indicator -->
+        <div class="col s4">
+          <h6 class="center red lighten-2 indicator flexCenter">ERROR</h6>
+        </div>
+
+        <!-- divider -->
+        <div class="col s12">
+          <h5 class="divider"></h5>
+        </div>
+
+        <!-- Message window -->
+        <div class="col s12">
+          <div class="card bg-light">
+            <div class="card-content">
+              <p id="messageWindow">Test results will appear here.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- row -->
+    </div>
+
+    <!-- FILES TAB -->
+    <div class="container mtop" id="files" style="padding-bottom: 50px">
+      <div class="row">
+        <div class="col s6">
+          <div class="card bg-light center">
+            <div class="card-content">
+              <span class="card-title">Files</span>
+              <h4 class="totalFiles">0</h4>
+            </div>
+          </div>
+        </div>
+        <div class="col s6">
+          <div class="card bg-light center">
+            <div class="card-content">
+              <span class="card-title">Size</span>
+              <h4 class="totalSize">0</h4>
+            </div>
+          </div>
+        </div>
+
+        <div class="col s12">
+          <div class="card">
+            <table class="striped centered borderB bg-light">
+              <thead>
+                <tr>
+                  <th colspan="2">Filename [Date]</th>
+                  <th colspan="2">Size [kB]</th>
+                  <th id="numChecked">0/0</th>
+                </tr>
+                <tr>
+                  <th colspan="2" class="no-padding"></th>
+                  <th colspan="2" class="no-padding"></th>
+                  <th>
+                    <label>
+                      <input type="checkbox" id="checkAll" class="filled-in" />
+                      <span class="checkSpan"></span>
+                    </label>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyFiles"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="col s12 center">
+          <a class="download-btn waves-effect waves-light btn disabled">
+            DOWNLOAD
+            <i class="left">
+              <svg width="14" height="17" viewBox="0 0 14 17" fill="none">
+                <path
+                  d="M0.583374 16.3333H13.4167V14.5H0.583374V16.3333ZM13.4167 6.25H9.75004V0.75H4.25004V6.25H0.583374L7.00004 12.6667L13.4167 6.25Z"
+                  fill="white"
+                />
+              </svg>
+            </i>
+          </a>
+        </div>
+      </div>
+
+      <div class="row valign-wrapper hide prog-bar mtop">
+        <div class="col s10 m11">
+          <div class="progress mtop">
+            <div class="determinate progressFill" style="width: 0%"></div>
+          </div>
+        </div>
+        <div class="col s2 m1">
+          <span
+            class="new badge progressLabel"
+            data-badge-caption=""
+            style="font-size: 1.1rem; font-weight: 600"
+            >0%</span
+          >
+        </div>
+      </div>
+    </div>
+
+    <!-- CONFIG TAB -->
+    <div class="container mtop" id="config" style="padding-bottom: 50px">
+      <div class="row">
+        <!-- Title -->
+        <div class="col s12">
+          <h5 class="center">PARAMETERS</h5>
+        </div>
+
+        <!-- Mission Number -->
+        <div class="col s12 m8 offset-m2">
+          <div class="card bg-light">
+            <div class="card-content">
+              <h6>Mission number</h6>
+              <input
+                class="center"
+                id="inputMissionNum"
+                type="number"
+                min="1"
+                value="1"
+                style="
+                  font-size: 2rem;
+                  font-weight: 600;
+                  border-radius: 2px;
+                  margin: 10px 0;
+                "
+              />
+              <div>
+                Previous logged mission number
+                <span id="missionNumFromNrf">#</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Range sliders -->
+        <div class="col s12 m8 offset-m2">
+          <div class="card bg-light">
+            <div class="card-content">
+              <!-- 4G Message Limit -->
+              <div class="row" style="margin-bottom: 12px">
+                <div class="flexBetween">
+                  <h6 class="col s8">4G Message Limit</h6>
+                  <div class="col s4 right-align">
+                    <input
+                      id="input4GLimit"
+                      type="number"
+                      class="center"
+                      style="
+                        width: 60px;
+                        height: 25px;
+                        font-weight: 500;
+                        margin: 0;
+                      "
+                    />
+                  </div>
+                </div>
+                <div class="sliderBox col s12" style="margin: 10px 0">
+                  <div id="slider4GLimit"></div>
+                </div>
+              </div>
+
+              <!-- Min depth-->
+              <div class="row" style="margin-bottom: 12px">
+                <div class="flexBetween">
+                  <h6 class="col s8">Minimum depth</h6>
+                  <div class="col s4 right-align">
+                    <input
+                      id="inputMinDepth"
+                      type="number"
+                      class="center"
+                      style="
+                        width: 60px;
+                        height: 25px;
+                        font-weight: 500;
+                        margin: 0;
+                      "
+                    />
+                  </div>
+                </div>
+                <div class="sliderBox col s12" style="margin: 10px 0">
+                  <div id="sliderMinDepth"></div>
+                </div>
+              </div>
+
+              <!-- Max depth-->
+              <div class="row" style="margin-bottom: 12px">
+                <div class="flexBetween">
+                  <h6 class="col s8">Maximum depth</h6>
+                  <div class="col s4 right-align">
+                    <input
+                      id="inputMaxDepth"
+                      type="number"
+                      class="center"
+                      style="
+                        width: 60px;
+                        height: 25px;
+                        font-weight: 500;
+                        margin: 0;
+                      "
+                    />
+                  </div>
+                </div>
+                <div class="sliderBox col s12" style="margin: 10px 0">
+                  <div id="sliderMaxDepth"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Radio buttons -->
+        <div class="col s12 m8 offset-m2">
+          <div class="card bg-light">
+            <div class="card-content">
+              <div class="row">
+                <h6 class="col s12">Logging frequencies</h6>
+                <!-- Temperature -->
+                <div
+                  class="col s12 m4 l3 offset-l2"
+                  style="align-items: center"
+                >
+                  <h6>Temperature</h6>
+                  <p>
+                    <label>
+                      <input name="temperatureGroup" type="radio" />
+                      <span class="radioText">High</span>
+                    </label>
+                  </p>
+                  <p>
+                    <label>
+                      <input checked name="temperatureGroup" type="radio" />
+                      <span class="radioText radioTextActive">Medium</span>
+                    </label>
+                  </p>
+                  <p>
+                    <label>
+                      <input name="temperatureGroup" type="radio" />
+                      <span class="radioText">Low</span>
+                    </label>
+                  </p>
+                  <p>
+                    <label>
+                      <input name="temperatureGroup" type="radio" />
+                      <span class="radioText">None</span>
+                    </label>
+                  </p>
+                </div>
+                <!-- Conductivity -->
+                <div class="col s12 m4 l3">
+                  <h6 style="font-size: 1.1rem; font-weight: 600">
+                    Conductivity
+                  </h6>
+                  <p>
+                    <label>
+                      <input name="conductivityGroup" type="radio" />
+                      <span class="radioText">High</span>
+                    </label>
+                  </p>
+                  <p>
+                    <label>
+                      <input checked name="conductivityGroup" type="radio" />
+                      <span class="radioText radioTextActive">Medium</span>
+                    </label>
+                  </p>
+                  <p>
+                    <label>
+                      <input name="conductivityGroup" type="radio" />
+                      <span class="radioText">Low</span>
+                    </label>
+                  </p>
+                  <p>
+                    <label>
+                      <input name="conductivityGroup" type="radio" />
+                      <span class="radioText">None</span>
+                    </label>
+                  </p>
+                </div>
+                <!-- Pressure -->
+                <div class="col s12 m3 l3">
+                  <h6 style="font-size: 1.1rem; font-weight: 600">Pressure</h6>
+                  <p>
+                    <label>
+                      <input name="pressureGroup" type="radio" />
+                      <span class="radioText">High</span>
+                    </label>
+                  </p>
+                  <p>
+                    <label>
+                      <input checked name="pressureGroup" type="radio" />
+                      <span class="radioText radioTextActive">Medium</span>
+                    </label>
+                  </p>
+                  <p>
+                    <label>
+                      <input name="pressureGroup" type="radio" />
+                      <span class="radioText">Low</span>
+                    </label>
+                  </p>
+                  <p>
+                    <label>
+                      <input name="pressureGroup" type="radio" />
+                      <span class="radioText">None</span>
+                    </label>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Start Date Time -->
+        <div class="col s12 m8 offset-m2">
+          <div class="card bg-light">
+            <div class="card-content">
+              <div class="row">
+                <h6 class="col s12 m6 offset-m3">Start Date</h6>
+                <div class="col s12 m6 offset-m3">
+                  <input
+                    id="startDate"
+                    type="text"
+                    class="datepicker inputBox"
+                    placeholder="Start date"
+                    autocomplete="off"
+                  />
+                </div>
+
+                <h6 class="col s12 m6 offset-m3">Start Time</h6>
+                <div class="col s12 m6 offset-m3">
+                  <input
+                    id="startTime"
+                    type="text"
+                    class="timepicker inputBox"
+                    placeholder="Start time"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Waypoints -->
+        <div class="col s12 m8 offset-m2">
+          <div class="card bg-light">
+            <div class="card-content">
+              <div class="row">
+                <h6 class="col s12">Waypoints</h6>
+
+                <!-- Waypointlist table header -->
+                <div class="row" style="margin-bottom: 0">
+                  <div class="col s2 numberBox">#</div>
+                  <div class="col s4 tableHeader">Latitude</div>
+                  <div class="col s4 tableHeader">Longitude</div>
+                  <div class="col s12 divider"></div>
+                </div>
+
+                <!-- WaypointList Body -->
+                <div class="row" style="margin-bottom: 10px">
+                  <div
+                    class="col s12"
+                    id="waypointList"
+                    style="
+                      height: 20vh;
+                      max-height: 20vh;
+                      overflow: auto;
+                      padding-top: 20px;
+                    "
+                  ></div>
+                  <div class="col s12 divider"></div>
+                </div>
+
+                <!-- Waypoint Inputs -->
+                <div class="row" style="margin-bottom: 0">
+                  <div
+                    id="currentWaypointNum"
+                    class="col s2 numberBox"
+                    style="height: 33px"
+                  >
+                    1
+                  </div>
+                  <div class="input-field col s4" style="margin: 0">
+                    <input id="wpLat" type="number" class="inputBox" />
+                  </div>
+                  <div class="input-field col s4" style="margin: 0">
+                    <input id="wpLng" type="number" class="inputBox" />
+                  </div>
+                  <div class="col s2">
+                    <div class="smallBtn" onclick="addWaypoint()">
+                      <img src="add.svg" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col s12 m8 offset-m2 xl6 offset-xl3 row center">
+          <!-- Configure button -->
+          <div class="col s6">
+            <a
+              class="waves-effect waves-light btn"
+              onclick="sendMissionParams()"
+            >
+              configure
+              <i class="left">
+                <img src="upload.svg" style="margin-top: 7px" />
+              </i>
+            </a>
+          </div>
+
+          <!-- End connection button -->
+          <div class="col s6">
+            <!-- Modal Trigger -->
+            <a
+              class="waves-effect waves-light btn red lighten-2 modal-trigger"
+              href="#modalClosePage"
+              onclick="endConnection()"
+            >
+              disconnect
+              <i class="left">
+                <img src="wifi_off.svg" style="margin-top: 7px" />
+              </i>
+            </a>
+
+            <!-- Modal Structure -->
+            <div id="modalClosePage" class="modal">
+              <div class="modal-content">
+                <h5>Succesfully disconnected the glider.</h5>
+                <h6>You can now close the browser window.</h6>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="wNumb.min.js"></script>
+    <script src="nouislider.min.js"></script>
+    <script src="jszip.js"></script>
+    <script src="FileSaver.js"></script>
+    <script src="materialize.js"></script>
+    <script src="main.js"></script>
+    <script src="modules.js"></script>
+    <script src="configure.js"></script>
+  </body>
+</html>

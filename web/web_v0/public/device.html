@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- noUiSider JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.6.4/nouislider.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.6.4/nouislider.css"
+    />
+
+    <!-- litePicker JS -->
+    <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/litepicker/dist/css/litepicker.css"
+    />
+
+    <!-- FileSaver JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"></script>
+
+    <!-- Moment JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+    <!-- Moment Timezone -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.33/moment-timezone-with-data.min.js"></script>
+
+    <!-- HammerJS for pan/zoom gestures -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.js"></script>
+
+    <!-- Firebase CORE -->
+    <script src="https://www.gstatic.com/firebasejs/8.5.0/firebase-app.js"></script>
+
+    <!-- Firebase Firestore -->
+    <script src="https://www.gstatic.com/firebasejs/8.5.0/firebase-firestore.js"></script>
+
+    <!-- Firebase Authentication -->
+    <script src="https://www.gstatic.com/firebasejs/8.5.0/firebase-auth.js"></script>
+
+    <!-- Material Icon -->
+    <link
+      href="https://fonts.googleapis.com/css?family=Material+Icons|Material+Icons+Outlined|Material+Icons+Two+Tone|Material+Icons+Round|Material+Icons+Sharp"
+      rel="stylesheet"
+    />
+
+    <!-- Bootstrap Icon -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.0/font/bootstrap-icons.css"
+    />
+
+    <!-- Fontawesome Icon -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+      integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+
+    <!-- Chart JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.css"
+    />
+
+    <!-- Maps Polyline -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css" />
+    <title>Device</title>
+  </head>
+
+  <body class="bg-gray-100 font-montserrat lg:pt-32">
+    <script src="js/header.js"></script>
+
+    <!-- Tab selector -->
+    <div
+      class="fixed bottom-0 lg:top-20 h-11 lg:w-3/5 lg:shadow-lg lg:border lg:left-1/2 lg:transform lg:-translate-x-1/2 w-full text-gray-400 overflow-hidden lg:rounded-md flex flex-col z-50 bg-dark lg:bg-gray-50"
+    >
+      <div class="flex h-full">
+        <!-- Data Btn -->
+        <button id="data-tab-btn" class="tabBtn activeTabBtn">
+          <span class="lg:hidden material-icons text-2xl"> insert_chart </span>
+          <span class="hidden lg:block">DATA</span>
+        </button>
+        <!-- Control Btn -->
+        <button id="control-tab-btn" class="tabBtn">
+          <span class="lg:hidden material-icons text-2xl"> tune </span>
+          <span class="hidden lg:block">MISSION CONTROL</span>
+        </button>
+        <!-- Satellite Btn -->
+        <button id="satellite-tab-btn" class="tabBtn">
+          <i class="fas fa-satellite-dish lg:hidden material-icons text-xl"></i>
+          <!-- <span class="lg:hidden material-icons text-2xl"> satellite </span> -->
+          <span class="hidden lg:block">SATELLITE</span>
+        </button>
+      </div>
+      <div
+        id="tabUnderline"
+        class="w-1/3 bg-light lg:bg-gray-800 h-1 duration-300"
+      ></div>
+    </div>
+
+    <main class="min-h-screen space-y-4 sm:space-y-6 m-4 pb-12">
+      <!-- ********************* Data tab ********************* -->
+      <div id="data-tab" class="container m-auto space-y-4">
+        <!-- Map-->
+        <div
+          class="container m-auto rounded-shadow h-60 sm:h-80 lg:h-screen p-2 sm:p-4 bg-light"
+          style="max-height: 450px"
+        >
+          <div id="dataMap" class="big-card h-full"></div>
+        </div>
+
+        <div
+          class="flex flex-wrap lg:flex-nowrap space-y-4 lg:space-y-0 lg:space-x-4"
+        >
+          <!-- Datepicker Data -->
+          <div class="h-11 w-full rounded-shadow flex items-center bg-light">
+            <!-- Date Icon -->
+            <label
+              for="datepickerData"
+              class="hidden w-8 h-8 rounded-sm shadow-sm sm:flex justify-center items-center duration-200 border bg-light text-dark cursor-pointer mx-2"
+            >
+              <span class="material-icons">calendar_today</span>
+            </label>
+
+            <!-- Date Field -->
+            <input
+              readonly
+              id="datepickerData"
+              class="w-full h-8 text-center border border-r-0 rounded-l-md outline-none focus:border-gray-400 text-gray-800 font-medium ml-2 sm:ml-0"
+            />
+            <!-- Send Icon -->
+            <div class="chartBtn mr-2">
+              <span onclick="applySelection()" class="material-icons">
+                send
+              </span>
+            </div>
+          </div>
+
+          <!-- Missionpicker-->
+          <div id="missionSelector" class="cursor-pointer w-full">
+            <div
+              class="z-10 dropDownBtn relative w-full activeBtnStyle rounded-shadow px-2 h-11 flex justify-between items-center font-semibold text-sm cursor-pointer duration-200 border bg-light text-dark"
+            >
+              <p class="inline-block uppercase pl-3">Loading...</p>
+              <span class="material-icons"> expand_more </span>
+              <div
+                class="dropDownContent rounded-shadow max-h-56 w-full absolute left-0 top-12 overflow-auto bg-light flex flex-col items-center"
+              ></div>
+            </div>
+          </div>
+        </div>
+
+        <!--  CHAAART -->
+        <div
+          id="chartGrid"
+          class="container m-auto grid grid-cols-1 lg:grid-cols-2 auto-cols-max gap-4"
+        ></div>
+      </div>
+
+      <!-- ***************Mission Control Tab ***************** -->
+      <div id="control-tab" class="hidden container m-auto space-y-4">
+        <!-- Map -->
+        <div
+          class="container m-auto rounded-shadow h-60 sm:h-80 lg:h-screen p-2 sm:p-4 bg-light"
+          style="max-height: 450px"
+        >
+          <div id="missionMap" class="big-card h-full"></div>
+        </div>
+
+        <!-- Waypoints-->
+        <div
+          id="waypoints"
+          class="rounded-shadow p-6 relative bg-light flex flex-col space-y-3"
+          style="max-height: 450px"
+        >
+          <!-- TITLE -->
+          <h1 class="font-semibold tracking-wide text-center">Waypoints</h1>
+
+          <!-- HEADERS -->
+          <div
+            class="headers grid grid-cols-8 w-full gap-x-2 border-b pr-1 pb-1"
+          >
+            <h1 class="col-span-1 flex justify-end items-end pr-2">No.</h1>
+            <h1 class="col-span-3 flex justify-end items-end pr-2">Lat</h1>
+            <h1 class="col-span-3 flex justify-end items-end pr-2">Lng</h1>
+            <span
+              id="editWaypointsBtn"
+              class="material-icons chartBtn col-span-1"
+            >
+              edit
+            </span>
+          </div>
+
+          <!-- WAYPOINT LIST -->
+          <div
+            id="waypointList"
+            class="flex-col max-h-72 overflow-y-auto overflow-x-hidden space-y-2 py-1 pr-1"
+          ></div>
+
+          <!-- ADD NEW ROW -->
+          <div class="grid grid-cols-8 w-full gap-x-2 pr-1">
+            <p
+              id="addLatLngIndex"
+              class="col-span-1 flex justify-center items-center font-medium"
+            >
+              1
+            </p>
+            <input
+              type="number"
+              onclick="resetInput()"
+              id="addLat"
+              class="col-span-3 text-md font-medium border pl-1 rounded-sm focus:outline-none text-dark pr-2 text-right"
+            />
+            <input
+              type="number"
+              id="addLng"
+              onclick="resetInput()"
+              class="col-span-3 text-md font-medium border pl-1 rounded-sm focus:outline-none text-dark pr-2 text-right"
+            />
+            <span
+              id="addLatLngBtn"
+              onclick="addWaypoint()"
+              class="material-icons chartBtn col-span-1"
+            >
+              add
+            </span>
+          </div>
+        </div>
+
+        <!-- Sliders and radios -->
+        <div
+          class="flex flex-col space-y-4 lg:flex-row lg:space-y-0 lg:space-x-4"
+        >
+          <!-- Sliders -->
+          <div
+            id="sliders"
+            class="flex flex-col flex-grow rounded-shadow space-y-3 p-6 bg-light"
+          >
+            <div class="flex justify-between">
+              <!-- Messages selector -->
+              <h1 class="text-sm font-semibold text-gray-800">
+                4G Message Limit
+              </h1>
+              <input
+                type="number"
+                min="0"
+                step="1"
+                id="input4GData"
+                class="w-16 text-md font-medium text-dark border rounded-sm text-center"
+              />
+            </div>
+
+            <div class="sliderBox w-full pb-3">
+              <div id="slider4GData" class="cursor-pointer flex-grow relative">
+                <span id="messageMaxLimit" class="absolute text-xs right-1"
+                  >Number</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- Radios -->
+          <div
+            class="flex flex-col rounded-shadow space-y-3 p-6 bg-light lg:w-1/2 xl:w-1/3 2xl:w-1/2"
+          >
+            <h2 class="text-base font-medium">Sampling frequencies</h2>
+
+            <div
+              id="radioButtonsBox"
+              class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:justify-between md:justify-around lg:justify-between 2xl:justify-around"
+            >
+              <div class="flex flex-col lg:space-y-3">
+                <h4 class="text-sm font-semibold pb-1">Temperature</h4>
+                <div>
+                  <input type="radio" id="tempHigh" name="temperatureGroup" />
+                  <label for="tempHigh">High</label>
+                </div>
+                <div>
+                  <input type="radio" id="tempMed" name="temperatureGroup" />
+                  <label for="tempMed">Medium</label>
+                </div>
+                <div>
+                  <input type="radio" id="tempLow" name="temperatureGroup" />
+                  <label for="tempLow">Low</label>
+                </div>
+                <div>
+                  <input type="radio" id="tempNone" name="temperatureGroup" />
+                  <label for="tempNone">None</label>
+                </div>
+              </div>
+
+              <div class="flex flex-col lg:space-y-3">
+                <h4 class="text-sm font-semibold pb-1">Conductivity</h4>
+                <div>
+                  <input type="radio" id="condHigh" name="conductivityGroup" />
+                  <label for="condHigh">High</label>
+                </div>
+                <div>
+                  <input type="radio" id="condMed" name="conductivityGroup" />
+                  <label for="condMed">Medium</label>
+                </div>
+                <div>
+                  <input type="radio" id="condLow" name="conductivityGroup" />
+                  <label for="condLow">Low</label>
+                </div>
+                <div>
+                  <input type="radio" id="condNone" name="conductivityGroup" />
+                  <label for="condNone">None</label>
+                </div>
+              </div>
+
+              <div class="flex flex-col lg:space-y-3">
+                <h4 class="text-sm font-semibold pb-1">Pressure</h4>
+                <div>
+                  <input type="radio" id="presHigh" name="pressureGroup" />
+                  <label for="presHigh">High</label>
+                </div>
+                <div>
+                  <input type="radio" id="presMed" name="pressureGroup" />
+                  <label for="presMed">Medium</label>
+                </div>
+                <div>
+                  <input type="radio" id="presLow" name="pressureGroup" />
+                  <label for="presLow">Low</label>
+                </div>
+                <div>
+                  <input type="radio" id="presNone" name="pressureGroup" />
+                  <label for="presNone">None</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Datepicker -->
+        <div class="flex items-center rounded-shadow h-11 bg-light px-2">
+          <input
+            readonly
+            id="datepickerControl"
+            class="h-8 w-full text-center border border-r-0 rounded-l-md outline-none focus:border-gray-400 text-gray-800 font-medium"
+          />
+
+          <label for="datepickerControl" class="chartBtn cursor-pointer">
+            <span class="material-icons">calendar_today</span>
+          </label>
+
+          <!-- Time Field -->
+          <div class="relative z-30 w-full h-8 pl-2">
+            <input
+              readonly
+              id="timepickerControl"
+              class="text-center border border-r-0 rounded-l-md outline-none focus:border-gray-400 text-gray-800 font-medium w-full h-8"
+            />
+            <div
+              id="timepickerContentControl"
+              class="w-full h-48 bg-light rounded-shadow overflow-hidden absolute top-10 flex hidden text-dark"
+            >
+              <div
+                id="hours"
+                class="w-1/2 text-center overflow-auto hideScrollbar"
+              ></div>
+              <div
+                id="minutes"
+                class="w-1/2 text-center overflow-auto hideScrollbar"
+              ></div>
+            </div>
+          </div>
+          <!-- Time Icon -->
+          <label for="timepickerControl" class="chartBtn cursor-pointer">
+            <span class="material-icons">access_time</span>
+          </label>
+        </div>
+
+        <!-- Preview Panel -->
+        <div
+          id="previews"
+          class="rounded-shadow p-4 relative bg-light flex flex-col mb-32"
+          style="max-height: 500px"
+        >
+          <h1 class="font-semibold tracking-wide text-center mb-3">
+            Preview parameters
+          </h1>
+          <div id="latestMissionNumber" class="text-center font-bold">
+            Mission #
+          </div>
+          <div
+            id="previewBox"
+            class="flex flex-col space-y-4 overflow-auto bg-gray-100 rounded-md p-5 text-sm font-medium"
+          >
+            <div
+              id="startDatetime"
+              class="flex space-x-3 text-dark justify-between"
+            >
+              <p>Start datetime:</p>
+              <div class="flex">
+                <p id="previewDate">YYYY-MM-DD</p>
+                <p id="previewTime" class="w-10 text-center ml-2">--:--</p>
+              </div>
+            </div>
+
+            <div id="previewParams" class="flex flex-col space-y-3">
+              <div class="flex justify-between border-b">
+                <p>Temperature:</p>
+                <p id="previewTemperature">None</p>
+              </div>
+              <div class="flex justify-between border-b">
+                <p>Conductivity:</p>
+                <p id="previewConductivity">None</p>
+              </div>
+              <div class="flex justify-between border-b">
+                <p>Pressure:</p>
+                <p id="previewPressure">None</p>
+              </div>
+              <div class="flex justify-between border-b">
+                <p>4G Limit:</p>
+                <p id="preview4GData">0</p>
+              </div>
+            </div>
+
+            <div id="previewWaypoints" class="grid grid-cols-7 gap-y-1 pt-2">
+              <h1 class="border-b col-span-7">Waypoints</h1>
+              <h1 class="text-center">No.</h1>
+              <h1 class="col-span-3 text-right">Lat</h1>
+              <h1 class="col-span-3 text-right">Lng</h1>
+            </div>
+          </div>
+
+          <!-- Send/Reset button row -->
+          <div class="flex absolute left-0 -bottom-12 w-full space-x-4">
+            <button
+              id="resetMissionParams"
+              class="w-1/2 h-10 border rounded-shadow flex justify-center items-center bg-light text-xs font-semibold tracking-widest"
+            >
+              RESET
+            </button>
+            <div class="w-1/2 h-10">
+              <button
+                id="sendMissionParams"
+                class="w-full h-full rounded-shadow flex justify-center items-center bg-light transform transition duration-200 text-xs font-semibold tracking-widest"
+              >
+                SEND
+              </button>
+              <div
+                id="confirmMissionParams"
+                class="w-full flex h-full space-x-1 transform transition scale-0 hidden duration-200"
+              >
+                <button
+                  id="yesMissionParams"
+                  class="w-1/2 h-full rounded-shadow flex justify-center items-center bg-green-300 text-xs font-semibold tracking-widest"
+                >
+                  YES
+                </button>
+
+                <button
+                  id="noMissionParams"
+                  class="w-1/2 h-full rounded-shadow flex justify-center items-center bg-red-300 text-xs font-semibold tracking-widest"
+                >
+                  NO
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ***************Satellite Tab ***************** -->
+      <div id="satellite-tab" class="hidden container m-auto space-y-4">
+        <!-- Satellite message table -->
+        <div class="container m-auto rounded-shadow bg-light overflow-auto p-2">
+          <div
+            id="satelliteMessageTableWrapper"
+            class="overflow-auto h-60 sm:h-72 lg:h-screen"
+            style="max-height: 450px"
+          >
+            <table
+              id="satelliteMessageTable"
+              class="relative bg-gray-100 w-full table-fixed font-medium border overflow-auto text-left"
+            >
+              <thead>
+                <tr>
+                  <th class="sticky -top-1 bg-gray-200 w-20 sm:w-32">Date</th>
+                  <th class="sticky -top-1 bg-gray-200 w-20 sm:w-24">Time</th>
+                  <th class="sticky -top-1 bg-gray-200 w-32 sm:w-full">
+                    Payload
+                  </th>
+                  <th class="sticky -top-1 bg-gray-200 w-28 sm:w-28">
+                    Direction
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="testbody" class="h-full">
+                <!-- <script>
+                  for (let i = 0; i < 21; i++) {
+                    let color = i % 2 == 0 ? "#C4E3F3" : "#D0E9C6";
+                    document.querySelector("#testbody").innerHTML += `<tr>
+                  <td>2020-20-20</td>
+                  <td>20:20:${i + 10}</td>
+                  <td>Some rows</td>
+                  <td style="background-color: ${color}">
+                    MO
+                    <span
+                      class="align-middle text-lg font-bold material-icons-outlined"
+                    >
+                      arrow_upwards
+                    </span>
+                  </td>
+                </tr>
+                    `;
+                  }
+                </script> -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="space-y-4 lg:flex lg:space-y-0 lg:space-x-2 lg:w-full">
+          <!-- Input row -->
+          <div
+            class="flex items-center rounded-shadow h-11 bg-light px-2 w-full"
+          >
+            <!-- Info modal btn -->
+            <span class="chartBtn mr-2" onclick="showSatelliteModal()">
+              <svg
+                width="36"
+                height="36"
+                fill="currentColor"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"
+                />
+              </svg>
+            </span>
+
+            <!-- Message input -->
+            <input
+              class="rounded-sm rounded-r-none h-9 border border-r-0 w-full px-3 tracking-wide font-medium text-sm"
+              id="inputSatellite"
+              type="text"
+              maxlength="270"
+            />
+
+            <!-- Bytecounter -->
+            <span
+              class="flex h-9 items-center justify-center rounded-sm rounded-l-none border bg-gray-100 px-3 text-xs font-medium tracking-widest"
+            >
+              <p id="byteCounter" class="">0</p>
+              <p class="w-8">/270</p>
+            </span>
+          </div>
+
+          <!-- Send/Flush row -->
+          <div class="flex items-center justify-between space-x-2 lg:w-96">
+            <!-- Send btn -->
+            <button
+              id="satelliteSendBtn"
+              onclick="sendSatelliteData()"
+              class="activeBtn p-4 h-9 lg:h-11 w-full rounded-shadow flex justify-center items-center bg-light transform transition duration-300 text-xs font-bold text-gray-700"
+            >
+              SEND
+            </button>
+
+            <!-- Flush btn -->
+            <div
+              id="flushBtn"
+              class="w-24 h-9 lg:h-11 flex rounded-shadow justify-center items-center text-gray-600 bg-light cursor-pointer px-3 space-x-2 transition duration-300"
+              data-checked="false"
+              onclick="toggleFlush()"
+            >
+              <span class="material-icons-outlined"> delete_sweep </span>
+              <p class="text-xs font-bold">FLUSH</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Satellite Info Modal -->
+        <div
+          id="satelliteModal"
+          class="hidden w-screen h-screen fixed top-0 left-0 z-50 bg-opacity-60 bg-gray-800 p-2"
+        >
+          <div
+            class="w-full rounded-shadow bg-light px-4 pt-10 pb-4 overflow-auto"
+            style="max-height: 80vh"
+          >
+            <button
+              id="closeSatelliteModalBtn"
+              onclick="hideSatelliteModal()"
+              class="absolute right-4 top-4 rounded-full w-8 h-8 hover:bg-gray-300 duration-200 p-1"
+            >
+              <span class="material-icons-outlined"> close </span>
+            </button>
+            <table id="satelliteErrorTable" class="bg-gray-100 m-auto">
+              <thead>
+                <th>Error code</th>
+                <th>Description</th>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>10</td>
+                  <td>Invalid login credentials</td>
+                </tr>
+                <tr>
+                  <td>11</td>
+                  <td>No RockBLOCK with this IMEI found on your account</td>
+                </tr>
+                <tr>
+                  <td>12</td>
+                  <td>RockBLOCK has no line rental</td>
+                </tr>
+                <tr>
+                  <td>13</td>
+                  <td>Your account has insufficient credit</td>
+                </tr>
+                <tr>
+                  <td>14</td>
+                  <td>Could not decode hex data</td>
+                </tr>
+                <tr>
+                  <td>15</td>
+                  <td>Data too long</td>
+                </tr>
+                <tr>
+                  <td>16</td>
+                  <td>No data</td>
+                </tr>
+                <tr>
+                  <td>99</td>
+                  <td>System Error</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <!--  SAT END -->
+      </div>
+    </main>
+
+    <script>
+      let gliderUID = new URLSearchParams(window.location.search).get(
+        "gliderUID"
+      );
+    </script>
+    <script src="js/footer.js"></script>
+    <script src="js/firebase.js"></script>
+    <script src="js/database.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/chartjs-zoompan-plugin.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/device.js"></script>
+    <script src="js/xlsx.full.min.js"></script>
+    <script src="js/xlsx.js"></script>
+    <script src="js/datepicker.js"></script>
+    <script src="js/wNumb.js"></script>
+    <script src="js/missionControlTab.js"></script>
+    <script src="js/satellite.js"></script>
+
+    <!-- MAPS API with KEY -->
+    <script
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDmDtuW7lGEvkAUbXOEzuXfcCx3UChoFFc&callback=initDataMap&libraries=&v=weekly"
+      async
+    ></script>
+    <script src="js/map.js"></script>
+  </body>
+</html>

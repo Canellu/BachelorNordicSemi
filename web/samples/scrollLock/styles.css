@@ -1,0 +1,49 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 10vw;
+  background: rgb(154, 179, 209);
+  background: linear-gradient(
+    0deg,
+    rgba(154, 179, 209, 1) 0%,
+    rgba(42, 49, 57, 1) 100%
+  );
+  font-size: 1.2rem;
+  letter-spacing: 1px;
+  line-height: 2rem;
+  font-family: "Montserrat";
+  overflow: auto;
+}
+
+.wrapper {
+  transform: translateY(20vh);
+  width: 50%;
+  height: 30vh;
+  background: #9ab3d1;
+  border-radius: 10px;
+  overflow: hidden;
+  padding: 25px;
+}
+
+.scrollable {
+  height: 100%;
+  width: 100%;
+  overflow-x: hidden;
+  overflow-y: scroll;
+}
+
+.spacer {
+  margin-top: 20vh;
+  height: 50vh;
+  width: 2px;
+  background: red;
+}
