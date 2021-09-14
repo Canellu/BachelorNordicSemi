@@ -31,7 +31,10 @@ Chart.defaults.global.defaultFontFamily = "'Montserrat'";
 const dummyData2 = createGraphData();
 const dummyDate = "2021-03-20";
 
-// Create dummy data for graph
+/**
+ * Create 100 datapoints for dummy data.
+ * @returns array of values [{ts: {T, P, C}}, ...]
+ */
 function createGraphData() {
   let dataArray = [];
   for (let i = 0; i < 100; i++) {
@@ -91,10 +94,15 @@ const dataT = parseFirestoreData();
 
 // Helper functions
 
-// If time or date is less than 10, add 0.  09, 08 etc...
+/**
+ * Adds a leading zero to the value if it is less than 10.
+ * @param {*} n time/date value passed in
+ * @returns n after check
+ */
 function pad(n) {
   return n < 10 ? "0" + n : n;
 }
+
 // Simple random number generator with min max parameters
 function randNum(min, max) {
   return Math.floor(Math.random() * max) + min;
