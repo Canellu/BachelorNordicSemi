@@ -44,42 +44,54 @@ condGroupBtns.forEach((btn) => {
 // Dive Depth
 // --------------------------------------------------------------------
 
-let sliderDepth = document.querySelector("#sliderDepth");
+let sliderMinDepth = document.querySelector("#sliderMinDepth");
+let sliderMaxDepth = document.querySelector("#sliderMaxDepth");
 let inputMinDepth = document.querySelector("#inputMinDepth");
 let inputMaxDepth = document.querySelector("#inputMaxDepth");
 
-noUiSlider.create(sliderDepth, {
-  start: [100, 300],
-  connect: true,
+noUiSlider.create(sliderMinDepth, {
+  start: [50],
+  connect: [true, false],
+  step: 1,
+  orientation: "horizontal", // 'horizontal' or 'vertical'
+  range: {
+    min: 0,
+    max: 100,
+  },
+  format: wNumb({
+    decimals: 0,
+  }),
+});
+
+noUiSlider.create(sliderMaxDepth, {
+  start: [150],
+  connect: [true, false],
   step: 1,
   orientation: "horizontal", // 'horizontal' or 'vertical'
   range: {
     min: 0,
     max: 300,
   },
-  // tooltips: [true, true],
-  // pips: {
-  //   mode: "range",
-  //   density: 4,
-  // },
   format: wNumb({
     decimals: 0,
   }),
 });
 
 // Link slider to input
-sliderDepth.noUiSlider.on("update", function (values, handle) {
+sliderMinDepth.noUiSlider.on("update", function (values, handle) {
   inputMinDepth.value = values[0];
-  inputMaxDepth.value = values[1];
 });
 
+sliderMaxDepth.noUiSlider.on("update", function (values, handle) {
+  inputMaxDepth.value = values[0];
+});
 // Link input to slider
 inputMinDepth.addEventListener("change", function () {
-  sliderDepth.noUiSlider.set([this.value, null]);
+  sliderMinDepth.noUiSlider.set(this.value);
 });
 
 inputMaxDepth.addEventListener("change", function () {
-  sliderDepth.noUiSlider.set([null, this.value]);
+  sliderMaxDepth.noUiSlider.set(this.value);
 });
 
 // --------------------------------------------------------------------
@@ -89,24 +101,15 @@ inputMaxDepth.addEventListener("change", function () {
 let slider4GLimit = document.querySelector("#slider4GLimit");
 let input4GLimit = document.querySelector("#input4GLimit");
 
-let sliderRange4G = {
-  min: [0],
-  "20%": [20],
-  "40%": [40],
-  "60%": [60],
-  "80%": [80],
-  max: [100],
-};
 noUiSlider.create(slider4GLimit, {
-  start: 50,
+  start: [50],
   connect: [true, false],
   step: 1,
   orientation: "horizontal", // 'horizontal' or 'vertical'
-  range: sliderRange4G,
-  // pips: {
-  //   mode: "range",
-  //   density: 4,
-  // },
+  range: {
+    min: 0,
+    max: 100,
+  },
   format: wNumb({
     decimals: 0,
   }),
@@ -125,46 +128,66 @@ input4GLimit.addEventListener("change", function () {
 // --------------------------------------------------------------------
 // Waypoints
 // --------------------------------------------------------------------
-
-let waypointListDiv = document.querySelector("#waypointList");
+let waypointList = document.querySelector("#waypointList");
 let wpLatInput = document.querySelector("#wpLat");
 let wpLngInput = document.querySelector("#wpLng");
 let waypoints = [];
-let index = 0;
 function addWaypoint() {
   let lat = Number(Number(wpLatInput.value).toFixed(4));
   let lng = Number(Number(wpLngInput.value).toFixed(4));
 
   if (!(lat == "" || lng == "")) {
+    waypoints.push({ lat, lng });
+    renderLatLngList();
+  }
+  // wpLatInput.value = "";
+  // wpLngInput.value = "";
+
+  waypointList.scrollTo(0, waypointList.scrollHeight);
+}
+
+// Latlng row delete
+function deleteRow(e) {
+  waypoints.pop(e.parentElement.dataset.wpnum);
+  e.parentElement.remove();
+  renderLatLngList();
+}
+
+function renderLatLngList() {
+  waypointList.innerHTML = "";
+  waypoints.forEach((coordinates, index) => {
     let row = `  
-    <div class="row" style="margin-bottom: 10px">
-      <div class="col s2" id="numberBox">${index + 1}</div>
+    <div class="row" style="margin-bottom: 10px" data-wpnum="${index}">
+      <div class="col s2 numberBox">${index + 1}</div>
       <div class="col s4">
-        <input type="number" id="latlngInputBox" value="${lat}" />
+        <input type="number" class="inputBox"
+        value="${coordinates.lat.toFixed(4)}" />
       </div>
       <div class="col s4">
-        <input type="number" id="latlngInputBox" value="${lng}"  />
+        <input type="number" class="inputBox"
+        value="${coordinates.lng.toFixed(4)}"  />
       </div>
       <div class="col s2" onclick="deleteRow(this)">
         <div class="smallBtn">
-          <img src="delete.svg" alt="" />
+          <img src="delete.svg"/>
         </div>
       </div>
     </div>
     `;
+    waypointList.innerHTML += row;
+  });
 
-    waypointListDiv.innerHTML += row;
-    waypoints.push({ lat, lng });
-    index++;
-  }
-
-  wpLatInput.value = "";
-  wpLngInput.value = "";
+  document.querySelector("#currentWaypointNum").innerText =
+    waypoints.length + 1;
 }
 
 // --------------------------------------------------------------------
-// CONFIGURE BUTTON
+// CONFIGURE & DISCONNECT
 // --------------------------------------------------------------------
+
+function endConnection() {
+  websocket.send("wifi_end\r");
+}
 
 function sendMissionParams() {
   let currentMissionNum = document.querySelector("#inputMissionNum").value;
@@ -228,12 +251,6 @@ function resetParams() {
 // HELPER FUNCTIONS
 // --------------------------------------------------------------------
 
-// Scrolls window to top
-function scrollToTop() {
-  document.body.scrollTop = 0;
-  document.documentElement.scrollTop = 0;
-}
-
 // Converts logging level to integer
 function freqModeToNum(mode) {
   switch (mode) {
@@ -252,21 +269,16 @@ function freqModeToNum(mode) {
   }
 }
 
-// Disabling outer scroll while scrolling in this div
-// function addScrollLock(div, scrollSpeed = 100) {
-//   div.addEventListener(
-//     "wheel",
-//     (e) => {
-//       e.preventDefault();
-//       let scrollTo = e.wheelDelta * -(scrollSpeed / 100);
-//       div.scrollTop = scrollTo + div.scrollTop;
-//     },
-//     { passive: false }
-//   );
-// }
-// addScrollLock(fileListBody, 50);
-
-// Latlng row delete
-function deleteRow(e) {
-  e.parentElement.remove();
+//Disabling outer scroll while scrolling in this div
+function addScrollLock(div, scrollSpeed = 100) {
+  div.addEventListener(
+    "wheel",
+    (e) => {
+      e.preventDefault();
+      let scrollTo = e.wheelDelta * -(scrollSpeed / 100);
+      div.scrollTop = scrollTo + div.scrollTop;
+    },
+    { passive: false }
+  );
 }
+addScrollLock(waypointList, 30);

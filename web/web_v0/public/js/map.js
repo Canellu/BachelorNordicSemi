@@ -7,6 +7,8 @@ let gliderPath;
 let dataMapDiv = document.getElementById("dataMap");
 let missionMapDiv = document.getElementById("missionMap");
 let homeMapDiv = document.getElementById("homeMap");
+let width = window.innerWidth;
+let small = 768;
 var flightPlanCoordinates;
 
 var defaultLocation = { lat: 59.769, lng: 10.654, zoom: 10 };
@@ -15,8 +17,8 @@ function initHomeMap() {
     center: { lat: defaultLocation.lat, lng: defaultLocation.lng },
     zoom: defaultLocation.zoom,
     disableDefaultUI: true,
-    mapTypeControl: true,
-    zoomControl: true,
+    mapTypeControl: width < small ? false : true,
+    zoomControl: width < small ? false : true,
     fullscreenControl: true,
   });
   console.log("HomeMap Made");
@@ -41,8 +43,8 @@ function initDataMap() {
     center: { lat: defaultLocation.lat, lng: defaultLocation.lng },
     zoom: defaultLocation.zoom,
     disableDefaultUI: true,
-    mapTypeControl: true,
-    zoomControl: true,
+    mapTypeControl: width < small ? false : true,
+    zoomControl: width < small ? false : true,
     fullscreenControl: true,
   });
 }
@@ -61,7 +63,7 @@ function addMarker(location, icon, index, map) {
 function addHomeMarkers(location, alias) {
   var markerIcon = {
     url: "assets/svg/Glider.svg",
-    labelOrigin: new google.maps.Point(40, 10),
+    labelOrigin: new google.maps.Point(40, -10),
   };
 
   new google.maps.Marker({
@@ -70,9 +72,10 @@ function addHomeMarkers(location, alias) {
     animation: google.maps.Animation.DROP,
     label: {
       text: alias,
-      color: "#CA4955",
+      color: "#CA561F",
       fontSize: "20px",
       fontWeight: "bold",
+      infoWindow: `<p style="background: red; width: 30px; height: 30px;"> Hello </p>`,
     },
     icon: markerIcon,
     title: location.t,
@@ -81,9 +84,11 @@ function addHomeMarkers(location, alias) {
 
 function clearMapMarkers() {
   // Loop through markers and remove them from map.
-  markers.forEach((marker) => {
-    marker.setMap(null);
-  });
+  if (markers.length != 0) {
+    markers.forEach((marker) => {
+      marker.setMap(null);
+    });
+  }
 
   if (gliderPath) gliderPath.setMap(null);
 
@@ -148,8 +153,8 @@ function initMissionMap() {
     center: { lat: defaultLocation.lat, lng: defaultLocation.lng },
     zoom: defaultLocation.zoom,
     disableDefaultUI: true,
-    mapTypeControl: true,
-    zoomControl: true,
+    mapTypeControl: width < small ? false : true,
+    zoomControl: width < small ? false : true,
     fullscreenControl: true,
   });
 

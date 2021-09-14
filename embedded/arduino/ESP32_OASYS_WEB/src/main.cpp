@@ -2,7 +2,6 @@
 #include <SPIFFS.h>            // For filesystem
 #include "ESPAsyncWebServer.h" // For webserver & websocket
 #include "WiFi.h"              // For Access Point
-#include "ESPmDNS.h"           // For domain Name e.g "www.oasys.local"
 
 // --------------------------------------------------
 // Definition of macros
@@ -32,6 +31,7 @@ AsyncEventSource events("/events");
 
 // Satellite
 boolean on_sat = false;
+boolean test_sat = false;
 
 // UART
 #define RXnrf 13
@@ -111,10 +111,18 @@ void handleWebSocketMessage(AsyncWebSocket *server,
         Serial.println("Wifi ending...");
         wifiEnd();
       }
+      else if (strstr((char *)data, "test:sat") != NULL)
+      {
+        Serial.println("test sat msg received");
+        test_sat = true;
+      }
       data[len] = 0;
       Serial.printf("%s\n", (char *)data);
       Serial1.printf("%s\r", (char *)data);
     }
+
+     /* Uncomment the section below if the frames are big. */
+
     // else
     // {
     //   for (size_t i = 0; i < info->len; i++)
@@ -128,6 +136,10 @@ void handleWebSocketMessage(AsyncWebSocket *server,
     // else
     //   client->binary("I got your binary message");
   }
+
+
+  /* Uncomment the section below if the frames are big. */
+
   // else
   // {
   //   //message is comprised of multiple frames or the frame is split into multiple packets
@@ -234,28 +246,12 @@ void initAP()
 
   // Setting ESP as Access Point (AP)
   // Remove the password parameter for AP to be open
+  WiFi.enableAP(true);
   WiFi.softAP(ssid, password);
 
   IPAddress IP = WiFi.softAPIP();
   Serial.print("AP IP address: ");
   Serial.println(IP);
-}
-
-// --------------------------------------------------
-// multicast Domain Name Server (mDNS) CURRENTLY NOT WORKING (not for AP?)
-// --------------------------------------------------
-void initMDNS()
-{
-  if (!MDNS.begin("esp32"))
-  {
-    Serial.println("Error setting up MDNS responder!");
-    while (1)
-    {
-      delay(1000);
-    }
-  }
-  Serial.println("mDNS responder started");
-  MDNS.addService("http", "tcp", 80);
 }
 
 // --------------------------------------------------
@@ -355,6 +351,80 @@ void loop()
       {
         rx_nrf[arr_nrf++] = c;
       }
+    }
+
+    if (test_sat)
+    {
+      Serial.println("Running sat test");
+      static int signal = -1;
+      static boolean test_ok = true;
+      static int max_tries = 3;
+      static int tries = 0;
+
+      Serial2.print("AT+CSQ\r");
+
+      while (tries < max_tries)
+      {
+        if (Serial2.available() > 0) // satellite
+        {
+          char c = Serial2.read();
+          if (c == '\r')
+          {
+            Serial.println("Received response: ");
+            Serial.println(rx_sat);
+
+            if (strstr((char *)rx_sat, "OK") != NULL)
+            {
+              if (signal > 0)
+              {
+                Serial.println("Received signal");
+                test_ok = true;
+                break;
+              }
+              else
+              {
+                Serial.println("Sending AT command");
+                Serial2.print("AT+CSQ\r");
+                tries++;
+                delay(10000);
+              }
+            }
+            else if (strcmp(rx_sat, "ERROR") == 0)
+            {
+              Serial.println("Received ERROR");
+              test_ok = false;
+              break;
+            }
+            else if (strcmp(rx_sat, "AT+CSQ\r") != 0 && strlen(rx_sat) != 0)
+            {
+              static char *eptr;
+              signal = strtol(rx_sat + 5, &eptr, 10);
+              Serial.println("Signal val: ");
+              Serial.println(signal);
+            }
+
+            memset(rx_sat, 0, sizeof(rx_sat));
+            arr_sat = 0;
+          }
+          else
+          {
+            rx_sat[arr_sat++] = c;
+          }
+        }
+      }
+
+      if (test_ok)
+      {
+        events.send("test:sat,OK", NULL, millis());
+      }
+      else
+      {
+        events.send("test:sat,ERROR", NULL, millis());
+      }
+      memset(rx_sat, 0, sizeof(rx_sat));
+      arr_sat = 0;
+
+      test_sat = false;
     }
   }
   else if (on_sat)

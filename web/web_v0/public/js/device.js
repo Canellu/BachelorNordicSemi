@@ -1,4 +1,13 @@
-userStateListener();
+// Check if user is logged in and redirect them
+auth.onAuthStateChanged((user) => {
+  if (user) {
+    console.log("Is logged in!");
+  } else {
+    // User is logged out
+    console.log("Is logged out!");
+    location.replace("index.html");
+  }
+});
 
 let dataTabBtn = document.querySelector("#data-tab-btn");
 let controlTabBtn = document.querySelector("#control-tab-btn");
@@ -223,10 +232,10 @@ async function listMissions() {
           }
         }
 
-        console.log(
-          `Creating mission-item: %c${missionDoc.id}`,
-          "color: teal; font-weight: bold; letter-spacing: 2px;"
-        );
+        // console.log(
+        //   `Creating mission-item: %c${missionDoc.id}`,
+        //   "color: teal; font-weight: bold; letter-spacing: 2px;"
+        // );
       });
     });
   console.log("Got Missions-snapshot listener...");
@@ -306,16 +315,19 @@ async function getMissionData(missionName) {
     }
   });
 
-  // parsing of lat, lng before added to dataObj
-  for (let i = 0; i < dataCoordinatesRaw.lat.length; i++) {
-    let t = dataCoordinatesRaw.lat[i].t;
-    let lat = parseFloat(dataCoordinatesRaw.lat[i].y);
-    let lng = parseFloat(dataCoordinatesRaw.lng[i].y);
+  if (Object.entries(dataCoordinatesRaw).length !== 0) {
+    // parsing of lat, lng before added to dataObj
+    for (let i = 0; i < dataCoordinatesRaw.lat.length; i++) {
+      let t = dataCoordinatesRaw.lat[i].t;
+      let lat = parseFloat(dataCoordinatesRaw.lat[i].y);
+      let lng = parseFloat(dataCoordinatesRaw.lng[i].y);
 
-    coordinates.push({ t: t, lat: lat, lng: lng });
+      coordinates.push({ t: t, lat: lat, lng: lng });
+    }
+    dataObj["coordinates"] = coordinates;
   }
+
   // add coordinates to dataObj
-  dataObj["coordinates"] = coordinates;
 
   return dataObj;
 }
@@ -341,7 +353,9 @@ function updateDataUI(data) {
       chartObj.chart.update();
       chartObj.chart.resetZoom();
     });
-    addDataMarkers(data.coordinates, dataMap);
+    if (data.coordinates != []) {
+      addDataMarkers(data.coordinates, dataMap);
+    }
   } else {
     clearMapMarkers();
     charts.forEach((chartObj) => {

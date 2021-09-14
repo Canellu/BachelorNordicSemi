@@ -32,6 +32,11 @@ if (loginForm != null) {
         email,
         password
       );
+      if (credentials.user) {
+        location.replace("home.html");
+      } else {
+        validateLogIn("No user found...");
+      }
     } catch (error) {
       validateLogIn(error.message);
     }
@@ -44,18 +49,5 @@ if (logout != null) {
   logout.addEventListener("click", async (e) => {
     await auth.signOut();
     // location.replace("index.html");
-  });
-}
-
-// Check if user is logged in and redirect them
-function userStateListener() {
-  auth.onAuthStateChanged((user) => {
-    if (user) {
-      console.log("Is logged in!");
-    } else {
-      // User is logged out
-      console.log("Is logged out!");
-      location.replace("index.html");
-    }
   });
 }

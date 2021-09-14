@@ -3,10 +3,10 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
 @layer utilities {
   .bg-light {
-    @apply bg-gray-50;
+    /* @apply bg-gray-50; */
+    @apply bg-white;
   }
   .bg-dark {
     @apply bg-gray-800;
@@ -35,6 +35,7 @@ iframe {
 /* width */
 ::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
 }
 
 /* Track */
@@ -56,6 +57,7 @@ iframe {
 .dropDownContent::-webkit-scrollbar,
 #waypointList::-webkit-scrollbar {
   width: 4px;
+  height: 4px;
 }
 
 /* Handle on hover */
@@ -81,20 +83,49 @@ body {
 }
 
 #radioButtonsBox label {
-  @apply text-sm cursor-pointer;
+  @apply text-sm cursor-pointer pl-2;
 }
 
-input[type="radio"] {
+input[type="radio"] + label {
+  transition-duration: 0.2s;
+}
+
+input[type="radio"]:after {
+  width: 16.3px;
+  height: 16.3px;
+  border-radius: 16.3px;
+  top: -2px;
+  left: -1px;
+  position: relative;
+  background-color: white;
+  content: "";
+  display: inline-block;
+  visibility: visible;
+  border: 2px solid #5a5a5a;
+  transition-duration: 0.2s;
+}
+
+input[type="radio"]:checked:after {
+  width: 16.3px;
+  height: 16.3px;
+  border-radius: 16.3px;
+  top: -2px;
+  left: -1px;
+  position: relative;
+  background-color: #6bb7bf;
+  content: "";
+  display: inline-block;
+  visibility: visible;
+  border: 2px solid rgb(107, 183, 191);
+}
+
+input {
   cursor: pointer;
+  background-color: #fafafa !important;
 }
 
 .rounded-shadow {
-  @apply rounded-md shadow-md border;
-}
-
-.tabs {
-  @apply sticky top-20 z-40 h-10 text-gray-400 overflow-hidden;
-  width: 600px;
+  @apply rounded-sm shadow-md;
 }
 
 .tabBtn {
@@ -103,12 +134,12 @@ input[type="radio"] {
 
 .big-card {
   @apply w-full rounded-lg;
-  height: 650px;
 }
-
+/*
 .headerBtn {
-  @apply h-full flex flex-col  justify-center items-center hover:bg-gray-50 hover-text-dark  transition duration-300;
+   @apply h-full flex flex-col  justify-center items-center hover:bg-gray-50 hover-text-dark  transition duration-300;
 }
+ */
 /* 
 .dropDownBtn {
   @apply h-full rounded-shadow flex items-center pl-8 hover:border-gray-400 duration-200 z-10;
@@ -156,44 +187,16 @@ input[type="radio"] {
   fill: #1f2937 !important;
 }
 
-.loginCard {
-  @apply h-2/4 max-w-screen-sm transform -translate-x-2/4 -translate-y-2/4 absolute left-1/2 top-1/2;
-
-  min-height: 550px;
-  min-width: 440px;
-}
+/* LOGIN stuff */
 
 .flipCard {
   transform: rotateY(180deg);
 }
 
-.cardContent {
-  @apply h-full w-full rounded-xl;
-  transition: all 0.5s ease;
-  transform-style: preserve-3d;
-}
-
-.front,
-.back {
-  @apply flex flex-col items-center py-8 px-10 absolute top-0 left-0 tracking-wider h-full w-full;
-  backface-visibility: hidden;
-}
-
-.back {
-  transform: rotateY(180deg);
-}
-
-.landingPageBtn {
-  @apply text-center tracking-wider text-gray-50 font-semibold mt-6 bg-dark p-2 duration-200 rounded-md transform hover:scale-95 w-3/5 border border-gray-50;
-  backface-visibility: hidden;
-}
-
-.landingPageForm {
-  @apply mt-6 text-lg font-medium w-96 flex flex-col items-center;
-}
+/*  Chart stuff */
 
 .chartBtn {
-  @apply w-8 h-8 rounded-sm shadow-sm flex justify-center items-center cursor-pointer duration-200 border bg-light text-dark ring-2 ring-transparent hover:ring-gray-300;
+  @apply w-8 h-8 rounded-sm shadow-sm flex justify-center items-center cursor-pointer duration-200 border bg-light text-dark;
 
   min-width: 32px;
 }
@@ -209,17 +212,13 @@ input[type="radio"] {
   width: 140px;
 }
 
-.chartCard {
-  @apply h-80 w-full rounded-md border shadow-md px-4 overflow-hidden relative bg-light;
-}
-
 .chartRangeBtnFocus {
   border: 1px solid #1f2937;
   transform: scale(1.05);
 }
 
 .activeTabBtn {
-  @apply text-dark;
+  @apply text-light lg:text-gray-800;
 }
 
 .chartRangeBtn:active,
@@ -256,22 +255,9 @@ input[type="radio"] {
   cursor: grabbing;
 }
 
-.sliderBox:hover h1 {
-  color: #6bb7bf;
-}
-
-.sliderBox h1 {
-  transition: all 0.2s;
-  min-width: 8rem;
-}
-
-.sliderBox {
-  @apply flex items-center px-4 py-3 duration-200;
-}
-
 .hour-item,
 .minute-item {
-  @apply border-l-2 hover:border-gray-800 hover:bg-gray-200 py-2 text-xs cursor-pointer;
+  @apply border-l-2 hover:border-gray-800 hover:bg-gray-200 py-2 text-sm cursor-pointer tracking-wide font-medium;
 }
 
 .saveTime:focus {
@@ -287,6 +273,10 @@ input[type="radio"] {
 .uploadSuccess {
   animation: slideIn 5s ease-in-out forwards;
   animation-play-state: paused;
+}
+
+.showMenu {
+  animation: scaleY 2s ease-in-out forwards;
 }
 
 @keyframes slideIn {
@@ -305,6 +295,15 @@ input[type="radio"] {
   100% {
     transform: translateX(120%);
     opacity: 0;
+  }
+}
+
+@keyframes scaleY {
+  from {
+    transform: translateY(-50%) scaleY(0);
+  }
+  to {
+    transform: translateY(0) scaleY(1);
   }
 }
 
@@ -338,4 +337,8 @@ tbody tr:nth-child(odd) {
 
 .btn {
   @apply cursor-pointer transform hover:scale-105 hover:border-gray-800 duration-200;
+}
+
+::placeholder {
+  color: rgb(100, 100, 100);
 }

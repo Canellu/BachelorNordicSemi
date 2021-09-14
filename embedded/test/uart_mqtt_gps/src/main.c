@@ -133,7 +133,6 @@ struct k_msgq gcloud_msg_q;
 static uint8_t gcloud_msgq_buffer[2 * 512];
 static uint8_t gcloud_msg[512];
 
-static bool mission_params_wifi = false;
 static bool data_available_to_send = false;
 static bool gcloud_init_complete = false;
 
@@ -329,6 +328,10 @@ static int message_queue_reset()
 // updates mission status and saves to sd card
 static int update_mission_status(enum glider_mission_status new_mission_state)
 {
+	int ret = 0;
+	int retry = 0;
+	int retry_max = 3;
+
 	LOG_INF("Setting mission state to: %d", new_mission_state);
 	mission_state = new_mission_state;
 
@@ -340,49 +343,63 @@ static int update_mission_status(enum glider_mission_status new_mission_state)
 	static uint8_t json_str[512] = "";
 	sd_msg.event = READ_JSON;
 
-	k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
-	k_msgq_get(&main_msg_q, &json_str, K_FOREVER);
-
-	if (strcmp(json_str, "ERROR") != 0)
+	while (retry < retry_max)
 	{
-		cJSON *m_JSON = cJSON_Parse(json_str);
-		if (cJSON_IsObject(m_JSON))
+		k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
+		k_msgq_get(&main_msg_q, &json_str, K_FOREVER);
+		LOG_INF("fetched mission: %s", log_strdup(json_str));
+
+		if (strcmp(json_str, "ERROR") != 0)
 		{
-			if (cJSON_HasObjectItem(m_JSON, "state"))
+			cJSON *m_JSON = cJSON_Parse(json_str);
+			if (cJSON_IsObject(m_JSON))
 			{
-				LOG_INF("Updating previously written state");
-				cJSON_DeleteItemFromObject(m_JSON, "state");
+				if (cJSON_HasObjectItem(m_JSON, "state"))
+				{
+					LOG_INF("Updating previously written state");
+					cJSON_DeleteItemFromObject(m_JSON, "state");
+				}
+
+				cJSON *state_JSON = cJSON_CreateObject();
+				cJSON_AddNumberToObject(state_JSON, "Ms", new_mission_state);
+				cJSON_AddNumberToObject(state_JSON, "wp_cur", glider.m_state.wp_cur);
+				cJSON_AddNumberToObject(state_JSON, "msg_sent", glider.m_state.msg_sent);
+				cJSON_AddNumberToObject(state_JSON, "unix", (unix_time_ms / 1000));
+				cJSON_AddNumberToObject(state_JSON, "surfaced", glider.m_state.surfaced);
+				cJSON_AddNumberToObject(state_JSON, "m_database", glider.m_state.m_database);
+				cJSON_AddItemToObject(m_JSON, "state", state_JSON);
+
+				LOG_INF("Writing new state to SD card");
+				// saving to sd card
+				sd_msg.event = OVERWRITE_FILE;
+
+				strcpy(sd_msg.string, cJSON_Print(m_JSON));
+				cJSON_Minify(sd_msg.string);
+
+				k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
+
+				ret = 0;
+				break;
 			}
+			else
+			{
+				LOG_ERR("Not a JSON, could not update mission parameters");
+				cJSON_Delete(m_JSON);
 
-			cJSON *state_JSON = cJSON_CreateObject();
-			cJSON_AddNumberToObject(state_JSON, "Ms", new_mission_state);
-			cJSON_AddNumberToObject(state_JSON, "wp_cur", glider.m_state.wp_cur);
-			cJSON_AddNumberToObject(state_JSON, "msg_sent", glider.m_state.msg_sent);
-			cJSON_AddNumberToObject(state_JSON, "unix", (unix_time_ms / 1000));
-			cJSON_AddNumberToObject(state_JSON, "surfaced", glider.m_state.surfaced);
-			cJSON_AddNumberToObject(state_JSON, "m_database", glider.m_state.m_database);
-			cJSON_AddItemToObject(m_JSON, "state", state_JSON);
-
-			LOG_INF("Writing new state to SD card");
-			// saving to sd card
-			sd_msg.event = OVERWRITE_FILE;
-
-			strcpy(sd_msg.string, cJSON_Print(m_JSON));
-			cJSON_Minify(sd_msg.string);
-
-			k_msgq_put(&sd_msg_q, &sd_msg, K_NO_WAIT);
+				retry++;
+				ret = -1;
+			}
+			cJSON_Delete(m_JSON);
 		}
 		else
 		{
-			LOG_ERR("not a JSON, could not parse mission parameters");
-			cJSON_Delete(m_JSON);
-
-			return -1;
+			LOG_ERR("Error returned by SD card read");
+			retry++;
+			ret = -1;
 		}
-		cJSON_Delete(m_JSON);
 	}
 
-	return 0;
+	return ret;
 }
 
 // checks mission if it is new or not, saves parameters to glider struct and sd card
@@ -816,6 +833,10 @@ static int test_module(uint8_t *module_str)
 	int retries = 0;
 	int retry_max = 3;
 
+	int64_t start_time = 0;
+	int64_t current_time = 0;
+	int64_t timeout = 20 * 1000; // 5 minutes
+
 	if (strstr(module_str, "gps") != NULL)
 	{
 		static glider_gps_data_t gps_data;
@@ -832,19 +853,71 @@ static int test_module(uint8_t *module_str)
 	}
 	else if (strstr(module_str, "4G") != NULL)
 	{
-		test = modem_configure();
-		// lte off
-		if (test == 0)
+		if (!gcloud_init_complete)
 		{
-			test = lte_lc_offline();
+			test = app_gcloud_init_and_connect(retry_max);
+			if (test != 0)
+			{
+				LOG_INF("Unable to connect to gcloud");
+				ret = -1;
+			}
+			else
+			{
+				gcloud_init_complete = true;
+				ret = 0;
+			}
 		}
-
-		if (test == 0)
-		{
-			ret = 0;
-		}
+		// reconnect
 		else
 		{
+			test = app_gcloud_reconnect(retry_max);
+			if (test != 0)
+			{
+				LOG_INF("Unable to connect to gcloud");
+				ret = -1;
+			}
+			else
+			{
+				ret = 0;
+			}
+		}
+
+		if (ret == 0)
+		{
+			start_time = k_uptime_get();
+			memset(gcloud_msg, 0, sizeof(gcloud_msg));
+
+			while (current_time <= timeout)
+			{
+				// button_wait();
+				current_time = k_uptime_get() - start_time;
+
+				// gcloud function
+				ret = app_gcloud();
+				if (ret != 0)
+				{
+					LOG_ERR("Error in running MQTT loop, exiting module");
+					ret = app_gcloud_disconnect(retry_max);
+					ret = -1;
+					break;
+				}
+
+				// fetch message from gcloud
+				k_msgq_get(&gcloud_msg_q, &gcloud_msg, K_NO_WAIT);
+				LOG_INF("gcloud string: %s", log_strdup(gcloud_msg));
+
+				if (strlen(gcloud_msg) != 0)
+				{
+					ret = 0;
+					break;
+				}
+			}
+		}
+
+		test = app_gcloud_disconnect(retry_max);
+		if (test != 0)
+		{
+			LOG_ERR("Disconnect unsuccessful: %d", test);
 			ret = -1;
 		}
 	}
@@ -880,6 +953,10 @@ static int test_module(uint8_t *module_str)
 		{
 			ret = -1;
 		}
+	}
+	else
+	{
+		LOG_ERR("Unknown test module");
 	}
 	LOG_INF("Test result: %d", ret);
 
@@ -997,7 +1074,7 @@ static int publish_data_4G()
 				cJSON_Minify(payload_4G);
 
 				LOG_INF("payload: %s", log_strdup(payload_4G));
-				// gcloud_publish(payload_4G, strlen(payload_4G), MQTT_QOS_1_AT_LEAST_ONCE);
+				gcloud_publish(payload_4G, strlen(payload_4G), MQTT_QOS_1_AT_LEAST_ONCE);
 				glider.m_state.m_database = 1;
 				update_mission_status(MISSION_ONGOING);
 			}
@@ -1024,7 +1101,7 @@ static int publish_data_4G()
 		if (ret == 0)
 		{
 			LOG_INF("payload: %s", log_strdup(payload_4G));
-			// gcloud_publish(payload_4G, strlen(payload_4G), MQTT_QOS_1_AT_LEAST_ONCE);
+			gcloud_publish(payload_4G, strlen(payload_4G), MQTT_QOS_1_AT_LEAST_ONCE);
 			glider.m_state.msg_sent++;
 			msg_sent++;
 		}
@@ -1058,7 +1135,7 @@ static int publish_data_4G()
 		if (ret == 0)
 		{
 			LOG_INF("payload: %s", log_strdup(payload_4G));
-			// gcloud_publish(payload_4G, strlen(payload_4G), MQTT_QOS_1_AT_LEAST_ONCE);
+			gcloud_publish(payload_4G, strlen(payload_4G), MQTT_QOS_1_AT_LEAST_ONCE);
 			glider.m_state.msg_sent++;
 			msg_sent++;
 			LOG_INF("messages sent: %d", msg_sent);
@@ -1272,7 +1349,7 @@ static int sat_sbd_session()
 
 	test = strtok_r(sat_response, ",", &saveptr); // TODO: check param 1, was always zero under testing
 	LOG_INF("test: %s", log_strdup(test));
-	sbd_response[i++] = strtol(test, &eptr, 10);
+	sbd_response[i++] = strtol(test + 6, &eptr, 10);
 	// LOG_INF("param %d: %d", i, sbd_response[0]);
 	// splitting up parameters
 	while ((test = strtok_r(NULL, ",", &saveptr)) != NULL)
@@ -1666,7 +1743,6 @@ static int wifi_module()
 				if (ret == 0)
 				{
 					mission_state = MISSION_WAIT_START;
-					mission_params_wifi = true;
 					glider.m_state.m_database = 0;
 					LOG_INF("Received new mission parameters");
 				}
@@ -1701,7 +1777,7 @@ static int gps_module()
 	// button_wait();
 	printk("\ngps test start");
 
-	ret = app_gps(&gps_data, 120 * 1000, 500);
+	ret = app_gps(&gps_data, 150 * 1000, 500);
 
 	if (ret == 0)
 	{
@@ -1855,19 +1931,19 @@ static int satellite_module()
 	printk("\n\npress button 1 to start satellite test\n\n");
 	// button_wait();
 
-	static int ret = 0;
-	static int cnt = 0;
-	static int cnt2 = 0;
-	static int max_retries_ESP = 3;
-	static int max_retries = 2;
+	int ret = 0;
+	int cnt = 0;
+	int cnt2 = 0;
+	int max_retries_ESP = 3;
+	int max_retries = 10;
 
 	static uint8_t sat_response[128] = "";
 	static uint8_t sat_payload[64] = "";
 
-	static bool sat_start = false;
-	static int signal = 0;
-	static bool msg_rdy = false;
-	static bool msg_sent = false;
+	bool sat_start = false;
+	int signal = 0;
+	bool msg_rdy = false;
+	bool msg_sent = false;
 
 	// start uart
 	uart_start(UART_2);
@@ -1897,7 +1973,6 @@ static int satellite_module()
 			if (signal)
 			{ // if signal found
 				LOG_INF("got signal");
-				break;
 
 				if (!msg_rdy)
 				{
@@ -2071,6 +2146,7 @@ void main(void)
 	static int ret = 0;
 	static int wifi_on = 0;
 
+	// default time if there are no other sources for fetching time
 	static int64_t unix_time_start = 1620810897;
 	time_UTC = gmtime(&unix_time_start);
 
@@ -2191,7 +2267,7 @@ void main(void)
 			LOG_INF("Current waypoint: %d", glider.m_state.wp_cur);
 			update_mission_status(MISSION_ONGOING);
 
-			publish_data_4G();
+			// publish_data_4G();
 
 			LOG_INF("Running gps module");
 			// button_wait();

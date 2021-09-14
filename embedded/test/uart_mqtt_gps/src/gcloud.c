@@ -669,6 +669,7 @@ int modem_configure(void)
         if (ret)
         {
             LOG_INF("Failed to establish LTE connection: %d", ret);
+            lte_lc_offline();
             return ret;
         }
     }
@@ -677,7 +678,7 @@ int modem_configure(void)
     return ret;
 }
 
-static int modem_reconnect()
+int modem_reconnect(void)
 {
     int ret;
 
@@ -886,7 +887,7 @@ int app_gcloud_disconnect(int retries)
     // lte off
     while (cnt < retries)
     {
-        ret = lte_lc_offline();
+        ret = lte_lc_deinit();
         if (ret == 0)
         {
             break;

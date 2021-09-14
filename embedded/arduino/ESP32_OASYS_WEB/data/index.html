@@ -32,7 +32,7 @@
       <div class="container">
         <ul class="tabs tabs-fixed-width bg-dark">
           <li class="tab">
-            <a class="" href="#info" onclick="scrollToTop()">
+            <a class="active" href="#info" onclick="scrollToTop()">
               <p class="icon">
                 <svg
                   width="22"
@@ -48,7 +48,7 @@
             </a>
           </li>
           <li class="tab">
-            <a class="active" href="#module" onclick="scrollToTop()">
+            <a class="" href="#module" onclick="scrollToTop()">
               <p class="icon">
                 <svg
                   width="22"
@@ -149,11 +149,19 @@
                 Tap/Click on a button to start a test. It may take a minute or
                 two for results to show.
 
-                <span class="green-text text-lighten-1">Green</span> signifies
-                that module is ok.
+                <span
+                  class="green-text text-lighten-1"
+                  style="font-weight: bold; font-size: 1.1rem"
+                  >Green</span
+                >
+                signifies that module is healthy.
 
-                <span class="red-text text-lighten-1">Red</span> signifies that
-                a module has an error.
+                <span
+                  class="red-text text-lighten-1"
+                  style="font-weight: bold; font-size: 1.1rem"
+                  >Red</span
+                >
+                signifies that a module has an error.
               </p>
             </div>
           </div>
@@ -207,15 +215,23 @@
                 </div>
               </div>
               <p>
-                This tab is for sending the glider out on a mission. Configure
-                the parameters and send it!
+                Send the glider out on a mission with configured parameters.<br /><br />
+                <span style="font-weight: bold; font-size: 1.2rem">
+                  Important! <br />
+                </span>
+                <span style="font-style: italic"
+                  >For the glider to start a mission after sending configured
+                  parameters through this application, you
+                </span>
+                <span style="font-weight: bold">MUST</span> click on the
+                disconnect button
               </p>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <!-- END INFO TAB -->
+
     <!-- MODULES TAB -->
     <div class="container mtop" id="module" style="padding-bottom: 50px">
       <div class="row">
@@ -274,7 +290,7 @@
 
         <!-- Fault indicator -->
         <div class="col s4">
-          <h6 class="center green lighten-2 indicator flexCenter">FAULTY</h6>
+          <h6 class="center green lighten-2 indicator flexCenter">HEALTHY</h6>
         </div>
 
         <!-- Untested indicator -->
@@ -298,18 +314,14 @@
         <div class="col s12">
           <div class="card bg-light">
             <div class="card-content">
-              <div class="card-title">Message window</div>
-              <p id="messageWindow">
-                If there are any error messages during testing. It will appear
-                here...
-              </p>
+              <p id="messageWindow">Test results will appear here.</p>
             </div>
           </div>
         </div>
       </div>
       <!-- row -->
     </div>
-    <!-- END MODULES TAB -->
+
     <!-- FILES TAB -->
     <div class="container mtop" id="files" style="padding-bottom: 50px">
       <div class="row">
@@ -317,8 +329,7 @@
           <div class="card bg-light center">
             <div class="card-content">
               <span class="card-title">Files</span>
-              <h4 class="totalFiles hide-on-small-and-down">0</h4>
-              <h5 class="totalFiles hide-on-med-and-up">0</h5>
+              <h4 class="totalFiles">0</h4>
             </div>
           </div>
         </div>
@@ -326,8 +337,7 @@
           <div class="card bg-light center">
             <div class="card-content">
               <span class="card-title">Size</span>
-              <h4 class="totalFiles hide-on-small-and-down">0</h4>
-              <h5 class="totalFiles hide-on-med-and-up">0</h5>
+              <h4 class="totalSize">0</h4>
             </div>
           </div>
         </div>
@@ -388,259 +398,342 @@
         </div>
       </div>
     </div>
-    <!-- END FILES TAB-->
+
     <!-- CONFIG TAB -->
     <div class="container mtop" id="config" style="padding-bottom: 50px">
-      <!-- TAB HEADER -->
-
-      <h5>Configure parameters</h5>
-
-      <div class="row bg-light rounded-shadow" style="padding-bottom: 10px">
-        <h5>Mission</h5>
-        <input
-          class="col s2 offset-s5 center"
-          id="inputMissionNum"
-          type="number"
-          value="0"
-          style="font-size: 2rem; font-weight: 600; border-radius: 10px"
-        />
-        <div
-          class="col s12 center"
-          style="font-size: 12px; font-weight: 500; letter-spacing: 0.5px"
-        >
-          Previous logged mission number <span id="missionNumFromNrf">#</span>
+      <div class="row">
+        <!-- Title -->
+        <div class="col s12">
+          <h5 class="center">PARAMETERS</h5>
         </div>
-      </div>
 
-      <!-- Depth Selector -->
-      <div class="row rounded-shadow bg-light" style="padding: 10px">
-        <!-- slider header -->
-
-        <h6 class="col s12">Dive depth</h6>
-        <!-- slider and input fields -->
-        <input id="inputMinDepth" type="number" class="col s2 m1" />
-        <div class="sliderBox col s8 m10" style="padding: 6px 20px">
-          <div id="sliderDepth"></div>
-        </div>
-        <input id="inputMaxDepth" type="number" class="col s2 m1" />
-      </div>
-
-      <!-- 4G Limit Selector -->
-      <div class="row rounded-shadow bg-light" style="padding: 10px">
-        <!-- slider header -->
-        <h6 class="col s12">4G Message limit</h6>
-        <!-- slider and input fields -->
-
-        <input
-          id="input4GLimit"
-          type="number"
-          class="col s2 m1"
-          style="max-height: 30px"
-        />
-        <div class="sliderBox col s10 m11" style="padding: 0px 10px">
-          <div id="slider4GLimit"></div>
-        </div>
-      </div>
-
-      <!-- Frequency Selectors -->
-      <div class="row rounded-shadow bg-light" style="padding: 10px">
-        <h6 class="col s12">Logging frequencies</h6>
-
-        <div class="col s4 m3 offset-m2" style="align-items: center">
-          <h6>Temperature</h6>
-          <p>
-            <label>
-              <input class="with-gap" name="temperatureGroup" type="radio" />
-              <span class="radioText">High</span>
-            </label>
-          </p>
-          <p>
-            <label>
+        <!-- Mission Number -->
+        <div class="col s12 m8 offset-m2">
+          <div class="card bg-light">
+            <div class="card-content">
+              <h6>Mission number</h6>
               <input
-                checked
-                class="with-gap"
-                name="temperatureGroup"
-                type="radio"
+                class="center"
+                id="inputMissionNum"
+                type="number"
+                min="1"
+                value="1"
+                style="
+                  font-size: 2rem;
+                  font-weight: 600;
+                  border-radius: 2px;
+                  margin: 10px 0;
+                "
               />
-              <span class="radioText radioTextActive">Medium</span>
-            </label>
-          </p>
-          <p>
-            <label>
-              <input class="with-gap" name="temperatureGroup" type="radio" />
-              <span class="radioText">Low</span>
-            </label>
-          </p>
-          <p>
-            <label>
-              <input class="with-gap" name="temperatureGroup" type="radio" />
-              <span class="radioText">None</span>
-            </label>
-          </p>
-        </div>
-
-        <div class="col s4 m3">
-          <h6 style="font-size: 1.1rem; font-weight: 600">Conductivity</h6>
-          <p>
-            <label>
-              <input class="with-gap" name="conductivityGroup" type="radio" />
-              <span class="radioText">High</span>
-            </label>
-          </p>
-          <p>
-            <label>
-              <input
-                checked
-                class="with-gap"
-                name="conductivityGroup"
-                type="radio"
-              />
-              <span class="radioText radioTextActive">Medium</span>
-            </label>
-          </p>
-          <p>
-            <label>
-              <input class="with-gap" name="conductivityGroup" type="radio" />
-              <span class="radioText">Low</span>
-            </label>
-          </p>
-          <p>
-            <label>
-              <input class="with-gap" name="conductivityGroup" type="radio" />
-              <span class="radioText">None</span>
-            </label>
-          </p>
-        </div>
-
-        <div class="col s4 m3">
-          <h6 style="font-size: 1.1rem; font-weight: 600">Pressure</h6>
-          <p>
-            <label>
-              <input class="with-gap" name="pressureGroup" type="radio" />
-              <span class="radioText">High</span>
-            </label>
-          </p>
-          <p>
-            <label>
-              <input
-                checked
-                class="with-gap"
-                name="pressureGroup"
-                type="radio"
-              />
-              <span class="radioText radioTextActive">Medium</span>
-            </label>
-          </p>
-          <p>
-            <label>
-              <input class="with-gap" name="pressureGroup" type="radio" />
-              <span class="radioText">Low</span>
-            </label>
-          </p>
-          <p>
-            <label>
-              <input class="with-gap" name="pressureGroup" type="radio" />
-              <span class="radioText">None</span>
-            </label>
-          </p>
-        </div>
-      </div>
-
-      <!-- Datetime Selector -->
-      <div class="row rounded-shadow bg-light" style="padding: 10px">
-        <!-- slider header -->
-        <h5>Start date & time</h5>
-        <!-- Datepicker -->
-        <input
-          id="startDate"
-          type="text"
-          class="datepicker col s12 m3 offset-m3"
-          placeholder="Start date"
-          autocomplete="off"
-        />
-
-        <input
-          id="startTime"
-          type="text"
-          class="timepicker col s12 m3"
-          placeholder="Start time"
-        />
-      </div>
-
-      <!-- Waypoint Selector -->
-      <div class="row rounded-shadow bg-light" style="padding: 10px">
-        <h5>Waypoints</h5>
-
-        <!-- Waypointlist header -->
-        <div class="row" style="margin: 0; padding: 0">
-          <div
-            class="col s2 flexCenter"
-            style="font-weight: bold; font-size: 1.2rem"
-          >
-            #
-          </div>
-          <div class="col s4">Lat</div>
-          <div class="col s4">Lng</div>
-          <div class="col s2"></div>
-        </div>
-
-        <!-- WaypointList Body -->
-        <div id="waypointList" style="max-height: 40vh; overflow: auto">
-          <!-- <div class="row" style="margin-bottom: 10px">
-            <div class="col s2" id="numberBox">1</div>
-            <div class="col s4">
-              <input type="number" id="latlngInputBox" />
-            </div>
-            <div class="col s4">
-              <input type="number" id="latlngInputBox" />
-            </div>
-            <div class="col s2" onclick="deleteRow(this)">
-              <div class="smallBtn">
-                <img src="delete.svg" alt="" />
+              <div>
+                Previous logged mission number
+                <span id="missionNumFromNrf">#</span>
               </div>
             </div>
-          </div> -->
+          </div>
         </div>
 
-        <div class="input-field col s5 m3 offset-m3">
-          <input id="wpLat" type="number" style="padding-left: 10px" />
-          <label for="wpLat">Latitude</label>
+        <!-- Range sliders -->
+        <div class="col s12 m8 offset-m2">
+          <div class="card bg-light">
+            <div class="card-content">
+              <!-- 4G Message Limit -->
+              <div class="row" style="margin-bottom: 12px">
+                <div class="flexBetween">
+                  <h6 class="col s8">4G Message Limit</h6>
+                  <div class="col s4 right-align">
+                    <input
+                      id="input4GLimit"
+                      type="number"
+                      class="center"
+                      style="
+                        width: 60px;
+                        height: 25px;
+                        font-weight: 500;
+                        margin: 0;
+                      "
+                    />
+                  </div>
+                </div>
+                <div class="sliderBox col s12" style="margin: 10px 0">
+                  <div id="slider4GLimit"></div>
+                </div>
+              </div>
+
+              <!-- Min depth-->
+              <div class="row" style="margin-bottom: 12px">
+                <div class="flexBetween">
+                  <h6 class="col s8">Minimum depth</h6>
+                  <div class="col s4 right-align">
+                    <input
+                      id="inputMinDepth"
+                      type="number"
+                      class="center"
+                      style="
+                        width: 60px;
+                        height: 25px;
+                        font-weight: 500;
+                        margin: 0;
+                      "
+                    />
+                  </div>
+                </div>
+                <div class="sliderBox col s12" style="margin: 10px 0">
+                  <div id="sliderMinDepth"></div>
+                </div>
+              </div>
+
+              <!-- Max depth-->
+              <div class="row" style="margin-bottom: 12px">
+                <div class="flexBetween">
+                  <h6 class="col s8">Maximum depth</h6>
+                  <div class="col s4 right-align">
+                    <input
+                      id="inputMaxDepth"
+                      type="number"
+                      class="center"
+                      style="
+                        width: 60px;
+                        height: 25px;
+                        font-weight: 500;
+                        margin: 0;
+                      "
+                    />
+                  </div>
+                </div>
+                <div class="sliderBox col s12" style="margin: 10px 0">
+                  <div id="sliderMaxDepth"></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="input-field col s5 m3">
-          <input id="wpLng" type="number" style="padding-left: 10px" />
-          <label for="wpLng">Longitude</label>
+
+        <!-- Radio buttons -->
+        <div class="col s12 m8 offset-m2">
+          <div class="card bg-light">
+            <div class="card-content">
+              <div class="row">
+                <h6 class="col s12">Logging frequencies</h6>
+                <!-- Temperature -->
+                <div
+                  class="col s12 m4 l3 offset-l2"
+                  style="align-items: center"
+                >
+                  <h6>Temperature</h6>
+                  <p>
+                    <label>
+                      <input name="temperatureGroup" type="radio" />
+                      <span class="radioText">High</span>
+                    </label>
+                  </p>
+                  <p>
+                    <label>
+                      <input checked name="temperatureGroup" type="radio" />
+                      <span class="radioText radioTextActive">Medium</span>
+                    </label>
+                  </p>
+                  <p>
+                    <label>
+                      <input name="temperatureGroup" type="radio" />
+                      <span class="radioText">Low</span>
+                    </label>
+                  </p>
+                  <p>
+                    <label>
+                      <input name="temperatureGroup" type="radio" />
+                      <span class="radioText">None</span>
+                    </label>
+                  </p>
+                </div>
+                <!-- Conductivity -->
+                <div class="col s12 m4 l3">
+                  <h6 style="font-size: 1.1rem; font-weight: 600">
+                    Conductivity
+                  </h6>
+                  <p>
+                    <label>
+                      <input name="conductivityGroup" type="radio" />
+                      <span class="radioText">High</span>
+                    </label>
+                  </p>
+                  <p>
+                    <label>
+                      <input checked name="conductivityGroup" type="radio" />
+                      <span class="radioText radioTextActive">Medium</span>
+                    </label>
+                  </p>
+                  <p>
+                    <label>
+                      <input name="conductivityGroup" type="radio" />
+                      <span class="radioText">Low</span>
+                    </label>
+                  </p>
+                  <p>
+                    <label>
+                      <input name="conductivityGroup" type="radio" />
+                      <span class="radioText">None</span>
+                    </label>
+                  </p>
+                </div>
+                <!-- Pressure -->
+                <div class="col s12 m3 l3">
+                  <h6 style="font-size: 1.1rem; font-weight: 600">Pressure</h6>
+                  <p>
+                    <label>
+                      <input name="pressureGroup" type="radio" />
+                      <span class="radioText">High</span>
+                    </label>
+                  </p>
+                  <p>
+                    <label>
+                      <input checked name="pressureGroup" type="radio" />
+                      <span class="radioText radioTextActive">Medium</span>
+                    </label>
+                  </p>
+                  <p>
+                    <label>
+                      <input name="pressureGroup" type="radio" />
+                      <span class="radioText">Low</span>
+                    </label>
+                  </p>
+                  <p>
+                    <label>
+                      <input name="pressureGroup" type="radio" />
+                      <span class="radioText">None</span>
+                    </label>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="col s2 m1" style="margin-top: 20px">
-          <div class="smallBtn" onclick="addWaypoint()">
-            <img src="add.svg" />
+
+        <!-- Start Date Time -->
+        <div class="col s12 m8 offset-m2">
+          <div class="card bg-light">
+            <div class="card-content">
+              <div class="row">
+                <h6 class="col s12 m6 offset-m3">Start Date</h6>
+                <div class="col s12 m6 offset-m3">
+                  <input
+                    id="startDate"
+                    type="text"
+                    class="datepicker inputBox"
+                    placeholder="Start date"
+                    autocomplete="off"
+                  />
+                </div>
+
+                <h6 class="col s12 m6 offset-m3">Start Time</h6>
+                <div class="col s12 m6 offset-m3">
+                  <input
+                    id="startTime"
+                    type="text"
+                    class="timepicker inputBox"
+                    placeholder="Start time"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Waypoints -->
+        <div class="col s12 m8 offset-m2">
+          <div class="card bg-light">
+            <div class="card-content">
+              <div class="row">
+                <h6 class="col s12">Waypoints</h6>
+
+                <!-- Waypointlist table header -->
+                <div class="row" style="margin-bottom: 0">
+                  <div class="col s2 numberBox">#</div>
+                  <div class="col s4 tableHeader">Latitude</div>
+                  <div class="col s4 tableHeader">Longitude</div>
+                  <div class="col s12 divider"></div>
+                </div>
+
+                <!-- WaypointList Body -->
+                <div class="row" style="margin-bottom: 10px">
+                  <div
+                    class="col s12"
+                    id="waypointList"
+                    style="
+                      height: 20vh;
+                      max-height: 20vh;
+                      overflow: auto;
+                      padding-top: 20px;
+                    "
+                  ></div>
+                  <div class="col s12 divider"></div>
+                </div>
+
+                <!-- Waypoint Inputs -->
+                <div class="row" style="margin-bottom: 0">
+                  <div
+                    id="currentWaypointNum"
+                    class="col s2 numberBox"
+                    style="height: 33px"
+                  >
+                    1
+                  </div>
+                  <div class="input-field col s4" style="margin: 0">
+                    <input id="wpLat" type="number" class="inputBox" />
+                  </div>
+                  <div class="input-field col s4" style="margin: 0">
+                    <input id="wpLng" type="number" class="inputBox" />
+                  </div>
+                  <div class="col s2">
+                    <div class="smallBtn" onclick="addWaypoint()">
+                      <img src="add.svg" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col s12 m8 offset-m2 xl6 offset-xl3 row center">
+          <!-- Configure button -->
+          <div class="col s6">
+            <a
+              class="waves-effect waves-light btn"
+              onclick="sendMissionParams()"
+            >
+              configure
+              <i class="left">
+                <img src="upload.svg" style="margin-top: 7px" />
+              </i>
+            </a>
+          </div>
+
+          <!-- End connection button -->
+          <div class="col s6">
+            <!-- Modal Trigger -->
+            <a
+              class="waves-effect waves-light btn red lighten-2 modal-trigger"
+              href="#modalClosePage"
+              onclick="endConnection()"
+            >
+              disconnect
+              <i class="left">
+                <img src="wifi_off.svg" style="margin-top: 7px" />
+              </i>
+            </a>
+
+            <!-- Modal Structure -->
+            <div id="modalClosePage" class="modal">
+              <div class="modal-content">
+                <h5>Succesfully disconnected the glider.</h5>
+                <h6>You can now close the browser window.</h6>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-
-      <!-- Configure button -->
-      <div class="flexCenter" style="margin-bottom: 30px">
-        <a class="waves-effect waves-light btn" onclick="sendMissionParams()">
-          configure
-          <i class="left">
-            <img src="upload.svg" style="margin-top: 7px" />
-          </i>
-        </a>
-      </div>
-
-      <!-- End connection button -->
-      <div class="flexCenter" style="margin-bottom: 80px">
-        <a
-          class="waves-effect waves-light btn red lighten-1"
-          onclick="endConnection()"
-        >
-          disconnect
-          <i class="left">
-            <img src="upload.svg" style="margin-top: 7px" />
-          </i>
-        </a>
-      </div>
     </div>
-    <!-- END CONFIG TAB -->
 
     <script src="wNumb.min.js"></script>
     <script src="nouislider.min.js"></script>
@@ -648,7 +741,7 @@
     <script src="FileSaver.js"></script>
     <script src="materialize.js"></script>
     <script src="main.js"></script>
-    <script src="UI.js"></script>
     <script src="modules.js"></script>
+    <script src="configure.js"></script>
   </body>
 </html>

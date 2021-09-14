@@ -32,6 +32,7 @@ let satIMEI = 0;
 let nrfIMEI = 0;
 let moduleTestStr = ""; // value assigned by modules.js
 
+let checkedFiles = 0;
 let checkValAll = true;
 
 // ----------------------------------------------------------------------------
@@ -81,6 +82,16 @@ function onMessage(event) {
   espString = "";
 }
 
+// ----------------------------------------------------------------------------
+// Helper functions
+// ----------------------------------------------------------------------------
+
+// Scrolls window to top
+function scrollToTop() {
+  document.body.scrollTop = 0;
+  document.documentElement.scrollTop = 0;
+}
+
 // Adjusts checkbox position based on scrollbar presence
 function adjustCheckboxesPosition() {
   let checkBoxes = document.querySelectorAll(
@@ -103,7 +114,7 @@ checkAll.addEventListener("click", () => {
     checkbox.checked = checkValAll;
   });
   checkValAll = !checkValAll;
-  if (!checkValAll) {
+  if (checkedFiles) {
     downloadBtn.classList.remove("disabled");
   } else {
     downloadBtn.classList.add("disabled");
@@ -116,7 +127,6 @@ fileListBody.addEventListener("click", () => {
     "#files .filled-in:not(#checkAll)"
   );
 
-  let checkedFiles = 0;
   checkBoxes.forEach((e) => {
     if (e.checked == true) checkedFiles++;
   });
@@ -135,7 +145,11 @@ fileListBody.addEventListener("click", () => {
 // Init materialize elements
 document.addEventListener("DOMContentLoaded", function () {
   M.Tabs.init(document.querySelectorAll(".tabs"));
-  M.Modal.init(document.querySelectorAll(".modal"));
+  M.Modal.init(document.querySelectorAll(".modal"), {
+    preventScrolling: true,
+    dismissible: false,
+    endingTop: "30%",
+  });
   M.FormSelect.init(document.querySelectorAll("select"));
   // M.Pushpin.init(document.querySelectorAll(".pushpin"), {});
   M.Datepicker.init(document.querySelectorAll(".datepicker"), {
@@ -297,10 +311,6 @@ function updateProgressBar() {
   progressLabel.innerText = `${percentage}%`;
 }
 
-function endConnection() {
-  websocket.send("wifi_end\r");
-}
-
 function updateMissionNum() {
   document.querySelector("#missionNumFromNrf").innerHTML = missionNumFromNrf;
   document.querySelector("#inputMissionNum").value = missionNumFromNrf + 1;
@@ -318,7 +328,7 @@ function modulesTestResponse(testResponseStr) {
 
 if (!!window.EventSource) {
   var source = new EventSource("/events");
-  console.log("Added event source");
+  console.log("Got event source");
 
   source.addEventListener(
     "open",
@@ -339,7 +349,6 @@ if (!!window.EventSource) {
   );
 
   let lastEventId;
-
   source.addEventListener(
     "message",
     function (event) {
