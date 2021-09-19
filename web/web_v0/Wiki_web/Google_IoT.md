@@ -59,14 +59,15 @@ Everything else can be left to their default values.
 
 Also keep note of the **authentication** section. We will come back to this section later once we create a public key for your device.
 
+![](./figures/iotcore_newdevice.png)
 
-#### Other nifty features within the devices tab
+### 1.c. Other nifty features within the devices tab
  
 - **Update config**: Updates the message that is sent to the device every time it connects to IoT Core. 
 - **Send command**: Sends a message to the device. The device needs to be connected to MQTT during the time the command is sent.
 - **Configuration & state**: Shows a backlog of previously set configs.
 
-
+![](./figures/iotcore_devicedetails.png)
 
 ## 2. Embedded prerequisites
 
@@ -97,69 +98,86 @@ List of arguments:
 - **-e or --ecdsa**: Generates an elliptic curve key
 - **-r or --rsa**: Generates an RSA key
 
-Example usage. This produces an elliptic curve key pair with DEVICE_NAME as the chosen device.
+Example usage. This produces an elliptic curve key pair with ``` G039189 ``` as the device name.
 
 ```
-python create_keys.py -d DEVICE_NAME -e
+python create_keys.py -d G039189 -e
 ```
 
-The output produces a a public and private key pair. The public key needs to be added into the authentication section in [**IoT Core - devices tab**]().
+The output produces a a public and private key pair. 
+Expected output from create_keys.py:
 
-INSERT IMAGE
+![](./figures/iotcore_keypair.png)
+
+The public key needs to be added into the authentication section in [**IoT Core - devices tab**](). The image below shows the relevant field.
 
 The private key needs to be added in the device itself. This is used in creating the JWT needed for authentication upon connecting to IoT Cloud.
 Notice that a .c file has also been created. This file can be used instead of the private certificate for easier integration when developing embedded systems in C.
 
+![](./figures/iotcore_deviceauthentication.png)
 
 
-## 3. Connecting your device with MQTT
+## 3. Connecting your device using MQTT
 
-This part assumes the user to have some familiarity with MQTT. As such, this section will mostly show the necessary parameters for establishing a connection with IoT Core. Some of the parameters are further elaborated upon below.
+This part assumes the user to have some familiarity with MQTT. As such, this section will mostly show the necessary parameters for establishing a connection with IoT Core.
 
 
 ### 3.a. TLS connection
 
-As mentioned earlier, TLS 1.2 needs to be used when communicating with Google's IoT brokers. The connection needs to be verified using the CA certificates. 
+As mentioned earlier, TLS 1.2 needs to be used when communicating with Google's IoT brokers. The connection needs to be verified using the CA certificates. The exact process on how to do this varies depending on the embedded ecosystem used and the libraries included.
 
 
 ### 3.b. MQTT parameters
 
 Note: 
 - Terms written in CAPITAL letters denote variables. 
-- Terms in brackets indicate pseudo-code. 
 - The variables need to match the parameters set in IoT Core
 
+These parameters are only written in pseudo-code form.
+
 ```
-broker      = "mqtt.googleapis.com:8883"
-                        OR 
-              "mqtt.googleapis.com:443"
+broker    = "mqtt.googleapis.com:8883"
+                   OR 
+            "mqtt.googleapis.com:443"
 
-client_id   = "projects/PROJECT_ID/locations/REGION/registries/REGISTRY_ID/devices/DEVICE_ID"
+client_id = "projects/PROJECT_ID/locations/REGION/registries/REGISTRY_ID/devices/DEVICE_ID"
 
-username    = "{blank}"                         // optional, not used by IoT Core
-password    = "JWT"                             // mandatory, details on JWTs below
-qos         = "{0 OR 1}"                        // IoT Core does not support QoS 2
-pubs        = "/devices/DEVICE_ID/events"       // default publish topic
-subs        = "/devices/DEVICE_ID/commands/#"   // default "live" subscription
-                    AND/OR
-              "/devices/DEVICE_ID/config"       // alt sub, receives the config message every time an MQTT connection is established
+username  = "{blank}"                         // optional, not used by IoT Core
+password  = "{JWT}"                           // mandatory, details on JWTs below
+qos       = "{0 OR 1}"                        // IoT Core does not support QoS 2
+pubs      = "/devices/DEVICE_ID/events"       // default publish topic
+subs      = "/devices/DEVICE_ID/commands/#"   // default "live" sub, receives command message
+                   AND/OR
+            "/devices/DEVICE_ID/config"       // alt sub, receives the config message
+```
+
+An example using a test glider can be seen below, with the exception of the password field.
+
+```
+broker    = "mqtt.googleapis.com:8883"
+client_id = "projects/oasys-2d5b2/locations/europe-west1/registries/oasys_gliders/devices/G039189"
+
+username  = ""
+password  = "{JWT}"
+qos       = "1"
+pubs      = "/devices/G039189/events"
+subs      = "/devices/G039189/commands/#",
+            "/devices/G039189/config"
 ```
 
 
-### 3.c. JWTs
+####  Note on JWTs
 
 **Google cloud documentation:**
 
 https://cloud.google.com/iot/docs/how-tos/credentials/jwts
 
-Several libraries include JWT generators that are readily useable. Otherwise, documentation on creating JWTs can also be found in the link above. The private key generated from the key pair needs to be used when creating the JWT.
+Several libraries include JWT generators that are readily useable. Otherwise, documentation on creating JWTs can also be found in the link above. The **private key** generated from the key pair needs to be used when creating the JWT.
 
 ### 3.d. Testing!
 
 With all of these steps, your device should (hopefully) now be set up and ready for communicating with IoT Core. The only thing left to do is run the setup and see if it works.
 
-You can check the **device details** tab in IoT Core and check the **details** tab within that again. Sending a message to IoT Core should update the ``` telemetry event received ``` line with the appropriate time and date. If you want to test whether your device is able to receive a message, you can try using the **send command**. This will also give you live feedback on whether it is successful or not.
+The appropriate device within the **devices** tab in IoT Core should update accordingly if things are working. Any potential errors with the MQTT communication should also be reported within the ``` error status and message ``` field.
 
-
-
-set up functions for listening to the subscriptions/publishes
+## ---------- End - Feedback appreciated ----------
