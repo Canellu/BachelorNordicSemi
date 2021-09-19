@@ -111,10 +111,11 @@ Expected output from create_keys.py:
 
 The public key needs to be added into the authentication section in [**IoT Core - devices tab**](). The image below shows the relevant field.
 
+![](./figures/iotcore_deviceauthentication.png)
+
 The private key needs to be added in the device itself. This is used in creating the JWT needed for authentication upon connecting to IoT Cloud.
 Notice that a .c file has also been created. This file can be used instead of the private certificate for easier integration when developing embedded systems in C.
 
-![](./figures/iotcore_deviceauthentication.png)
 
 
 ## 3. Connecting your device using MQTT
