@@ -52,7 +52,7 @@ Once the registry is set up, we can add new devices.
 
 New devices can be added within the **Devices** tab.
 
-<img src="./figures/iotcore_devices.png" width="700">
+![](./figures/iotcore_devices.png)
 
 It is important to note the **device ID** used when creating a new device. This will be used when setting up the embedded side.
 Everything else can be left to their default values.
