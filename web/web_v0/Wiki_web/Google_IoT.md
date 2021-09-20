@@ -1,8 +1,10 @@
-# Connecting to Google IoT Core:
+# Part 1. Connecting to Google IoT Core:
 
 **Official google cloud documentation. Provides more detailed information on setting up your IoT device:**
 
 https://cloud.google.com/iot/docs/how-tos/mqtt-bridge
+
+This is part 1 of a guide for setting up a chain of communication from your device to the front-end.
 
 This is a guide on how to connect your device to Google's IoT Core through MQTT. Feel free to give feedback on if anything is not clear. Good luck :)
 
