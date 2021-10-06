@@ -181,4 +181,4 @@ With all of these steps, your device should (hopefully) now be set up and ready 
 
 The appropriate device within the **devices** tab in IoT Core should update accordingly if things are working. Any potential errors with the MQTT communication should also be reported within the ``` error status and message ``` field.
 
-## ---------- End - Feedback appreciated ----------
+## ---------- End - Feedback appreciated! ----------

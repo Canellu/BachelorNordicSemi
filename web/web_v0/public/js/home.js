@@ -112,6 +112,7 @@ async function createCard(uid, alias, sync, img) {
   document.querySelector("#deviceGrid").innerHTML += html;
 }
 
+// Populates the home page with cards and places device location on map
 async function createAllCards() {
   const gliders = await db.collection("Gliders").get();
   gliders.forEach((glider) => {

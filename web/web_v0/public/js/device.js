@@ -160,6 +160,7 @@ var missionDataset = {};
 //   missionDivs[missionDivs.length - 1].click();
 // }
 
+// requests the list of missions from firebase
 async function listMissions() {
   dropDownContent.innerHTML = "";
 
