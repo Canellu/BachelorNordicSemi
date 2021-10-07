@@ -298,7 +298,7 @@ function addLatLng(event) {
 }
 
 function createPreviewWaypoints() {
-  let waypoints = missionWaypoints.getPath().Nb;
+  let waypoints = missionWaypoints.getPath().getArray();
   let waypointDiv = document.querySelector("#previewWaypoints");
 
   waypointDiv.innerHTML = `

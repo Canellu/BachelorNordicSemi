@@ -122,3 +122,7 @@ Chart JS (link here) has been used for displaying the graphss, which plot the va
 ![](./figures/device_graph.png)
 
 Additionally, it is possible to pan around the graph and download the dataset as an .xlsx file.
+
+
+## MIssion control
+
