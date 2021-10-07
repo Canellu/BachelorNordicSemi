@@ -40,7 +40,7 @@ A request is sent to firebase much like in the homepage. This request reads the 
 Data per mission is only fetched when a mission is chosen from the list, which prompts another request from Firebase. Data that has been read will remain saved until the page is refreshed. 
 
 Data is saved as an array of JSON objects. The structure can be seen below:
-```json
+```*.jsx
 dataset = [obj1, obj2, ...];
 
 obj1 structure:
@@ -55,7 +55,7 @@ data = {
 ```
 
 Example:
-```json
+```*.jsx
 dataset = 
 [
   {
@@ -90,7 +90,7 @@ A function has been made to find out different data types. In theory it should m
 
 The new dataset will therefore look like this. Notice the difference in structure for **coordinates**:
 
-```json
+```*.jsx
 dataObj =
 {
   T:
