@@ -55,7 +55,7 @@ data = {
 ```
 
 Example:
-```json
+```*.jsx
 dataset = 
 [
   {
