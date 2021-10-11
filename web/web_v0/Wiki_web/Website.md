@@ -1,6 +1,19 @@
 # Website
 
-The website is written using the regular web stack (HTML/CSS/Javascript) but uses Tailwind CSS for styling. Any relevant javascript libraries will be mentioned along the way.
+The website is written with the standard web stack (HTML/CSS/Javascript) but uses Tailwind CSS for styling. Any relevant javascript libraries will be mentioned along the way.
+
+Some of the most used documentations are shown below:
+
+Google Maps:
+
+https://developers.google.com/maps/documentation/javascript/overview
+
+Tailwind CSS:
+
+https://tailwindcss.com/
+
+
+
 
 ## Main Page
 
@@ -113,16 +126,99 @@ dataObj =
 }
 ```
 
+### Google Maps API
 
+The maps need to be initialized before displaying any content. An API key is necessary before using the Google Maps API for javascript.
 
-### Graphs: Chart JS
+The waypoints can be displayed directly using the **coordinates** array created in the previous section. Lines are created between points using the [polyline function](https://developers.google.com/maps/documentation/javascript/examples/polyline-simple) within the google maps API. 
 
-Chart JS (link here) has been used for displaying the graphss, which plot the value with respect to time. A custom function has also been implemented to allow a vertical line to select a specific point on the graph.
+Custom icons have also been added for each marker, with the first and last markers having a more distinct appearance.
+
+```
+// Add new markers to marker-array
+let firstMarker;
+coordinates.forEach((loc, index) => {
+  let icon = "assets/svg/triangleMarker.svg";
+
+  // If start give icon, if end, give another
+  switch (index) {
+    case 0:
+      firstMarker = { lat: loc.lat, lng: loc.lng };
+      icon = "assets/svg/startMarkerWhite.svg";
+      break;
+    case coordinates.length - 1:
+      icon = "assets/svg/endMarkerWhite.svg";
+      break;
+  }
+
+  addMarker(loc, icon, index, map);
+});
+```
+
+### Graphs: Chart JS 2.9.4
+
+https://www.chartjs.org/docs/2.9.4/
+
+Chartjs has been used for displaying the graphs, which plot the value with respect to time. A custom function has also been implemented to allow a vertical line to select a specific point on the graph. This is not a built-in function of Chartjs (as per the version used) and is a custom addon written into the code.
+
+```*.jsx
+// THIS SECTION IS EXPERIMENTAL
+Chart.defaults.LineWithLine = Chart.defaults.line;
+Chart.controllers.LineWithLine = Chart.controllers.line.extend({
+  draw: function (ease) {
+    Chart.controllers.line.prototype.draw.call(this, ease);
+
+    if (this.chart.tooltip._active && this.chart.tooltip._active.length) {
+      var activePoint = this.chart.tooltip._active[0],
+        ctx = this.chart.ctx,
+        x = activePoint.tooltipPosition().x,
+        topY = this.chart.scales["y-axis-0"].top,
+        bottomY = this.chart.scales["y-axis-0"].bottom;
+
+      // draw vertical line
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(x, topY);
+      ctx.lineTo(x, bottomY);
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = "rgba(245, 92, 56, 0.5)";
+      ctx.stroke();
+      ctx.restore();
+    }
+  },
+});
+```
 
 ![](./figures/device_graph.png)
 
-Additionally, it is possible to pan around the graph and download the dataset as an .xlsx file.
+Additionally, it is possible to pan around the graph and download the dataset as an .xlsx file. These are also not built-in within Chartjs, and have been added with the [Hammerjs library](https://hammerjs.github.io/).
 
 
 ## MIssion control
 
+Mission control allows for creation of mission parameters to be sent to the glider. The map is interactive and lets the user add and edit waypoints directly. The users can also change it directly through the table.
+
+### Map - extra functions
+
+Interacting and adding waypoints were created using [polylines](https://developers.google.com/maps/documentation/javascript/examples/polyline-simple). It has been modified to allow adding, moving and deleting of waypoints, using [this](https://developers.google.com/maps/documentation/javascript/examples/delete-vertex-menu) as an example. 
+
+![image of map and waypoint table](./figures/device_maps.png)
+
+The new modifications make sure that the accompanying table of coordinates updates whenever changes are done on the map and vice versa. These are added as event listeners within google maps.
+
+This code snippet shows one of the event listeners added to the code whenever a waypoint is dragged:
+
+```*.jsx
+google.maps.event.addListener(
+  missionWaypoints,
+  "dragend",
+  createPreviewWaypoints
+);
+
+// createPreviewWaypoints is the function that updates the coordinates table.
+```
+
+
+### Sliders and input fields
+
+Most of the sliders and input fields are made using noUISlider. 
